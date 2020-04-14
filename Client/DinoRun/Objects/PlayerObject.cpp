@@ -181,27 +181,53 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 	{
 		//타깃의 충돌에 대한 운동처리
 		target->Move(XMFLOAT3(0, 0, 0), true);  //방향으로 속력 추가 적용, 시간변수 사용할 것
+		/*
+	
+	bfVX = ((2.f*aMass) / (aMass + bMass))* aVX
+		+ ((bMass - aMass) / (aMass + bMass))*bVX;
+	
+	bfVY = ((2.f*aMass) / (aMass + bMass))* aVY
+		+ ((bMass - aMass) / (aMass + bMass))*bVY;
+
+	bfVZ = ((2.f*aMass) / (aMass + bMass))* aVZ
+		+ ((bMass - aMass) / (aMass + bMass))*bVZ;
+		*/
+		
+		//fVx = ((2.f* m_fMass) / (m_fMass + target->m_fMass)) * m_xmf3Velocity.z
+		//	+ ((target->m_fMass - m_fMass) / (m_fMass + target->m_fMass)) * target->m_xmf3Velocity.z;
 	}
-	switch (target->m_uType)
+	float fVx, fVy, fVz;
+
+	switch (target->m_ModelType)
 	{
-	case CHECKPOINT:
+	case ModelType::CheckPoint:
 		++m_uCheckpointCount;
 		break;
-	case FENCE:
+	case ModelType::Fence:
+		//힘 전송
+		fVx = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.x
+			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.x;
+
+		fVy = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.y
+			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.y;
+
+		fVz = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.z
+			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.z;
+		//SetVelocity(XMFLOAT3(fVx, fVy, fVz));
+		Move(XMFLOAT3(fVx,fVy,fVz),true);
+		break;
+	case ModelType::Player:
 		//힘 전송
 		break;
-	case PLAYER:
-		//힘 전송
-		break;
-	case ITEM_BOX:
+	case ModelType::Item_Box:
 		//아이템 습득
 		target->isEnable = false;
 		break;
-	case MEAT_ITEM:
+	case ModelType::Meat_Item:
 		m_uGuage += 10;
 		target->isEnable = false;
 		break;
-	case SLIDING_ITEM:
+	case ModelType::Sliding_Item:
 		target->isEnable = false;
 		return true;
 	default:
@@ -218,7 +244,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		if (m_fForce < 0)
 			degree *= -1;  //이부분 수정할것
 		float w;
-		if (Vector3::Length(m_xmf3Velocity) > 20.0)
+		if (Vector3::Length(m_xmf3Velocity) < 20.0)
 			w = Vector3::Length(m_xmf3Velocity)*degree / (3.8 * 57.3);
 		else
 		{
@@ -244,6 +270,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	m_xmf3AcceleratingForce = Vector3::DivProduct(xmf3Ftraction, m_fMass,false);
 	if (m_xmf3AcceleratingForce.z < 0)
 		drag = 1;
+	m_xmf3AcceleratingForce.y -= 98;
 	Move(Vector3::ScalarProduct(m_xmf3AcceleratingForce, fTimeElapsed, false), true);
 	
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);

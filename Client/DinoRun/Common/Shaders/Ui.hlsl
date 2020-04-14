@@ -28,7 +28,7 @@ VS_UI_OUTPUT VSUiNumber(VS_UI_INPUT input, uint nInstanceID : SV_InstanceID)
 	
 	output.num = gGameUiInfos[nInstanceID].numUi;
 
-	output.TexC.x = input.TexC.x + (int(output.num) % 10) * 0.1;
+	output.TexC.x = input.TexC.x + (output.num % 10) * 0.1;
 	output.TexC.y = input.TexC.y + ((output.num / 10) * 0.5);
 	return(output);
 }

@@ -198,20 +198,35 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		m_pScene->ReleaseObjects();
 		m_pScene->ReleaseShaderVariables();
 	}
-
+	// 게임씬에 들어가는 액션에서는 기존의 player를 메모리 반납 후 캐릭터 번호에 맞는 모델로 새로 생성할것
+	//이때 반납전에 아이디와 모델타입을 이곳에 만든 지역변수에 저장후 반납할 것.
 	if (type == SceneType::Start_Scene)
 	{
-		
+		if (m_PrevState == SceneType::Lobby_Scene)
+		{
+		}
 	}
 	else if (type == SceneType::Lobby_Scene)
 	{
+		if(m_PrevState == SceneType::Start_Scene)
+		{ 
+		}
+		else if (m_PrevState == SceneType::End_Scene)
+		{
+
+		}
 	}
 	else if (type == SceneType::Game_Scene)
 	{
-		
+		if (m_PrevState == SceneType::Lobby_Scene)
+		{
+		}
 	}
 	else if (type == SceneType::End_Scene)
 	{
+		if (m_PrevState == SceneType::Game_Scene)
+		{
+		}
 	}
 
 	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());

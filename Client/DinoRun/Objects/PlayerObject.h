@@ -29,6 +29,9 @@ class CCamera;
 class CPlayer : public CGameObject
 {
 protected:
+	string						m_id = "Default";
+	
+
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -55,7 +58,7 @@ protected:
 public:
 	CPlayer();
 	virtual ~CPlayer();
-
+	string GetId() { return m_id; }
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
@@ -66,6 +69,7 @@ public:
 	void UpCheckPoint() { m_uCheckpointCount++; }
 	void UpGuage() { m_uGuage += 10; if (m_uGuage > 100) m_uGuage = 100;}
 
+	void SetId(string id) { m_id = id; }
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetGravity(const XMFLOAT3& xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
 	void SetMaxVelocityXZ(float fMaxVelocity) { m_fMaxVelocityXZ = fMaxVelocity; }

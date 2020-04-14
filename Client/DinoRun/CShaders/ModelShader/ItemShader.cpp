@@ -33,7 +33,7 @@ void ItemShader::Load(shared_ptr<CreateManager> pCreateManager, const char* file
 		pItemObject->SetChild(pModel->m_pModelRootObject->m_pChild);
 		pItemObject->AddRef();
 		pItemObject->isKinematic = true;
-		pItemObject->m_uType = MEAT_ITEM;
+		pItemObject->m_ModelType = ModelType::Meat_Item;
 
 		//이곳에서 findFrame을 통해 각 오브젝트에 질량 및 키네마틱 값 추가할 것.
 		nReads = (UINT)::fread(&(pItemObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);

@@ -10,7 +10,7 @@ struct INSTANCEDGAMEOBJECTINFO
 struct INSTANCEDGAMEUIINFO
 {
 	matrix gmtxGameUi;
-	int numUi;
+	uint numUi;
 };
 
 struct INSTANCEDSKINEDOBJECTINFO

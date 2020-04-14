@@ -433,7 +433,7 @@ public:
 	bool							isKinematic = false; //충돌 체크시 물리효과를 적용할 것인가 y or n 
 	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n
 
-	UINT							m_uType;   //충돌체크시 사용될 오브젝트의 유형(player, wall 등등)
+	ModelType						m_ModelType = ModelType::Default;   //충돌체크시 사용될 오브젝트의 유형(player, wall 등등)
 
 	float							m_fMass = 0;  
 
