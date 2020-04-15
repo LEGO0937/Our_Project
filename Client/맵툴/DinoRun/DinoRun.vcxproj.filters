@@ -1,0 +1,330 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{21c0ff29-1c60-470a-afdb-4d3210fb9a2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects">
+      <UniqueIdentifier>{2d9ec6ce-8b40-4577-a358-85fdea47899d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{c64c9d88-bea4-4767-a04e-8774b7cf81f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes">
+      <UniqueIdentifier>{3d15bf46-2392-4327-a8a6-dacdb6897eed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Meshes">
+      <UniqueIdentifier>{11d7a805-b48e-49f2-8443-ed24f40cc339}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Camera">
+      <UniqueIdentifier>{0063471a-ea67-423d-b4f5-339f22c008bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Framework">
+      <UniqueIdentifier>{a483e75e-b4f5-4afa-8b3b-834d152c2567}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Timer">
+      <UniqueIdentifier>{8e7690e7-fcda-4364-b24e-e069021f4d09}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\TextureLoad">
+      <UniqueIdentifier>{fb412dbc-b760-4b66-86ff-8d1e4f71a307}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes\BaseScene">
+      <UniqueIdentifier>{bc465297-5264-4fa2-a967-cb8931c9cb54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes\GameScene">
+      <UniqueIdentifier>{3371446c-f215-46d0-89ad-4501095998b8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\BaseObject">
+      <UniqueIdentifier>{290f73c5-61ec-42cc-9c48-6ac77a4d1e22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\PlayerObject">
+      <UniqueIdentifier>{8106e10b-ef77-42de-b534-87c16b705e6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Meshes\BaseMesh">
+      <UniqueIdentifier>{4ed16e11-3f97-463b-be11-13f4368ca87e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders">
+      <UniqueIdentifier>{f451a827-3dbc-478f-aa61-d29bb08271fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\BaseShader">
+      <UniqueIdentifier>{057f5a38-6eda-4957-934f-6514231483f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\TerrainObject">
+      <UniqueIdentifier>{2dc3cbbd-3c43-4229-82a8-80caab0d84a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Meshes\TerrainMesh">
+      <UniqueIdentifier>{ac51a89c-1cf2-4388-9bf7-12ac8c72c77c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Global">
+      <UniqueIdentifier>{00108b15-7089-4251-b299-205024b72fdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\TerrainShader">
+      <UniqueIdentifier>{ba3d65fb-b417-43b2-bdab-7dace941cb7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\SkyBoxObject">
+      <UniqueIdentifier>{f85e6750-fa47-4338-91f3-652368e95e9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\SkyBoxShader">
+      <UniqueIdentifier>{515f6dc0-d90d-47d4-afe1-1685cdee7413}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Meshes\SkyBoxBesh">
+      <UniqueIdentifier>{e098abb9-3ab5-4e62-a64f-2991596f5436}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\BillBoardShader">
+      <UniqueIdentifier>{133ec4f2-d7c4-4263-bed7-1e5972baf155}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Meshes\BillBoardMesh">
+      <UniqueIdentifier>{7f5f725d-215a-40b1-80e5-ebd274351e20}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\BillBoardObject">
+      <UniqueIdentifier>{e4c5f5f1-7456-44a6-8560-8f6ea981a52d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\ImGui">
+      <UniqueIdentifier>{4ea8fd8a-2bb0-4264-b4dd-ec2d03aaae93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\ImGui\ImGuiManager">
+      <UniqueIdentifier>{183235e1-c94a-414b-b020-6483628b908e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\MaptoolShader">
+      <UniqueIdentifier>{3503363d-fc24-4c6e-ba20-14d9e59dd9c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\TreeShader">
+      <UniqueIdentifier>{31fc4ef1-4f28-4c7d-b262-e301c2d29a78}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\FenceShader">
+      <UniqueIdentifier>{64940c87-69bf-4d2d-b597-2123ede911a1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common\stdafx.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\d3dx12.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Resource.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\targetver.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\FrameWork\CGameFramework.h">
+      <Filter>Common\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Timer\Timer.h">
+      <Filter>Common\Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\TextureLoad\DDSTextureLoader12.h">
+      <Filter>Common\TextureLoad</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\FrameWork\Final_Game.h">
+      <Filter>Common\Framework</Filter>
+    </ClInclude>
+    <ClInclude Include="Global\Global.h">
+      <Filter>Common\Global</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\GameScene.h">
+      <Filter>Scenes\GameScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\BaseScene.h">
+      <Filter>Scenes\BaseScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Camera\Camera.h">
+      <Filter>Common\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\BaseObject.h">
+      <Filter>Objects\BaseObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\PlayerObject.h">
+      <Filter>Objects\PlayerObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Meshes\Mesh.h">
+      <Filter>Meshes\BaseMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\Shader.h">
+      <Filter>CShaders\BaseShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\TerrainObject.h">
+      <Filter>Objects\TerrainObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Meshes\TerrainMesh.h">
+      <Filter>Meshes\TerrainMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\TerrainShader\TerrainShader.h">
+      <Filter>CShaders\TerrainShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\SkyBoxObject.h">
+      <Filter>Objects\SkyBoxObject</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\SkyBoxShader\SkyBoxShader.h">
+      <Filter>CShaders\SkyBoxShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Meshes\SkyBoxMesh.h">
+      <Filter>Meshes\SkyBoxBesh</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\BillBoardShader\BillBoardShader.h">
+      <Filter>CShaders\BillBoardShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Meshes\BillBoardMesh.h">
+      <Filter>Meshes\BillBoardMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\BillBoardObject.h">
+      <Filter>Objects\BillBoardObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ImGui\imgui\imconfig.h">
+      <Filter>Common\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ImGui\imgui\imgui.h">
+      <Filter>Common\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ImGui\imgui\imgui_internal.h">
+      <Filter>Common\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ImGui\imgui\examples\imgui_impl_dx12.h">
+      <Filter>Common\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ImGui\imgui\examples\imgui_impl_win32.h">
+      <Filter>Common\ImGui</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\ImGui\ImguiManager.h">
+      <Filter>Common\ImGui\ImGuiManager</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\MaptoolShader\MaptoolShader.h">
+      <Filter>CShaders\MaptoolShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\TreeShader\TreeShader.h">
+      <Filter>CShaders\TreeShader</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\FenceShader\FenceShader.h">
+      <Filter>CShaders\FenceShader</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Common\stdafx.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\FrameWork\CGameFramework.cpp">
+      <Filter>Common\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Timer\Timer.cpp">
+      <Filter>Common\Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\TextureLoad\DDSTextureLoader12.cpp">
+      <Filter>Common\TextureLoad</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\FrameWork\Final_Game.cpp">
+      <Filter>Common\Framework</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\GameScene.cpp">
+      <Filter>Scenes\GameScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\BaseScene.cpp">
+      <Filter>Scenes\BaseScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Camera\Camera.cpp">
+      <Filter>Common\Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\BaseObject.cpp">
+      <Filter>Objects\BaseObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\PlayerObject.cpp">
+      <Filter>Objects\PlayerObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Meshes\Mesh.cpp">
+      <Filter>Meshes\BaseMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\Shader.cpp">
+      <Filter>CShaders\BaseShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\TerrainObject.cpp">
+      <Filter>Objects\TerrainObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Meshes\TerrainMesh.cpp">
+      <Filter>Meshes\TerrainMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\TerrainShader\TerrainShader.cpp">
+      <Filter>CShaders\TerrainShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\SkyBoxObject.cpp">
+      <Filter>Objects\SkyBoxObject</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\SkyBoxShader\SkyBoxShader.cpp">
+      <Filter>CShaders\SkyBoxShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Meshes\SkyBoxMesh.cpp">
+      <Filter>Meshes\SkyBoxBesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\BillBoardShader\BillBoardShader.cpp">
+      <Filter>CShaders\BillBoardShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Meshes\BillBoardMesh.cpp">
+      <Filter>Meshes\BillBoardMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\BillBoardObject.cpp">
+      <Filter>Objects\BillBoardObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImGui\imgui\imgui.cpp">
+      <Filter>Common\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImGui\imgui\imgui_demo.cpp">
+      <Filter>Common\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImGui\imgui\imgui_draw.cpp">
+      <Filter>Common\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImGui\imgui\imgui_widgets.cpp">
+      <Filter>Common\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImGui\imgui\examples\imgui_impl_dx12.cpp">
+      <Filter>Common\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImGui\imgui\examples\imgui_impl_win32.cpp">
+      <Filter>Common\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\ImGui\ImguiManager.cpp">
+      <Filter>Common\ImGui\ImGuiManager</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\MaptoolShader\MaptoolShader.cpp">
+      <Filter>CShaders\MaptoolShader</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\TreeShader\TreeShader.cpp">
+      <Filter>CShaders\TreeShader</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\FenceShader\FenceShader.cpp">
+      <Filter>CShaders\FenceShader</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DinoRun.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="DinoRun.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Common\Shaders\Light.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Common\Shaders\Shaders.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
