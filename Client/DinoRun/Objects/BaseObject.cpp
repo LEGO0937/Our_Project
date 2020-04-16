@@ -611,6 +611,7 @@ CGameObject::CGameObject()
 {
 	m_xmf4x4ToParent = Matrix4x4::Identity();
 	m_xmf4x4World = Matrix4x4::Identity();
+	m_xmf4x4PrevWorld = Matrix4x4::Identity();
 }
 
 CGameObject::CGameObject(int nMaterials) : CGameObject()
@@ -753,6 +754,7 @@ CGameObject *CGameObject::FindFrame(char *pstrFrameName)
 
 void CGameObject::UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent)
 {
+	m_xmf4x4PrevWorld = m_xmf4x4World;
 	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : m_xmf4x4ToParent;
 
 	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
@@ -820,6 +822,29 @@ void CGameObject::FixedUpdate(float fTimeElapsed)
 	m_fForce = 0;
 	m_xmf3Forces = XMFLOAT3(0, 0, 0);
 }
+
+void CGameObject::UpdateDistance(float fTimeElapsed, CGameObject* target)
+{
+	float time = 0;
+	XMFLOAT3 vel = Vector3::Subtract(target->GetPosition(), GetPosition());
+	vel = Vector3::Normalize(vel);
+	while (1)
+	{
+		Move(Vector3::ScalarProduct(vel, -fTimeElapsed * 100, false), false);
+		OnPrepareRender();
+		UpdateTransform(NULL);
+		if (!IsCollide(target))
+		{
+			return;
+		}
+		fTimeElapsed /= 2.0f;
+		time += fTimeElapsed;
+
+		if (fTimeElapsed == 0)
+			return;
+	}
+}
+
 void CGameObject::Move(const XMFLOAT3& xmf3Shift, bool bVelocity)
 {
 	if (bVelocity)

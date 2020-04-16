@@ -460,6 +460,7 @@ public:
 
 	XMFLOAT4X4						m_xmf4x4ToParent;
 	XMFLOAT4X4						m_xmf4x4World;
+	XMFLOAT4X4						m_xmf4x4PrevWorld;
 
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;
@@ -488,7 +489,7 @@ public:
 	virtual void Animate(float fTimeElapsed); // 局聪皋捞记 贸府
 	virtual void FixedUpdate(float fTimeElapsed); //拱府
 	virtual bool Update(float fTimeElapsed, CGameObject* target) { return false; } //面倒贸府
-	
+	virtual void UpdateDistance(float fTimeElapsed, CGameObject* target); //面倒矫 芭府 炼例
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);

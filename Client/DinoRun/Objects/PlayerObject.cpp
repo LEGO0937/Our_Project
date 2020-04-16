@@ -213,8 +213,12 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 
 		fVz = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.z
 			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.z;
-		//SetVelocity(XMFLOAT3(fVx, fVy, fVz));
-		Move(XMFLOAT3(fVx,fVy,fVz),true);
+		SetVelocity(XMFLOAT3(fVx, fVy, fVz));
+		SetPosition(XMFLOAT3(m_xmf4x4PrevWorld._41, m_xmf4x4PrevWorld._42, m_xmf4x4PrevWorld._43));
+
+		UpdateDistance(fTimeElapsed, target);
+		m_fForce = 0;
+		//Move(XMFLOAT3(fVx,fVy,fVz),true);
 		break;
 	case ModelType::Player:
 		//Èû Àü¼Û
@@ -491,7 +495,7 @@ CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager)
 
 	CreateShaderVariables(pCreateManager);
 
-	SetPosition(XMFLOAT3(500.0f, 0, 50));
+	SetPosition(XMFLOAT3(800.0f, 0, 900));
 
 	SetScale(XMFLOAT3(0.2f, 0.2f, 0.2f));
 }
