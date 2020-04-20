@@ -86,7 +86,7 @@ void CGameFramework::BuildObjects()
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
 	m_pFontManager->Initialize(m_pCreateMgr);
 	//-----------
-	/*
+	
 	m_pScene = shared_ptr<GameScene>(new GameScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
@@ -97,16 +97,16 @@ void CGameFramework::BuildObjects()
 
 	m_pScene->setPlayer(m_pPlayer);
 	m_pScene->setCamera(m_pPlayer->GetCamera());
-	*/
-	//--------
 	
+	//--------
+	/*
 	m_pScene = shared_ptr<LobbyScene>(new LobbyScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
 	m_pScene->BuildObjects(m_pCreateMgr);
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pScene->setCamera(m_pCamera);
-	
+	*/
 	//-----------------------
 
 	m_pCreateMgr->ExecuteCommandList();
@@ -134,8 +134,9 @@ void CGameFramework::CalculateFrameStats()
 		wstring mspfStr = to_wstring(mspf);
 		::GetCursorPos(&m_ptOldCursorPos);
 
-		
-		wstring windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(m_ptOldCursorPos.x)+L"   y:"+ to_wstring(m_ptOldCursorPos.y);
+		ScreenToClient(m_hWnd, &m_ptOldCursorPos);
+		Point2D p = ScreenToProj(m_pCreateMgr->GetWindowWidth(), m_pCreateMgr->GetWindowHeight(), m_ptOldCursorPos);
+		wstring windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x)+L"   y:"+ to_wstring(p.y);
 			
 			/*+ L"  x:" +
 			to_wstring(m_pPlayer->m_xmf4x4World._41)

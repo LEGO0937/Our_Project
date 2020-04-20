@@ -39,4 +39,7 @@ public:
 private:
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CUiShader*> instacingUiShaders;
+	bool isClickedLogin = false;
+	bool isClickedID = false;
+	bool isClickedPassWord = false;
 };

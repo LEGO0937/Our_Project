@@ -9,15 +9,26 @@ struct TextVertex {
 	XMFLOAT4 texCoord;
 	XMFLOAT4 color;
 };
-
+struct GameText {
+	string text ="None";
+	XMFLOAT2 pos;
+	XMFLOAT2 scale = XMFLOAT2(1,1);
+	XMFLOAT4 color = XMFLOAT4(1, 1, 1, 1);
+	GameText(XMFLOAT2 position, XMFLOAT2 size = XMFLOAT2(1,1),XMFLOAT4 Color = XMFLOAT4(1, 1, 1, 1))
+	{
+		pos = position;
+		scale = size;
+		color = Color;
+	}
+};
 class FontShader : public CShader
 {
 private:
 	Font arialFont;
 
-	ID3D12Resource* textVertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW textVertexBufferView; // a view for our text vertex buffer
-	UINT8* textVBGPUAddress;
+	ID3D12Resource* textVertexBuffer[18];
+	D3D12_VERTEX_BUFFER_VIEW textVertexBufferView[18]; // a view for our text vertex buffer
+	UINT8* textVBGPUAddress[18];
 
 	int maxNumTextCharacters = 1024;
 	CTexture * fontTex;
@@ -32,8 +43,8 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) {}
 	virtual void ReleaseShaderVariables();
 
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-	void RenderText(ID3D12GraphicsCommandList *pd3dCommandList, Font font, string text, XMFLOAT2 pos, XMFLOAT2 scale = XMFLOAT2(1.0f, 1.0f), XMFLOAT2 padding = XMFLOAT2(0.5f, 0.0f), XMFLOAT4 color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, vector<GameText>& vec);
+	void RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx, Font font, string text, XMFLOAT2 pos, XMFLOAT2 scale = XMFLOAT2(1.0f, 1.0f), XMFLOAT2 padding = XMFLOAT2(0.5f, 0.0f), XMFLOAT4 color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 };
 

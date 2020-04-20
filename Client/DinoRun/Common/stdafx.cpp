@@ -185,6 +185,14 @@ wchar_t* ConvertCHARtoWCHAR(const char* str)
 	return wText;
 }
 
+Point2D ScreenToProj(int width, int height, POINT& point)
+{
+	Point2D p;
+	p.x = (float)(point.x - width / 2) / float(width / 2);
+	p.y = -(float)(point.y - height / 2) / float(height / 2);
+	return p;
+}
+
 D3D12_RASTERIZER_DESC CreateRasterizerState()
 {
 	D3D12_RASTERIZER_DESC d3dRasterizerDesc;

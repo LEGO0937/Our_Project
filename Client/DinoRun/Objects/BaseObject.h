@@ -439,18 +439,18 @@ public:
 
 
 
-	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	XMFLOAT3 m_xmf3AcceleratingForce = { 0,0,0 };
+	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);  //속력
+	XMFLOAT3 m_xmf3AcceleratingForce = { 0,0,0 };   //가속력
 
 	XMFLOAT3 m_xmf3AngularVelocity = { 0,0,0 };
 	XMFLOAT3 m_xmf3EulerAngles = { 0,0,0 };
 
 	float m_fSpeed;
-	//Quaternion
-	float m_fForce = 0;
-	float maxForce = 0;
-	XMFLOAT3 m_xmf3Forces = { 0,0,0 };
-	XMFLOAT3 m_xmf3Moments = { 0,0,0 };
+
+	float m_fForce = 0;    //앞키 누를 시 증가하는 변수, 룩벡터에 곱함으로써 진행 방향에 대한 힘벡터를 구함.
+	float maxForce = 0; // 힘의 크기 이 이상 넘을 경우 이 값을 유지함
+	XMFLOAT3 m_xmf3Forces = { 0,0,0 };  // 충돌 시 적용할 힘을 추가 하기 위한 변수.
+	XMFLOAT3 m_xmf3Moments = { 0,0,0 }; //모멘트 아직 적용 안함
 	//----
 
 	CMesh							*m_pMesh = NULL;
@@ -459,8 +459,8 @@ public:
 	CMaterial						**m_ppMaterials = NULL;
 
 	XMFLOAT4X4						m_xmf4x4ToParent;
-	XMFLOAT4X4						m_xmf4x4World;
-	XMFLOAT4X4						m_xmf4x4PrevWorld;
+	XMFLOAT4X4						m_xmf4x4World;  //현재 프레임의 월드 행렬
+	XMFLOAT4X4						m_xmf4x4PrevWorld;  //이전 프레임의 월드 행렬
 
 	CGameObject 					*m_pParent = NULL;
 	CGameObject 					*m_pChild = NULL;

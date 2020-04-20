@@ -24,50 +24,40 @@ void FontShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* te
 	CreateShaderResourceViews(pCreateManager, fontTex, 8, true);
 
 	HRESULT hr;
+	for (int i = 0; i < 18; ++i)
+	{
+		pCreateManager->GetDevice().Get()->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(maxNumTextCharacters * sizeof(TextVertex)),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&textVertexBuffer[i]));
+		textVertexBuffer[i]->SetName(L"Text Vertex Buffer Upload Resource Heap");
 
-	pCreateManager->GetDevice().Get()->CreateCommittedResource(
-		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD), // upload heap
-		D3D12_HEAP_FLAG_NONE, // no flags
-		&CD3DX12_RESOURCE_DESC::Buffer(maxNumTextCharacters * sizeof(TextVertex)), // resource description for a buffer
-		D3D12_RESOURCE_STATE_GENERIC_READ, // GPU will read from this buffer and copy its contents to the default heap
-		nullptr,
-		IID_PPV_ARGS(&textVertexBuffer));
-	textVertexBuffer->SetName(L"Text Vertex Buffer Upload Resource Heap");
+		hr = textVertexBuffer[i]->Map(0, NULL, reinterpret_cast<void**>(&textVBGPUAddress[i]));
 
-	hr = textVertexBuffer->Map(0, NULL, reinterpret_cast<void**>(&textVBGPUAddress));
-
-	textVertexBufferView.BufferLocation = textVertexBuffer->GetGPUVirtualAddress();
-	textVertexBufferView.StrideInBytes = sizeof(TextVertex);
-	textVertexBufferView.SizeInBytes = maxNumTextCharacters * sizeof(TextVertex);
-
+		textVertexBufferView[i].BufferLocation = textVertexBuffer[i]->GetGPUVirtualAddress();
+		textVertexBufferView[i].StrideInBytes = sizeof(TextVertex);
+		textVertexBufferView[i].SizeInBytes = maxNumTextCharacters * sizeof(TextVertex);
+	}
 }
 
 void FontShader::ReleaseObjects()
 {
-	/*
-	if (objectList.size())
-	{
-		for (CGameObject* ob : objectList)
-		{
-			ob->Release();
-		}
-		objectList.clear();
-	}
-	if (m_ppObjects)
-	{
-		m_ppObjects->Release();
-		m_ppObjects = NULL;
-	}
-	*/
+
 }
 
 void FontShader::ReleaseShaderVariables()
 {
-	if (textVertexBuffer)
+	for (int i = 0; i < 18; ++i)
 	{
-		textVertexBuffer->Unmap(0, NULL);
-		textVertexBuffer->Release();
-		textVertexBuffer = NULL;
+		if (textVertexBuffer)
+		{
+			textVertexBuffer[i]->Unmap(0, NULL);
+			textVertexBuffer[i]->Release();
+			textVertexBuffer[i] = NULL;
+		}
 	}
 	if (fontTex)
 	{
@@ -84,23 +74,23 @@ void FontShader::ReleaseUploadBuffers()
 }
 
 
-void FontShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+void FontShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, vector<GameText>& vec)
 {
 	CShader::Render(pd3dCommandList, pCamera);
 	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView);
 	fontTex->UpdateShaderVariable(pd3dCommandList, 0);
-	string t = "abcdefghijk";
-	RenderText(pd3dCommandList,arialFont, t, XMFLOAT2(0.02f, 0.8f), XMFLOAT2(1.0f, 1.0f), XMFLOAT2(0.5f, 0.0f),XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	//string t = "abcdefghijk";
+	//RenderText(pd3dCommandList,arialFont, t, XMFLOAT2(0.02f, 0.8f), XMFLOAT2(1.0f, 1.0f), XMFLOAT2(0.5f, 0.0f),XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	int i = 0;
+	for (const GameText& text : vec)
+	{
+		pd3dCommandList->IASetVertexBuffers(0, 1, &textVertexBufferView[i]);
+		RenderText(pd3dCommandList, i++,arialFont, text.text, text.pos, text.scale, XMFLOAT2(0.5f, 0.0f), text.color);
+	}
 }
 
-void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, Font font, string text, XMFLOAT2 pos, XMFLOAT2 scale, XMFLOAT2 padding, XMFLOAT4 color)
+void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx, Font font, string text, XMFLOAT2 pos, XMFLOAT2 scale, XMFLOAT2 padding, XMFLOAT4 color)
 {
-	//commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	//
-	//// set the text vertex buffer
-	//commandList->IASetVertexBuffers(0, 1, &textVertexBufferView[frameIndex]);
-
 	int numCharacters = 0;
 
 	float topLeftScreenX = (pos.x * 2.0f) - 1.0f;
@@ -112,10 +102,9 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, Font fon
 	float horrizontalPadding = (font.leftpadding + font.rightpadding) * padding.x;
 	float verticalPadding = (font.toppadding + font.bottompadding) * padding.y;
 
-	// cast the gpu virtual address to a textvertex, so we can directly store our vertices there
-	TextVertex* vert = (TextVertex*)textVBGPUAddress;
+	TextVertex* vert = (TextVertex*)textVBGPUAddress[idx];
 
-	wchar_t lastChar = -1; // no last character to start with
+	wchar_t lastChar = -1; 
 
 	for (int i = 0; i < text.size(); ++i)
 	{
@@ -123,15 +112,12 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, Font fon
 
 		FontChar* fc = font.GetChar(c);
 
-		// character not in font char set
 		if (fc == nullptr)
 			continue;
 
-		// end of string
 		if (c == L'\0')
 			break;
 
-		// new line
 		if (c == L'\n')
 		{
 			x = topLeftScreenX;
@@ -139,7 +125,6 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, Font fon
 			continue;
 		}
 
-		// don't overflow the buffer. In your app if this is true, you can implement a resize of your text vertex buffer
 		if (numCharacters >= maxNumTextCharacters)
 			break;
 
@@ -162,12 +147,10 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, Font fon
 			
 		numCharacters++;
 
-		// remove horrizontal padding and advance to next char position
 		x += (fc->xadvance - horrizontalPadding) * scale.x;
 
 		lastChar = c;
 	}
 
-	// we are going to have 4 vertices per character (trianglestrip to make quad), and each instance is one character
 	pd3dCommandList->DrawInstanced(4, numCharacters, 0, 0);
 }

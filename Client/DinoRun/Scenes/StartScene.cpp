@@ -8,7 +8,7 @@
 
 #include "../Common/Camera/Camera.h"
 
-StartScene::StartScene() :BaseScene()
+StartScene::StartScene():BaseScene()
 {
 }
 StartScene::~StartScene()
@@ -48,9 +48,24 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CObInstancingShader* shader;
 	CUiShader* uiShader;
 
-	uiShader = new TimeCountShader;
-	uiShader->BuildObjects(pCreateManager, NULL);
+	uiShader = new BackGroundShader;
+	string name = "Resources/Images/LoginBackGround.dds";
+	uiShader->BuildObjects(pCreateManager, &name);
 	instacingUiShaders.emplace_back(uiShader);
+
+	UI_INFO button_info;
+	button_info.textureName = "Resources/Images/Button.dds";
+	button_info.meshSize = XMFLOAT2(0.15, 0.12);
+	button_info.positions.emplace_back(XMFLOAT3(0.31, -0.5, 0));
+	button_info.f_uvY.emplace_back(0.25);
+	
+	uiShader = new ButtonShader;
+	uiShader->BuildObjects(pCreateManager, &button_info);
+	instacingUiShaders.emplace_back(uiShader);
+
+	
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.27,0.60)));// ID구간
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.27, 0.75)));// PassWord구간
 
 	CreateShaderVariables(pCreateManager);
 }
@@ -58,15 +73,59 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 	lParam, float deltaTime)
 {
+	Point2D point;
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		::SetCapture(hWnd);
+		::GetCursorPos(&m_ptOldCursorPos);
+		ScreenToClient(hWnd,&m_ptOldCursorPos);
+		point = ScreenToProj(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_ptOldCursorPos);
+		if (point.x > 0.16 && point.x < 0.46 && point.y > -0.62 && point.y < -0.38) //로그인 버튼 충돌체크
+		{
+			instacingUiShaders[1]->getUvXs()[0] = 0.5;
+			isClickedLogin = true;
+		}
+		else if (point.x > -0.48 && point.x < 0.13 && point.y > -0.31 && point.y < -0.2) //ID TEXT 충돌체크
+		{
+			isClickedID = true;
+			isClickedPassWord = false;
+		}
+		else if (point.x > -0.48 && point.x < 0.13 && point.y > -0.63 && point.y < -0.5) //PassWord TEXT 충돌체크
+		{
+			isClickedID = false;
+			isClickedPassWord = true;
+		}
+		else
+		{
+			isClickedID = false;
+			isClickedPassWord = false;
+		}
+		break;
 	case WM_RBUTTONDOWN:
 		//마우스 캡쳐를 하고 현재 마우스 위치를 가져온다. 
 		::SetCapture(hWnd);
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
+		::GetCursorPos(&m_ptOldCursorPos);
+		ScreenToClient(hWnd, &m_ptOldCursorPos);
+		point = ScreenToProj(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_ptOldCursorPos);
+		if (point.x > 0.16 && point.x < 0.46 && point.y > -0.62 && point.y < -0.38) //로그인 버튼 충돌체크
+		{
+			if (isClickedLogin)
+			{
+				//씬 전환
+			}
+		}
+		else
+		{
+			if (isClickedLogin)
+			{
+				isClickedLogin = false;
+				instacingUiShaders[1]->getUvXs()[0] = 0.0;
+			}
+		}
 		::ReleaseCapture();
 		break;
 	case WM_RBUTTONUP:
@@ -96,11 +155,28 @@ void StartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		}
 		break;
 	case WM_KEYDOWN:
+
 		switch (wParam)
 		{
+		case VK_BACK:
+			if (isClickedID && gameTexts[0].text.length() > 0)
+				gameTexts[0].text.pop_back();
+						
+			if (isClickedPassWord && gameTexts[1].text.length() > 0)
+				gameTexts[1].text.pop_back();
+			break;
+
 		default:
+			if (isalnum((TCHAR)wParam))
+			{
+				if (isClickedID)
+					gameTexts[0].text.push_back((TCHAR)wParam);
+				else if (isClickedPassWord)
+					gameTexts[1].text.push_back((TCHAR)wParam);
+			}
 			break;
 		}
+		break;
 	default:
 		break;
 	}
@@ -121,6 +197,7 @@ void StartScene::ProcessInput(HWND hwnd, float deltaTime)
 		if (pKeyBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
 		if (pKeyBuffer[VK_PRIOR] & 0xF0) dwDirection |= DIR_UP;
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
+
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	POINT ptCursorPos;
@@ -128,19 +205,19 @@ void StartScene::ProcessInput(HWND hwnd, float deltaTime)
 	메시지(WM_LBUTTONDOWN, WM_RBUTTONDOWN)를 처리할 때 마우스를 캡쳐하였다. 그러므로 마우스가 캡쳐된
 	것은 마우스 버튼이 눌려진 상태를 의미한다. 마우스 버튼이 눌려진 상태에서 마우스를 좌우 또는 상하로 움직이면 플
 	레이어를 x-축 또는 y-축으로 회전한다.*/
-	if (::GetCapture() == hwnd)
-	{
-		//마우스 커서를 화면에서 없앤다(보이지 않게 한다).
-		::SetCursor(NULL);
-		//현재 마우스 커서의 위치를 가져온다. 
-		::GetCursorPos(&ptCursorPos);
-		//마우스 버튼이 눌린 상태에서 마우스가 움직인 양을 구한다. 
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-		//마우스 커서의 위치를 마우스가 눌려졌던 위치로 설정한다. 
-		//m_ptOldCursorPos = ptCursorPos;
-		::SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-	}
+	//if (::GetCapture() == hwnd)
+	//{
+	//	//마우스 커서를 화면에서 없앤다(보이지 않게 한다).
+	//	::SetCursor(NULL);
+	//	//현재 마우스 커서의 위치를 가져온다. 
+	//	::GetCursorPos(&ptCursorPos);
+	//	//마우스 버튼이 눌린 상태에서 마우스가 움직인 양을 구한다. 
+	//	cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+	//	cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+	//	//마우스 커서의 위치를 마우스가 눌려졌던 위치로 설정한다. 
+	//	//m_ptOldCursorPos = ptCursorPos;
+	//	::SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+	//}
 	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
@@ -165,9 +242,15 @@ void StartScene::Render()
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList.Get(), m_pCamera);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[14]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[16]);
 	if (instacingUiShaders[0])
 		instacingUiShaders[0]->Render(m_pd3dCommandList.Get(), m_pCamera);
+	if (instacingUiShaders[1])
+		instacingUiShaders[1]->Render(m_pd3dCommandList.Get(), m_pCamera);
+
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[15]);
+	if (fontShader)
+		fontShader->Render(m_pd3dCommandList.Get(), m_pCamera, gameTexts);
 
 #ifdef _WITH_BOUND_BOX
 
@@ -187,8 +270,7 @@ SceneType StartScene::Update(float fTimeElapsed)
 
 	for (CUiShader* shader : instacingUiShaders)
 		shader->Update(fTimeElapsed, NULL);
-
-	return Start_Scene;
+	return Lobby_Scene;
 }
 
 

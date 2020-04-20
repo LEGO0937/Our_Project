@@ -59,12 +59,9 @@ public:
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
-
-
 	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager) {}
 	virtual void UpdateShaderVariables() {}
 	virtual void ReleaseShaderVariables() {}
-
 
 	virtual SceneType Update(float fTimeElapsed) = 0;
 	virtual void FixedUpdate(float fTimeElapsed) {};
@@ -84,7 +81,6 @@ public:
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
 
-
 protected:
 	ComPtr<ID3D12GraphicsCommandList> m_pd3dCommandList = NULL;
 
@@ -99,4 +95,5 @@ protected:
 	LIGHTS *m_pcbMappedLights = NULL;
 
 	shared_ptr<FontShader> fontShader = NULL;
+	vector<GameText> gameTexts;
 };

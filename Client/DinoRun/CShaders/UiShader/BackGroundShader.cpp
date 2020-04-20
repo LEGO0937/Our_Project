@@ -32,7 +32,7 @@ void BackGroundShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, vo
 	m_ppObjects->SetMaterial(0, material);
 
 	PlaneMesh *mesh = NULL;
-	mesh = new PlaneMesh(1, 1, 0.1, 0, 1.0, 0, 1.0);
+	mesh = new PlaneMesh(1, 1, 0.5, 0, 1.0, 0, 1.0);
 	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	m_ppObjects->SetMesh(mesh);

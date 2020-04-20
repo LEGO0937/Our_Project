@@ -183,6 +183,7 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
+	vector<float>& getUvXs() { return uvX; }
 protected:
 	CB_UI_INFO *m_pcbMappedUis = NULL;
 	ID3D12Resource *m_pd3dcbUis = NULL;

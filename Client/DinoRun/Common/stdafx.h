@@ -68,6 +68,12 @@ using namespace std;
 const UINT N_SWAPCHAINBUFFERS = 2; //스왑 체인의 후면 버퍼의 개수
 const UINT N_RENDERTARGETBUFFERS = 1; //스왑 체인의 후면 버퍼의 개수
 
+typedef struct Point2D 
+{
+	float x;
+	float y;
+}Point2D;
+
 extern ID3D12Resource *CreateBufferResource(ID3D12Device *pd3dDevice,
 	ID3D12GraphicsCommandList *pd3dCommandList, void *pData, UINT nBytes, D3D12_HEAP_TYPE
 	d3dHeapType = D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATES d3dResourceStates =
@@ -381,7 +387,7 @@ inline void Swap(float *pfS, float *pfT) { float fTemp = *pfS; *pfS = *pfT; *pfT
 
 
 wchar_t* ConvertCHARtoWCHAR(const char* str);
-
+Point2D ScreenToProj(int width, int height, POINT& point);
 
 // Pipeline's Base Setting Function
 D3D12_RASTERIZER_DESC CreateRasterizerState();

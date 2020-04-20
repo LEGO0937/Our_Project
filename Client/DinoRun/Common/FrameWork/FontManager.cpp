@@ -10,11 +10,6 @@ void FontManager::Release()
 {
 	m_pFontShader->ReleaseShaderVariables();
 }
-
-void FontManager::Render(ID3D12GraphicsCommandList *pd3dCommandList)
-{
-	m_pFontShader->Render(pd3dCommandList, NULL);
-}
 void FontManager::ReleaseUploadBuffers()
 {
 	m_pFontShader->ReleaseUploadBuffers();

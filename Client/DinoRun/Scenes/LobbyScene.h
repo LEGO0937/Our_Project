@@ -37,4 +37,12 @@ public:
 private:
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CUiShader*> instacingUiShaders;
+
+	bool isClickedLeftRoom = false;
+	bool isClickedRightRoom = false;
+	bool isClickedLeftUser = false;
+	bool isClickedRightUser = false;
+
+	bool isClicked = false;
+	float m_fClickedTime = 0.f;
 };

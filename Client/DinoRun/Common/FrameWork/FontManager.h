@@ -12,7 +12,6 @@ public:
 
 	shared_ptr<FontShader> getFontShader() { return m_pFontShader; }
 	
-	void Render(ID3D12GraphicsCommandList *pd3dCommandList);
 	void ReleaseUploadBuffers();
 };
 

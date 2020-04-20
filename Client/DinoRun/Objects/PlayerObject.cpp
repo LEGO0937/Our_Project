@@ -137,10 +137,12 @@ void CPlayer::Rotate(float x, float y, float z)
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 			
 			if (!isShift)
-				m_xmf3Velocity = Vector3::TransformNormal(m_xmf3Velocity, xmmtxRotate);
-			else
 			{
 				m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
+			}
+			else
+			{
+				//m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
 			}
 		}
 	}
@@ -244,42 +246,46 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 {
 	if (m_fWheelDegree != 0)
 	{
-		float degree = m_fWheelDegree;
+		float degree = m_fWheelDegree;  //현재 머리의 회전 각도
 		if (m_fForce < 0)
-			degree *= -1;  //이부분 수정할것
+			degree *= -1;  //후진일 경우 회전 방향이 다르므로 -1을 곱함
 		float w;
 		if (Vector3::Length(m_xmf3Velocity) < 20.0)
-			w = Vector3::Length(m_xmf3Velocity)*degree / (3.8 * 57.3);
+			w = Vector3::Length(m_xmf3Velocity)*degree / (3.8 * 57.3); // 공룡 몸체가 회전해야하는 각도 radian
 		else
 		{
-			w = Vector3::Length(m_xmf3Velocity)*(degree * 0.7) / (3.8 * 57.3);
+			w = Vector3::Length(m_xmf3Velocity)*(degree * 0.5) / (3.8 * 57.3);
 		}
+		//w = Vector3::Length(m_xmf3Velocity)* sin(XMConvertToRadians(degree)) / (3.8);
+		
 		//이부분에  10인 값을 4.8정도로 바꾸면 드리프트도 가능할 듯?
-		Rotate(0, XMConvertToDegrees(w)*fTimeElapsed, 0);
+		Rotate(0, XMConvertToDegrees(w)*fTimeElapsed, 0); //degree로 바꿔서 회전 시작 
+		//Rotate는 degree값을 받고 회전변환을 시켜줌.
+		//XMConvertToRadians
 	}
 
 	float drag = 0.5* cPlayer* AIR *2.2;
 	float rR = drag * 30;
 
-	XMFLOAT3 xmf3Fdrag = Vector3::ScalarProduct(m_xmf3Velocity,-drag * Vector3::Length(m_xmf3Velocity),false);
-	XMFLOAT3 xmf3Frr = Vector3::ScalarProduct(m_xmf3Velocity, -rR, false);
+	XMFLOAT3 xmf3Fdrag = Vector3::ScalarProduct(m_xmf3Velocity,-drag * Vector3::Length(m_xmf3Velocity),false); // 공기 저항
+	XMFLOAT3 xmf3Frr = Vector3::ScalarProduct(m_xmf3Velocity, -rR, false); //회전 저항
 	XMFLOAT3 xmf3Ftraction;
 	if (!isShift)
-		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false);
+		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); //앞키로 얻은 힘을 통한 진행 힘 구하는 식
 	else
-		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Velocity, -100, false);
+		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Velocity, -10, false); //브레이크 시
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Frr);
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Fdrag);  //총합
-	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);
-	m_xmf3AcceleratingForce = Vector3::DivProduct(xmf3Ftraction, m_fMass,false);
+	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);//힘의 최종합을 구함
+	m_xmf3AcceleratingForce = Vector3::DivProduct(xmf3Ftraction, m_fMass,false); //힘에 질량을 나눠서 가속력을 구함
 	if (m_xmf3AcceleratingForce.z < 0)
 		drag = 1;
 	m_xmf3AcceleratingForce.y -= 98;
-	Move(Vector3::ScalarProduct(m_xmf3AcceleratingForce, fTimeElapsed, false), true);
+	Move(Vector3::ScalarProduct(m_xmf3AcceleratingForce, fTimeElapsed, false), true); //가속력에 시간변화량을 곱하여 속력에 더함.
 	
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 	float fMaxVelocityXZ = m_fMaxVelocityXZ;
-	if (fLength > m_fMaxVelocityXZ)
+	if (fLength > m_fMaxVelocityXZ)  //속도 크기가 xz최대량을 넘으면 최대량으로 변하게 함.
 	{
 		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
 		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
@@ -288,8 +294,8 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	//fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	//if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
 
-	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, 10 * fTimeElapsed   , false);
-	Move(xmf3Velocity, false);
+	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, 10 * fTimeElapsed   , false); //10은 유닛당 10cm 이므로 10을 곱해야함
+	Move(xmf3Velocity, false); //속력만큼 벡터 이동
 
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 
@@ -336,10 +342,10 @@ void CPlayer::Animate(float fTimeElapsed)
 		m_fWheelDegree += WHEELROTATEPERSEC * fTimeElapsed;
 		break;
 	}
-	if (m_fWheelDegree > WHEELROTATEPERSEC*0.5)
-		m_fWheelDegree = WHEELROTATEPERSEC * 0.5;
-	else if (m_fWheelDegree < -WHEELROTATEPERSEC * 0.5)
-		m_fWheelDegree = -WHEELROTATEPERSEC * 0.5;
+	if (m_fWheelDegree > 15)
+		m_fWheelDegree = 15;
+	else if (m_fWheelDegree < -15)
+		m_fWheelDegree = -15;
 
 	CGameObject::Animate(fTimeElapsed);
 }
