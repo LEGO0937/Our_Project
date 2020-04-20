@@ -116,13 +116,13 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	lParam, float deltaTime)
 {
 	Point2D point;
+	::SetCapture(hWnd);
+	::GetCursorPos(&m_ptOldCursorPos);
+	ScreenToClient(hWnd, &m_ptOldCursorPos);
+	point = ScreenToProj(m_nWndClientWidth, m_nWndClientHeight, m_ptOldCursorPos);
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
-		ScreenToClient(hWnd, &m_ptOldCursorPos);
-		point = ScreenToProj(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_ptOldCursorPos);
 		if (point.x > -0.48 && point.x < -0.32 && point.y > -0.36 && point.y < -0.24) //방목록 왼쪽화살표 충돌체크
 		{
 			instacingUiShaders[2]->getUvXs()[0] = 0.5;
@@ -178,10 +178,6 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
-		ScreenToClient(hWnd, &m_ptOldCursorPos);
-		point = ScreenToProj(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_ptOldCursorPos);
 		if (point.x > -0.32 && point.x < -0.48 && point.y > -0.36 && point.y < -0.24) //방목록 왼쪽화살표 충돌체크
 		{
 			if (isClickedLeftRoom)

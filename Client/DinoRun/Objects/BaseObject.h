@@ -480,8 +480,8 @@ public:
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
-
 	void SetMaterial(int nMaterial, CMaterial *pMaterial);
+	virtual void resetShadowTexture(shared_ptr<CreateManager> pCreateManager);
 
 	void SetChild(CGameObject *pChild, bool bReferenceUpdate = false);
 

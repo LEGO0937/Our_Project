@@ -54,6 +54,8 @@ public:
 	void Render();
 	void RenderShadow();
 
+	virtual void ResetShadowBuffer(shared_ptr<CreateManager> pCreateManager);
+
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
 

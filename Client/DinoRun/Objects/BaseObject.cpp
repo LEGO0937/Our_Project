@@ -35,7 +35,9 @@ CTexture::~CTexture()
 {
 	if (m_ppd3dTextures)
 	{
-		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextures[i]) m_ppd3dTextures[i]->Release();
+		for (int i = 0; i < m_nTextures; i++) 
+			if (m_ppd3dTextures[i]) 
+				m_ppd3dTextures[i]->Release();
 		delete[] m_ppd3dTextures;
 	}
 
@@ -718,6 +720,13 @@ void CGameObject::SetMaterial(int nMaterial, CMaterial *pMaterial)
 	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
 }
 
+void CGameObject::resetShadowTexture(shared_ptr<CreateManager> pCreateManager)
+{
+	CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(), 0);
+	m_ppMaterials[0]->m_pShader->BackDescriptorHeapCount();
+	m_ppMaterials[0]->m_pShader->CreateShadowResourceViews(pCreateManager, pShadowTexture, 10, true);
+}
 CSkinnedMesh *CGameObject::FindSkinnedMesh(char *pstrSkinnedMeshName)
 {
 	CSkinnedMesh *pSkinnedMesh = NULL;

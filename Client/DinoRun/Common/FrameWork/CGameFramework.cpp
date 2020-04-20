@@ -162,6 +162,22 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	case WM_SIZE:
 	{
 		m_pCreateMgr->Resize(LOWORD(lParam), HIWORD(lParam));
+
+		m_pCamera->SetViewport(0, 0, LOWORD(lParam), HIWORD(lParam), 0.0f, 1.0f);
+		m_pCamera->SetScissorRect(0, 0, LOWORD(lParam), HIWORD(lParam));
+
+		if (m_pScene)
+		{
+			m_pScene->ResetShadowBuffer(m_pCreateMgr);
+			m_pScene->SetWindowSize(m_pCreateMgr->GetWindowWidth(), m_pCreateMgr->GetWindowHeight());
+		}
+		if (m_pPlayer)
+		{
+			CCamera* camera = m_pPlayer->GetCamera();
+			camera->GenerateProjectionMatrix(1.01f, 5000.0f, LOWORD(lParam) / HIWORD(lParam), 60.0f);
+			camera->SetViewport(0, 0, LOWORD(lParam), HIWORD(lParam), 0.0f, 1.0f);
+			camera->SetScissorRect(0, 0, LOWORD(lParam), HIWORD(lParam));
+		}
 		break;
 	}
 	case WM_LBUTTONDOWN:

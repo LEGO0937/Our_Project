@@ -74,13 +74,13 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	lParam, float deltaTime)
 {
 	Point2D point;
+	::SetCapture(hWnd);
+	::GetCursorPos(&m_ptOldCursorPos);
+	ScreenToClient(hWnd, &m_ptOldCursorPos);
+	point = ScreenToProj(m_nWndClientWidth, m_nWndClientHeight, m_ptOldCursorPos);
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
-		ScreenToClient(hWnd,&m_ptOldCursorPos);
-		point = ScreenToProj(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_ptOldCursorPos);
 		if (point.x > 0.16 && point.x < 0.46 && point.y > -0.62 && point.y < -0.38) //로그인 버튼 충돌체크
 		{
 			instacingUiShaders[1]->getUvXs()[0] = 0.5;
@@ -104,13 +104,8 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		break;
 	case WM_RBUTTONDOWN:
 		//마우스 캡쳐를 하고 현재 마우스 위치를 가져온다. 
-		::SetCapture(hWnd);
-		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
-		::GetCursorPos(&m_ptOldCursorPos);
-		ScreenToClient(hWnd, &m_ptOldCursorPos);
-		point = ScreenToProj(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, m_ptOldCursorPos);
 		if (point.x > 0.16 && point.x < 0.46 && point.y > -0.62 && point.y < -0.38) //로그인 버튼 충돌체크
 		{
 			if (isClickedLogin)

@@ -74,6 +74,8 @@ public:
 	void SetPipelineStates(int nPipelineStates, ID3D12PipelineState** ppd3dPipelineStates);
 	void SetFontShader(shared_ptr<FontShader> shader) { fontShader = shader; }
 
+	virtual void ResetShadowBuffer(shared_ptr<CreateManager> pCreateManager) {};
+
 	CPlayer* m_pPlayer = NULL;
 	CCamera* m_pCamera = NULL;
 	string m_sPlayerId;
@@ -81,6 +83,9 @@ public:
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
 
+	void SetWindowSize(const int& width, const int& height) {
+		m_nWndClientWidth = width; m_nWndClientHeight = height;
+	}
 protected:
 	ComPtr<ID3D12GraphicsCommandList> m_pd3dCommandList = NULL;
 
@@ -96,4 +101,7 @@ protected:
 
 	shared_ptr<FontShader> fontShader = NULL;
 	vector<GameText> gameTexts;
+
+	int m_nWndClientWidth{ FRAME_BUFFER_WIDTH };
+	int m_nWndClientHeight{ FRAME_BUFFER_HEIGHT };
 };

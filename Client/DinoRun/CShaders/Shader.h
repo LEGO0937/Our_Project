@@ -33,7 +33,9 @@ public:
 	virtual void ReleaseObjects() { }
 
 	void CreateCbvSrvDescriptorHeaps(shared_ptr<CreateManager> pCreateManager, int nConstantBufferViews, int nShaderResourceViews);
-
+	void BackDescriptorHeapCount()
+	{ m_d3dSrvGPUDescriptorNextHandle.ptr -= ::gnCbvSrvDescriptorIncrementSize;
+	m_d3dSrvCPUDescriptorNextHandle.ptr -= ::gnCbvSrvDescriptorIncrementSize;}
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(shared_ptr<CreateManager> pCreateManager, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride);
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceViews(shared_ptr<CreateManager> pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement);
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateShadowResourceViews(shared_ptr<CreateManager> pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement);

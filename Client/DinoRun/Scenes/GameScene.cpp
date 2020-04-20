@@ -598,3 +598,8 @@ void GameScene::setCamera(CCamera* camera)
 	BaseScene::setCamera(camera);
 	m_pPlayer->SetCameraUpdatedContext((CHeightMapTerrain*)m_pTerrain);
 }
+
+void GameScene::ResetShadowBuffer(shared_ptr<CreateManager> pCreateManager)
+{
+	m_pTerrain->resetShadowTexture(pCreateManager);
+}

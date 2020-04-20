@@ -21,9 +21,9 @@ void CreateManager::Initialize(HINSTANCE hInstance, HWND hWnd)
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateGraphicsRootSignature();
 
-	CreateSwapChainRenderTargetViews();
-	CreateRenderTargetViews();
-	CreateDepthStencilView();
+	//CreateSwapChainRenderTargetViews();
+	//CreateRenderTargetViews();
+	//CreateDepthStencilView();
 
 	m_pDrawManager->Initialize();
 }
@@ -75,7 +75,7 @@ void CreateManager::Resize(int width, int height)
 	m_nWndClientWidth = width;
 	m_nWndClientHeight = height;
 
-//	OnResizeBackBuffers();
+	OnResizeBackBuffers();
 }
 
 void CreateManager::OnResizeBackBuffers()
@@ -95,8 +95,8 @@ void CreateManager::OnResizeBackBuffers()
 		m_ppd3dSwapChainBackBuffers[i].Reset();
 	}
 
-	if (m_pd3dDepthStencilBuffer) { m_pd3dDepthStencilBuffer.Reset(); }
-	if (m_pd3dShadowDepthBuffer) { m_pd3dShadowDepthBuffer.Reset(); }
+	//if (m_pd3dDepthStencilBuffer) { m_pd3dDepthStencilBuffer.Reset(); }
+	//if (m_pd3dShadowDepthBuffer) { m_pd3dShadowDepthBuffer.Reset(); }
 
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	hResult = m_pdxgiSwapChain->GetDesc(&swapChainDesc);
