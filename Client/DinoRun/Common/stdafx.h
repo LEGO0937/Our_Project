@@ -36,6 +36,12 @@
 
 #include "../Common/TextureLoad/DDSTextureLoader12.h"
 #include "../Global/Global.h"
+
+//FMOD
+#include <fmod.hpp>
+
+using namespace FMOD;
+//
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
