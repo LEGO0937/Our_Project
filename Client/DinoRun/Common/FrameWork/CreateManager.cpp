@@ -20,6 +20,7 @@ void CreateManager::Initialize(HINSTANCE hInstance, HWND hWnd)
 	CreateSwapChain();
 	CreateRtvAndDsvDescriptorHeaps();
 	CreateGraphicsRootSignature();
+	CreateComputeRootSignature();
 
 	//CreateSwapChainRenderTargetViews();
 	//CreateRenderTargetViews();
@@ -480,7 +481,6 @@ void CreateManager::CreateGraphicsRootSignature()
 	pd3dDescriptorRanges[2].RegisterSpace = 0;
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = 0;
 
-	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 	D3D12_ROOT_PARAMETER pd3dRootParameters[11];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
@@ -568,7 +568,69 @@ void CreateManager::CreateGraphicsRootSignature()
 
 	m_pDrawManager->SaveGraphicsRootSignature(m_pGraphicsRootSignature);
 }
+void CreateManager::CreateComputeRootSignature()
+{
+	D3D12_DESCRIPTOR_RANGE srvTable;
+	srvTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	srvTable.NumDescriptors = 1;
+	srvTable.BaseShaderRegister = 0;
+	srvTable.RegisterSpace = 0;
+	srvTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
+	D3D12_DESCRIPTOR_RANGE uavTable;
+	uavTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	uavTable.NumDescriptors = 1;
+	uavTable.BaseShaderRegister = 0;
+	uavTable.RegisterSpace = 0;
+	uavTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
+
+	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	pd3dRootParameters[0].Constants.Num32BitValues = 12;
+	pd3dRootParameters[0].Constants.ShaderRegister = 0;
+	pd3dRootParameters[0].Constants.RegisterSpace = 0;
+	pd3dRootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[1].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[1].DescriptorTable.pDescriptorRanges = &srvTable;
+	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &uavTable;
+	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	//auto staticSamplers = GetStaticSamplers();
+
+	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
+		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
+
+	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
+	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
+	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);
+	d3dRootSignatureDesc.pParameters = pd3dRootParameters;
+	d3dRootSignatureDesc.NumStaticSamplers = 0;
+	d3dRootSignatureDesc.pStaticSamplers = nullptr;
+	d3dRootSignatureDesc.Flags = d3dRootSignatureFlags;
+
+	ID3DBlob *pd3dSignatureBlob = NULL;
+	ID3DBlob *pd3dErrorBlob = NULL;
+
+	HRESULT h = D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
+		&pd3dSignatureBlob, &pd3dErrorBlob);
+
+	m_pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(),
+		pd3dSignatureBlob->GetBufferSize(), IID_PPV_ARGS(m_pComputeRootSignature.GetAddressOf()));
+
+	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();
+	if (pd3dErrorBlob) pd3dErrorBlob->Release();
+
+	m_pComputeRootSignature->SetName(L"m_pComputeRootSignature");
+
+	m_pDrawManager->SaveComputeRootSignature(m_pComputeRootSignature);
+}
 //정적 샘플러
 array<const D3D12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers()
 {

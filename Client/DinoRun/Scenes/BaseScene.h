@@ -68,7 +68,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Render();
 	virtual void RenderShadow();
-
+	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer) {};
 
 	void SetGraphicsRootSignature(ID3D12RootSignature *pd3dRootSignature);
 	void SetPipelineStates(int nPipelineStates, ID3D12PipelineState** ppd3dPipelineStates);

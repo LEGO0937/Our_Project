@@ -23,32 +23,32 @@
     <ProjectGuid>{398CE88A-DC4E-4594-A006-463AC5C2A571}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DinoRun</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -167,6 +167,7 @@
     <ClInclude Include="Common\TextureLoad\DDSTextureLoader12.h" />
     <ClInclude Include="Common\Timer\Timer.h" />
     <ClInclude Include="CShaders\BillBoardShader\BillBoardShader.h" />
+    <ClInclude Include="CShaders\BlurShader\BlurShader.h" />
     <ClInclude Include="CShaders\FontShader\FontShader.h" />
     <ClInclude Include="CShaders\ModelShader\ModelShader.h" />
     <ClInclude Include="CShaders\Shader.h" />
@@ -205,6 +206,7 @@
     <ClCompile Include="Common\TextureLoad\DDSTextureLoader12.cpp" />
     <ClCompile Include="Common\Timer\Timer.cpp" />
     <ClCompile Include="CShaders\BillBoardShader\BillBoardShader.cpp" />
+    <ClCompile Include="CShaders\BlurShader\BlurShader.cpp" />
     <ClCompile Include="CShaders\FontShader\FontShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\BlockShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\FenceShader.cpp" />
@@ -248,6 +250,12 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Common\Shaders\BillBoard.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Common\Shaders\Blur.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

@@ -16,7 +16,7 @@ public:
 
 	void Render(shared_ptr<BaseScene> pScene);
 	void RenderDepth(shared_ptr<BaseScene> pScene);
-	void RenderMotionBlur(shared_ptr<BaseScene> pScene);
+	void RenderPostProcess(shared_ptr<BaseScene> pScene);
 	void RenderLight(shared_ptr<BaseScene> pScene);
 
 	void RenderLoadingScreen(float loadingPercentage = 0.f);
@@ -44,6 +44,7 @@ public:
 	void SetFence(ComPtr<ID3D12Fence> pFence) { m_pd3dFence = pFence; }
 
 	void SaveGraphicsRootSignature(ComPtr<ID3D12RootSignature> pGraphicsRootSignature) { m_pGraphicsRootSignature = pGraphicsRootSignature; }
+	void SaveComputeRootSignature(ComPtr<ID3D12RootSignature> pComputeRootSignature) { m_pComputeRootSignature = pComputeRootSignature; }
 
 	void SetShadowDepthBuffer(ComPtr<ID3D12Resource> pShadowDepthBuffer) { m_pd3dShadowDepthBuffer = pShadowDepthBuffer; }
 
@@ -74,9 +75,8 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_dsvDepthStencilBufferCPUHandle;
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_dsvShadowBufferCPUHandle;
 
-	//shared_ptr<CTextureToFullScreenShader> m_pTextureToFullScreenShader;
-
 	ComPtr<ID3D12RootSignature> m_pGraphicsRootSignature;
+	ComPtr<ID3D12RootSignature> m_pComputeRootSignature;
 
 	shared_ptr<BaseScene> m_pLoadingScene;
 };

@@ -184,6 +184,9 @@
     <Filter Include="Common\Framework\SoundManager">
       <UniqueIdentifier>{80054a99-b8a3-4446-96d6-ea12ba77ed06}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CShaders\BlurShader">
+      <UniqueIdentifier>{65c525b6-9193-4dd9-a792-46330ab517cf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -302,6 +305,9 @@
     </ClInclude>
     <ClInclude Include="Common\FrameWork\SoundManager.h">
       <Filter>Common\Framework\SoundManager</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\BlurShader\BlurShader.h">
+      <Filter>CShaders\BlurShader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -440,6 +446,9 @@
     <ClCompile Include="Common\FrameWork\SoundManager.cpp">
       <Filter>Common\Framework\SoundManager</Filter>
     </ClCompile>
+    <ClCompile Include="CShaders\BlurShader\BlurShader.cpp">
+      <Filter>CShaders\BlurShader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DinoRun.rc">
@@ -487,6 +496,9 @@
     </FxCompile>
     <FxCompile Include="Common\Shaders\Font.hlsl">
       <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Common\Shaders\Blur.hlsl">
+      <Filter>Shaders\not complete</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

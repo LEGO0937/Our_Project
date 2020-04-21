@@ -8,6 +8,7 @@
 #include "../CShaders/BillBoardShader/BillBoardShader.h"
 #include "../CShaders/ModelShader/ModelShader.h"
 #include "../CShaders/SkinedShader/SkinedShader.h"
+#include "../CShaders/BlurShader/BlurShader.h"
 
 #include "../CShaders/UiShader/UiShader.h"
 
@@ -74,6 +75,9 @@ void GameScene::ReleaseObjects()
 		m_pMinimapCamera->ReleaseShaderVariables();
 		delete m_pMinimapCamera;
 	}
+	if (blurShader)
+		blurShader->Release();
+
 	UpdatedShaders.clear();
 	instacingUiShaders.clear();
 	instacingBillBoardShaders.clear();
@@ -139,6 +143,8 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//instacingAnimatedModelShaders.emplace_back(animatedShader);
 	//animatedShader->AddRef();
 	//UpdatedShaders.emplace_back(animatedShader);
+
+	blurShader = new BlurShader(pCreateManager);
 
 	BuildLights();
 
@@ -327,16 +333,6 @@ void GameScene::Render()
 			shader->Render(m_pd3dCommandList.Get(), m_pCamera);
 		}
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[13]);
-	if(instacingUiShaders[0])
-		instacingUiShaders[0]->Render(m_pd3dCommandList.Get(), m_pCamera);
-
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[14]);
-	if (instacingUiShaders[1])
-		instacingUiShaders[1]->Render(m_pd3dCommandList.Get(), m_pCamera);
-	if (instacingUiShaders[2])
-		instacingUiShaders[2]->Render(m_pd3dCommandList.Get(), m_pCamera);
-
 #ifdef _WITH_BOUND_BOX
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[11]);
 	m_pPlayer->BbxRender(m_pd3dCommandList.Get(), m_pCamera);
@@ -345,14 +341,6 @@ void GameScene::Render()
 		if (shader) shader->BbxRender(m_pd3dCommandList.Get(), m_pCamera);
 
 #endif
-
-	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
-	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList.Get());
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[4]);
-	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
-
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1]);
-	m_pPlayer->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
 }
 
 void GameScene::RenderShadow()
@@ -370,10 +358,31 @@ void GameScene::RenderShadow()
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList.Get(), m_pCamera);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[9]);
-	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList.Get(), m_pCamera);
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[9]);
+	//if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList.Get(), m_pCamera);
 }
+void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
+{
+	blurShader->Dispatch(m_pd3dCommandList.Get(), m_ppd3dPipelineStates[17], m_ppd3dPipelineStates[18], curBuffer.Get(), 2);
 
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[13]);
+	if (instacingUiShaders[0])
+		instacingUiShaders[0]->Render(m_pd3dCommandList.Get(), m_pCamera);
+
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[14]);
+	if (instacingUiShaders[1])
+		instacingUiShaders[1]->Render(m_pd3dCommandList.Get(), m_pCamera);
+	if (instacingUiShaders[2])
+		instacingUiShaders[2]->Render(m_pd3dCommandList.Get(), m_pCamera);
+
+	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
+	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList.Get());
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[4]);
+	//if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
+
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1]);
+	m_pPlayer->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
+}
 void GameScene::AnimateObjects(float fTimeElapsed)  
 {
 	//말 그대로 애니메이션 update

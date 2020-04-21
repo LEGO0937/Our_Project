@@ -426,3 +426,7 @@ void CreatePsoWireInstance(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3d
 
 //Font PipeLine
 void CreatePsoFont(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
+
+//Compute PipeLine
+void CreatePsoHorzBlur(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
+void CreatePsoVertBlur(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);

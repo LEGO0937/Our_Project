@@ -1,5 +1,6 @@
 #pragma once
 #include "BaseScene.h"
+//#include "../CShaders/BlurShader/BlurShader.h"
 
 #define TerrainScaleX 25
 #define TerrainScaleY 0.7
@@ -9,6 +10,7 @@ class CObInstancingShader;
 class CSkinedObInstancingShader;
 class CObjectsShader;
 class CUiShader;
+class BlurShader;
 
 class CHeightMapTerrain;
 class SkyBoxObject;
@@ -53,6 +55,7 @@ public:
 
 	void Render();
 	void RenderShadow();
+	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer);
 
 	virtual void ResetShadowBuffer(shared_ptr<CreateManager> pCreateManager);
 
@@ -79,4 +82,5 @@ private:
 
 	CCamera* m_pMinimapCamera = NULL;
 
+	BlurShader* blurShader = NULL;
 };

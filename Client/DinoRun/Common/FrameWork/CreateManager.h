@@ -30,6 +30,7 @@ public:
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList() { return m_pd3dCommandList; }
 
 	ComPtr<ID3D12RootSignature> GetGraphicsRootSignature() { return m_pGraphicsRootSignature; }
+	ComPtr<ID3D12RootSignature> GetComputeRootSignature() { return m_pComputeRootSignature; }
 
 	HWND GetHwnd() { return m_hWnd; }
 
@@ -50,6 +51,7 @@ private:  //d3d ComObject
 	void CreateDepthStencilView();
 	//void CreatePostprocessShader();
 	void CreateGraphicsRootSignature();
+	void CreateComputeRootSignature();
 
 private:
 	HINSTANCE m_hInstance;
@@ -107,6 +109,7 @@ private:
 	//shared_ptr<CTextureToFullScreenShader> m_pTextureToFullScreenShader;
 
 	ComPtr<ID3D12RootSignature> m_pGraphicsRootSignature;
+	ComPtr<ID3D12RootSignature> m_pComputeRootSignature;
 
 	shared_ptr<DrawManager> m_pDrawManager;
 };

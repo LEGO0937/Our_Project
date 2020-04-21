@@ -10,7 +10,7 @@ class CGameFramework
 public:	// 생성자, 소멸자
 	CGameFramework();
 	~CGameFramework();
-public:  //순수 가상함수들
+public:
 	bool Initialize(HINSTANCE hInstance, HWND hWnd);
 	void Release();
 

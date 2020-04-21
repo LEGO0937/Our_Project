@@ -266,7 +266,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 void CGameFramework::BuildPipelineState()
 {
-	m_nPipelineStates = 17;
+	m_nPipelineStates = 19;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 	for (int i = 0; i < m_nPipelineStates; ++i)
 	{
@@ -298,4 +298,7 @@ void CGameFramework::CreatePSOs()
 	CreatePsoWireInstance(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 12);
 	//Font
 	CreatePsoFont(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 15);
+	//Blur
+	CreatePsoHorzBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, 17);
+	CreatePsoVertBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, 18);
 }
