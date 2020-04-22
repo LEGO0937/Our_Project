@@ -1,16 +1,14 @@
 #include "ItemObject.h"
 ItemObject::ItemObject(int nMeshes) :CGameObject(nMeshes)
 {
+	isKinematic = true;
+	m_ModelType = ModelType::Meat_Item;
 }
 ItemObject::~ItemObject()
 {
 
 }
 
-void ItemObject::Animate(float fTimeElapsed)
-{
-	CGameObject::Animate(fTimeElapsed);
-}
 bool ItemObject::Update(float fTimeElapsed, CGameObject* target)
 {
 	Rotate(0, 360*fTimeElapsed ,0);

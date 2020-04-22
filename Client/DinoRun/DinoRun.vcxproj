@@ -184,13 +184,17 @@
     <ClInclude Include="Meshes\TerrainMesh.h" />
     <ClInclude Include="Objects\BaseObject.h" />
     <ClInclude Include="Objects\BillBoardObject.h" />
+    <ClInclude Include="Objects\CheckPointObject.h" />
+    <ClInclude Include="Objects\FenceObject.h" />
     <ClInclude Include="Objects\ItemObject.h" />
     <ClInclude Include="Objects\PlayerObject.h" />
     <ClInclude Include="Objects\SkyBoxObject.h" />
     <ClInclude Include="Objects\TerrainObject.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
+    <ClInclude Include="Scenes\EndScene.h" />
     <ClInclude Include="Scenes\GameScene.h" />
     <ClInclude Include="Scenes\LobbyScene.h" />
+    <ClInclude Include="Scenes\RoomScene.h" />
     <ClInclude Include="Scenes\StartScene.h" />
   </ItemGroup>
   <ItemGroup>
@@ -232,13 +236,17 @@
     <ClCompile Include="Meshes\TerrainMesh.cpp" />
     <ClCompile Include="Objects\BaseObject.cpp" />
     <ClCompile Include="Objects\BillBoardObject.cpp" />
+    <ClCompile Include="Objects\CheckPointObject.cpp" />
+    <ClCompile Include="Objects\FenceObject.cpp" />
     <ClCompile Include="Objects\ItemObject.cpp" />
     <ClCompile Include="Objects\PlayerObject.cpp" />
     <ClCompile Include="Objects\SkyBoxObject.cpp" />
     <ClCompile Include="Objects\TerrainObject.cpp" />
     <ClCompile Include="Scenes\BaseScene.cpp" />
+    <ClCompile Include="Scenes\EndScene.cpp" />
     <ClCompile Include="Scenes\GameScene.cpp" />
     <ClCompile Include="Scenes\LobbyScene.cpp" />
+    <ClCompile Include="Scenes\RoomScene.cpp" />
     <ClCompile Include="Scenes\StartScene.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -60,14 +60,16 @@ void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick();
 	float fTimeElapsed = m_GameTimer.DeltaTime();
+	if(m_CurState != m_PrevState)
 	{
+		ChangeSceneByType(m_CurState);
 		//씬 교환 부분.
 	}
 	m_pScene->ProcessInput(m_hWnd, fTimeElapsed);
 	// processinput과 플레이어 animate의 순서를 뒤바꾸면 플레이어가 움직일 시 흔들림 발생 왜?
 	m_pScene->FixedUpdate(fTimeElapsed);
 	m_pScene->AnimateObjects(fTimeElapsed); //바뀐 행렬값으로 애니메이션 수행
-	m_pScene->Update(fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
+	m_CurState = m_pScene->Update(fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
 	
 	m_pDrawMgr->Render(m_pScene);
 }
@@ -86,7 +88,7 @@ void CGameFramework::BuildObjects()
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
 	m_pFontManager->Initialize(m_pCreateMgr);
 	//-----------
-	
+	/*
 	m_pScene = shared_ptr<GameScene>(new GameScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
@@ -97,16 +99,16 @@ void CGameFramework::BuildObjects()
 
 	m_pScene->setPlayer(m_pPlayer);
 	m_pScene->setCamera(m_pPlayer->GetCamera());
-	
+	*/
 	//--------
-	/*
-	m_pScene = shared_ptr<LobbyScene>(new LobbyScene());
+	
+	m_pScene = shared_ptr<StartScene>(new StartScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
 	m_pScene->BuildObjects(m_pCreateMgr);
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pScene->setCamera(m_pCamera);
-	*/
+	
 	//-----------------------
 
 	m_pCreateMgr->ExecuteCommandList();
@@ -211,39 +213,51 @@ void CGameFramework::ReleaseObjects()
 	if (m_pPlayer)
 	{
 		m_pPlayer->Release();
+		m_pPlayer = NULL;
 	}
 	//if (m_pLoadingScene) m_pLoadingScene->Release();
 }
 
 void CGameFramework::ChangeSceneByType(SceneType type)
 {
-	if (m_pScene)
-	{
-		m_pScene->ReleaseObjects();
-		m_pScene->ReleaseShaderVariables();
-	}
+	m_pCreateMgr->ResetCommandList();
+	
+	ReleaseObjects();
+
 	// 게임씬에 들어가는 액션에서는 기존의 player를 메모리 반납 후 캐릭터 번호에 맞는 모델로 새로 생성할것
 	//이때 반납전에 아이디와 모델타입을 이곳에 만든 지역변수에 저장후 반납할 것.
 	if (type == SceneType::Start_Scene)
 	{
 		if (m_PrevState == SceneType::Lobby_Scene)
 		{
+			m_pScene = shared_ptr<StartScene>(new StartScene());
+			m_pScene->SetFontShader(m_pFontManager->getFontShader());
+			m_pScene->setCamera(m_pCamera);
 		}
 	}
 	else if (type == SceneType::Lobby_Scene)
 	{
-		if(m_PrevState == SceneType::Start_Scene)
+		if(m_PrevState == SceneType::Start_Scene || m_PrevState == SceneType::Room_Scene)
 		{ 
+			m_pScene = shared_ptr<LobbyScene>(new LobbyScene());
+			m_pScene->SetFontShader(m_pFontManager->getFontShader());
+			m_pScene->setCamera(m_pCamera);
 		}
-		else if (m_PrevState == SceneType::End_Scene)
+	}
+	else if (type == SceneType::Room_Scene)
+	{
+		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::End_Scene)
 		{
-
+			m_pScene = shared_ptr<RoomScene>(new RoomScene());
+			m_pScene->SetFontShader(m_pFontManager->getFontShader());
+			m_pScene->setCamera(m_pCamera);
 		}
 	}
 	else if (type == SceneType::Game_Scene)
 	{
-		if (m_PrevState == SceneType::Lobby_Scene)
+		if (m_PrevState == SceneType::Room_Scene)
 		{
+			m_pScene = shared_ptr<GameScene>(new GameScene());
 		}
 	}
 	else if (type == SceneType::End_Scene)
@@ -257,9 +271,21 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	m_pScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
 	m_pScene->BuildObjects(m_pCreateMgr);
 
+	if (type == SceneType::Game_Scene)
+	{
+		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateMgr);
+		m_pPlayer = pPlayer;
+
+		m_pScene->setPlayer(m_pPlayer);
+		m_pScene->setCamera(m_pPlayer->GetCamera());
+
+
+	}
 	m_pCreateMgr->ExecuteCommandList();
 	m_pScene->ReleaseUploadBuffers();
-	
+	if (m_pPlayer)
+		m_pPlayer->ReleaseUploadBuffers();
+
 	m_PrevState = type;
 }
 

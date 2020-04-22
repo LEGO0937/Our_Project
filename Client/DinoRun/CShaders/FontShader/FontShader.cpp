@@ -24,6 +24,7 @@ void FontShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* te
 	CreateShaderResourceViews(pCreateManager, fontTex, 8, true);
 
 	HRESULT hr;
+	//18개의 텍스트 출력을 위한 정점 버퍼 생성.
 	for (int i = 0; i < 18; ++i)
 	{
 		pCreateManager->GetDevice().Get()->CreateCommittedResource(

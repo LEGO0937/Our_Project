@@ -187,6 +187,18 @@
     <Filter Include="CShaders\BlurShader">
       <UniqueIdentifier>{65c525b6-9193-4dd9-a792-46330ab517cf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scenes\RoomScene">
+      <UniqueIdentifier>{4b91accd-062c-4756-9514-155142872f60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scenes\EndScene">
+      <UniqueIdentifier>{3252424d-4fae-40c4-ab1c-d7ae51cae3fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\CheckPointObject">
+      <UniqueIdentifier>{c60024f0-e335-4de2-89ff-e43b41c32419}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\FenceObject">
+      <UniqueIdentifier>{158f8c88-e4e6-4f6f-925f-1138409072a0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -308,6 +320,18 @@
     </ClInclude>
     <ClInclude Include="CShaders\BlurShader\BlurShader.h">
       <Filter>CShaders\BlurShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\EndScene.h">
+      <Filter>Scenes\EndScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\RoomScene.h">
+      <Filter>Scenes\RoomScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\FenceObject.h">
+      <Filter>Objects\FenceObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\CheckPointObject.h">
+      <Filter>Objects\CheckPointObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -449,6 +473,18 @@
     <ClCompile Include="CShaders\BlurShader\BlurShader.cpp">
       <Filter>CShaders\BlurShader</Filter>
     </ClCompile>
+    <ClCompile Include="Scenes\EndScene.cpp">
+      <Filter>Scenes\EndScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\RoomScene.cpp">
+      <Filter>Scenes\RoomScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\FenceObject.cpp">
+      <Filter>Objects\FenceObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\CheckPointObject.cpp">
+      <Filter>Objects\CheckPointObject</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DinoRun.rc">
@@ -498,7 +534,7 @@
       <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="Common\Shaders\Blur.hlsl">
-      <Filter>Shaders\not complete</Filter>
+      <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

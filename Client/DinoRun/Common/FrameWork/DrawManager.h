@@ -3,6 +3,8 @@
 #include "../../Scenes/GameScene.h"
 #include "../../Scenes/LobbyScene.h"
 #include "../../Scenes/StartScene.h"
+#include "../../Scenes/EndScene.h"
+#include "../../Scenes/RoomScene.h"
 
 class DrawManager
 {

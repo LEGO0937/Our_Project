@@ -87,6 +87,8 @@ public:
 		m_nWndClientWidth = width; m_nWndClientHeight = height;
 	}
 protected:
+	SceneType sceneType;
+
 	ComPtr<ID3D12GraphicsCommandList> m_pd3dCommandList = NULL;
 
 	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;

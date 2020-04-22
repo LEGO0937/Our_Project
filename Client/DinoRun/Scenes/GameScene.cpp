@@ -17,6 +17,7 @@
 
 GameScene::GameScene() :BaseScene()
 {
+	sceneType = SceneType::Game_Scene;
 }
 GameScene::~GameScene()
 {
@@ -267,6 +268,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 	레이어를 x-축 또는 y-축으로 회전한다.*/
 	if (::GetCapture() == hwnd)
 	{
+		/*
 		//마우스 커서를 화면에서 없앤다(보이지 않게 한다).
 		::SetCursor(NULL);
 		//현재 마우스 커서의 위치를 가져온다. 
@@ -277,6 +279,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		//마우스 커서의 위치를 마우스가 눌려졌던 위치로 설정한다. 
 		//m_ptOldCursorPos = ptCursorPos;
 		::SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
+		*/
 	}
 	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
@@ -363,7 +366,7 @@ void GameScene::RenderShadow()
 }
 void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
-	blurShader->Dispatch(m_pd3dCommandList.Get(), m_ppd3dPipelineStates[17], m_ppd3dPipelineStates[18], curBuffer.Get(), 2);
+	//blurShader->Dispatch(m_pd3dCommandList.Get(), m_ppd3dPipelineStates[17], m_ppd3dPipelineStates[18], curBuffer.Get(), 1);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[13]);
 	if (instacingUiShaders[0])
@@ -396,7 +399,10 @@ void GameScene::AnimateObjects(float fTimeElapsed)
 SceneType GameScene::Update(float fTimeElapsed)
 {
 	//충돌을 위한 update
-
+	if (sceneType != SceneType::Game_Scene)
+	{
+		return sceneType;
+	}
 	if (m_pLights)
 	{
 		m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
@@ -465,7 +471,7 @@ void GameScene::BuildLights()
 
 	m_pLights->m_pLights[0].m_bEnable = true;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);

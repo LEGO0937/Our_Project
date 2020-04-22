@@ -10,6 +10,7 @@
 
 StartScene::StartScene():BaseScene()
 {
+	sceneType = SceneType::Start_Scene;
 }
 StartScene::~StartScene()
 {
@@ -111,6 +112,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (isClickedLogin)
 			{
 				//씬 전환
+				sceneType = Lobby_Scene;
 			}
 		}
 		else
@@ -262,10 +264,14 @@ void StartScene::AnimateObjects(float fTimeElapsed)
 SceneType StartScene::Update(float fTimeElapsed)
 {
 	//물리 및 충돌을 위한 update
+	if (sceneType != SceneType::Start_Scene)
+	{
+		return sceneType;
+	}
 
 	for (CUiShader* shader : instacingUiShaders)
 		shader->Update(fTimeElapsed, NULL);
-	return Lobby_Scene;
+	return SceneType::Start_Scene;
 }
 
 

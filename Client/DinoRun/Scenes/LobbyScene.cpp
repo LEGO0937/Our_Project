@@ -10,6 +10,7 @@
 
 LobbyScene::LobbyScene() :BaseScene()
 {
+	sceneType = SceneType::Lobby_Scene;
 }
 LobbyScene::~LobbyScene()
 {
@@ -155,19 +156,19 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				//더블 클릭 구간 
 				if (point.x > -0.87 && point.x < -0.34 && point.y > 0.22 && point.y < 0.51) //1번 방 충돌체크
 				{
-					
+					sceneType = SceneType::Room_Scene;
 				}
 				else if (point.x > -0.24 && point.x < 0.28 && point.y > 0.22 && point.y < 0.51) //2번 방 충돌체크
 				{
-					
+					sceneType = SceneType::Room_Scene;
 				}
 				else if (point.x > -0.87 && point.x < -0.34 && point.y > -0.17 && point.y < 0.14) //3번 방 충돌체크
 				{
-					
+					sceneType = SceneType::Room_Scene;
 				}
 				else if (point.x > -0.24 && point.x < 0.28 && point.y > -0.17 && point.y < 0.14) //4번 방 충돌체크
 				{
-				
+					sceneType = SceneType::Room_Scene;
 				}
 			}
 		}
@@ -241,7 +242,7 @@ void LobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+			sceneType = SceneType::Start_Scene;
 			break;
 		default:
 			break;
@@ -342,6 +343,11 @@ void LobbyScene::AnimateObjects(float fTimeElapsed)
 
 SceneType LobbyScene::Update(float fTimeElapsed)
 {
+	if (sceneType != SceneType::Lobby_Scene)
+	{
+		return sceneType;
+	}
+
 	//물리 및 충돌을 위한 update
 	if (isClicked)
 		m_fClickedTime += fTimeElapsed;

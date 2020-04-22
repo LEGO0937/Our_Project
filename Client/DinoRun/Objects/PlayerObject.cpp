@@ -11,7 +11,7 @@
 // CPlayer
 
 
-CPlayer::CPlayer()
+CPlayer::CPlayer() : CGameObject()
 {
 	m_pCamera = NULL;
 
@@ -264,7 +264,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		//XMConvertToRadians
 	}
 
-	float drag = 0.5* cPlayer* AIR *2.2;
+	float drag = 0.5* 0.5* AIR *2.2;
 	float rR = drag * 30;
 
 	XMFLOAT3 xmf3Fdrag = Vector3::ScalarProduct(m_xmf3Velocity,-drag * Vector3::Length(m_xmf3Velocity),false); // 공기 저항
@@ -273,7 +273,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	if (!isShift)
 		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); //앞키로 얻은 힘을 통한 진행 힘 구하는 식
 	else
-		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Velocity, -10, false); //브레이크 시
+		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Velocity, -0.0001, false); //브레이크 시
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Frr);
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Fdrag);  //총합
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);//힘의 최종합을 구함
@@ -433,17 +433,17 @@ void CFuncCallbackHandler::HandleCallback(void *pAnimationController, int nSet)
 	controller->SetTrackEnable(nSet, true);
 }
 
-CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager)
+CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager) : CPlayer()
 {
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, "Resources/Models/Dino.bin", NULL);
+	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, "Resources/Models/Dino2.bin", NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject->m_pChild, true);
 	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 14, pAngrybotModel);
 	
 	m_fMass = 70;
-	
-	maxForce = 1000;
+
+	maxForce = 2000;
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE, IDLE); //left_turn_start
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE_LEFT_TURN, IDLE_LEFT_TURN);
@@ -503,7 +503,7 @@ CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager)
 
 	SetPosition(XMFLOAT3(800.0f, 0, 900));
 
-	SetScale(XMFLOAT3(0.2f, 0.2f, 0.2f));
+	//SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
 }
 
 CDinoRunPlayer::~CDinoRunPlayer()
@@ -514,7 +514,7 @@ void CDinoRunPlayer::OnPrepareRender()
 {
 	CPlayer::OnPrepareRender();
 
-	m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
+	//m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
 	//m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixRotationY(XMConvertToRadians(180.f)), m_xmf4x4ToParent);
 }
 

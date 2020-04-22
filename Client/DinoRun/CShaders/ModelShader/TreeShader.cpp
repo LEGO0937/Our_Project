@@ -19,7 +19,8 @@ void TreeShader::Load(shared_ptr<CreateManager> pCreateManager, const char* file
 	int nLength = 0;
 
 	string string = filename;
-	string.insert(string.find("."), "_ins");
+	string.insert(string.find("."), "_ins");  //인스턴싱 전용 모델파일을 불러온다
+											  //텍스처,메시의 정보들이 들어 있지않음.
 	const char* fileName = string.c_str();
 
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
@@ -28,9 +29,6 @@ void TreeShader::Load(shared_ptr<CreateManager> pCreateManager, const char* file
 		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
 		pTreeObject = pModel->m_pModelRootObject;
 		pTreeObject->AddRef();
-		pTreeObject->m_fMass = 100;
-		pTreeObject->isKinematic = true;
-		pTreeObject->m_ModelType = ModelType::Default;
 		//이곳에서 findFrame을 통해 각 오브젝트에 질량 및 키네마틱 값 추가할 것.
 		nReads = (UINT)::fread(&(pTreeObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
 		objectList.emplace_back(pTreeObject);
