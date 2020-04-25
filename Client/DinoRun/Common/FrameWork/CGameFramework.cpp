@@ -292,7 +292,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 void CGameFramework::BuildPipelineState()
 {
-	m_nPipelineStates = 19;
+	m_nPipelineStates = 21;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 	for (int i = 0; i < m_nPipelineStates; ++i)
 	{
@@ -312,6 +312,7 @@ void CGameFramework::CreatePSOs()
 	CreatePsoUi(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 16);
 	CreatePsoUiGuage(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 13);
 	CreatePsoUiNumber(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 14);
+	CreatePsoParticle(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 19);
 	//Shadow Pipelines
 
 	CreatePsoShadowSkinMesh(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 6);//¼öÁ¤
@@ -319,6 +320,7 @@ void CGameFramework::CreatePSOs()
 	CreatePsoShadowBillBoardInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 8);
 	CreatePsoShadowTerrain(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 9);
 	CreatePsoShadowSkinedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 10);
+
 	//Wire Pipelines
 	CreatePsoWire(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 11);
 	CreatePsoWireInstance(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 12);
@@ -327,4 +329,6 @@ void CGameFramework::CreatePSOs()
 	//Blur
 	CreatePsoHorzBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, 17);
 	CreatePsoVertBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, 18);
+
+	CreatePsoParticleCs(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, 20);
 }

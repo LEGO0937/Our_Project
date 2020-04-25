@@ -1045,23 +1045,6 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCame
 		{
 			for (int i = 0; i < m_nMaterials; ++i)
 			{
-				//if (m_ppMaterials[i])
-				//{
-				//	if (m_ppMaterials[i]->m_pShader)
-				//	{
-				//		m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
-				//	}
-				//	if (m_ppMaterials[i]->m_ppTextures)
-				//	{
-				//		for (int j = 0; j < m_ppMaterials[i]->m_nTextures; ++j)
-				//		{
-				//			m_ppMaterials[i]->m_ppTextures[j]->UpdateShaderVariables(pd3dCommandList);
-				//		}
-				//	
-				//	}
-				//	m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
-				//}
-
 				m_pMesh->Render(pd3dCommandList, i, nInstances);
 			}
 		}

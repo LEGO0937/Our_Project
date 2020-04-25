@@ -14,6 +14,8 @@ class BlurShader;
 
 class CHeightMapTerrain;
 class SkyBoxObject;
+
+class ParticleSystem;
 struct CB_GAME_INFO
 {
 	XMFLOAT4X4 m_xmf4x4ShadowView;
@@ -83,4 +85,6 @@ private:
 	CCamera* m_pMinimapCamera = NULL;
 
 	BlurShader* blurShader = NULL;
+
+	ParticleSystem* particleSystem = NULL;
 };

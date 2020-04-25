@@ -1,9 +1,12 @@
 #include "GameScene.h"
 #include "../Common/FrameWork/CreateManager.h"
 
+#include "../Common/ParticleSystem/ParticleSystem.h"
+
 #include "../Objects/PlayerObject.h"
 #include "../Objects/SkyBoxObject.h"
 #include "../Objects/TerrainObject.h"
+
 
 #include "../CShaders/BillBoardShader/BillBoardShader.h"
 #include "../CShaders/ModelShader/ModelShader.h"
@@ -41,13 +44,16 @@ void GameScene::ReleaseUploadBuffers()
 		if (shader) shader->ReleaseUploadBuffers();
 	for (CUiShader* shader : instacingUiShaders)
 		if (shader) { shader->ReleaseUploadBuffers(); }
+	if (particleSystem)
+		particleSystem->ReleaseUploadBuffers();
 }
 void GameScene::ReleaseObjects()
 {
 	BaseScene::ReleaseObjects();
 	if (m_pTerrain)
 		m_pTerrain->Release();
-
+	if (particleSystem)
+		delete particleSystem;
 	if (m_pSkyBox)
 	{
 		m_pSkyBox->Release();
@@ -146,7 +152,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//UpdatedShaders.emplace_back(animatedShader);
 
 	blurShader = new BlurShader(pCreateManager);
-
+	particleSystem = new ParticleSystem(pCreateManager, 0, CONE,100, NULL, XMFLOAT3(800.0f, 80, 900), 15, "Resources/Images/smoke.dds", 2);
 	BuildLights();
 
 	BuildMinimapCamera(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
@@ -367,6 +373,12 @@ void GameScene::RenderShadow()
 void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
 	//blurShader->Dispatch(m_pd3dCommandList.Get(), m_ppd3dPipelineStates[17], m_ppd3dPipelineStates[18], curBuffer.Get(), 1);
+
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[20]);
+	//particleSystem->Update(0.025);
+	particleSystem->AnimateObjects(0.025);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[19]);
+	particleSystem->Render(m_pd3dCommandList.Get(), m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[13]);
 	if (instacingUiShaders[0])

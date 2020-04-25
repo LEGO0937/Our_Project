@@ -536,5 +536,8 @@
     <FxCompile Include="Common\Shaders\Blur.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Common\Shaders\Particle.hlsl">
+      <Filter>Shaders\not complete</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
