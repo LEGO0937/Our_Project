@@ -414,7 +414,7 @@ void CGameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition
 void CGameObject::FixedUpdate(float fTimeElapsed)
 {
 
-	float drag = 0.5* cPlayer* AIR *2.2;
+	float drag = 0.5f* cPlayer* AIR *2.2f;
 	float rR = drag * 30;
 	XMFLOAT3 xmf3Look = GetLook();
 	XMFLOAT3 xmf3Fdrag = Vector3::ScalarProduct(m_xmf3Velocity, -drag * Vector3::Length(m_xmf3Velocity), false);
@@ -833,7 +833,6 @@ void CGameObject::LoadMaterialsFromFile(shared_ptr<CreateManager> pCreateManager
 			nReads = (UINT)::fread(&nTexture, sizeof(int), 1, pInFile);
 
 			pMaterial = new CMaterial(nTexture); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal						
-			CTexture *pTexture;
 			if (nTexture > 0)
 			{
 				CShader* shader = new CShader();
@@ -856,9 +855,9 @@ void CGameObject::LoadMaterialsFromFile(shared_ptr<CreateManager> pCreateManager
 			{
 				(UINT)::fread(&pMaterial->m_xmf4AmbientColor, sizeof(float), 3, pInFile);
 				(UINT)::fread(&pMaterial->m_xmf4DiffuseColor, sizeof(float), 3, pInFile);
-				pMaterial->m_xmf4DiffuseColor.z = 0.2;
+				pMaterial->m_xmf4DiffuseColor.z = 0.2f;
 				(UINT)::fread(&pMaterial->m_xmf4SpecularColor, sizeof(float), 3, pInFile);
-				pMaterial->m_xmf4SpecularColor.z = 0.1;
+				pMaterial->m_xmf4SpecularColor.z = 0.1f;
 				(UINT)::fread(&pMaterial->m_xmf4EmissiveColor, sizeof(float), 3, pInFile);
 			}
 			else if (!strcmp(pstrToken, "<Lambert>:"))

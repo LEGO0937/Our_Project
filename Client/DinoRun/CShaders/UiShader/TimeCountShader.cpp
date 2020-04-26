@@ -32,7 +32,7 @@ void TimeCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, voi
 	m_ppObjects->SetMaterial(0, material);
 
 	PlaneMesh *mesh = NULL;
-	mesh = new PlaneMesh(0.03, 0.045, 0.1,0,0.1,0,0.5);
+	mesh = new PlaneMesh(0.03f, 0.045f, 0.1f,0.0f,0.1f,0.0f,0.5f);
 	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	m_ppObjects->SetMesh(mesh);
@@ -41,56 +41,56 @@ void TimeCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, voi
 	uvY.reserve(8);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.62, 0.75, 0);
+	pObject->SetPosition(0.62f, 0.75f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.67, 0.75, 0);
+	pObject->SetPosition(0.67f, 0.75f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.77, 0.75, 0);
+	pObject->SetPosition(0.77f, 0.75f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.82, 0.75, 0);
+	pObject->SetPosition(0.82f, 0.75f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.92, 0.75, 0);
+	pObject->SetPosition(0.92f, 0.75f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.97, 0.75, 0);
+	pObject->SetPosition(0.97f, 0.75f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.72, 0.75, 0);
+	pObject->SetPosition(0.72f, 0.75f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(10);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;    //6ÀÚ¸®
-	pObject->SetPosition(0.87, 0.75, 0);
+	pObject->SetPosition(0.87f, 0.75f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(10);

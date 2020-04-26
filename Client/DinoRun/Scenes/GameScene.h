@@ -2,9 +2,9 @@
 #include "BaseScene.h"
 //#include "../CShaders/BlurShader/BlurShader.h"
 
-#define TerrainScaleX 25
-#define TerrainScaleY 0.7
-#define TerrainScaleZ 25
+#define TerrainScaleX 25.0f
+#define TerrainScaleY 0.7f
+#define TerrainScaleZ 25.0f
 
 class CObInstancingShader;
 class CSkinedObInstancingShader;

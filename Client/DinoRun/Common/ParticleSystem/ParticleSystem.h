@@ -15,8 +15,8 @@
 
 struct CB_Particle
 {
-	float fGravity = 0;
-	float fElapsedTime = 0.1;
+	float fGravity = 0.0f;
+	float fElapsedTime = 0.1f;
 };
 
 class Particle

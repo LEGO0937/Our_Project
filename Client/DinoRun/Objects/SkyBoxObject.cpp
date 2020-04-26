@@ -18,8 +18,8 @@ SkyBoxObject::SkyBoxObject(shared_ptr<CreateManager> pCreateManager) : CGameObje
 
 	
 	CMaterial *pSkyBoxMaterial = new CMaterial(1);
-	pSkyBoxMaterial->m_xmf4AmbientColor = XMFLOAT4(0.3, 0.3, 0.3, 1.0);
-	pSkyBoxMaterial->m_xmf4DiffuseColor = XMFLOAT4(0.5, 0.7, 0.5, 1.0);
+	pSkyBoxMaterial->m_xmf4AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	pSkyBoxMaterial->m_xmf4DiffuseColor = XMFLOAT4(0.5f, 0.7f, 0.5f, 1.0f);
 
 	pSkyBoxMaterial->SetTexture(pSkyBoxTexture,0);
 	pSkyBoxMaterial->SetShader(pSkyBoxShader);

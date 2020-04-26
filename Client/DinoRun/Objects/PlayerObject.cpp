@@ -250,27 +250,27 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 
 void CPlayer::FixedUpdate(float fTimeElapsed)
 {
-	if (m_fWheelDegree != 0)
+	if (m_fWheelDegree != 0.0f)
 	{
 		float degree = m_fWheelDegree;  //현재 머리의 회전 각도
-		if (m_fForce < 0)
+		if (m_fForce < 0.0f)
 			degree *= -1;  //후진일 경우 회전 방향이 다르므로 -1을 곱함
 		float w;
-		if (Vector3::Length(m_xmf3Velocity) < 20.0)
-			w = Vector3::Length(m_xmf3Velocity)*degree / (3.8 * 57.3); // 공룡 몸체가 회전해야하는 각도 radian
+		if (Vector3::Length(m_xmf3Velocity) < 20.0f)
+			w = Vector3::Length(m_xmf3Velocity)*degree / (3.8f * 57.3f); // 공룡 몸체가 회전해야하는 각도 radian
 		else
 		{
-			w = Vector3::Length(m_xmf3Velocity)*(degree * 0.5) / (3.8 * 57.3);
+			w = Vector3::Length(m_xmf3Velocity)*(degree * 0.5f) / (3.8f * 57.3f);
 		}
 		//w = Vector3::Length(m_xmf3Velocity)* sin(XMConvertToRadians(degree)) / (3.8);
 		
 		//이부분에  10인 값을 4.8정도로 바꾸면 드리프트도 가능할 듯?
-		Rotate(0, XMConvertToDegrees(w)*fTimeElapsed, 0); //degree로 바꿔서 회전 시작 
+		Rotate(0, XMConvertToDegrees(w)*fTimeElapsed, 0.0f); //degree로 바꿔서 회전 시작 
 		//Rotate는 degree값을 받고 회전변환을 시켜줌.
 		//XMConvertToRadians
 	}
 
-	float drag = 0.5* 0.5* AIR *2.2;
+	float drag = 0.5f* 0.5f* AIR *2.2f;
 	float rR = drag * 30;
 
 	XMFLOAT3 xmf3Fdrag = Vector3::ScalarProduct(m_xmf3Velocity,-drag * Vector3::Length(m_xmf3Velocity),false); // 공기 저항
@@ -279,7 +279,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	if (!isShift)
 		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); //앞키로 얻은 힘을 통한 진행 힘 구하는 식
 	else
-		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Velocity, -0.0001, false); //브레이크 시
+		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Velocity, -0.0001f, false); //브레이크 시
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Frr);
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Fdrag);  //총합
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);//힘의 최종합을 구함
@@ -320,7 +320,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 
 	if (isWalking)
 	{
-		if (::IsEqual(Vector3::Length(m_xmf3Velocity), 0,0.005))   //속력이 0에 근사할 경우
+		if (::IsEqual(Vector3::Length(m_xmf3Velocity), 0.0f, 0.005f))   //속력이 0에 근사할 경우
 		{
 			returnIdle();
 		}
@@ -513,7 +513,7 @@ CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager) : CPlay
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager, 0, RAND, 1.8, 100, this, XMFLOAT3(0.0f, 0, -10),
+	m_pParticleSystem = new ParticleSystem(pCreateManager, 0, RAND, 1.8f, 100, this, XMFLOAT3(0.0f, 0, -10),
 		15, "Resources/Images/smoke.dds", 2,60);
 	//SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
 	

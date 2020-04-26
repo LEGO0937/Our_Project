@@ -59,8 +59,6 @@ void DrawManager::RenderDepth(shared_ptr<BaseScene> pScene)
 
 void DrawManager::RenderLight(shared_ptr<BaseScene> pScene, float fTimeElapsed)
 {
-	HRESULT hResult;
-
 	ChangeResourceState(m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	m_pd3dCommandList->ClearDepthStencilView(m_dsvDepthStencilBufferCPUHandle,

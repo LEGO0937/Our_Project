@@ -40,7 +40,6 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	ComPtr<ID3D12Device> m_pd3dDevice = pCreateManager->GetDevice();
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
-	CObInstancingShader* shader;
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
@@ -50,31 +49,31 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	UI_INFO button_info;
 	button_info.textureName = "Resources/Images/Button.dds";
-	button_info.meshSize = XMFLOAT2(0.15, 0.12);
-	button_info.positions.emplace_back(XMFLOAT3(0.0, -0.8, 0));
-	button_info.f_uvY.emplace_back(0);
+	button_info.meshSize = XMFLOAT2(0.15f, 0.12f);
+	button_info.positions.emplace_back(XMFLOAT3(0.0f, -0.8f, 0.0f));
+	button_info.f_uvY.emplace_back(0.0f);
 	//레디 or 준비 상태 확인 인터페이스
-	button_info.positions.emplace_back(XMFLOAT3(0.55, 0.57, 0));
-	button_info.f_uvY.emplace_back(0);
-	button_info.positions.emplace_back(XMFLOAT3(0.55, 0.28, 0));
-	button_info.f_uvY.emplace_back(0);
-	button_info.positions.emplace_back(XMFLOAT3(0.55, 0.00, 0));
-	button_info.f_uvY.emplace_back(0);
-	button_info.positions.emplace_back(XMFLOAT3(0.55, -0.28, 0));
-	button_info.f_uvY.emplace_back(0);
-	button_info.positions.emplace_back(XMFLOAT3(0.55, -0.57, 0));
-	button_info.f_uvY.emplace_back(0);
+	button_info.positions.emplace_back(XMFLOAT3(0.55f, 0.57f, 0.0f));
+	button_info.f_uvY.emplace_back(0.0f);
+	button_info.positions.emplace_back(XMFLOAT3(0.55f, 0.28f, 0.0f));
+	button_info.f_uvY.emplace_back(0.0f);
+	button_info.positions.emplace_back(XMFLOAT3(0.55f, 0.0f, 0.0f));
+	button_info.f_uvY.emplace_back(0.0f);
+	button_info.positions.emplace_back(XMFLOAT3(0.55f, -0.28f, 0.0f));
+	button_info.f_uvY.emplace_back(0.0f);
+	button_info.positions.emplace_back(XMFLOAT3(0.55f, -0.57f, 0.0f));
+	button_info.f_uvY.emplace_back(0.0f);
 
 	uiShader = new ButtonShader;
 	uiShader->BuildObjects(pCreateManager, &button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.17, 0.19))); //플레이어 명단
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.17, 0.33)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.17, 0.47)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.17, 0.61)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.17, 0.75)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.19f))); //플레이어 명단
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.33f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.47f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.61f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.75f)));
 
 	CreateShaderVariables(pCreateManager);
 }
@@ -90,16 +89,16 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		if (point.x > -0.15 && point.x < 0.15 && point.y > -0.92 && point.y < -0.68) //로그인 버튼 충돌체크
+		if (point.x > -0.15f && point.x < 0.15f && point.y > -0.92f && point.y < -0.68f) //로그인 버튼 충돌체크
 		{
-			if (instacingUiShaders[1]->getUvXs()[0] == 0)
+			if (instacingUiShaders[1]->getUvXs()[0] == 0.0f)
 			{
-				instacingUiShaders[1]->getUvXs()[0] = 0.5;
+				instacingUiShaders[1]->getUvXs()[0] = 0.5f;
 				//임시적인 씬이동을 위해 여기서 씬타입 전환
 				sceneType = Game_Scene;
 			}
 			else
-				instacingUiShaders[1]->getUvXs()[0] = 0;
+				instacingUiShaders[1]->getUvXs()[0] = 0.0f;
 		}
 		
 		break;

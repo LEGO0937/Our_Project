@@ -46,7 +46,6 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	ComPtr<ID3D12Device> m_pd3dDevice = pCreateManager->GetDevice();
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
-	CObInstancingShader* shader;
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
@@ -54,34 +53,34 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader->BuildObjects(pCreateManager, &name);
 	instacingUiShaders.emplace_back(uiShader);
 
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71, 0.28),XMFLOAT2(1.05,1.05)));  //유저 목록 8줄
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71, 0.35),XMFLOAT2(1.05,1.05)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71, 0.42),XMFLOAT2(1.05,1.05)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71, 0.49),XMFLOAT2(1.05,1.05)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71, 0.56),XMFLOAT2(1.05,1.05)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71, 0.63),XMFLOAT2(1.05,1.05)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71, 0.70),XMFLOAT2(1.05,1.05)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71, 0.77),XMFLOAT2(1.05,1.05)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.28f),XMFLOAT2(1.05f,1.05f)));  //유저 목록 8줄
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.35f),XMFLOAT2(1.05f,1.05f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.42f),XMFLOAT2(1.05f,1.05f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.49f),XMFLOAT2(1.05f,1.05f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.56f),XMFLOAT2(1.05f,1.05f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.63f),XMFLOAT2(1.05f,1.05f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.70f),XMFLOAT2(1.05f,1.05f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.77f),XMFLOAT2(1.05f,1.05f)));
 
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.09, 0.24), XMFLOAT2(0.8, 0.8)));  //방 인원 수
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.09, 0.43), XMFLOAT2(0.8, 0.8)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.40, 0.24), XMFLOAT2(0.8, 0.8)));
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.40, 0.43), XMFLOAT2(0.8, 0.8)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.09f, 0.24f), XMFLOAT2(0.8f, 0.8f)));  //방 인원 수
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.09f, 0.43f), XMFLOAT2(0.8f, 0.8f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.40f, 0.24f), XMFLOAT2(0.8f, 0.8f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.40f, 0.43f), XMFLOAT2(0.8f, 0.8f)));
 
 	UI_INFO view_info;    //게임중 or 대기중 뷰
 	view_info.textureName = "Resources/Images/Button.dds";
-	view_info.meshSize = XMFLOAT2(0.087, 0.05);
-	view_info.positions.emplace_back(XMFLOAT3(-0.45, 0.475, 0));
-	view_info.f_uvY.emplace_back(0.5);
+	view_info.meshSize = XMFLOAT2(0.087f, 0.05f);
+	view_info.positions.emplace_back(XMFLOAT3(-0.45f, 0.475f, 0.0f));
+	view_info.f_uvY.emplace_back(0.5f);
 
-	view_info.positions.emplace_back(XMFLOAT3(-0.45, 0.087, 0));
-	view_info.f_uvY.emplace_back(0.5);
+	view_info.positions.emplace_back(XMFLOAT3(-0.45f, 0.087f, 0.0f));
+	view_info.f_uvY.emplace_back(0.5f);
 
-	view_info.positions.emplace_back(XMFLOAT3(0.175, 0.475, 0));
-	view_info.f_uvY.emplace_back(0.5);
+	view_info.positions.emplace_back(XMFLOAT3(0.175f, 0.475f, 0.0f));
+	view_info.f_uvY.emplace_back(0.5f);
 
-	view_info.positions.emplace_back(XMFLOAT3(0.175, 0.087, 0));
-	view_info.f_uvY.emplace_back(0.5);
+	view_info.positions.emplace_back(XMFLOAT3(0.175f, 0.087f, 0.0f));
+	view_info.f_uvY.emplace_back(0.5f);
 
 	uiShader = new ButtonShader;
 	uiShader->BuildObjects(pCreateManager, &view_info);
@@ -89,18 +88,18 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 
 	view_info.textureName = "Resources/Images/Arrow_Button.dds";  //화살표 버튼
-	view_info.meshSize = XMFLOAT2(0.08, 0.06);
+	view_info.meshSize = XMFLOAT2(0.08f, 0.06f);
 	view_info.positions.clear();
 	view_info.f_uvY.clear();
-	view_info.positions.emplace_back(XMFLOAT3(-0.40, -0.3, 0));
-	view_info.f_uvY.emplace_back(0.25);
-	view_info.positions.emplace_back(XMFLOAT3(-0.18, -0.3, 0));
-	view_info.f_uvY.emplace_back(0);
+	view_info.positions.emplace_back(XMFLOAT3(-0.40f, -0.3f, 0.0f));
+	view_info.f_uvY.emplace_back(0.25f);
+	view_info.positions.emplace_back(XMFLOAT3(-0.18f, -0.3f, 0.0f));
+	view_info.f_uvY.emplace_back(0.0f);
 
-	view_info.positions.emplace_back(XMFLOAT3(0.55, -0.75, 0));
-	view_info.f_uvY.emplace_back(0.25);
-	view_info.positions.emplace_back(XMFLOAT3(0.77, -0.75, 0));
-	view_info.f_uvY.emplace_back(0);
+	view_info.positions.emplace_back(XMFLOAT3(0.55f, -0.75f, 0.0f));
+	view_info.f_uvY.emplace_back(0.25f);
+	view_info.positions.emplace_back(XMFLOAT3(0.77f, -0.75f, 0.0f));
+	view_info.f_uvY.emplace_back(0.0f);
 
 	uiShader = new ButtonShader;
 	uiShader->BuildObjects(pCreateManager, &view_info);
@@ -124,24 +123,24 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		if (point.x > -0.48 && point.x < -0.32 && point.y > -0.36 && point.y < -0.24) //방목록 왼쪽화살표 충돌체크
+		if (point.x > -0.48f && point.x < -0.32f && point.y > -0.36f && point.y < -0.24f) //방목록 왼쪽화살표 충돌체크
 		{
 			instacingUiShaders[2]->getUvXs()[0] = 0.5;
 			isClickedLeftRoom = true;
 		}
-		else if (point.x > -0.26 && point.x < -0.1 && point.y > -0.36 && point.y < -0.24) //방목록 오른쪽 화살표 충돌체크
+		else if (point.x > -0.26f && point.x < -0.1f && point.y > -0.36f && point.y < -0.24f) //방목록 오른쪽 화살표 충돌체크
 		{
-			instacingUiShaders[2]->getUvXs()[1] = 0.5;
+			instacingUiShaders[2]->getUvXs()[1] = 0.5f;
 			isClickedRightRoom = true;
 		}
-		else if (point.x > 0.47 && point.x < 0.63 && point.y > -0.81 && point.y < -0.69) //유저목록 왼쪽화살표 충돌체크
+		else if (point.x > 0.47f && point.x < 0.63f && point.y > -0.81f && point.y < -0.69f) //유저목록 왼쪽화살표 충돌체크
 		{
-			instacingUiShaders[2]->getUvXs()[2] = 0.5;
+			instacingUiShaders[2]->getUvXs()[2] = 0.5f;
 			isClickedLeftUser = true;
 		}
-		else if (point.x > 0.69 && point.x < 0.85 && point.y > -0.81 && point.y < -0.69) //유저목록 오른쪽화살표 충돌체크
+		else if (point.x > 0.69f && point.x < 0.85f && point.y > -0.81f && point.y < -0.69f) //유저목록 오른쪽화살표 충돌체크
 		{
-			instacingUiShaders[2]->getUvXs()[3] = 0.5;
+			instacingUiShaders[2]->getUvXs()[3] = 0.5f;
 			isClickedRightUser = true;
 		}
 		else
@@ -154,19 +153,19 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			else
 			{
 				//더블 클릭 구간 
-				if (point.x > -0.87 && point.x < -0.34 && point.y > 0.22 && point.y < 0.51) //1번 방 충돌체크
+				if (point.x > -0.87f && point.x < -0.34f && point.y > 0.22f && point.y < 0.51f) //1번 방 충돌체크
 				{
 					sceneType = SceneType::Room_Scene;
 				}
-				else if (point.x > -0.24 && point.x < 0.28 && point.y > 0.22 && point.y < 0.51) //2번 방 충돌체크
+				else if (point.x > -0.24f && point.x < 0.28f && point.y > 0.22f && point.y < 0.51f) //2번 방 충돌체크
 				{
 					sceneType = SceneType::Room_Scene;
 				}
-				else if (point.x > -0.87 && point.x < -0.34 && point.y > -0.17 && point.y < 0.14) //3번 방 충돌체크
+				else if (point.x > -0.87f && point.x < -0.34f && point.y > -0.17f && point.y < 0.14f) //3번 방 충돌체크
 				{
 					sceneType = SceneType::Room_Scene;
 				}
-				else if (point.x > -0.24 && point.x < 0.28 && point.y > -0.17 && point.y < 0.14) //4번 방 충돌체크
+				else if (point.x > -0.24f && point.x < 0.28f && point.y > -0.17f && point.y < 0.14f) //4번 방 충돌체크
 				{
 					sceneType = SceneType::Room_Scene;
 				}
@@ -179,7 +178,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
-		if (point.x > -0.32 && point.x < -0.48 && point.y > -0.36 && point.y < -0.24) //방목록 왼쪽화살표 충돌체크
+		if (point.x > -0.32f && point.x < -0.48f && point.y > -0.36f && point.y < -0.24f) //방목록 왼쪽화살표 충돌체크
 		{
 			if (isClickedLeftRoom)
 			{
@@ -187,21 +186,21 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			}
 					
 		}
-		else if (point.x > -0.26 && point.x < -0.1 && point.y > -0.36 && point.y < -0.24) //방목록 오른쪽 화살표 충돌체크
+		else if (point.x > -0.26f && point.x < -0.1f && point.y > -0.36f && point.y < -0.24f) //방목록 오른쪽 화살표 충돌체크
 		{
 			if (isClickedRightRoom)
 			{
 				//방목록 변경
 			}
 		}
-		else if (point.x > 0.47 && point.x < 0.63 && point.y > -0.81 && point.y < -0.69) //유저목록 왼쪽화살표 충돌체크
+		else if (point.x > 0.47f && point.x < 0.63f && point.y > -0.81f && point.y < -0.69f) //유저목록 왼쪽화살표 충돌체크
 		{
 			if (isClickedLeftUser)
 			{
 				//유저목록 변경
 			}
 		}
-		else if (point.x > 0.69 && point.x < 0.85 && point.y > -0.81 && point.y < -0.69) //유저목록 오른쪽화살표 충돌체크
+		else if (point.x > 0.69f && point.x < 0.85f && point.y > -0.81f && point.y < -0.69f) //유저목록 오른쪽화살표 충돌체크
 		{
 			if (isClickedRightUser)
 			{
@@ -249,11 +248,7 @@ void LobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		}
 		break;
 	case WM_KEYDOWN:
-		switch (wParam)
-		{
-		default:
-			break;
-		}
+		break;
 	default:
 		break;
 	}
@@ -276,7 +271,6 @@ void LobbyScene::ProcessInput(HWND hwnd, float deltaTime)
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
-	POINT ptCursorPos;
 	/*마우스를 캡쳐했으면 마우스가 얼마만큼 이동하였는 가를 계산한다. 마우스 왼쪽 또는 오른쪽 버튼이 눌러질 때의
 	메시지(WM_LBUTTONDOWN, WM_RBUTTONDOWN)를 처리할 때 마우스를 캡쳐하였다. 그러므로 마우스가 캡쳐된
 	것은 마우스 버튼이 눌려진 상태를 의미한다. 마우스 버튼이 눌려진 상태에서 마우스를 좌우 또는 상하로 움직이면 플

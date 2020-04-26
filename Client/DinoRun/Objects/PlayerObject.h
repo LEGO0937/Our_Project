@@ -20,11 +20,11 @@ class CCamera;
 
 #define ANIMATIONGAP RUN - IDLE
 
-#define cPlayer 0.29     //Cdrag
-#define AIR 1.226
+#define cPlayer 0.29f     //Cdrag
+#define AIR 1.226f
 //#define cRr cDrag*30   //Crr
 
-#define Pi 3.1415
+#define Pi 3.1415f
 #define WHEELROTATEPERSEC 30
 class CPlayer : public CGameObject
 {
@@ -53,7 +53,6 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
-	UINT						m_uGuage = 0;  //게이지를 없앨 예정, 게이지는  오로지 멕스 force값으로 정해지게
 	//할 것임.
 	UINT						m_uCheckpointCount = 0;
 public:
@@ -66,9 +65,7 @@ public:
 	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
 
 	UINT GetCheckPoint() { return m_uCheckpointCount; }
-	UINT GetGauge() { return(m_uGuage); }
 	void UpCheckPoint() { m_uCheckpointCount++; }
-	void UpGuage() { m_uGuage += 10; if (m_uGuage > 100) m_uGuage = 100;}
 
 	void SetId(string id) { m_id = id; }
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }

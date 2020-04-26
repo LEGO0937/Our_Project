@@ -107,7 +107,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	CObInstancingShader* shader;
 	CUiShader* uiShader;
-	CSkinedObInstancingShader* animatedShader;
+	//CSkinedObInstancingShader* animatedShader;
 	
 	shader = new BillBoardShader;
 	shader->BuildObjects(pCreateManager, "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
@@ -154,10 +154,10 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	blurShader = new BlurShader(pCreateManager);
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8, 100, NULL, XMFLOAT3(800.0f, 80, 940),
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 100, NULL, XMFLOAT3(800.0f, 80, 940),
 		15, "Resources/Images/smoke.dds", 2,30));
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8, 100, NULL, XMFLOAT3(750.0f, 80, 900),
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 100, NULL, XMFLOAT3(750.0f, 80, 900),
 		15, "Resources/Images/smoke.dds", 5,50));
 	BuildLights();
 
@@ -226,7 +226,6 @@ void GameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM w
 		switch (wParam)
 		{
 		case VK_CONTROL:
-			m_pPlayer->UpGuage();
 			break;
 		case VK_F2:
 		case VK_F3:
@@ -273,7 +272,6 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
-	POINT ptCursorPos;
 	/*마우스를 캡쳐했으면 마우스가 얼마만큼 이동하였는 가를 계산한다. 마우스 왼쪽 또는 오른쪽 버튼이 눌러질 때의
 	메시지(WM_LBUTTONDOWN, WM_RBUTTONDOWN)를 처리할 때 마우스를 캡쳐하였다. 그러므로 마우스가 캡쳐된
 	것은 마우스 버튼이 눌려진 상태를 의미한다. 마우스 버튼이 눌려진 상태에서 마우스를 좌우 또는 상하로 움직이면 플

@@ -159,16 +159,16 @@ void ParticleSystem::CreateParticles()
 	case CONE:
 		if (curNumParticle + 15 < m_uMaxSize)
 		{
-			XMFLOAT3 vel = XMFLOAT3(0.5*m_fVelocity, 1 * m_fVelocity, 0);
+			XMFLOAT3 vel = XMFLOAT3(0.5f*m_fVelocity, 1.0f * m_fVelocity, 0.0f);
 			if (m_pTarget)
 			{
 				vel = Vector3::TransformCoord(vel, m_pTarget->m_xmf4x4World);
 				vel = Vector3::Normalize(vel);
-				vel = XMFLOAT3(vel.x*0.5, vel.x, 0);
+				vel = XMFLOAT3(vel.x*0.5f, vel.x, 0.0f);
 			}
 
 
-			XMFLOAT3 xmf3Up = XMFLOAT3(0, 1, 0);
+			XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			XMVECTOR up = XMLoadFloat3(&xmf3Up);
 
 			XMMATRIX mat = XMMatrixRotationAxis(up, XMConvertToRadians(24));
@@ -184,7 +184,7 @@ void ParticleSystem::CreateParticles()
 		if (curNumParticle < m_uMaxSize)
 		{
 			XMFLOAT3 vel = XMFLOAT3(m_fVelocity*cos(rand()), m_fVelocity,
-				m_fVelocity * (cos(rand()) + sin(rand()))*0.5);
+				m_fVelocity * (cos(rand()) + sin(rand()))*0.5f);
 
 			m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
 			curNumParticle++;
@@ -295,5 +295,5 @@ void ParticleSystem::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 		m_pMaterial->UpdateShaderVariable(pd3dCommandList);
 
 	if (m_pMesh)
-		m_pMesh->Render(pd3dCommandList, 0,m_vParticles.size());
+		m_pMesh->Render(pd3dCommandList, 0, m_vParticles.size());
 }
