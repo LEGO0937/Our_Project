@@ -2,10 +2,11 @@
 #include <time.h>
 
 
-ParticleSystem::ParticleSystem(shared_ptr<CreateManager> pCreateManager, const char& cPattern, const char& cShape, UINT uSize,
-	CGameObject* pTarget, const XMFLOAT3& xmf3Position, const float& fVelocity,
-	string pTextureName, const float& fLife): m_cPattern(cPattern),m_cShape(cShape), m_uSize(uSize),
-	m_fParticleLife(fLife), m_fVelocity(fVelocity)
+ParticleSystem::ParticleSystem(shared_ptr<CreateManager> pCreateManager, const char& cPattern, 
+	const char& cShape, const float& fGravity,	const UINT& uSize,	CGameObject* pTarget, 
+	const XMFLOAT3& xmf3Position, const float& fVelocity,	string pTextureName, 
+	const float& fLife, const UINT& uMaxSize): m_cPattern(cPattern),m_cShape(cShape), m_uSize(uSize),
+	m_fParticleLife(fLife), m_fVelocity(fVelocity),m_fGravity(fGravity),m_uMaxSize(uMaxSize)
 {
 	m_pd3dCommandList = pCreateManager->GetCommandList();
 
@@ -27,25 +28,17 @@ ParticleSystem::ParticleSystem(shared_ptr<CreateManager> pCreateManager, const c
 	
 	
 	m_vParticles.reserve(m_uMaxSize);
-	CreateParticles();
-
 
 	m_pTarget = pTarget;
 
-	if (m_pTarget)
-	{
-		m_pTarget->AddRef();
-		m_xmf3Position = m_pTarget->GetPosition();
-	}
-	else
-		m_xmf3Position = xmf3Position;
+	m_xmf3Position = xmf3Position;
 
 	BuildResource(pCreateManager);
+	//CreateParticles();
 }
 ParticleSystem::~ParticleSystem()
 {
-	if (m_pTarget)
-		m_pTarget->Release();
+	ReleaseUploadBuffers();
 
 	if (m_pMesh)
 	{
@@ -57,36 +50,43 @@ ParticleSystem::~ParticleSystem()
 	{
 		m_pMaterial->Release();
 	}
-	if (m_pd3dcbParticles1)
+	if (m_pd3dUbParticles)
 	{
-		//m_pd3dcbParticles1->Unmap(0, NULL);
-		m_pd3dcbParticles1->Release();
-		m_pd3dcbParticles1 = NULL;
+		m_pd3dUbParticles->Release();
+		m_pd3dUbParticles = NULL;
 	}
 
-	if (m_pd3dcbParticles2)
+	if (m_pd3dReadBackParticles)
 	{
-		m_pd3dcbParticles2->Unmap(0, NULL);
-		m_pd3dcbParticles2->Release();
-		m_pd3dcbParticles2 = NULL;
+		m_pd3dReadBackParticles->Unmap(0, NULL);
+		m_pd3dReadBackParticles->Release();
+		m_pd3dReadBackParticles = NULL;
 	}
-	if (m_pd3dcbParticles3)
+	if (m_pd3dSrbParticles)
 	{
-		m_pd3dcbParticles3->Unmap(0, NULL);
-		m_pd3dcbParticles3->Release();
-		m_pd3dcbParticles3 = NULL;
+		m_pd3dSrbParticles->Unmap(0, NULL);
+		m_pd3dSrbParticles->Release();
+		m_pd3dSrbParticles = NULL;
+	}
+	if (m_pd3dcbStruct)
+	{
+		m_pd3dcbStruct->Unmap(0, NULL);
+		m_pd3dcbStruct->Release();
+		m_pd3dcbStruct = NULL;
 	}
 	//m_vParticles.clear();
 }
 
-void ParticleSystem::AnimateObjects(float fTimeElapsed) 
+bool ParticleSystem::AnimateObjects(float fTimeElapsed) 
 {
 	D3D12_RANGE readbackBufferRange{ 0,sizeof(Particle) * m_vParticles.size() };
-	m_pd3dcbParticles2->Map(0, &readbackBufferRange, (void **)&m_pcbMappedParticles2);
-	memcpy(m_pcbMappedParticles3, m_pcbMappedParticles2, sizeof(Particle) * m_vParticles.size());
-	memcpy(m_vParticles.data(), m_pcbMappedParticles3, sizeof(Particle) * m_vParticles.size());
-	m_pd3dcbParticles2->Unmap(0, NULL);
+	m_pd3dReadBackParticles->Map(0, &readbackBufferRange, (void **)&m_pReadBackMappedParticles);
+	memcpy(m_pSrbMappedParticles, m_pReadBackMappedParticles, sizeof(Particle) * m_vParticles.size());
+	memcpy(m_vParticles.data(), m_pSrbMappedParticles, sizeof(Particle) * m_vParticles.size());
+	m_pd3dReadBackParticles->Unmap(0, NULL);
 
+	particleCb->fElapsedTime = fTimeElapsed;
+	particleCb->fGravity = m_fGravity;
 	if (m_bEnable)
 	{
 		if (curNumParticle + m_cShape > m_uMaxSize)
@@ -96,11 +96,12 @@ void ParticleSystem::AnimateObjects(float fTimeElapsed)
 
 				if (m_vParticles.size() == 0)
 				{
-				}//메모리 반납. 
+					return true; //메모리 반납   씬에서 release 처리
+				}
 			}
 			else if (m_cPattern == LOOP)
 			{
-				curNumParticle = 0;
+				curNumParticle = 0;  //루프는 소유자가 직접 release해야만 함
 			}
 		}
 		else
@@ -108,33 +109,45 @@ void ParticleSystem::AnimateObjects(float fTimeElapsed)
 			Update(fTimeElapsed);
 		}
 	}
-	memcpy(m_pcbMappedParticles3, m_vParticles.data(), sizeof(Particle) * m_uMaxSize);
-	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dcbParticles1, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+	for (auto i = m_vParticles.begin(); i < m_vParticles.end(); )
+	{
+		if (i->life < 0)
+		{
+			i = m_vParticles.erase(i);
+		}
+		else
+			++i;
+	}
+	memcpy(m_pSrbMappedParticles, m_vParticles.data(), sizeof(Particle) * m_uMaxSize);
+	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dUbParticles, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	m_pd3dCommandList->SetComputeRootShaderResourceView(4,
-		m_pd3dcbParticles3->GetGPUVirtualAddress());
+		m_pd3dSrbParticles->GetGPUVirtualAddress());
 	m_pd3dCommandList->SetComputeRootUnorderedAccessView(5,
-		m_pd3dcbParticles1->GetGPUVirtualAddress());
+		m_pd3dUbParticles->GetGPUVirtualAddress());
+	m_pd3dCommandList->SetComputeRootConstantBufferView(6, m_pd3dcbStruct->GetGPUVirtualAddress());
 
 	m_pd3dCommandList->Dispatch(1, 1, 1);
 
-	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dcbParticles1, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
-	m_pd3dCommandList->CopyResource(m_pd3dcbParticles2, m_pd3dcbParticles1);
+	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dUbParticles, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	m_pd3dCommandList->CopyResource(m_pd3dReadBackParticles, m_pd3dUbParticles);
+	return false;
 }
 void ParticleSystem::CreateParticles()
 {
 
+	XMFLOAT3 pos;
 	if (m_pTarget)
 	{
 		//타겟의 월드행렬에 오프셋값(position)의 translate 행렬곱한 결과의 포지션값을 구해온다.
-		XMFLOAT4X4 matrix = Matrix4x4::Multiply(m_pTarget->m_xmf4x4World,
-			XMMatrixTranslation(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z));
-		m_xmf3Position.x = matrix._41; m_xmf3Position.y = matrix._42; m_xmf3Position.z = matrix._43;
-
-		m_xmf3Position.x = (((float)rand() - (float)rand()) / RAND_MAX) * m_xmf3Position.x;
-		m_xmf3Position.y = (((float)rand() - (float)rand()) / RAND_MAX) * m_xmf3Position.y;
-		m_xmf3Position.z = (((float)rand() - (float)rand()) / RAND_MAX) * m_xmf3Position.z;
+		//XMFLOAT4X4 matrix = Matrix4x4::Multiply(m_pTarget->m_xmf4x4World,
+		//	XMMatrixTranslation(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z));
+		//pos.x = matrix._41; pos.y = matrix._42; pos.z = matrix._43;
+		//위치값 손봐야함;
+		pos = m_pTarget->GetPosition();
 	}
+	else
+		pos = m_xmf3Position;
 
 	//XMFLOAT3 vel = XMFLOAT3(m_xmf3Velocity.x* cos(rand()), m_xmf3Velocity.y,
 	//	m_xmf3Velocity.z*(cos(rand()) + sin(rand()))*0.5);
@@ -147,13 +160,21 @@ void ParticleSystem::CreateParticles()
 		if (curNumParticle + 15 < m_uMaxSize)
 		{
 			XMFLOAT3 vel = XMFLOAT3(0.5*m_fVelocity, 1 * m_fVelocity, 0);
+			if (m_pTarget)
+			{
+				vel = Vector3::TransformCoord(vel, m_pTarget->m_xmf4x4World);
+				vel = Vector3::Normalize(vel);
+				vel = XMFLOAT3(vel.x*0.5, vel.x, 0);
+			}
+
+
 			XMFLOAT3 xmf3Up = XMFLOAT3(0, 1, 0);
 			XMVECTOR up = XMLoadFloat3(&xmf3Up);
 
 			XMMATRIX mat = XMMatrixRotationAxis(up, XMConvertToRadians(24));
 			for (int i = 0; i < 15; ++i)
 			{
-				m_vParticles.emplace_back(Particle(m_xmf3Position, vel, m_fParticleLife));
+				m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
 				vel = Vector3::TransformNormal(vel, mat);
 			}
 			curNumParticle += 15;
@@ -165,7 +186,7 @@ void ParticleSystem::CreateParticles()
 			XMFLOAT3 vel = XMFLOAT3(m_fVelocity*cos(rand()), m_fVelocity,
 				m_fVelocity * (cos(rand()) + sin(rand()))*0.5);
 
-			m_vParticles.emplace_back(Particle(m_xmf3Position, vel, m_fParticleLife));
+			m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
 			curNumParticle++;
 		}
 		break;
@@ -204,16 +225,6 @@ void ParticleSystem::Update(float fTimeElapsed)
 			//m_vParticles.emplace_back(Particle(m_xmf3Position, vel, m_fParticleLife));
 			CreateParticles();
 		}
-		curNumParticle++;
-	}
-	for (auto i = m_vParticles.begin(); i < m_vParticles.end(); )
-	{
-		if (i->life < 0)
-		{
-			i = m_vParticles.erase(i);
-		}
-		else
-			++i;
 	}
 	
 }
@@ -222,29 +233,34 @@ void ParticleSystem::FixedUpdate(float fTimeElapsed) {}
 void ParticleSystem::BuildResource(shared_ptr<CreateManager> pCreateManager)
 {
 
-	m_pd3dcbParticles1 = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+	m_pd3dUbParticles = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
 		sizeof(Particle) * m_uMaxSize, D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_COPY_DEST, NULL, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 	//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
 	//m_pd3dcbParticles1->Map(0, NULL, (void **)m_vParticles.data());
 
-	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dcbParticles1, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dUbParticles, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	//버퍼는 세개 만든다 하나는 uav , upload, readback
 	//업데이트 전에 업로드힙에서 오브젝트 정보를 업데이트하고 uav로 복사, 업데이트 실행후 uav의 내용을 readBack으로
 	//복사, -> readback에서 map함수호출로 최종값 불러옴.
-	m_pd3dcbParticles3 = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+	m_pd3dSrbParticles = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
 		sizeof(Particle) * m_uMaxSize, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
-	m_pd3dcbParticles3->Map(0, NULL, (void **)&m_pcbMappedParticles3);
-	memcpy(m_pcbMappedParticles3, m_vParticles.data(), sizeof(Particle) * m_uMaxSize);
+	m_pd3dSrbParticles->Map(0, NULL, (void **)&m_pSrbMappedParticles);
+	memcpy(m_pSrbMappedParticles, m_vParticles.data(), sizeof(Particle) * m_uMaxSize);
 
-	m_pd3dcbParticles2 = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+	m_pd3dReadBackParticles = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
 		sizeof(Particle) * m_uMaxSize, D3D12_HEAP_TYPE_READBACK,
 		D3D12_RESOURCE_STATE_COPY_DEST, NULL);
 	//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
-	m_pd3dCommandList->CopyResource(m_pd3dcbParticles2, m_pd3dcbParticles3);
+	m_pd3dCommandList->CopyResource(m_pd3dReadBackParticles, m_pd3dSrbParticles);
 
+	UINT ncbElementBytes = ((sizeof(CB_Particle) + 255) & ~255); //256의 배수
+	m_pd3dcbStruct = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList.Get(), NULL,
+		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbStruct->Map(0, NULL, (void **)&particleCb);
 }
 
 void ParticleSystem::ChangeResourceState(ID3D12GraphicsCommandList* pCommandList, ID3D12Resource* pResource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter)
@@ -271,7 +287,7 @@ void ParticleSystem::ReleaseUploadBuffers()
 void ParticleSystem::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
 	m_pd3dCommandList->SetGraphicsRootShaderResourceView(3,
-		m_pd3dcbParticles3->GetGPUVirtualAddress());
+		m_pd3dSrbParticles->GetGPUVirtualAddress());
 
 	if (m_pShader)
 		m_pShader->Render(pd3dCommandList, pCamera);

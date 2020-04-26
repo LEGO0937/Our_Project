@@ -15,7 +15,7 @@ class BlurShader;
 class CHeightMapTerrain;
 class SkyBoxObject;
 
-class ParticleSystem;
+
 struct CB_GAME_INFO
 {
 	XMFLOAT4X4 m_xmf4x4ShadowView;
@@ -55,7 +55,7 @@ public:
 	virtual SceneType Update(float fTimeElapsed);  // 面倒贸府 棺 拱府
 	virtual void FixedUpdate(float fTimeElapsed);
 
-	void Render();
+	void Render(float fTimeElapsed);
 	void RenderShadow();
 	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer);
 
@@ -86,5 +86,5 @@ private:
 
 	BlurShader* blurShader = NULL;
 
-	ParticleSystem* particleSystem = NULL;
+	list<ParticleSystem*> particleSystems;
 };

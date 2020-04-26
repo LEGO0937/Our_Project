@@ -84,17 +84,17 @@ void EndScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 }
 
-void EndScene::Render()
+void EndScene::Render(float fTimeElapsed)
 {
-	BaseScene::Render();
+	BaseScene::Render(fTimeElapsed);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[3]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[16]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	if (instacingUiShaders[0])
 		instacingUiShaders[0]->Render(m_pd3dCommandList.Get(), m_pCamera);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[15]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList.Get(), m_pCamera, gameTexts);
 

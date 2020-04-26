@@ -199,6 +199,9 @@
     <Filter Include="Objects\FenceObject">
       <UniqueIdentifier>{158f8c88-e4e6-4f6f-925f-1138409072a0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Animation">
+      <UniqueIdentifier>{7d44ddc3-d552-4ee0-b8a2-ad23c4f09565}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -332,6 +335,9 @@
     </ClInclude>
     <ClInclude Include="Objects\CheckPointObject.h">
       <Filter>Objects\CheckPointObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Animation\Animation.h">
+      <Filter>Common\Animation</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -484,6 +490,9 @@
     </ClCompile>
     <ClCompile Include="Objects\CheckPointObject.cpp">
       <Filter>Objects\CheckPointObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\Animation\Animation.cpp">
+      <Filter>Common\Animation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

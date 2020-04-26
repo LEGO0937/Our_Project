@@ -91,8 +91,6 @@ private:
 	//그림자 깊이 버퍼
 
 	// RTV / DSV 버퍼 생성용
-	//shared_ptr<CTexture> m_pTexture;
-
 	D3D12_CPU_DESCRIPTOR_HANDLE m_pRtvRenderTargetBufferCPUHandles[N_RENDERTARGETBUFFERS];
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_pRtvSwapChainBackBufferCPUHandles[N_SWAPCHAINBUFFERS];
 
@@ -103,10 +101,7 @@ private:
 
 	ComPtr<ID3D12Fence> m_pd3dFence;
 
-	UINT m_cbvSrvDescriptorIncrementSize{ 0 };  //?
-
-	// PostProcessing Shader
-	//shared_ptr<CTextureToFullScreenShader> m_pTextureToFullScreenShader;
+	UINT m_cbvSrvDescriptorIncrementSize{ 0 }; 
 
 	ComPtr<ID3D12RootSignature> m_pGraphicsRootSignature;
 	ComPtr<ID3D12RootSignature> m_pComputeRootSignature;

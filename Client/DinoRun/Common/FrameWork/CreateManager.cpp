@@ -591,7 +591,7 @@ void CreateManager::CreateComputeRootSignature()
 	uavTable2.RegisterSpace = 0;
 	uavTable2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[6];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 12;
@@ -623,6 +623,11 @@ void CreateManager::CreateComputeRootSignature()
 	pd3dRootParameters[5].Descriptor.ShaderRegister = 2; //u2   ¿ŒΩ∫≈œΩÃπˆ∆€ π≠¿Ω
 	pd3dRootParameters[5].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[6].Descriptor.ShaderRegister = 1; // particle structure
+	pd3dRootParameters[6].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//auto staticSamplers = GetStaticSamplers();
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =

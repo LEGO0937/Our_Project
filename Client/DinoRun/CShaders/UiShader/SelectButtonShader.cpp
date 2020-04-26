@@ -10,10 +10,10 @@ SelectButtonShader::~SelectButtonShader()
 }
 
 
-void SelectButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain)
+void SelectButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
 {
 
-	const char* name = *(const char**)terrain;
+	const char* name = *(const char**)pInformation;
 	CTexture * backGround = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	backGround->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(name), 0);
 
@@ -51,7 +51,7 @@ void SelectButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, 
 }
 
 
-void SelectButtonShader::Update(float fTimeElapsed, CPlayer* player)
+void SelectButtonShader::Update(float fTimeElapsed, void* pInformation)
 {
 
 }

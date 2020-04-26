@@ -10,10 +10,10 @@ BackGroundShader::~BackGroundShader()
 }
 
 
-void BackGroundShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain)
+void BackGroundShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
 {
 
-	string* name = (string*)terrain;
+	string* name = (string*)pInformation;
 	CTexture * backGround = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	backGround->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(name->c_str()), 0);
 
@@ -51,7 +51,7 @@ void BackGroundShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, vo
 }
 
 
-void BackGroundShader::Update(float fTimeElapsed, CPlayer* player)
+void BackGroundShader::Update(float fTimeElapsed, void* pInformation)
 {
 	
 }

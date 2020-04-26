@@ -16,10 +16,10 @@ public:
 	void Initialize();
 	void Release();
 
-	void Render(shared_ptr<BaseScene> pScene);
+	void Render(shared_ptr<BaseScene> pScene, float fTimeElapsed);
 	void RenderDepth(shared_ptr<BaseScene> pScene);
 	void RenderPostProcess(shared_ptr<BaseScene> pScene);
-	void RenderLight(shared_ptr<BaseScene> pScene);
+	void RenderLight(shared_ptr<BaseScene> pScene, float fTimeElapsed);
 
 	void RenderLoadingScreen(float loadingPercentage = 0.f);
 

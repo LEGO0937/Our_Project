@@ -72,15 +72,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -152,6 +156,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Common\Animation\Animation.h" />
     <ClInclude Include="Common\Camera\Camera.h" />
     <ClInclude Include="Common\d3dx12.h" />
     <ClInclude Include="Common\Font\Font.h" />
@@ -198,6 +203,7 @@
     <ClInclude Include="Scenes\StartScene.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Common\Animation\Animation.cpp" />
     <ClCompile Include="Common\Camera\Camera.cpp" />
     <ClCompile Include="Common\Font\Font.cpp" />
     <ClCompile Include="Common\FrameWork\CGameFramework.cpp" />

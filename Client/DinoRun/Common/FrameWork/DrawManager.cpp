@@ -23,10 +23,10 @@ void DrawManager::Release()
 	::CloseHandle(m_hFenceEvent);
 }
 
-void DrawManager::Render(shared_ptr<BaseScene> pScene)
+void DrawManager::Render(shared_ptr<BaseScene> pScene, float fTimeElapsed)
 {
 	RenderDepth(pScene);   // ShadowDraw
-	RenderLight(pScene);   // BaseDraw
+	RenderLight(pScene, fTimeElapsed);   // BaseDraw
 	RenderPostProcess(pScene);
 	MoveToNextFrame();
 }
@@ -39,7 +39,7 @@ void DrawManager::RenderDepth(shared_ptr<BaseScene> pScene)
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	m_pd3dCommandList->SetGraphicsRootSignature(m_pGraphicsRootSignature.Get());
-
+	m_pd3dCommandList->SetComputeRootSignature(m_pComputeRootSignature.Get());
 	// Change to DEPTH_WRITE
 	ChangeResourceState(m_pd3dShadowDepthBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
@@ -57,7 +57,7 @@ void DrawManager::RenderDepth(shared_ptr<BaseScene> pScene)
 	//ExecuteCommandList();
 }
 
-void DrawManager::RenderLight(shared_ptr<BaseScene> pScene)
+void DrawManager::RenderLight(shared_ptr<BaseScene> pScene, float fTimeElapsed)
 {
 	HRESULT hResult;
 
@@ -71,14 +71,12 @@ void DrawManager::RenderLight(shared_ptr<BaseScene> pScene)
 		TRUE, &m_dsvDepthStencilBufferCPUHandle);
 
 	if (pScene)
-		pScene->Render();
+		pScene->Render(fTimeElapsed);
 
 }
 
 void DrawManager::RenderPostProcess(shared_ptr<BaseScene> pScene)
 {
-	m_pd3dCommandList->SetComputeRootSignature(m_pComputeRootSignature.Get());
-
 	pScene->RenderPostProcess(m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex]);
 
 	ChangeResourceState(m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);

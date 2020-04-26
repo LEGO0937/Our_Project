@@ -7,6 +7,10 @@
 #include "../Common/FrameWork/CreateManager.h"
 #include "../CShaders/Shader.h"
 #include "../Common/Camera/Camera.h"
+
+#include "../Common/ParticleSystem/ParticleSystem.h"
+#include "../../DinoRun/Common/Animation/Animation.h"
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
@@ -84,10 +88,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 		//Move(xmf3Shift, bUpdateVelocity);
 	}
-	if (m_fForce > maxForce)
-		m_fForce = maxForce;
-	if (m_fForce < -maxForce)
-		m_fForce = -maxForce;
+	if (m_fForce > m_fMaxForce)
+		m_fForce = m_fMaxForce;
+	if (m_fForce < -m_fMaxForce)
+		m_fForce = -m_fMaxForce;
 }
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
@@ -230,7 +234,9 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		target->isEnable = false;
 		break;
 	case ModelType::Meat_Item:
-		m_uGuage += 10;
+		m_fMaxForce += 200;
+		if (m_fMaxForce > MAX_FORCE)
+			m_fMaxForce = MAX_FORCE;
 		target->isEnable = false;
 		break;
 	case ModelType::Sliding_Item:
@@ -443,7 +449,9 @@ CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager) : CPlay
 	
 	m_fMass = 70;
 
-	maxForce = 2000;
+	m_fMaxForce = 2000;
+
+	
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE, IDLE); //left_turn_start
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE_LEFT_TURN, IDLE_LEFT_TURN);
@@ -503,7 +511,12 @@ CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager) : CPlay
 
 	SetPosition(XMFLOAT3(800.0f, 0, 900));
 
+	UpdateTransform(NULL);
+
+	m_pParticleSystem = new ParticleSystem(pCreateManager, 0, RAND, 1.8, 100, this, XMFLOAT3(0.0f, 0, -10),
+		15, "Resources/Images/smoke.dds", 2,60);
 	//SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
+	
 }
 
 CDinoRunPlayer::~CDinoRunPlayer()

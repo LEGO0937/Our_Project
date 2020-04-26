@@ -7,7 +7,7 @@ public:
 	SkinedShader();
 	virtual ~SkinedShader();
 	
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain) {}
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation) {}
 	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename = NULL);
 	
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);

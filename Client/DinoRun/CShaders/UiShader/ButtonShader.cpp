@@ -10,9 +10,9 @@ ButtonShader::~ButtonShader()
 }
 
 
-void ButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain)
+void ButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
 {	
-	UI_INFO* ui_Infomation = (UI_INFO*)terrain;
+	UI_INFO* ui_Infomation = (UI_INFO*)pInformation;
 	if (ui_Infomation->positions.size() <= 0)
 		return;
 	CTexture * texture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
@@ -58,7 +58,7 @@ void ButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* 
 }
 
 
-void ButtonShader::Update(float fTimeElapsed, CPlayer* player)
+void ButtonShader::Update(float fTimeElapsed, void* pInformation)
 {
 
 }

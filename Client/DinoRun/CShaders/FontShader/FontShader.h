@@ -36,7 +36,7 @@ public:
 	FontShader();
 	virtual ~FontShader();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 

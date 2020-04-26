@@ -6,17 +6,18 @@ struct Particle
 	float3 velocity;
 	float life;
 };
-struct Particle_Info
+
+
+cbuffer cbParticle : register(b1)
 {
-	float3 position;
-	float3 velocity;
-	float life;
+	float gGravity;
+	float gElapsedTime;
 };
 
 RWStructuredBuffer<Particle> consumeBuf : register(u2);
 StructuredBuffer<Particle> appendBuf : register(t1);
 
-StructuredBuffer<Particle_Info> gParticleInfos : register(t0);
+StructuredBuffer<Particle> gParticleInfos : register(t0);
 
 float rand(float2 uv)
 {
@@ -27,18 +28,19 @@ float rand(float2 uv)
 [numthreads(1000, 1, 1)]
 void ParticleCS( uint3 id : SV_GroupThreadID)
 {
-	float time = 0.1;
 	Particle prevParticle = appendBuf[id.x];
 	Particle curParticle;
 
-	curParticle.position = prevParticle.position + (prevParticle.velocity * time);
+	curParticle.position = prevParticle.position + (prevParticle.velocity * gElapsedTime);
 
 	float3 flat = curParticle.position.xyz;
 	flat.y = 0;
 
 	float3 force = normalize(flat) / length(curParticle.position);
-	curParticle.velocity = prevParticle.velocity - ((force * time) * 0.5);
-	curParticle.life = prevParticle.life - time;
+	curParticle.velocity = prevParticle.velocity - ((force * gElapsedTime) * 0.5);
+	curParticle.velocity.y -= gGravity;
+
+	curParticle.life = prevParticle.life - gElapsedTime;
 	
 	consumeBuf[id.x] = curParticle;
 }

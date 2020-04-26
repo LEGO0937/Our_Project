@@ -15,8 +15,10 @@
 
 struct CB_Particle
 {
-	XMFLOAT4X4 m_xmf4x4World;
+	float fGravity = 0;
+	float fElapsedTime = 0.1;
 };
+
 class Particle
 {
 public:
@@ -30,6 +32,13 @@ public:
 };
 class ParticleSystem
 {
+private:
+	int								m_nReferences = 0;
+
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
+
 private:
 	bool m_bEnable = true;
 
@@ -53,28 +62,29 @@ private:
 	vector<Particle> m_vParticles;
 	float m_fParticleLife = 0;
 
-	Particle *m_pcbMappedParticles1 = NULL;
-	ID3D12Resource *m_pd3dcbParticles1 = NULL;
+	ID3D12Resource *m_pd3dUbParticles = NULL;
 
-	Particle *m_pcbMappedParticles2 = NULL;
-	ID3D12Resource *m_pd3dcbParticles2 = NULL;
+	Particle *m_pReadBackMappedParticles = NULL;
+	ID3D12Resource *m_pd3dReadBackParticles = NULL;
 
-	Particle *m_pcbMappedParticles3 = NULL;
-	ID3D12Resource *m_pd3dcbParticles3 = NULL;
+	Particle *m_pSrbMappedParticles = NULL;
+	ID3D12Resource *m_pd3dSrbParticles = NULL;
 
-	
-	int m_iCurrentBufferIndex = 0;
+	float m_fGravity = 0;
 
 	ComPtr<ID3D12GraphicsCommandList> m_pd3dCommandList = NULL;
 
+	ID3D12Resource *m_pd3dcbStruct = NULL;	
+	CB_Particle *particleCb;
 	
 public:
-	ParticleSystem(shared_ptr<CreateManager> pCreateManager, const char& cPattern, const char& cShape, UINT uSize, CGameObject* pTarget, const XMFLOAT3& xmf3Position,
+	ParticleSystem(shared_ptr<CreateManager> pCreateManager, const char& cPattern, const char& cShape, const float& fGravity, 
+		const UINT& uSize, CGameObject* pTarget, const XMFLOAT3& xmf3Position,
 		 const float& fVelocity,
-		string pTextureName, const float& fLife);
+		string pTextureName, const float& fLife, const UINT& uMaxSize);
 	~ParticleSystem();
 	vector<Particle> GetParticles() { return m_vParticles; }
-	void AnimateObjects(float fTimeElapsed);
+	bool AnimateObjects(float fTimeElapsed);
 	void Update(float fTimeElapsed);
 	void FixedUpdate(float fTimeElapsed);
 
