@@ -67,6 +67,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateConstantBufferViews(shared_ptr<Create
 
 D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3dResourceDesc, UINT nTextureType)
 {
+	
 	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
 	d3dShaderResourceViewDesc.Format = d3dResourceDesc.Format;
 	d3dShaderResourceViewDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -413,7 +414,7 @@ CUiShader::~CUiShader()
 }
 
 
-void CUiShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain)
+void CUiShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
 {
 }
 

@@ -11,7 +11,7 @@ GaugeShader::~GaugeShader()
 }
 
 
-void GaugeShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain)
+void GaugeShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
 {
 	
 	CTexture * Guage = new CTexture(1, RESOURCE_TEXTURE2D, 0);
@@ -51,11 +51,18 @@ void GaugeShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* t
 }
 
 
-void GaugeShader::Update(float fTimeElapsed, CPlayer* player)
+void GaugeShader::Update(float fTimeElapsed, void* pInformation)
 {
-	UINT nGauge = player->GetGauge();
-	if (uvX[0] < nGauge)
+	CPlayer* pPlayer = (CPlayer*)pInformation;
+	UINT nGauge = pPlayer->GetMaxForce();
+	pPlayer->SetMaxForce(pPlayer->GetMaxForce() - fTimeElapsed * 2);
+	if (pPlayer->GetMaxForce() < MIN_FORCE) pPlayer->SetMaxForce(MIN_FORCE);
+	if (uvX[0] < (int)(nGauge * 0.05))
 	{
 		uvX[0] += 1;
+	}
+	else if (uvX[0] > (int)(nGauge * 0.05))
+	{
+		uvX[0] -= 1;
 	}
 }

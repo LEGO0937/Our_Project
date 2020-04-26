@@ -577,14 +577,21 @@ void CreateManager::CreateComputeRootSignature()
 	srvTable.RegisterSpace = 0;
 	srvTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_DESCRIPTOR_RANGE uavTable;
-	uavTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
-	uavTable.NumDescriptors = 1;
-	uavTable.BaseShaderRegister = 0;
-	uavTable.RegisterSpace = 0;
-	uavTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	D3D12_DESCRIPTOR_RANGE uavTable1;
+	uavTable1.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	uavTable1.NumDescriptors = 1;
+	uavTable1.BaseShaderRegister = 0;
+	uavTable1.RegisterSpace = 0;
+	uavTable1.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[3];
+	D3D12_DESCRIPTOR_RANGE uavTable2;
+	uavTable2.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+	uavTable2.NumDescriptors = 1;
+	uavTable2.BaseShaderRegister = 1;
+	uavTable2.RegisterSpace = 0;
+	uavTable2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 12;
@@ -599,9 +606,28 @@ void CreateManager::CreateComputeRootSignature()
 
 	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	pd3dRootParameters[2].DescriptorTable.NumDescriptorRanges = 1;
-	pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &uavTable;
+	pd3dRootParameters[2].DescriptorTable.pDescriptorRanges = &uavTable1;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
+	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[3].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[3].DescriptorTable.pDescriptorRanges = &uavTable2;
+	pd3dRootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[4].Descriptor.ShaderRegister = 1; //t1   ¿ŒΩ∫≈œΩÃπˆ∆€ π≠¿Ω
+	pd3dRootParameters[4].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_UAV;
+	pd3dRootParameters[5].Descriptor.ShaderRegister = 2; //u2   ¿ŒΩ∫≈œΩÃπˆ∆€ π≠¿Ω
+	pd3dRootParameters[5].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[6].Descriptor.ShaderRegister = 1; // particle structure
+	pd3dRootParameters[6].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 	//auto staticSamplers = GetStaticSamplers();
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =

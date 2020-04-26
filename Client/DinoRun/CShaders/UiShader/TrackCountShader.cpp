@@ -11,7 +11,7 @@ TrackCountShader::~TrackCountShader()
 }
 
 
-void TrackCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain)
+void TrackCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
 {
 
 	CTexture * Count = new CTexture(1, RESOURCE_TEXTURE2D_ARRAY, 0);
@@ -65,8 +65,9 @@ void TrackCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, vo
 	CreateShaderVariables(pCreateManager);
 }
 
-void TrackCountShader::Update(float fTimeElapsed, CPlayer* player)
+void TrackCountShader::Update(float fTimeElapsed, void* pInformation)
 {
 	//vNum = 181
-	uvX[0] = player->GetCheckPoint() / 181;
+	CPlayer* pPlayer = (CPlayer*)pInformation;
+	uvX[0] = pPlayer->GetCheckPoint() / 181;
 }

@@ -6,7 +6,7 @@ public:
 	ModelShader();
 	virtual ~ModelShader();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain) {}
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation) {}
 	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename = NULL);
 	virtual void Update(float fTimeElapsed){}
 	virtual void FixedUpdate(float fTimeElapsed) {}

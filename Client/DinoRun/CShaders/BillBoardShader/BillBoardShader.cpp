@@ -53,8 +53,8 @@ void BillBoardShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, con
 	BillBoardObject *pBillBoardObject = NULL;
 	CMaterial *material = new CMaterial(1);
 
-	material->m_xmf4AmbientColor = XMFLOAT4(0.7, 0.7, 0.7, 1);
-	material->m_xmf4DiffuseColor = XMFLOAT4(0.3, 0.3, 0.3, 1);
+	material->m_xmf4AmbientColor = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	material->m_xmf4DiffuseColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 
 	material->SetTexture(billboard);
 	material->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());

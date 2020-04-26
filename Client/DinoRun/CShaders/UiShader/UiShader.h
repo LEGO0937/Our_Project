@@ -21,8 +21,8 @@ public:
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void Update(float fTimeElapsed, CPlayer* player);
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain);
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 };
 
 class GaugeShader : public CUiShader
@@ -31,9 +31,9 @@ public:
 	GaugeShader();
 	virtual ~GaugeShader();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 	virtual void Update(float fTimeElapsed){}
-	virtual void Update(float fTimeElapsed, CPlayer* player);
+	virtual void Update(float fTimeElapsed, void* pInformation);
 };
 
 
@@ -47,8 +47,8 @@ public:
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void Update(float fTimeElapsed, CPlayer* player);
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain);
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 };
 
 
@@ -62,8 +62,8 @@ public:
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void Update(float fTimeElapsed, CPlayer* player);
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain);
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 };
 
 class ButtonShader : public CUiShader
@@ -76,8 +76,8 @@ public:
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void Update(float fTimeElapsed, CPlayer* player);
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain);
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 };
 
 class SelectButtonShader : public CUiShader
@@ -90,6 +90,6 @@ public:
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void Update(float fTimeElapsed, CPlayer* player);
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain);
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 };

@@ -71,7 +71,7 @@ void CGameFramework::FrameAdvance()
 	m_pScene->AnimateObjects(fTimeElapsed); //바뀐 행렬값으로 애니메이션 수행
 	m_CurState = m_pScene->Update(fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
 	
-	m_pDrawMgr->Render(m_pScene);
+	m_pDrawMgr->Render(m_pScene, fTimeElapsed);
 }
 
 void CGameFramework::BuildObjects()
@@ -274,6 +274,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	if (type == SceneType::Game_Scene)
 	{
 		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateMgr);
+		pPlayer->SetMaxForce(MIN_FORCE);
 		m_pPlayer = pPlayer;
 
 		m_pScene->setPlayer(m_pPlayer);
@@ -292,7 +293,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 void CGameFramework::BuildPipelineState()
 {
-	m_nPipelineStates = 19;
+	m_nPipelineStates = 21;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 	for (int i = 0; i < m_nPipelineStates; ++i)
 	{
@@ -303,28 +304,32 @@ void CGameFramework::BuildPipelineState()
 void CGameFramework::CreatePSOs()
 {
 	//Base Pipelines
-	CreatePsoCube(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 0);
-	CreatePsoSkinMesh(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 1);
-	CreatePsoTextedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 2);
-	CreatePsoBillBoardInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 3);
-	CreatePsoTerrain(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 4);
-	CreatePsoSkinedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 5);
-	CreatePsoUi(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 16);
-	CreatePsoUiGuage(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 13);
-	CreatePsoUiNumber(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 14);
+	CreatePsoCube(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_CUBE_MAP);
+	CreatePsoSkinMesh(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH);
+	CreatePsoTextedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MODEL_INSTANCING);
+	CreatePsoBillBoardInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_BILLBOARD);
+	CreatePsoTerrain(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_TERRAIN);
+	CreatePsoSkinedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH_INSTANCING);
+	CreatePsoUi(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI);
+	CreatePsoUiGuage(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_GAUGE);
+	CreatePsoUiNumber(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_NUMBER);
+	CreatePsoParticle(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE);
 	//Shadow Pipelines
 
-	CreatePsoShadowSkinMesh(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 6);//수정
-	CreatePsoShadowTextedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 7);
-	CreatePsoShadowBillBoardInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 8);
-	CreatePsoShadowTerrain(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 9);
-	CreatePsoShadowSkinedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 10);
+	CreatePsoShadowSkinMesh(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKIN_MESH);//수정
+	CreatePsoShadowTextedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_MODEL_INSTANCING);
+	CreatePsoShadowBillBoardInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_BILLBOARD);
+	CreatePsoShadowTerrain(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_TERRAIN);
+	CreatePsoShadowSkinedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKINED_INSTANCING);
+
 	//Wire Pipelines
-	CreatePsoWire(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 11);
-	CreatePsoWireInstance(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 12);
+	CreatePsoWire(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE);
+	CreatePsoWireInstance(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE_INSTANCING);
 	//Font
-	CreatePsoFont(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, 15);
+	CreatePsoFont(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PONT);
 	//Blur
-	CreatePsoHorzBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, 17);
-	CreatePsoVertBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, 18);
+	CreatePsoHorzBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_HORZ_BLUR);
+	CreatePsoVertBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_VERT_BLUR);
+
+	CreatePsoParticleCs(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE_CALC);
 }

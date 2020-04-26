@@ -19,7 +19,7 @@ void BaseScene::SetViewportsAndScissorRects()
 	if (m_pCamera) m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
 }
 
-void BaseScene::Render()
+void BaseScene::Render(float fTimeElapsed)
 {
 	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
 	m_pCamera->UpdateShaderVariables(m_pd3dCommandList.Get());

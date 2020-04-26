@@ -11,7 +11,7 @@ FontShader::~FontShader()
 
 }
 
-void FontShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain)
+void FontShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
 {
 	
 	arialFont = LoadFont(L"Resources/Fonts/Arial.fnt", FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);

@@ -53,7 +53,8 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
-	UINT						m_uGuage = 0;
+	UINT						m_uGuage = 0;  //게이지를 없앨 예정, 게이지는  오로지 멕스 force값으로 정해지게
+	//할 것임.
 	UINT						m_uCheckpointCount = 0;
 public:
 	CPlayer();

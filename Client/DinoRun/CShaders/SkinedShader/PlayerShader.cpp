@@ -1,6 +1,6 @@
 #include "SkinedShader.h"
 #include "../../Common//FrameWork/CreateManager.h"
-
+#include "../../Common/Animation/Animation.h"
 
 PlayerShader::PlayerShader()
 {

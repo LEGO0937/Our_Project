@@ -8,7 +8,7 @@ Font LoadFont(LPCWSTR filename, int windowWidth, int windowHeight)
 
 	Font font;
 	std::wstring tmp;
-	int startpos;
+	size_t startpos;
 
 	// extract font name
 	fs >> tmp >> tmp; // info face="Arial"

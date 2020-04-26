@@ -66,7 +66,7 @@ public:
 	virtual SceneType Update(float fTimeElapsed) = 0;
 	virtual void FixedUpdate(float fTimeElapsed) {};
 	virtual void AnimateObjects(float fTimeElapsed) {}
-	virtual void Render();
+	virtual void Render(float fTimeElapsed);
 	virtual void RenderShadow();
 	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer) {};
 

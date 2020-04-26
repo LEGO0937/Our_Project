@@ -310,22 +310,22 @@ void LobbyScene::ProcessInput(HWND hwnd, float deltaTime)
 
 }
 
-void LobbyScene::Render()
+void LobbyScene::Render(float fTimeElapsed)
 {
-	BaseScene::Render();
+	BaseScene::Render(fTimeElapsed);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[3]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList.Get(), m_pCamera);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[16]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	for (CUiShader* shader : instacingUiShaders)
 	{
 		if(shader)
 			shader->Render(m_pd3dCommandList.Get(), m_pCamera);
 	}
 	
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[15]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList.Get(), m_pCamera, gameTexts);
 

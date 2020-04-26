@@ -28,7 +28,7 @@ public:
 
 	virtual void ReleaseUploadBuffers() { }
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void *pContext = NULL) { }
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void *pInformation = NULL) { }
 	virtual void AnimateObjects(float fTimeElapsed) { }
 	virtual void ReleaseObjects() { }
 
@@ -74,7 +74,7 @@ public:
 	CObjectsShader();
 	virtual ~CObjectsShader();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain) = 0;
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation) = 0;
 	virtual void ReleaseObjects() = 0;
 	virtual void ReleaseUploadBuffers();
 
@@ -111,7 +111,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain) {}
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation) {}
 	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename = NULL){}
 	virtual void ReleaseObjects();
 
@@ -144,7 +144,7 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain) {}
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation) {}
 	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename = NULL) {}
 	virtual void ReleaseObjects();
 
@@ -174,12 +174,12 @@ public:
 	CUiShader();
 	virtual ~CUiShader();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 	virtual void ReleaseObjects();
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void Update(float fTimeElapsed, CPlayer* player) {}
+	virtual void Update(float fTimeElapsed, void* pInformation) {}
 	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void ReleaseShaderVariables();

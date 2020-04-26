@@ -5,12 +5,12 @@ UINT gnCbvSrvDescriptorIncrementSize = 0;
 
 ID3D12Resource *CreateBufferResource(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 	*pd3dCommandList, void *pData, UINT nBytes, D3D12_HEAP_TYPE d3dHeapType,
-	D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource **ppd3dUploadBuffer)
+	D3D12_RESOURCE_STATES d3dResourceStates, ID3D12Resource **ppd3dUploadBuffer, D3D12_RESOURCE_FLAGS flags)
 {
 	ID3D12Resource *pd3dBuffer = NULL;
 	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc;
 	::ZeroMemory(&d3dHeapPropertiesDesc, sizeof(D3D12_HEAP_PROPERTIES));
-	d3dHeapPropertiesDesc.Type = d3dHeapType;
+	d3dHeapPropertiesDesc.Type = d3dHeapType; 
 	d3dHeapPropertiesDesc.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 	d3dHeapPropertiesDesc.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
 	d3dHeapPropertiesDesc.CreationNodeMask = 1;
@@ -27,7 +27,7 @@ ID3D12Resource *CreateBufferResource(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	d3dResourceDesc.SampleDesc.Count = 1;
 	d3dResourceDesc.SampleDesc.Quality = 0;
 	d3dResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+	d3dResourceDesc.Flags = flags;
 	D3D12_RESOURCE_STATES d3dResourceInitialStates = D3D12_RESOURCE_STATE_COPY_DEST;
 	if (d3dHeapType == D3D12_HEAP_TYPE_UPLOAD) d3dResourceInitialStates =
 		D3D12_RESOURCE_STATE_GENERIC_READ;
@@ -143,7 +143,7 @@ ComPtr<ID3D12Resource> CreateTexture2DResource(ID3D12Device *pd3dDevice, UINT nW
 	D3D12_RESOURCE_STATES resourceStates, D3D12_CLEAR_VALUE * pClearValue)
 {
 	ComPtr<ID3D12Resource> pTexture;
-
+	
 	D3D12_HEAP_PROPERTIES heapPropertiesDesc;
 	::ZeroMemory(&heapPropertiesDesc, sizeof(D3D12_HEAP_PROPERTIES));
 	heapPropertiesDesc.Type = D3D12_HEAP_TYPE_DEFAULT;
@@ -1011,6 +1011,58 @@ void CreatePsoVertBlur(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dRoot
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_COMPUTE_PIPELINE_STATE_DESC));
 	d3dPipelineStateDesc.pRootSignature = m_pd3dRootSignature;
 	d3dPipelineStateDesc.CS = CompileShaderFromFile(L"Common/Shaders/Blur.hlsl", "VertBlurCS", "cs_5_1", &pd3dComputeShaderBlob);
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+
+	HRESULT T = pd3dDevice->CreateComputePipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[idx]);
+
+	if (pd3dComputeShaderBlob)
+		pd3dComputeShaderBlob->Release();
+}
+
+
+void CreatePsoParticle(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx)
+{
+	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL, *pd3dGeoShaderBlob = NULL;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
+	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Particle.hlsl", "VSParticle", "vs_5_1",
+		&pd3dVertexShaderBlob);
+	d3dPipelineStateDesc.GS = CompileShaderFromFile(L"Common/Shaders/Particle.hlsl", "GSParticle", "gs_5_1",
+		&pd3dGeoShaderBlob);
+	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Particle.hlsl", "PSParticle", "ps_5_1",
+		&pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
+	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
+	d3dPipelineStateDesc.InputLayout = CreateInstancingTextureInputLayout();
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	d3dPipelineStateDesc.NumRenderTargets = 1;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT T = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[idx]);
+	if (pd3dVertexShaderBlob)
+		pd3dVertexShaderBlob->Release();
+	if (pd3dPixelShaderBlob)
+		pd3dPixelShaderBlob->Release();
+	if (pd3dGeoShaderBlob)
+		pd3dGeoShaderBlob->Release();
+	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
+		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CreatePsoParticleCs(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx)
+{
+	ID3DBlob *pd3dComputeShaderBlob = NULL;
+	D3D12_COMPUTE_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_COMPUTE_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dRootSignature;
+	d3dPipelineStateDesc.CS = CompileShaderFromFile(L"Common/Shaders/Particle.hlsl", "ParticleCS", "cs_5_1", &pd3dComputeShaderBlob);
 	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
 
 	HRESULT T = pd3dDevice->CreateComputePipelineState(&d3dPipelineStateDesc,

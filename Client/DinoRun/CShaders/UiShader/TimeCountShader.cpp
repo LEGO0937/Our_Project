@@ -11,7 +11,7 @@ TimeCountShader::~TimeCountShader()
 }
 
 
-void TimeCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* terrain)
+void TimeCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
 {
 
 	CTexture * Count = new CTexture(1, RESOURCE_TEXTURE2D_ARRAY, 0);
@@ -100,7 +100,7 @@ void TimeCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, voi
 	CreateShaderVariables(pCreateManager);
 }
 
-void TimeCountShader::Update(float fTimeElapsed, CPlayer* player)
+void TimeCountShader::Update(float fTimeElapsed, void* pInformation)
 {
 	m_fSecond += fTimeElapsed;
 	if (m_fSecond >= 60)

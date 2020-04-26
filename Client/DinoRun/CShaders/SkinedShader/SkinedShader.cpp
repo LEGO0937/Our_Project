@@ -2,6 +2,7 @@
 #include "../../Common//FrameWork/CreateManager.h"
 #include "../../Objects/TerrainObject.h"
 
+#include "../../Common/Animation/Animation.h"
 
 SkinedShader::SkinedShader()
 {
