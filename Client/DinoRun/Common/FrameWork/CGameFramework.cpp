@@ -163,6 +163,8 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	{
 	case WM_SIZE:
 	{
+		if (LOWORD(lParam) == 0 || HIWORD(lParam) == 0)
+			break;
 		m_pCreateMgr->Resize(LOWORD(lParam), HIWORD(lParam));
 
 		m_pCamera->SetViewport(0, 0, LOWORD(lParam), HIWORD(lParam), 0.0f, 1.0f);

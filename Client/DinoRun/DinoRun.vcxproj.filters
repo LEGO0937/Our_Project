@@ -205,16 +205,13 @@
     <Filter Include="Objects\ItemObject\00Item">
       <UniqueIdentifier>{2c0be0cf-2dda-45d7-9b86-a368b81af24d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\ItemObject\01ItemBox">
-      <UniqueIdentifier>{4ffb4fe2-6ce2-407c-b7b4-0f0b8851da46}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Objects\ItemObject\02ItemMeat">
+    <Filter Include="Objects\ItemObject\01ItemMeat">
       <UniqueIdentifier>{1d168824-1fc4-4647-9344-95938061b8ac}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\ItemObject\03ItemBanana">
+    <Filter Include="Objects\ItemObject\02ItemBanana">
       <UniqueIdentifier>{ec4577bb-18be-4dbc-8976-8061b240a1de}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\ItemObject\04ItemOil">
+    <Filter Include="Objects\ItemObject\03ItemOil">
       <UniqueIdentifier>{284e0d6b-6074-41d9-8898-4de18454dae0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -506,11 +503,17 @@
     <ClCompile Include="Common\Animation\Animation.cpp">
       <Filter>Common\Animation</Filter>
     </ClCompile>
-    <ClCompile Include="ItemBanana.cpp">
-      <Filter>Objects\ItemObject</Filter>
-    </ClCompile>
     <ClCompile Include="Objects\ItemObject.cpp">
       <Filter>Objects\ItemObject\00Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\ItemMeat.cpp">
+      <Filter>Objects\ItemObject\01ItemMeat</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\ItemBanana.cpp">
+      <Filter>Objects\ItemObject\02ItemBanana</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\ItemOil.cpp">
+      <Filter>Objects\ItemObject\03ItemOil</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -235,7 +235,6 @@
     <ClCompile Include="CShaders\UiShader\TimeCountShader.cpp" />
     <ClCompile Include="CShaders\UiShader\TrackCountShader.cpp" />
     <ClCompile Include="DinoRun.cpp" />
-    <ClCompile Include="ItemBanana.cpp" />
     <ClCompile Include="Meshes\BillBoardMesh.cpp" />
     <ClCompile Include="Meshes\Mesh.cpp" />
     <ClCompile Include="Meshes\PlaneMesh.cpp" />
@@ -245,7 +244,10 @@
     <ClCompile Include="Objects\BillBoardObject.cpp" />
     <ClCompile Include="Objects\CheckPointObject.cpp" />
     <ClCompile Include="Objects\FenceObject.cpp" />
+    <ClCompile Include="Objects\ItemBanana.cpp" />
+    <ClCompile Include="Objects\ItemMeat.cpp" />
     <ClCompile Include="Objects\ItemObject.cpp" />
+    <ClCompile Include="Objects\ItemOil.cpp" />
     <ClCompile Include="Objects\PlayerObject.cpp" />
     <ClCompile Include="Objects\SkyBoxObject.cpp" />
     <ClCompile Include="Objects\TerrainObject.cpp" />

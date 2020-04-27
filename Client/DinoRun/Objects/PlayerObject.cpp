@@ -233,13 +233,13 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		//¾ÆÀÌÅÛ ½Àµæ
 		target->isEnable = false;
 		break;
-	case ModelType::Meat_Item:
+	case ModelType::Item_Meat:
 		m_fMaxForce += 200;
 		if (m_fMaxForce > MAX_FORCE)
 			m_fMaxForce = MAX_FORCE;
 		target->isEnable = false;
 		break;
-	case ModelType::Sliding_Item:
+	case ModelType::Item_Banana:
 		target->isEnable = false;
 		return true;
 	default:
