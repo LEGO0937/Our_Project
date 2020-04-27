@@ -14,6 +14,7 @@ CHeightMapTerrain::CHeightMapTerrain(shared_ptr<CreateManager> pCreateManager, L
 
 	CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(),0);
+	pCreateManager->GetShadowBuffer()->AddRef();
 	//----------------------
 	//지형에 사용할 높이 맵의 가로, 세로의 크기이다. 
 	m_nWidth = nWidth;

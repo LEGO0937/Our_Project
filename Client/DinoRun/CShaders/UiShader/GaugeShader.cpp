@@ -32,7 +32,7 @@ void GaugeShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* p
 	m_ppObjects->SetMaterial(0, material);
 
 	PlaneMesh *mesh = NULL;
-	mesh = new PlaneMesh(0.003,0.06,0.1,0,1.0,0,1.0);
+	mesh = new PlaneMesh(0.003f,0.06f,0.1f,0.0f,1.0f,0.0f,1.0f);
 	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	m_ppObjects->SetMesh(mesh);
@@ -54,7 +54,7 @@ void GaugeShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* p
 void GaugeShader::Update(float fTimeElapsed, void* pInformation)
 {
 	CPlayer* pPlayer = (CPlayer*)pInformation;
-	UINT nGauge = pPlayer->GetMaxForce();
+	UINT nGauge = (UINT)pPlayer->GetMaxForce();
 	pPlayer->SetMaxForce(pPlayer->GetMaxForce() - fTimeElapsed * 2);
 	if (pPlayer->GetMaxForce() < MIN_FORCE) pPlayer->SetMaxForce(MIN_FORCE);
 	if (uvX[0] < (int)(nGauge * 0.05))

@@ -58,7 +58,8 @@ ParticleSystem::~ParticleSystem()
 
 	if (m_pd3dReadBackParticles)
 	{
-		m_pd3dReadBackParticles->Unmap(0, NULL);
+		if (m_pReadBackMappedParticles)
+			m_pd3dReadBackParticles->Unmap(0, NULL);
 		m_pd3dReadBackParticles->Release();
 		m_pd3dReadBackParticles = NULL;
 	}
@@ -84,6 +85,7 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 	memcpy(m_pSrbMappedParticles, m_pReadBackMappedParticles, sizeof(Particle) * m_vParticles.size());
 	memcpy(m_vParticles.data(), m_pSrbMappedParticles, sizeof(Particle) * m_vParticles.size());
 	m_pd3dReadBackParticles->Unmap(0, NULL);
+	m_pReadBackMappedParticles = NULL;
 
 	particleCb->fElapsedTime = fTimeElapsed;
 	particleCb->fGravity = m_fGravity;

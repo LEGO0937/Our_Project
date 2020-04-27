@@ -46,7 +46,6 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	ComPtr<ID3D12Device> m_pd3dDevice = pCreateManager->GetDevice();
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
-	CObInstancingShader* shader;
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
@@ -56,17 +55,17 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	UI_INFO button_info;
 	button_info.textureName = "Resources/Images/Button.dds";
-	button_info.meshSize = XMFLOAT2(0.15, 0.12);
-	button_info.positions.emplace_back(XMFLOAT3(0.31, -0.5, 0));
-	button_info.f_uvY.emplace_back(0.25);
+	button_info.meshSize = XMFLOAT2(0.15f, 0.12f);
+	button_info.positions.emplace_back(XMFLOAT3(0.31f, -0.5f, 0.0f));
+	button_info.f_uvY.emplace_back(0.25f);
 	
 	uiShader = new ButtonShader;
 	uiShader->BuildObjects(pCreateManager, &button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 	
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.27,0.60)));// ID구간
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.27, 0.75)));// PassWord구간
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.27f, 0.60f)));// ID구간
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.27f, 0.75f)));// PassWord구간
 
 	CreateShaderVariables(pCreateManager);
 }
@@ -82,17 +81,17 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		if (point.x > 0.16 && point.x < 0.46 && point.y > -0.62 && point.y < -0.38) //로그인 버튼 충돌체크
+		if (point.x > 0.16f && point.x < 0.46f && point.y > -0.62f && point.y < -0.38f) //로그인 버튼 충돌체크
 		{
-			instacingUiShaders[1]->getUvXs()[0] = 0.5;
+			instacingUiShaders[1]->getUvXs()[0] = 0.5f;
 			isClickedLogin = true;
 		}
-		else if (point.x > -0.48 && point.x < 0.13 && point.y > -0.31 && point.y < -0.2) //ID TEXT 충돌체크
+		else if (point.x > -0.48f && point.x < 0.13f && point.y > -0.31f && point.y < -0.2f) //ID TEXT 충돌체크
 		{
 			isClickedID = true;
 			isClickedPassWord = false;
 		}
-		else if (point.x > -0.48 && point.x < 0.13 && point.y > -0.63 && point.y < -0.5) //PassWord TEXT 충돌체크
+		else if (point.x > -0.48f && point.x < 0.13f && point.y > -0.63f && point.y < -0.5f) //PassWord TEXT 충돌체크
 		{
 			isClickedID = false;
 			isClickedPassWord = true;
@@ -107,11 +106,12 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		//마우스 캡쳐를 하고 현재 마우스 위치를 가져온다. 
 		break;
 	case WM_LBUTTONUP:
-		if (point.x > 0.16 && point.x < 0.46 && point.y > -0.62 && point.y < -0.38) //로그인 버튼 충돌체크
+		if (point.x > 0.16f && point.x < 0.46f && point.y > -0.62f && point.y < -0.38f) //로그인 버튼 충돌체크
 		{
 			if (isClickedLogin)
 			{
-				//씬 전환
+				//서버 적용 시 이 구간에서 서버와 연결하여 아이디와 패스워드가 일치하면 씬 전환
+				//씬 전환 
 				sceneType = Lobby_Scene;
 			}
 		}
@@ -120,7 +120,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (isClickedLogin)
 			{
 				isClickedLogin = false;
-				instacingUiShaders[1]->getUvXs()[0] = 0.0;
+				instacingUiShaders[1]->getUvXs()[0] = 0.0f;
 			}
 		}
 		::ReleaseCapture();
@@ -197,7 +197,7 @@ void StartScene::ProcessInput(HWND hwnd, float deltaTime)
 
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
-	POINT ptCursorPos;
+
 	/*마우스를 캡쳐했으면 마우스가 얼마만큼 이동하였는 가를 계산한다. 마우스 왼쪽 또는 오른쪽 버튼이 눌러질 때의
 	메시지(WM_LBUTTONDOWN, WM_RBUTTONDOWN)를 처리할 때 마우스를 캡쳐하였다. 그러므로 마우스가 캡쳐된
 	것은 마우스 버튼이 눌려진 상태를 의미한다. 마우스 버튼이 눌려진 상태에서 마우스를 좌우 또는 상하로 움직이면 플

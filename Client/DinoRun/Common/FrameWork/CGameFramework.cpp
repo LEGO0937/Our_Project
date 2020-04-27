@@ -222,6 +222,13 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 {
 	m_pCreateMgr->ResetCommandList();
 	
+	
+	if (m_PrevState == Start_Scene)
+	{
+		//씬전환 시 이전 상태가 스타트인 경우 아이디와 비밀번호를 멤버에 저장해야함.
+		m_sPlayerID = m_pScene->GetId();
+		m_sPlayerPASSWORD = m_pScene->GetPassWord();
+	}
 	ReleaseObjects();
 
 	// 게임씬에 들어가는 액션에서는 기존의 player를 메모리 반납 후 캐릭터 번호에 맞는 모델로 새로 생성할것
@@ -230,6 +237,8 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	{
 		if (m_PrevState == SceneType::Lobby_Scene)
 		{
+			m_sPlayerID = "";
+			m_sPlayerPASSWORD = "";
 			m_pScene = shared_ptr<StartScene>(new StartScene());
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
@@ -264,6 +273,9 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	{
 		if (m_PrevState == SceneType::Game_Scene)
 		{
+			m_pScene = shared_ptr<EndScene>(new EndScene());
+			m_pScene->SetFontShader(m_pFontManager->getFontShader());
+			m_pScene->setCamera(m_pCamera);
 		}
 	}
 

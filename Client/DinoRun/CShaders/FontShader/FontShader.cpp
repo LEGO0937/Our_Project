@@ -80,8 +80,7 @@ void FontShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCa
 	CShader::Render(pd3dCommandList, pCamera);
 	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	fontTex->UpdateShaderVariable(pd3dCommandList, 0);
-	//string t = "abcdefghijk";
-	//RenderText(pd3dCommandList,arialFont, t, XMFLOAT2(0.02f, 0.8f), XMFLOAT2(1.0f, 1.0f), XMFLOAT2(0.5f, 0.0f),XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	
 	int i = 0;
 	for (const GameText& text : vec)
 	{
@@ -100,12 +99,10 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx,
 	float x = topLeftScreenX;
 	float y = topLeftScreenY;
 
-	float horrizontalPadding = (font.leftpadding + font.rightpadding) * padding.x;
-	float verticalPadding = (font.toppadding + font.bottompadding) * padding.y;
+	float leftRightPadding = (font.leftpadding + font.rightpadding) * padding.x; //텍스처 상 공간에서의 안쪽의 여백너비
+	float upDownPadding = (font.toppadding + font.bottompadding) * padding.y; //텍스처 상 공간에서의 안쪽의 여백너비
 
 	TextVertex* vert = (TextVertex*)textVBGPUAddress[idx];
-
-	wchar_t lastChar = -1; 
 
 	for (int i = 0; i < text.size(); ++i)
 	{
@@ -122,16 +119,12 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx,
 		if (c == L'\n')
 		{
 			x = topLeftScreenX;
-			y -= (font.lineHeight + verticalPadding) * scale.y;
+			y -= (font.lineHeight + upDownPadding) * scale.y;
 			continue;
 		}
 
 		if (numCharacters >= maxNumTextCharacters)
 			break;
-
-		float kerning = 0.0f;
-		if (i > 0)
-			kerning = font.GetKerning(lastChar, c);
 		
 		vert[numCharacters] = TextVertex(color.x,
 			color.y,
@@ -141,16 +134,16 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx,
 			fc->v,
 			fc->twidth,
 			fc->theight,
-			x + ((fc->xoffset + kerning) * scale.x),
+			x + (fc->xoffset * scale.x),   
 			y - (fc->yoffset * scale.y),
 			fc->width * scale.x,
 			fc->height * scale.y);
 			
 		numCharacters++;
 
-		x += (fc->xadvance - horrizontalPadding) * scale.x;
-
-		lastChar = c;
+		x += (fc->xadvance - leftRightPadding) * scale.x; //leftRightPadding은 가로축의 빈공간 
+		//텍스처에 각 문자간격마다 빈공간이 있는데 이 빈공간을 없애기 위한 패딩값임. xadvance는 
+		//한 문자의 크기(빈공간 포함)
 	}
 
 	pd3dCommandList->DrawInstanced(4, numCharacters, 0, 0);

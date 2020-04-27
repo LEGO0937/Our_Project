@@ -431,6 +431,11 @@ void GameScene::AnimateObjects(float fTimeElapsed)
 
 SceneType GameScene::Update(float fTimeElapsed)
 {
+	if (m_pPlayer->GetCheckPoint() == 5)
+	{
+		return End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+	}
+
 	//충돌을 위한 update
 	if (sceneType != SceneType::Game_Scene)
 	{

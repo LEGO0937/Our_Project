@@ -39,5 +39,8 @@
 #define MIDDLE_FORCE 1300
 #define MIN_FORCE 600
 
+
+//CheckPoint max
+#define CHECKPOINT_GOAL 362
 enum SceneType{ Default_Scene =0 , Start_Scene,Lobby_Scene,Room_Scene,Game_Scene,End_Scene };
 enum ModelType {Default = 0, CheckPoint,Player,Fence,Item_Box,Sliding_Item,Meat_Item};

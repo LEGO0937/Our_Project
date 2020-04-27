@@ -36,6 +36,8 @@ public:
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
 
+	virtual string GetId() { return gameTexts[0].text; }
+	virtual string GetPassWord() { return gameTexts[1].text; }
 private:
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CUiShader*> instacingUiShaders;

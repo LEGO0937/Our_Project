@@ -202,6 +202,21 @@
     <Filter Include="Common\Animation">
       <UniqueIdentifier>{7d44ddc3-d552-4ee0-b8a2-ad23c4f09565}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Objects\ItemObject\00Item">
+      <UniqueIdentifier>{2c0be0cf-2dda-45d7-9b86-a368b81af24d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\ItemObject\01ItemBox">
+      <UniqueIdentifier>{4ffb4fe2-6ce2-407c-b7b4-0f0b8851da46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\ItemObject\02ItemMeat">
+      <UniqueIdentifier>{1d168824-1fc4-4647-9344-95938061b8ac}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\ItemObject\03ItemBanana">
+      <UniqueIdentifier>{ec4577bb-18be-4dbc-8976-8061b240a1de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\ItemObject\04ItemOil">
+      <UniqueIdentifier>{284e0d6b-6074-41d9-8898-4de18454dae0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -306,9 +321,6 @@
     <ClInclude Include="Scenes\StartScene.h">
       <Filter>Scenes\StartScene</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\ItemObject.h">
-      <Filter>Objects\ItemObject</Filter>
-    </ClInclude>
     <ClInclude Include="Common\Font\Font.h">
       <Filter>Common\Font</Filter>
     </ClInclude>
@@ -338,6 +350,9 @@
     </ClInclude>
     <ClInclude Include="Common\Animation\Animation.h">
       <Filter>Common\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\ItemObject.h">
+      <Filter>Objects\ItemObject\00Item</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -446,9 +461,6 @@
     <ClCompile Include="CShaders\ModelShader\FenceShader.cpp">
       <Filter>CShaders\ModelShader\03Fence</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\ItemObject.cpp">
-      <Filter>Objects\ItemObject</Filter>
-    </ClCompile>
     <ClCompile Include="CShaders\ModelShader\ItemShader.cpp">
       <Filter>CShaders\ModelShader\04Item</Filter>
     </ClCompile>
@@ -493,6 +505,12 @@
     </ClCompile>
     <ClCompile Include="Common\Animation\Animation.cpp">
       <Filter>Common\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemBanana.cpp">
+      <Filter>Objects\ItemObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\ItemObject.cpp">
+      <Filter>Objects\ItemObject\00Item</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

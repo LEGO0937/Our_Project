@@ -86,6 +86,9 @@ public:
 	void SetWindowSize(const int& width, const int& height) {
 		m_nWndClientWidth = width; m_nWndClientHeight = height;
 	}
+
+	virtual string GetId() { return ""; }
+	virtual string GetPassWord() { return ""; }
 protected:
 	SceneType sceneType;
 

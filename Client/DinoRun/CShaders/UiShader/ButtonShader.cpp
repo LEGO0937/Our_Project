@@ -33,7 +33,7 @@ void ButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* 
 	m_ppObjects->SetMaterial(0, material);
 
 	PlaneMesh *mesh = NULL;
-	mesh = new PlaneMesh(ui_Infomation->meshSize.x, ui_Infomation->meshSize.y, 0.1, 0, 0.5, 0, 0.25);
+	mesh = new PlaneMesh(ui_Infomation->meshSize.x, ui_Infomation->meshSize.y, 0.1f, 0.0f, 0.5f, 0.0f, 0.25f);
 	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	m_ppObjects->SetMesh(mesh);

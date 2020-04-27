@@ -235,6 +235,7 @@
     <ClCompile Include="CShaders\UiShader\TimeCountShader.cpp" />
     <ClCompile Include="CShaders\UiShader\TrackCountShader.cpp" />
     <ClCompile Include="DinoRun.cpp" />
+    <ClCompile Include="ItemBanana.cpp" />
     <ClCompile Include="Meshes\BillBoardMesh.cpp" />
     <ClCompile Include="Meshes\Mesh.cpp" />
     <ClCompile Include="Meshes\PlaneMesh.cpp" />

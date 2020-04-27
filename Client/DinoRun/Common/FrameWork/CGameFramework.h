@@ -7,7 +7,11 @@
 #include "DrawManager.h"
 class CGameFramework
 {
-public:	// 持失切, 社瑚切
+
+private: 
+	string m_sPlayerID = "";
+	string m_sPlayerPASSWORD = "";
+public:
 	CGameFramework();
 	~CGameFramework();
 public:

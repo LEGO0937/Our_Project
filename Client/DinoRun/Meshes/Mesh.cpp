@@ -326,9 +326,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 				m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 				m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 			}
-			vector<XMFLOAT3> vec;
-			vec.assign(m_pxmf3Positions, m_pxmf3Positions + m_nVertices);
-			int n;
+
 		}
 		else if (!strcmp(pstrToken, "<Normals>:"))
 		{
@@ -364,9 +362,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 				m_d3dUvBufferView.StrideInBytes = sizeof(XMFLOAT2);
 				m_d3dUvBufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
 			}
-			vector<XMFLOAT2> vec;
-			vec.assign(m_pxmf2Uvs, m_pxmf2Uvs + m_nVertices);
-			int n;
+
 		}
 		else if (!strcmp(pstrToken, "<Polygons>:"))
 		{
@@ -431,9 +427,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 						m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 						m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
 					}
-					vector<XMFLOAT3> vec;
-					vec.assign(m_pxmf3Positions, m_pxmf3Positions + m_nVertices);
-					int n;
+
 				}
 				else if (!strcmp(pstrToken, "<Normals>:"))
 				{
@@ -469,9 +463,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 						m_d3dUvBufferView.StrideInBytes = sizeof(XMFLOAT2);
 						m_d3dUvBufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
 					}
-					vector<XMFLOAT2> vec;
-					vec.assign(m_pxmf2Uvs, m_pxmf2Uvs + m_nVertices);
-					int n;
+
 				}
 				else if (!strcmp(pstrToken, "</Polygons>"))
 				{
