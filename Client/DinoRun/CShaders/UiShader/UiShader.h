@@ -1,7 +1,7 @@
 #pragma once
 #include "../Shader.h"
 
-
+//ui들을 인스턴싱하는 경우 이 구조체를 사용.
 struct UI_INFO
 {
 	vector<XMFLOAT3> positions;

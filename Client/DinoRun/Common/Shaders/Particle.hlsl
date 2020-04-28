@@ -8,10 +8,19 @@ struct Particle
 };
 
 
-cbuffer cbParticle : register(b1)
+cbuffer cbParticleCS : register(b1)
 {
+	float3 gPosition;
 	float gGravity;
 	float gElapsedTime;
+	float gSize;
+};
+cbuffer cbParticleVS : register(b5)
+{
+	float3 f3Position;
+	float fGravity;
+	float fElapsedTime;
+	float fSize;
 };
 
 RWStructuredBuffer<Particle> consumeBuf : register(u2);
@@ -61,18 +70,19 @@ struct VS_PARTICLE_OUTPUT
 	float3 positionW : POSITION;
 	float3 normalW : NORMAL;
 	float2 TexC : TEXCOORD;
+	float size : SIZE;
 	int n : NUM;
 };
 
 VS_PARTICLE_OUTPUT VSParticle(VS_PARTICLE_INPUT input, uint nInstanceID : SV_InstanceID)
 {
 	VS_PARTICLE_OUTPUT output;
-	output.positionW = gParticleInfos[nInstanceID].position;
+	output.positionW = gParticleInfos[nInstanceID].position + f3Position;
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.normalW = input.normal;
 	output.TexC = input.TexC;
 	output.n = nInstanceID;
-
+	output.size = fSize;
 	return(output);
 }
 [maxvertexcount(4)]
@@ -83,8 +93,8 @@ void GSParticle(point VS_PARTICLE_OUTPUT input[1], inout TriangleStream<VS_PARTI
 	vLook.y = 0;
 	vLook = normalize(vLook);
 	float3 vRight = cross(vUp, vLook);
-	float fWidth = 2;
-	float fHeight = 2;
+	float fWidth = input[0].size;
+	float fHeight = input[0].size;
 	float4 pVertices[4] = {
 		float4(input[0].positionW + fWidth * vRight - fHeight * vUp, 1.0f),
 		float4(input[0].positionW + fWidth * vRight + fHeight * vUp, 1.0f),
@@ -102,6 +112,7 @@ void GSParticle(point VS_PARTICLE_OUTPUT input[1], inout TriangleStream<VS_PARTI
 		output.normalW = vLook;
 		output.TexC = pUVs[i];
 		output.n = input[0].n;
+		output.size = input[0].size;
 		outStream.Append(output);
 	}
 }

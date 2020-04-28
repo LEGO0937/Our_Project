@@ -137,14 +137,3 @@ void EndScene::ReleaseShaderVariables()
 {
 
 }
-
-
-void EndScene::setPlayer(CPlayer* player)
-{
-	BaseScene::setPlayer(player);
-}
-
-void EndScene::setCamera(CCamera* camera)
-{
-	BaseScene::setCamera(camera);
-}

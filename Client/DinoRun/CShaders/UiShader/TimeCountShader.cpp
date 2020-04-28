@@ -95,7 +95,6 @@ void TimeCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, voi
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(10);
 	uvY.emplace_back(0);
-	// m_ppObjects의 m_pcbMappedGameObjects를 통해 숫자배열이미지의 인덱스값 전송 가능
 
 	CreateShaderVariables(pCreateManager);
 }

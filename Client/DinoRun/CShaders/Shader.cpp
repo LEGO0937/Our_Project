@@ -9,6 +9,7 @@
 
 CShader::CShader()
 {
+	//m_nReferences = 1;
 }
 
 CShader::~CShader()
@@ -29,10 +30,6 @@ void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 {
 	OnPrepareRender(pd3dCommandList);
 }
-void CShader::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
-{
-}
-
 
 void CShader::CreateCbvSrvDescriptorHeaps(shared_ptr<CreateManager> pCreateManager, int nConstantBufferViews, int nShaderResourceViews)
 {
@@ -47,6 +44,11 @@ void CShader::CreateCbvSrvDescriptorHeaps(shared_ptr<CreateManager> pCreateManag
 	m_d3dCbvGPUDescriptorNextHandle = m_d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 	m_d3dSrvCPUDescriptorNextHandle.ptr = m_d3dSrvCPUDescriptorStartHandle.ptr = m_d3dCbvCPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nConstantBufferViews);
 	m_d3dSrvGPUDescriptorNextHandle.ptr = m_d3dSrvGPUDescriptorStartHandle.ptr = m_d3dCbvGPUDescriptorStartHandle.ptr + (::gnCbvSrvDescriptorIncrementSize * nConstantBufferViews);
+}
+void CShader::BackDescriptorHeapCount()
+{
+	m_d3dSrvGPUDescriptorNextHandle.ptr -= ::gnCbvSrvDescriptorIncrementSize;
+	m_d3dSrvCPUDescriptorNextHandle.ptr -= ::gnCbvSrvDescriptorIncrementSize;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateConstantBufferViews(shared_ptr<CreateManager> pCreateManager, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride)
@@ -162,8 +164,6 @@ CObjectsShader::~CObjectsShader()
 
 }
 
-
-
 void CObjectsShader::ReleaseObjects()
 {
 	if (objectList.size())
@@ -203,7 +203,6 @@ void CObjectsShader::ReleaseUploadBuffers()
 	}
 	m_ppObjects->ReleaseUploadBuffers();
 }
-
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {

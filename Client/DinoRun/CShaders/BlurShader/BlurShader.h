@@ -27,7 +27,6 @@ public:
 
 	void OnResize(UINT newWidth, UINT newHeight);
 
-
 	void Dispatch(
 		ID3D12GraphicsCommandList* pCommandList,
 		ID3D12PipelineState* pHorzBlurPSO,
@@ -43,7 +42,6 @@ private:
 	void BuildResources();
 
 private:
-
 	const int BlurRadius = 5;
 
 	ComPtr<ID3D12Device> m_pd3dDevice = nullptr;

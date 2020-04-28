@@ -22,6 +22,7 @@ class CreateManager;
 class ParticleSystem; 
 class CAnimationSets;
 class CAnimationController;
+
 struct CB_OBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4World;
@@ -191,10 +192,15 @@ class CGameObject
 {
 protected:
 	int								m_nReferences = 0;
-
-
-protected:
 	float m_fMaxForce = 0; // 힘의 크기 이 이상 넘을 경우 이 값을 유지함
+
+	float m_nScale = 1;
+
+	CB_OBJECT_INFO *m_pcbMappedGameObjects = NULL;  //no Skined Object's instancing buffer
+	ID3D12Resource *m_pd3dcbGameObjects = NULL;
+
+	CB_SKINEOBJECT_INFO *m_pcbMappedSkinedGameObjects = NULL; // Skined Object's instancing buffer
+	ID3D12Resource *m_pd3dcbSkinedGameObjects = NULL;
 public:
 	void AddRef();
 	void Release();
@@ -214,20 +220,12 @@ public:
 
 	float							m_fMass = 0;  
 
-
-
 	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);  //속력
 	XMFLOAT3 m_xmf3AcceleratingForce = { 0,0,0 };   //가속력
-
-	XMFLOAT3 m_xmf3AngularVelocity = { 0,0,0 };
-	XMFLOAT3 m_xmf3EulerAngles = { 0,0,0 };
-
-	float m_fSpeed;
 
 	float m_fForce = 0;    //앞키 누를 시 증가하는 변수, 룩벡터에 곱함으로써 진행 방향에 대한 힘벡터를 구함.
 
 	XMFLOAT3 m_xmf3Forces = { 0,0,0 };  // 충돌 시 적용할 힘을 추가 하기 위한 변수.
-	XMFLOAT3 m_xmf3Moments = { 0,0,0 }; //모멘트 아직 적용 안함
 	//----
 
 	CMesh							*m_pMesh = NULL;
@@ -244,21 +242,14 @@ public:
 	CGameObject 					*m_pSibling = NULL;
 
 	XMFLOAT3					m_xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
-	float m_nScale = 1;
 
-	CB_OBJECT_INFO *m_pcbMappedGameObjects = NULL;  //no Skined Object's instancing buffer
-	ID3D12Resource *m_pd3dcbGameObjects = NULL;
-
-	CB_SKINEOBJECT_INFO *m_pcbMappedSkinedGameObjects = NULL; // Skined Object's instancing buffer
-	ID3D12Resource *m_pd3dcbSkinedGameObjects = NULL;
-
-	//RigidBody* m_pRigidBody = NULL;
 	ParticleSystem* m_pParticleSystem = NULL;
 public:
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
 	void SetMaterial(int nMaterial, CMaterial *pMaterial);
+
 	virtual void resetShadowTexture(shared_ptr<CreateManager> pCreateManager);
 
 	void SetChild(CGameObject *pChild, bool bReferenceUpdate = false);
@@ -279,13 +270,12 @@ public:
 	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
 #endif
 
-	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager) {}
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) {}
 	virtual void ReleaseShaderVariables();
 
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial);
 
 	void CreateInstanceBuffer(shared_ptr<CreateManager> pCreateManager,
 		UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& uMap);

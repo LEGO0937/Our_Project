@@ -18,7 +18,6 @@ public:
 		lParam, float deltaTime);
 
 	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
-	virtual void BuildLights() {}
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
@@ -30,9 +29,6 @@ public:
 	virtual SceneType Update(float fTimeElapsed);  // 面倒贸府 棺 拱府
 
 	void Render(float fTimeElapsed);
-
-	virtual void setPlayer(CPlayer* player);
-	virtual void setCamera(CCamera* camera);
 
 private:
 	vector<CUiShader*> instacingUiShaders;

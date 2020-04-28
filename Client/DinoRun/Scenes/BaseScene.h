@@ -17,10 +17,13 @@ struct LIGHT
 	XMFLOAT4 m_xmf4Specular;
 	XMFLOAT3 m_xmf3Position;
 	float m_fFalloff;
+
 	XMFLOAT3 m_xmf3Direction;
 	float m_fTheta; //cos(m_fTheta)
+
 	XMFLOAT3 m_xmf3Attenuation;
 	float m_fPhi; //cos(m_fPhi)
+
 	bool m_bEnable;
 	int m_nType;
 	float m_fRange;
@@ -54,7 +57,7 @@ public:
 	virtual void SetViewportsAndScissorRects();
 
 	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager) = 0;
-	virtual void BuildLights() = 0;
+	virtual void BuildLights() {};
 
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
@@ -66,6 +69,7 @@ public:
 	virtual SceneType Update(float fTimeElapsed) = 0;
 	virtual void FixedUpdate(float fTimeElapsed) {};
 	virtual void AnimateObjects(float fTimeElapsed) {}
+
 	virtual void Render(float fTimeElapsed);
 	virtual void RenderShadow();
 	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer) {};

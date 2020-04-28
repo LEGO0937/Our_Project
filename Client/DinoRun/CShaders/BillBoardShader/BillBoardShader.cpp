@@ -39,7 +39,6 @@ void BillBoardShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, con
 	if (!pszFileName)
 		return;
 
-
 	CTexture * billboard = new CTexture(1, RESOURCE_TEXTURE2DARRAY, 0);
 	billboard->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(pszFileName), 0);
 

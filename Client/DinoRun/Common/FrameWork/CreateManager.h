@@ -49,7 +49,6 @@ private:  //d3d ComObject
 	void CreateSwapChainRenderTargetViews();
 	void CreateRenderTargetViews();
 	void CreateDepthStencilView();
-	//void CreatePostprocessShader();
 	void CreateGraphicsRootSignature();
 	void CreateComputeRootSignature();
 

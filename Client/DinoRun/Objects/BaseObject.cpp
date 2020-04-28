@@ -649,13 +649,7 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCame
 
 }
 
-void CGameObject::CreateShaderVariables(shared_ptr<CreateManager> pCreateManager)
-{
-}
 
-void CGameObject::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
-{
-}
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World)
 {
@@ -677,10 +671,7 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandLis
 		}
 	}
 }
-void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial)
-{
 
-}
 
 void CGameObject::ReleaseShaderVariables()
 {

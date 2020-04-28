@@ -281,9 +281,6 @@ void CMesh::ComputeBoundBox(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList 
 
 }
 #endif
-void CMesh::OnPostRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext)
-{
-}
 
 void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile)
 {
@@ -316,10 +313,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 				m_nType |= VERTEXT_POSITION;
 				m_pxmf3Positions = new XMFLOAT3[m_nVertices];
 				nReads = (UINT)::fread(m_pxmf3Positions, sizeof(XMFLOAT3), m_nVertices, pInFile);
-				//for (int j = 0; j < m_nVertices; ++j)
-				//{
-				//	m_pxmf3Positions[j].x *= -1;
-				//}
+				
 				m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
 				m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
@@ -352,10 +346,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 				m_nType |= VERTEXT_TEXTURE_COORD0;
 				m_pxmf2Uvs = new XMFLOAT2[m_nVertices];
 				nReads = (UINT)::fread(m_pxmf2Uvs, sizeof(XMFLOAT2), m_nVertices, pInFile);
-				//for (int j = 0; j < m_nVertices; ++j)
-				//{
-				//	m_pxmf2Uvs[j].y = 1 - m_pxmf2Uvs[j].y;
-				//}
+				
 				m_pd3dUvBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2Uvs, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dUvUploadBuffer);
 
 				m_d3dUvBufferView.BufferLocation = m_pd3dUvBuffer->GetGPUVirtualAddress();
@@ -375,7 +366,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 
 				if (!strcmp(pstrToken, "<Indices>:"))
 				{
-					//m_nSubMeshes = 1;
+					
 					nReads = (UINT)::fread(&nPolygons, sizeof(int), 1, pInFile);
 					nReads = (UINT)::fread(&m_nSubMeshes, sizeof(int), 1, pInFile);
 
@@ -395,12 +386,6 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 							m_ppnSubSetIndices[i] = new UINT[m_pnSubSetIndices[i]];
 							nReads = (UINT)::fread(m_ppnSubSetIndices[i], sizeof(UINT), m_pnSubSetIndices[i], pInFile);
 
-							//for (int j = 0; j < m_pnSubSetIndices[i]; j += 3)
-							//{
-							//	int temp = m_ppnSubSetIndices[i][j + 2];
-							//	m_ppnSubSetIndices[i][j + 2] = m_ppnSubSetIndices[i][j + 1];
-							//	m_ppnSubSetIndices[i][j + 1] = temp;
-							//}
 							m_ppd3dSubSetIndexBuffers[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_ppnSubSetIndices[i], sizeof(UINT) * m_pnSubSetIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[i]);
 
 							m_pd3dSubSetIndexBufferViews[i].BufferLocation = m_ppd3dSubSetIndexBuffers[i]->GetGPUVirtualAddress();
@@ -417,10 +402,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 						m_nType |= VERTEXT_POSITION;
 						m_pxmf3Positions = new XMFLOAT3[m_nVertices];
 						nReads = (UINT)::fread(m_pxmf3Positions, sizeof(XMFLOAT3), m_nVertices, pInFile);
-						//for (int j = 0; j < m_nVertices; ++j)
-						//{
-						//	m_pxmf3Positions[j].x *= -1;
-						//}
+						
 						m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
 						m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
@@ -453,10 +435,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 						m_nType |= VERTEXT_TEXTURE_COORD0;
 						m_pxmf2Uvs = new XMFLOAT2[m_nVertices];
 						nReads = (UINT)::fread(m_pxmf2Uvs, sizeof(XMFLOAT2), m_nVertices, pInFile);
-						//for (int j = 0; j < m_nVertices; ++j)
-						//{
-						//	m_pxmf2Uvs[j].y = 1 - m_pxmf2Uvs[j].y;
-						//}
+						
 						m_pd3dUvBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2Uvs, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dUvUploadBuffer);
 
 						m_d3dUvBufferView.BufferLocation = m_pd3dUvBuffer->GetGPUVirtualAddress();
@@ -488,6 +467,7 @@ CSkinnedMesh::~CSkinnedMesh()
 {
 	if (m_pxmn4BoneIndices) delete[] m_pxmn4BoneIndices;
 	if (m_pxmf4BoneWeights) delete[] m_pxmf4BoneWeights;
+
 	if (m_ppSkinningBoneFrameCaches) delete[] m_ppSkinningBoneFrameCaches;
 	if (m_pxmf4x4BindPoseBoneOffsets) delete[] m_pxmf4x4BindPoseBoneOffsets;
 	if (m_pd3dcbBindPoseBoneOffsets)

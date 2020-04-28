@@ -114,7 +114,7 @@ public:
 	virtual void OnPreRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, int nSubSet, int nInstance);
-	virtual void OnPostRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext);
+	virtual void OnPostRender(ID3D12GraphicsCommandList *pd3dCommandList, void *pContext) {};
 
 	void LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, FILE *pInFile);
 

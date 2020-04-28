@@ -20,11 +20,9 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) {};
 	virtual void ReleaseShaderVariables() {};
 
-	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World) { }
-
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState = 0);
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
+	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {}
 
 	virtual void ReleaseUploadBuffers() { }
 
@@ -33,9 +31,8 @@ public:
 	virtual void ReleaseObjects() { }
 
 	void CreateCbvSrvDescriptorHeaps(shared_ptr<CreateManager> pCreateManager, int nConstantBufferViews, int nShaderResourceViews);
-	void BackDescriptorHeapCount()
-	{ m_d3dSrvGPUDescriptorNextHandle.ptr -= ::gnCbvSrvDescriptorIncrementSize;
-	m_d3dSrvCPUDescriptorNextHandle.ptr -= ::gnCbvSrvDescriptorIncrementSize;}
+	void BackDescriptorHeapCount();
+
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(shared_ptr<CreateManager> pCreateManager, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride);
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceViews(shared_ptr<CreateManager> pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement);
 	D3D12_GPU_DESCRIPTOR_HANDLE CreateShadowResourceViews(shared_ptr<CreateManager> pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement);
@@ -95,9 +92,9 @@ public:
 	}
 
 protected:
-	CGameObject *m_ppObjects = NULL;
-	vector<CGameObject*> objectList;
-	vector<CGameObject*> drawingObjectList;
+	CGameObject *m_ppObjects = NULL;   //인스턴싱drawing 대상
+	vector<CGameObject*> objectList;   // 인스턴싱될 오브젝트들
+	vector<CGameObject*> drawingObjectList;   //오브젝트들중 enable이 아닌 것들.(최종 drawing)
 };
 
 class CObInstancingShader : public CObjectsShader
@@ -127,8 +124,6 @@ public:
 	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL) {}
 	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL, const char* Loadname = NULL) {}
 protected:
-	CB_OBJECT_INFO *m_pcbMappedGameObjects = NULL;
-	ID3D12Resource *m_pd3dcbGameObjects = NULL;
 	unordered_map<string, CB_OBJECT_INFO*> instancedObjectInfo;
 };
 
@@ -148,7 +143,7 @@ public:
 	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename = NULL) {}
 	virtual void ReleaseObjects();
 
-	//virtual void AnimateObjects(float fTimeElapsed) {}
+	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed) {}
 
@@ -160,9 +155,6 @@ public:
 	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL) {}
 	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL, const char* Loadname = NULL) {}
 protected:
-
-	CB_SKINEOBJECT_INFO* m_pcbMappedGameObjects = NULL;
-	ID3D12Resource *m_pd3dcbGameObjects = NULL;
 	unordered_map<string, CB_SKINEOBJECT_INFO*> instancedObjectInfo;
 };
 

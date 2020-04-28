@@ -40,7 +40,14 @@
 #define MIN_FORCE 600
 
 
+//¥‹¿ß ¿Ø¥÷ vs Meter or Kilometer
+#define METER_PER_UNIT 0.1
+#define UNIT_PER_METER 10
+#define UNIT_PER_KILOMETER 10000
+
+
 //CheckPoint max
 #define CHECKPOINT_GOAL 362
-enum SceneType{ Default_Scene =0 , Start_Scene,Lobby_Scene,Room_Scene,Game_Scene,End_Scene };
-enum ModelType {Default = 0, CheckPoint,Player,Fence,Item_Box,Item_Banana,Item_Meat,Item_Oil};
+enum SceneType { Default_Scene = 0, Start_Scene, Lobby_Scene, Room_Scene, Game_Scene, End_Scene };
+enum ModelType { Default = 0, CheckPoint, Player, Fence, Item_Box, Item_Banana, Item_Meat, Item_Oil };
+

@@ -513,8 +513,8 @@ CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager) : CPlay
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager, 0, RAND, 1.8f, 100, this, XMFLOAT3(0.0f, 0, -10),
-		15, "Resources/Images/smoke.dds", 2,60);
+	m_pParticleSystem = new ParticleSystem(pCreateManager, 0, RAND, -0.05f, 5, this, XMFLOAT3(0.0f, 0, 18),
+		15, "Resources/Images/dust.dds", 0.5,60);
 	//SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
 	
 }

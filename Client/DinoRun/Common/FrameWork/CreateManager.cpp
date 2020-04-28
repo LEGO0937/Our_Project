@@ -628,7 +628,6 @@ void CreateManager::CreateComputeRootSignature()
 	pd3dRootParameters[6].Descriptor.ShaderRegister = 1; // particle structure
 	pd3dRootParameters[6].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-	//auto staticSamplers = GetStaticSamplers();
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;

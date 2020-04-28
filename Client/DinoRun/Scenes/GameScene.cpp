@@ -78,11 +78,13 @@ void GameScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 	for (CUiShader* shader : instacingUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
+
 	if (m_pMinimapCamera)
 	{
 		m_pMinimapCamera->ReleaseShaderVariables();
 		delete m_pMinimapCamera;
 	}
+
 	if (blurShader)
 		blurShader->Release();
 
@@ -154,10 +156,10 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	blurShader = new BlurShader(pCreateManager);
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 100, NULL, XMFLOAT3(800.0f, 80, 940),
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(800.0f, 80, 940),
 		15, "Resources/Images/smoke.dds", 2,30));
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 100, NULL, XMFLOAT3(750.0f, 80, 900),
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(750.0f, 80, 900),
 		15, "Resources/Images/smoke.dds", 5,50));
 	BuildLights();
 
@@ -431,7 +433,7 @@ void GameScene::AnimateObjects(float fTimeElapsed)
 
 SceneType GameScene::Update(float fTimeElapsed)
 {
-	if (m_pPlayer->GetCheckPoint() == 5)
+	if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 	{
 		return End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 	}

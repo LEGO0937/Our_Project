@@ -47,7 +47,6 @@ void SelectButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, 
 	uvY.emplace_back(0);
 
 	CreateShaderVariables(pCreateManager);
-
 }
 
 

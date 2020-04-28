@@ -3,9 +3,9 @@
 
 
 ParticleSystem::ParticleSystem(shared_ptr<CreateManager> pCreateManager, const char& cPattern, 
-	const char& cShape, const float& fGravity,	const UINT& uSize,	CGameObject* pTarget, 
+	const char& cShape, const float& fGravity,	const float& fSize,	CGameObject* pTarget,
 	const XMFLOAT3& xmf3Position, const float& fVelocity,	string pTextureName, 
-	const float& fLife, const UINT& uMaxSize): m_cPattern(cPattern),m_cShape(cShape), m_uSize(uSize),
+	const float& fLife, const UINT& uMaxSize): m_cPattern(cPattern),m_cShape(cShape), m_fSize(fSize),
 	m_fParticleLife(fLife), m_fVelocity(fVelocity),m_fGravity(fGravity),m_uMaxSize(uMaxSize)
 {
 	m_pd3dCommandList = pCreateManager->GetCommandList();
@@ -16,7 +16,7 @@ ParticleSystem::ParticleSystem(shared_ptr<CreateManager> pCreateManager, const c
     m_pShader = new CShader();
 	m_pShader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
 	m_pShader->CreateShaderResourceViews(pCreateManager, texture, 8, true);
-
+	
 	m_pMaterial = new CMaterial(1);
 	m_pMaterial->SetShader(m_pShader);
 	m_pMaterial->SetTexture(texture, 0);
@@ -34,7 +34,6 @@ ParticleSystem::ParticleSystem(shared_ptr<CreateManager> pCreateManager, const c
 	m_xmf3Position = xmf3Position;
 
 	BuildResource(pCreateManager);
-	//CreateParticles();
 }
 ParticleSystem::~ParticleSystem()
 {
@@ -75,7 +74,7 @@ ParticleSystem::~ParticleSystem()
 		m_pd3dcbStruct->Release();
 		m_pd3dcbStruct = NULL;
 	}
-	//m_vParticles.clear();
+	m_vParticles.clear();
 }
 
 bool ParticleSystem::AnimateObjects(float fTimeElapsed) 
@@ -87,8 +86,20 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 	m_pd3dReadBackParticles->Unmap(0, NULL);
 	m_pReadBackMappedParticles = NULL;
 
-	particleCb->fElapsedTime = fTimeElapsed;
-	particleCb->fGravity = m_fGravity;
+	XMFLOAT3 pos;
+	if (m_pTarget)
+	{
+		pos = m_pTarget->GetPosition();
+		pos = Vector3::Add(pos, m_pTarget->GetLook(), -m_xmf3Position.z);
+	}
+	else
+		pos = m_xmf3Position;
+
+	particleCb[0].xmf3Position = pos;
+	particleCb[0].fElapsedTime = fTimeElapsed;
+	particleCb[0].fGravity = m_fGravity;
+	particleCb[0].fSize = m_fSize;
+
 	if (m_bEnable)
 	{
 		if (curNumParticle + m_cShape > m_uMaxSize)
@@ -138,23 +149,8 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 void ParticleSystem::CreateParticles()
 {
 
-	XMFLOAT3 pos;
-	if (m_pTarget)
-	{
-		//타겟의 월드행렬에 오프셋값(position)의 translate 행렬곱한 결과의 포지션값을 구해온다.
-		//XMFLOAT4X4 matrix = Matrix4x4::Multiply(m_pTarget->m_xmf4x4World,
-		//	XMMatrixTranslation(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z));
-		//pos.x = matrix._41; pos.y = matrix._42; pos.z = matrix._43;
-		//위치값 손봐야함;
-		pos = m_pTarget->GetPosition();
-	}
-	else
-		pos = m_xmf3Position;
+	XMFLOAT3 pos= XMFLOAT3(0.0f,0.0f,0.0f);
 
-	//XMFLOAT3 vel = XMFLOAT3(m_xmf3Velocity.x* cos(rand()), m_xmf3Velocity.y,
-	//	m_xmf3Velocity.z*(cos(rand()) + sin(rand()))*0.5);
-
-	//m_vParticles.emplace_back(Particle(m_xmf3Position, vel, m_fParticleLife));
 
 	switch (m_cShape)
 	{
@@ -185,8 +181,18 @@ void ParticleSystem::CreateParticles()
 	case RAND:
 		if (curNumParticle < m_uMaxSize)
 		{
-			XMFLOAT3 vel = XMFLOAT3(m_fVelocity*cos(rand()), m_fVelocity,
-				m_fVelocity * (cos(rand()) + sin(rand()))*0.5f);
+			auto time = std::chrono::system_clock::now();
+			auto duration = time.time_since_epoch();     
+			auto randomSeed = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+			std::mt19937 mtRand(randomSeed);                  
+			std::uniform_real_distribution<double> randX(-1.0f, 1.0f);
+			std::uniform_real_distribution<double> randY(0.1f, 2.0f);
+			std::uniform_real_distribution<double> randZ(-1.0f, 0.1f);
+
+
+			XMFLOAT3 vel = XMFLOAT3(m_fVelocity*randX(mtRand), m_fVelocity * randY(mtRand),
+				m_fVelocity * randZ(mtRand));
 
 			m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
 			curNumParticle++;
@@ -200,33 +206,13 @@ void ParticleSystem::CreateParticles()
 }
 void ParticleSystem::Update(float fTimeElapsed) 
 {
-
-	srand(time(NULL));
 	coolTime += fTimeElapsed;
 	
-	if (coolTime > 0.25)
+	if (coolTime > 0.05)
 	{
 		coolTime = 0.f;
 		if (m_vParticles.size() < m_uMaxSize)
-		{
-			//if (m_pTarget)
-			//{
-			//	//타겟의 월드행렬에 오프셋값(position)의 translate 행렬곱한 결과의 포지션값을 구해온다.
-			//	XMFLOAT4X4 matrix = Matrix4x4::Multiply(m_pTarget->m_xmf4x4World,
-			//		XMMatrixTranslation(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z));
-			//	m_xmf3Position.x = matrix._41; m_xmf3Position.y = matrix._42; m_xmf3Position.z = matrix._43;
-			//
-			//	m_xmf3Position.x = (((float)rand() - (float)rand()) / RAND_MAX) * m_xmf3Position.x;
-			//	m_xmf3Position.y = (((float)rand() - (float)rand()) / RAND_MAX) * m_xmf3Position.y;
-			//	m_xmf3Position.z = (((float)rand() - (float)rand()) / RAND_MAX) * m_xmf3Position.z;
-			//}
-
-			//XMFLOAT3 vel = XMFLOAT3(m_xmf3Velocity.x* cos(rand()), m_xmf3Velocity.y,
-			//	m_xmf3Velocity.z*(cos(rand()) +	sin(rand()))*0.5);
-			//
-			//m_vParticles.emplace_back(Particle(m_xmf3Position, vel, m_fParticleLife));
 			CreateParticles();
-		}
 	}
 	
 }
@@ -290,6 +276,7 @@ void ParticleSystem::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 {
 	m_pd3dCommandList->SetGraphicsRootShaderResourceView(3,
 		m_pd3dSrbParticles->GetGPUVirtualAddress());
+	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 6, particleCb, 0);
 
 	if (m_pShader)
 		m_pShader->Render(pd3dCommandList, pCamera);

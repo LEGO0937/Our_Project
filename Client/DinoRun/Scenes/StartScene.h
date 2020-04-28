@@ -20,7 +20,7 @@ public:
 		lParam, float deltaTime);
 
 	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
-	virtual void BuildLights() {}
+
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 

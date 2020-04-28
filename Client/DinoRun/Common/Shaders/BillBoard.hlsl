@@ -8,7 +8,6 @@ VS_TEXTED_INSTANCING_OUTPUT VSTextedInstancing(VS_TEXTED_INSTANCING_INPUT input,
 	output.normalW = mul(input.normal, (float3x3)gGameObjectInfos[nInstanceID].gmtxGameObject);
 	output.TexC = input.TexC;
 	output.n = nInstanceID;
-
 	return(output);
 }
 [maxvertexcount(4)]

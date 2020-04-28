@@ -15,8 +15,10 @@
 
 struct CB_Particle
 {
-	float fGravity = 0.0f;
-	float fElapsedTime = 0.1f;
+	XMFLOAT3 xmf3Position;
+	float fGravity;
+	float fElapsedTime;
+	float fSize;
 };
 
 class Particle
@@ -49,7 +51,7 @@ private:
 	CMaterial* m_pMaterial = NULL;
 	CShader* m_pShader = NULL;
 
-	UINT m_uSize = 0;
+	float m_fSize = 0;
 	UINT m_uMaxSize = 1000;
 
 	XMFLOAT3 m_xmf3Position;  //target이 없으면 고정 위치값, 있으면 target의 포지션에 대한 offset값
@@ -79,7 +81,7 @@ private:
 	
 public:
 	ParticleSystem(shared_ptr<CreateManager> pCreateManager, const char& cPattern, const char& cShape, const float& fGravity, 
-		const UINT& uSize, CGameObject* pTarget, const XMFLOAT3& xmf3Position,
+		const float& fSize, CGameObject* pTarget, const XMFLOAT3& xmf3Position,
 		 const float& fVelocity,
 		string pTextureName, const float& fLife, const UINT& uMaxSize);
 	~ParticleSystem();
