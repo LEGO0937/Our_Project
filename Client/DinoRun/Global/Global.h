@@ -11,6 +11,7 @@
 #define PSO_WIRE 6
 #define PSO_WIRE_INSTANCING 7
 
+#define PSO_MINIMAP 21
 //PSO ui
 #define PSO_UI 8
 #define PSO_UI_GAUGE 9
@@ -51,3 +52,8 @@
 enum SceneType { Default_Scene = 0, Start_Scene, Lobby_Scene, Room_Scene, Game_Scene, End_Scene };
 enum ModelType { Default = 0, CheckPoint, Player, Fence, Item_Box, Item_Banana, Item_Meat, Item_Oil };
 
+
+#define MAX_ROTATE_RADIAN 0.26   //약 15도
+#define MIN_ROTATE_RADIAN -0.26  //약 -15도
+
+#define ROTATE_ACCELERATING 0.086   //각 가속력 초당 5도   2초 15도

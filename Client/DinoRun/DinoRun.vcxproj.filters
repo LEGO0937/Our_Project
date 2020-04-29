@@ -115,9 +115,6 @@
     <Filter Include="CShaders\SkinedShader">
       <UniqueIdentifier>{98d6b664-2c66-41b4-b087-4a36610fd21b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Meshes\PlainMesh">
-      <UniqueIdentifier>{2788cff3-2ded-4e93-bbef-9117fa7ca928}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CShaders\UiShader">
       <UniqueIdentifier>{d958ffaf-dba1-4036-8fa6-8db3f9c17d6e}</UniqueIdentifier>
     </Filter>
@@ -214,6 +211,18 @@
     <Filter Include="Objects\ItemObject\03ItemOil">
       <UniqueIdentifier>{284e0d6b-6074-41d9-8898-4de18454dae0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Meshes\LiePlaneMesh">
+      <UniqueIdentifier>{33862513-9039-4c7f-b55a-089937c31c49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Meshes\PlaneMesh">
+      <UniqueIdentifier>{2788cff3-2ded-4e93-bbef-9117fa7ca928}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\MinimapShader">
+      <UniqueIdentifier>{8e1a3989-09b2-419b-bc68-e12f2d0e85a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\UiShader\07Icon">
+      <UniqueIdentifier>{f588377e-8e1c-4ca4-9ddf-50e0778e0e2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -298,7 +307,7 @@
       <Filter>DinoRun</Filter>
     </ClInclude>
     <ClInclude Include="Meshes\PlaneMesh.h">
-      <Filter>Meshes\PlainMesh</Filter>
+      <Filter>Meshes\PlaneMesh</Filter>
     </ClInclude>
     <ClInclude Include="CShaders\SkinedShader\SkinedShader.h">
       <Filter>CShaders\SkinedShader\00Skined</Filter>
@@ -350,6 +359,12 @@
     </ClInclude>
     <ClInclude Include="Objects\ItemObject.h">
       <Filter>Objects\ItemObject\00Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Meshes\LiePlaneMesh.h">
+      <Filter>Meshes\LiePlaneMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\MinimapShader\MinimapShader.h">
+      <Filter>CShaders\MinimapShader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -423,7 +438,7 @@
       <Filter>Scenes\GameScene</Filter>
     </ClCompile>
     <ClCompile Include="Meshes\PlaneMesh.cpp">
-      <Filter>Meshes\PlainMesh</Filter>
+      <Filter>Meshes\PlaneMesh</Filter>
     </ClCompile>
     <ClCompile Include="CShaders\SkinedShader\SkinedShader.cpp">
       <Filter>CShaders\SkinedShader\00Skined</Filter>
@@ -514,6 +529,15 @@
     </ClCompile>
     <ClCompile Include="Objects\ItemOil.cpp">
       <Filter>Objects\ItemObject\03ItemOil</Filter>
+    </ClCompile>
+    <ClCompile Include="Meshes\LiePlaneMesh.cpp">
+      <Filter>Meshes\LiePlaneMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\MinimapShader\MinimapShader.cpp">
+      <Filter>CShaders\MinimapShader</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\UiShader\IconShader.cpp">
+      <Filter>CShaders\UiShader\07Icon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

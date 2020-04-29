@@ -93,3 +93,17 @@ public:
 	virtual void Update(float fTimeElapsed, void* pInformation);
 	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
 };
+
+class IconShader : public CUiShader
+{
+private:
+
+public:
+	IconShader();
+	virtual ~IconShader();
+
+	virtual void AnimateObjects(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation);
+};

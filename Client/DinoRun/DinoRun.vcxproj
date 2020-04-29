@@ -174,6 +174,7 @@
     <ClInclude Include="CShaders\BillBoardShader\BillBoardShader.h" />
     <ClInclude Include="CShaders\BlurShader\BlurShader.h" />
     <ClInclude Include="CShaders\FontShader\FontShader.h" />
+    <ClInclude Include="CShaders\MinimapShader\MinimapShader.h" />
     <ClInclude Include="CShaders\ModelShader\ModelShader.h" />
     <ClInclude Include="CShaders\Shader.h" />
     <ClInclude Include="CShaders\SkinedShader\SkinedShader.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="DinoRun.h" />
     <ClInclude Include="Global\Global.h" />
     <ClInclude Include="Meshes\BillBoardMesh.h" />
+    <ClInclude Include="Meshes\LiePlaneMesh.h" />
     <ClInclude Include="Meshes\Mesh.h" />
     <ClInclude Include="Meshes\PlaneMesh.h" />
     <ClInclude Include="Meshes\SkyBoxMesh.h" />
@@ -218,6 +220,7 @@
     <ClCompile Include="CShaders\BillBoardShader\BillBoardShader.cpp" />
     <ClCompile Include="CShaders\BlurShader\BlurShader.cpp" />
     <ClCompile Include="CShaders\FontShader\FontShader.cpp" />
+    <ClCompile Include="CShaders\MinimapShader\MinimapShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\BlockShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\FenceShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\ItemShader.cpp" />
@@ -231,11 +234,13 @@
     <ClCompile Include="CShaders\UiShader\BackGroundShader.cpp" />
     <ClCompile Include="CShaders\UiShader\ButtonShader.cpp" />
     <ClCompile Include="CShaders\UiShader\GaugeShader.cpp" />
+    <ClCompile Include="CShaders\UiShader\IconShader.cpp" />
     <ClCompile Include="CShaders\UiShader\SelectButtonShader.cpp" />
     <ClCompile Include="CShaders\UiShader\TimeCountShader.cpp" />
     <ClCompile Include="CShaders\UiShader\TrackCountShader.cpp" />
     <ClCompile Include="DinoRun.cpp" />
     <ClCompile Include="Meshes\BillBoardMesh.cpp" />
+    <ClCompile Include="Meshes\LiePlaneMesh.cpp" />
     <ClCompile Include="Meshes\Mesh.cpp" />
     <ClCompile Include="Meshes\PlaneMesh.cpp" />
     <ClCompile Include="Meshes\SkyBoxMesh.cpp" />

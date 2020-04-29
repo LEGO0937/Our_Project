@@ -307,7 +307,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 void CGameFramework::BuildPipelineState()
 {
-	m_nPipelineStates = 21;
+	m_nPipelineStates = 22;
 	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 	for (int i = 0; i < m_nPipelineStates; ++i)
 	{
@@ -328,6 +328,7 @@ void CGameFramework::CreatePSOs()
 	CreatePsoUiGuage(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_GAUGE);
 	CreatePsoUiNumber(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_NUMBER);
 	CreatePsoParticle(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE);
+	CreatePsoMinimap(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MINIMAP);
 	//Shadow Pipelines
 
 	CreatePsoShadowSkinMesh(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKIN_MESH);//¼öÁ¤

@@ -217,16 +217,23 @@ public:
 	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n
 
 	ModelType						m_ModelType = ModelType::Default;   //충돌체크시 사용될 오브젝트의 유형(player, wall 등등)
+	//-----------------------rigidBody----------------------
+	float							m_fMass = 0; 
+	
+	XMFLOAT3 m_xmf3Angle;
+	XMFLOAT3 m_xmf3Force;
 
-	float							m_fMass = 0;  
 
+	XMFLOAT3 m_xmf3RotateVelocity =XMFLOAT3(0.0f,0.0f,0.0f);
 	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);  //속력
-	XMFLOAT3 m_xmf3AcceleratingForce = { 0,0,0 };   //가속력
+	XMFLOAT3 m_xmf3AcceleratingForce = { 0.0f,0.0f,0.0f };   //가속력
 
 	float m_fForce = 0;    //앞키 누를 시 증가하는 변수, 룩벡터에 곱함으로써 진행 방향에 대한 힘벡터를 구함.
 
 	XMFLOAT3 m_xmf3Forces = { 0,0,0 };  // 충돌 시 적용할 힘을 추가 하기 위한 변수.
-	//----
+
+
+	//---------------------------------------------------
 
 	CMesh							*m_pMesh = NULL;
 

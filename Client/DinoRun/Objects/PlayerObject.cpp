@@ -270,7 +270,15 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		//XMConvertToRadians
 	}
 
-	float drag = 0.5f* 0.5f* AIR *2.2f;
+	float drag;
+	if (isShift && m_fWheelDegree != 0)
+	{
+		drag = 0.5f* 0.5f* AIR *0.2f;
+	}
+	else
+	{
+		drag = 0.5f* 0.5f* AIR *2.2f;
+	}
 	float rR = drag * 30;
 
 	XMFLOAT3 xmf3Fdrag = Vector3::ScalarProduct(m_xmf3Velocity,-drag * Vector3::Length(m_xmf3Velocity),false); // 공기 저항
@@ -279,7 +287,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	if (!isShift)
 		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); //앞키로 얻은 힘을 통한 진행 힘 구하는 식
 	else
-		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Velocity, -0.0001f, false); //브레이크 시
+		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Velocity, -0.001f, false); //브레이크 시
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Frr);
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Fdrag);  //총합
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);//힘의 최종합을 구함
@@ -348,11 +356,20 @@ void CPlayer::Animate(float fTimeElapsed)
 		m_fWheelDegree += WHEELROTATEPERSEC * fTimeElapsed;
 		break;
 	}
-	if (m_fWheelDegree > 15)
-		m_fWheelDegree = 15;
-	else if (m_fWheelDegree < -15)
-		m_fWheelDegree = -15;
-
+	if (!isShift)
+	{
+		if (m_fWheelDegree > 10)
+			m_fWheelDegree = 10;
+		else if (m_fWheelDegree < -10)
+			m_fWheelDegree = -10;
+	}
+	else
+	{
+		if (m_fWheelDegree > 40)
+			m_fWheelDegree = 10;
+		else if (m_fWheelDegree < -40)
+			m_fWheelDegree = -10;
+	}
 	CGameObject::Animate(fTimeElapsed);
 }
 

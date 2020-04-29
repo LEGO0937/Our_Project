@@ -10,6 +10,8 @@
 #include "../CShaders/ModelShader/ModelShader.h"
 #include "../CShaders/SkinedShader/SkinedShader.h"
 #include "../CShaders/BlurShader/BlurShader.h"
+#include "../CShaders/MinimapShader/MinimapShader.h"
+
 #include "../Common/ParticleSystem/ParticleSystem.h"
 
 #include "../CShaders/UiShader/UiShader.h"
@@ -44,6 +46,10 @@ void GameScene::ReleaseUploadBuffers()
 	for (CUiShader* shader : instacingUiShaders)
 		if (shader) { shader->ReleaseUploadBuffers(); }
 
+	if (m_pMinimapShader)
+		m_pMinimapShader->ReleaseUploadBuffers();
+	if (m_pIconShader)
+		m_pIconShader->ReleaseUploadBuffers();
 }
 void GameScene::ReleaseObjects()
 {
@@ -87,6 +93,19 @@ void GameScene::ReleaseObjects()
 
 	if (blurShader)
 		blurShader->Release();
+
+	if (m_pMinimapShader)
+	{
+		m_pMinimapShader->ReleaseShaderVariables();
+		m_pMinimapShader->ReleaseObjects();
+		m_pMinimapShader->Release();
+	}
+	if (m_pIconShader)
+	{
+		m_pIconShader->ReleaseShaderVariables();
+		m_pIconShader->ReleaseObjects();
+		m_pIconShader->Release();
+	}
 
 	UpdatedShaders.clear();
 	instacingUiShaders.clear();
@@ -153,6 +172,12 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//instacingAnimatedModelShaders.emplace_back(animatedShader);
 	//animatedShader->AddRef();
 	//UpdatedShaders.emplace_back(animatedShader);
+	m_pMinimapShader = new MinimapShader();
+	m_pMinimapShader->BuildObjects(pCreateManager, "Resources/Images/MiniMap.dds",NULL);
+
+	string name = "Resources/Images/MiniMap.dds";
+	m_pIconShader = new IconShader();
+	m_pIconShader->BuildObjects(pCreateManager, &name);
 
 	blurShader = new BlurShader(pCreateManager);
 
@@ -395,9 +420,6 @@ void GameScene::RenderShadow()
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList.Get(), m_pCamera);
-
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[9]);
-	//if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList.Get(), m_pCamera);
 }
 void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
@@ -415,11 +437,12 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 
 	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
 	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList.Get());
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[4]);
-	//if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
-
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[1]);
-	//m_pPlayer->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MINIMAP]);
+	if (m_pMinimapShader)
+		m_pMinimapShader->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
+	if(m_pIconShader)
+		m_pIconShader->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
 }
 void GameScene::AnimateObjects(float fTimeElapsed)  
 {
@@ -546,14 +569,9 @@ void GameScene::BuildMinimapCamera(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 }
 
 void GameScene::UpdateShadow()
-{
-	float x = 257 * TerrainScaleX;
-	float z = 257 * TerrainScaleZ;
-	//XMFLOAT3 centerPosition(x/2,0,z/2);  //지형의 한 가운데
-	//float rad = sqrtf((x*x) + (z*z));   // 지형을 담는 구의 반지름(ex 지구의 반지름)
-	
+{	
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
-	float rad = 1000;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
+	float rad = 800;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
 
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
 	lightDir= XMVector3Normalize(lightDir);

@@ -11,6 +11,8 @@ class CSkinedObInstancingShader;
 class CObjectsShader;
 class CUiShader;
 class BlurShader;
+class MinimapShader;
+class IconShader;
 
 class CHeightMapTerrain;
 class SkyBoxObject;
@@ -87,4 +89,7 @@ private:
 	BlurShader* blurShader = NULL;
 
 	list<ParticleSystem*> particleSystems;
+
+	MinimapShader* m_pMinimapShader = NULL;
+	IconShader* m_pIconShader = NULL;
 };
