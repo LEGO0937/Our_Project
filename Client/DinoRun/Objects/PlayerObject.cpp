@@ -263,7 +263,10 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 			w = Vector3::Length(m_xmf3Velocity)*(degree * 0.5f) / (3.8f * 57.3f);
 		}
 		//w = Vector3::Length(m_xmf3Velocity)* sin(XMConvertToRadians(degree)) / (3.8);
-		
+		/*
+		float s = (3.8f*sin(XMConvertToRadians(degree)) / 1.6f);
+			w = Vector3::Length(m_xmf3Velocity)* sin(s) / 3.8f;
+		*/
 		//이부분에  10인 값을 4.8정도로 바꾸면 드리프트도 가능할 듯?
 		Rotate(0, XMConvertToDegrees(w)*fTimeElapsed, 0.0f); //degree로 바꿔서 회전 시작 
 		//Rotate는 degree값을 받고 회전변환을 시켜줌.

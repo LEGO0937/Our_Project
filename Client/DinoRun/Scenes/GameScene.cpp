@@ -175,7 +175,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager, "Resources/Images/MiniMap.dds",NULL);
 
-	string name = "Resources/Images/MiniMap.dds";
+	string name = "Resources/Images/Face_Icon.dds";
 	m_pIconShader = new IconShader();
 	m_pIconShader->BuildObjects(pCreateManager, &name);
 
