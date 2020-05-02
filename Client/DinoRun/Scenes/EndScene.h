@@ -17,11 +17,11 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 		lParam, float deltaTime);
 
-	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
+	void BuildObjects(CreateManager* pCreateManager);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
-	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager);
+	virtual void CreateShaderVariables(CreateManager* pCreateManager);
 	virtual void UpdateShaderVariables();
 	virtual void ReleaseShaderVariables();
 

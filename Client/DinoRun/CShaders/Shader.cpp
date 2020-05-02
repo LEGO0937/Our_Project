@@ -31,7 +31,7 @@ void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	OnPrepareRender(pd3dCommandList);
 }
 
-void CShader::CreateCbvSrvDescriptorHeaps(shared_ptr<CreateManager> pCreateManager, int nConstantBufferViews, int nShaderResourceViews)
+void CShader::CreateCbvSrvDescriptorHeaps(CreateManager* pCreateManager, int nConstantBufferViews, int nShaderResourceViews)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	d3dDescriptorHeapDesc.NumDescriptors = nConstantBufferViews + nShaderResourceViews; //CBVs + SRVs 
@@ -51,7 +51,7 @@ void CShader::BackDescriptorHeapCount()
 	m_d3dSrvCPUDescriptorNextHandle.ptr -= ::gnCbvSrvDescriptorIncrementSize;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateConstantBufferViews(shared_ptr<CreateManager> pCreateManager, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride)
+D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateConstantBufferViews(CreateManager* pCreateManager, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = m_d3dCbvGPUDescriptorNextHandle;
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = pd3dConstantBuffers->GetGPUVirtualAddress();
@@ -109,7 +109,7 @@ D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3
 	return(d3dShaderResourceViewDesc);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShaderResourceViews(shared_ptr<CreateManager> pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
+D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShaderResourceViews(CreateManager* pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle = m_d3dSrvGPUDescriptorNextHandle;
 	if (pTexture)
@@ -131,7 +131,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShaderResourceViews(shared_ptr<Create
 	return(d3dSrvGPUDescriptorHandle);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShadowResourceViews(shared_ptr<CreateManager> pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
+D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShadowResourceViews(CreateManager* pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle = m_d3dSrvGPUDescriptorNextHandle;
 	if (pTexture)
@@ -226,7 +226,7 @@ CObInstancingShader::~CObInstancingShader()
 {
 }
 
-void CObInstancingShader::CreateShaderVariables(shared_ptr<CreateManager> pCreateManager)
+void CObInstancingShader::CreateShaderVariables(CreateManager* pCreateManager)
 {
 	m_ppObjects->CreateInstanceBuffer(pCreateManager, objectList.size(), instancedObjectInfo);
 }
@@ -322,7 +322,7 @@ CSkinedObInstancingShader::~CSkinedObInstancingShader()
 {
 }
 
-void CSkinedObInstancingShader::CreateShaderVariables(shared_ptr<CreateManager> pCreateManager)
+void CSkinedObInstancingShader::CreateShaderVariables(CreateManager* pCreateManager)
 {
 	m_ppObjects->CreateSkinedInstanceBuffer(pCreateManager, objectList.size(), instancedObjectInfo);
 }
@@ -413,7 +413,7 @@ CUiShader::~CUiShader()
 }
 
 
-void CUiShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
+void CUiShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
 }
 
@@ -430,7 +430,7 @@ void CUiShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCam
 	}
 }
 
-void CUiShader::CreateShaderVariables(shared_ptr<CreateManager> pCreateManager)
+void CUiShader::CreateShaderVariables(CreateManager* pCreateManager)
 {
 	if (objectList.size() > 0)
 	{

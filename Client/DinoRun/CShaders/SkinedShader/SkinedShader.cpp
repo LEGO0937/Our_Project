@@ -10,7 +10,7 @@ SkinedShader::SkinedShader()
 SkinedShader::~SkinedShader()
 {
 }
-void SkinedShader::Load(shared_ptr<CreateManager> pCreateManager, const char* filename, const char* Loadname)
+void SkinedShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, Loadname, "rb");
@@ -43,7 +43,7 @@ void SkinedShader::Load(shared_ptr<CreateManager> pCreateManager, const char* fi
 	::fclose(pInFile);
 }
 
-void SkinedShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename)
+void SkinedShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
 {
 	if (!pszFileName)
 		return;

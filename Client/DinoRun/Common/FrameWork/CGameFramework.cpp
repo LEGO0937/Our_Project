@@ -53,25 +53,26 @@ void CGameFramework::Release()
 		m_pCamera->ReleaseShaderVariables();
 		delete m_pCamera;
 	}
-		m_pCreateMgr->Release();
+	m_pCreateMgr->Release();
 }
 
 void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick();
 	float fTimeElapsed = m_GameTimer.DeltaTime();
-	if(m_CurState != m_PrevState)
-	{
-		ChangeSceneByType(m_CurState);
-		//씬 교환 부분.
-	}
 	m_pScene->ProcessInput(m_hWnd, fTimeElapsed);
 	// processinput과 플레이어 animate의 순서를 뒤바꾸면 플레이어가 움직일 시 흔들림 발생 왜?
 	m_pScene->FixedUpdate(fTimeElapsed);
 	m_pScene->AnimateObjects(fTimeElapsed); //바뀐 행렬값으로 애니메이션 수행
 	m_CurState = m_pScene->Update(fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
-	
+
 	m_pDrawMgr->Render(m_pScene, fTimeElapsed);
+
+	if (m_CurState != m_PrevState)
+	{
+		ChangeSceneByType(m_CurState);
+		//씬 교환 부분.
+	}
 }
 
 void CGameFramework::BuildObjects()
@@ -83,18 +84,20 @@ void CGameFramework::BuildObjects()
 	
 	BuildPipelineState();
 
+	//m_pCreateMgr->GetDrawMgr()->WaitForGpuComplete();
 	m_pCreateMgr->ResetCommandList();
 
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
-	m_pFontManager->Initialize(m_pCreateMgr);
+	m_pFontManager->Initialize(m_pCreateMgr.get());
 	//-----------
 	/*
 	m_pScene = shared_ptr<GameScene>(new GameScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateMgr);
+	m_pScene->BuildObjects(m_pCreateMgr.get());
 
-	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateMgr);
+	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateMgr.get());
+	pPlayer->SetMaxForce(MIN_FORCE);
 	m_pPlayer = pPlayer;
 
 	m_pScene->setPlayer(m_pPlayer);
@@ -105,14 +108,16 @@ void CGameFramework::BuildObjects()
 	m_pScene = shared_ptr<StartScene>(new StartScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateMgr);
+	m_pScene->BuildObjects(m_pCreateMgr.get());
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pScene->setCamera(m_pCamera);
 	
 	//-----------------------
 
 	m_pCreateMgr->ExecuteCommandList();
-	m_pScene->ReleaseUploadBuffers();
+
+	if (m_pScene)
+		m_pScene->ReleaseUploadBuffers();
 	m_pFontManager->ReleaseUploadBuffers();
 	if (m_pPlayer)
 		m_pPlayer->ReleaseUploadBuffers();
@@ -172,7 +177,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 
 		if (m_pScene)
 		{
-			m_pScene->ResetShadowBuffer(m_pCreateMgr);
+			m_pScene->ResetShadowBuffer(m_pCreateMgr.get());
 			m_pScene->SetWindowSize(m_pCreateMgr->GetWindowWidth(), m_pCreateMgr->GetWindowHeight());
 		}
 		if (m_pPlayer)
@@ -283,11 +288,11 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateMgr);
+	m_pScene->BuildObjects(m_pCreateMgr.get());
 
 	if (type == SceneType::Game_Scene)
 	{
-		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateMgr);
+		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateMgr.get());
 		pPlayer->SetMaxForce(MIN_FORCE);
 		m_pPlayer = pPlayer;
 
@@ -296,8 +301,11 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 
 	}
+
 	m_pCreateMgr->ExecuteCommandList();
-	m_pScene->ReleaseUploadBuffers();
+
+	if (m_pScene)
+		m_pScene->ReleaseUploadBuffers();
 	if (m_pPlayer)
 		m_pPlayer->ReleaseUploadBuffers();
 

@@ -1,7 +1,7 @@
 #include "SkyBoxObject.h"
 #include "../Common/Camera/Camera.h"
 #include "../Common/FrameWork/CreateManager.h"
-SkyBoxObject::SkyBoxObject(shared_ptr<CreateManager> pCreateManager) : CGameObject(1)
+SkyBoxObject::SkyBoxObject(CreateManager* pCreateManager) : CGameObject(1)
 {
 
 	SkyBoxMesh *pSkyBoxMesh = new SkyBoxMesh(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 2500.0f, 2500.0f, 2500.0f);

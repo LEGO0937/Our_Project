@@ -11,7 +11,7 @@ TimeCountShader::~TimeCountShader()
 }
 
 
-void TimeCountShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
+void TimeCountShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
 
 	CTexture * Count = new CTexture(1, RESOURCE_TEXTURE2D_ARRAY, 0);

@@ -34,10 +34,8 @@ void RoomScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 }
-void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void RoomScene::BuildObjects(CreateManager* pCreateManager)
 {
-
-	ComPtr<ID3D12Device> m_pd3dDevice = pCreateManager->GetDevice();
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
@@ -161,13 +159,13 @@ void RoomScene::Render(float fTimeElapsed)
 	
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	if (instacingUiShaders[0])
-		instacingUiShaders[0]->Render(m_pd3dCommandList.Get(), m_pCamera);
+		instacingUiShaders[0]->Render(m_pd3dCommandList, m_pCamera);
 	if (instacingUiShaders[1])
-		instacingUiShaders[1]->Render(m_pd3dCommandList.Get(), m_pCamera);
+		instacingUiShaders[1]->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
 	if (fontShader)
-		fontShader->Render(m_pd3dCommandList.Get(), m_pCamera, gameTexts);
+		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 
 #ifdef _WITH_BOUND_BOX
 
@@ -195,7 +193,7 @@ SceneType RoomScene::Update(float fTimeElapsed)
 }
 
 
-void RoomScene::CreateShaderVariables(shared_ptr<CreateManager> pCreateManager)
+void RoomScene::CreateShaderVariables(CreateManager* pCreateManager)
 {
 }
 

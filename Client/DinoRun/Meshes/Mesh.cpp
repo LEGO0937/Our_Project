@@ -53,7 +53,8 @@ void CMesh::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	if (m_nType & VERTEXT_POSITION)
 	{
 		m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Positions, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
-
+		m_pd3dPositionBuffer->SetName(L"PositionBuf");
+		m_pd3dPositionUploadBuffer->SetName(L"positionUpload");
 		m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 		m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 		m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
@@ -61,7 +62,8 @@ void CMesh::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	if (m_nType & VERTEXT_NORMAL)
 	{
 		m_pd3dNormalBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3Normals, sizeof(XMFLOAT3) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dNormalUploadBuffer);
-
+		m_pd3dNormalBuffer->SetName(L"NormalBuf");
+		m_pd3dNormalUploadBuffer->SetName(L"NormalUpload");
 		m_d3dNormalBufferView.BufferLocation = m_pd3dNormalBuffer->GetGPUVirtualAddress();
 		m_d3dNormalBufferView.StrideInBytes = sizeof(XMFLOAT3);
 		m_d3dNormalBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
@@ -69,7 +71,8 @@ void CMesh::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	if (m_nType & VERTEXT_TEXTURE_COORD0)
 	{
 		m_pd3dUvBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2Uvs, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dUvUploadBuffer);
-
+		m_pd3dUvBuffer->SetName(L"UvBuf");
+		m_pd3dUvUploadBuffer->SetName(L"Uv0Upload");
 		m_d3dUvBufferView.BufferLocation = m_pd3dUvBuffer->GetGPUVirtualAddress();
 		m_d3dUvBufferView.StrideInBytes = sizeof(XMFLOAT2);
 		m_d3dUvBufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
@@ -77,7 +80,8 @@ void CMesh::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 	if (m_nType & VERTEXT_TEXTURE_COORD1)
 	{
 		m_pd3dDetailedUvBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf2DetailedUvs, sizeof(XMFLOAT2) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dDetailedUvUploadBuffer);
-
+		m_pd3dDetailedUvBuffer->SetName(L"DetailBuf");
+		m_pd3dDetailedUvUploadBuffer->SetName(L"DetailUpload");
 		m_d3dDetailedUvBufferView.BufferLocation = m_pd3dDetailedUvBuffer->GetGPUVirtualAddress();
 		m_d3dDetailedUvBufferView.StrideInBytes = sizeof(XMFLOAT2);
 		m_d3dDetailedUvBufferView.SizeInBytes = sizeof(XMFLOAT2) * m_nVertices;
@@ -89,7 +93,9 @@ void CMesh::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsComman
 		if (m_pnSubSetIndices[i] > 0)
 		{
 			m_ppd3dSubSetIndexBuffers[i] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_ppnSubSetIndices[i], sizeof(UINT) * m_pnSubSetIndices[i], D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_INDEX_BUFFER, &m_ppd3dSubSetIndexUploadBuffers[i]);
-
+			m_ppd3dSubSetIndexBuffers[i]->SetName(L"IndexBuf");
+			m_ppd3dSubSetIndexUploadBuffers[i]->SetName(L"IndexUpload");
+			
 			m_pd3dSubSetIndexBufferViews[i].BufferLocation = m_ppd3dSubSetIndexBuffers[i]->GetGPUVirtualAddress();
 			m_pd3dSubSetIndexBufferViews[i].Format = DXGI_FORMAT_R32_UINT;
 			m_pd3dSubSetIndexBufferViews[i].SizeInBytes = sizeof(UINT) * m_pnSubSetIndices[i];

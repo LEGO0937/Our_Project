@@ -56,13 +56,13 @@ public:
 
 	virtual void SetViewportsAndScissorRects();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager) = 0;
+	virtual void BuildObjects(CreateManager* pCreateManager) = 0;
 	virtual void BuildLights() {};
 
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
-	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager) {}
+	virtual void CreateShaderVariables(CreateManager* pCreateManager) {}
 	virtual void UpdateShaderVariables() {}
 	virtual void ReleaseShaderVariables() {}
 
@@ -76,9 +76,9 @@ public:
 
 	void SetGraphicsRootSignature(ID3D12RootSignature *pd3dRootSignature);
 	void SetPipelineStates(int nPipelineStates, ID3D12PipelineState** ppd3dPipelineStates);
-	void SetFontShader(shared_ptr<FontShader> shader) { fontShader = shader; }
+	void SetFontShader(FontShader* shader) { fontShader = shader; }
 
-	virtual void ResetShadowBuffer(shared_ptr<CreateManager> pCreateManager) {};
+	virtual void ResetShadowBuffer(CreateManager* pCreateManager) {};
 
 	CPlayer* m_pPlayer = NULL;
 	CCamera* m_pCamera = NULL;
@@ -96,9 +96,9 @@ public:
 protected:
 	SceneType sceneType;
 
-	ComPtr<ID3D12GraphicsCommandList> m_pd3dCommandList = NULL;
+	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
 
-	ComPtr<ID3D12RootSignature> m_pd3dGraphicsRootSignature = NULL;
+	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 
 	int m_nPipelineStates = 0;
 	ID3D12PipelineState **m_ppd3dPipelineStates = NULL;
@@ -108,7 +108,7 @@ protected:
 	ID3D12Resource *m_pd3dcbLights = NULL;
 	LIGHTS *m_pcbMappedLights = NULL;
 
-	shared_ptr<FontShader> fontShader = NULL;
+	FontShader* fontShader = NULL;
 	vector<GameText> gameTexts;
 
 	int m_nWndClientWidth{ FRAME_BUFFER_WIDTH };

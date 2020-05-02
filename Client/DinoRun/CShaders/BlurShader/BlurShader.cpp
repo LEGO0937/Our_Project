@@ -1,7 +1,7 @@
 #include "BlurShader.h"
 
 
-BlurShader::BlurShader(shared_ptr<CreateManager> pCreateManager)
+BlurShader::BlurShader(CreateManager* pCreateManager)
 {
 	m_pd3dDevice = pCreateManager->GetDevice();
 

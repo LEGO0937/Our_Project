@@ -2,7 +2,7 @@
 #include "../CShaders/TerrainShader/TerrainShader.h"
 #include "../Common/FrameWork/CreateManager.h"
 
-CHeightMapTerrain::CHeightMapTerrain(shared_ptr<CreateManager> pCreateManager, LPCTSTR pFileName, int
+CHeightMapTerrain::CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFileName, int
 	nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale) : CGameObject(1)
 {
 

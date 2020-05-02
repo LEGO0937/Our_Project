@@ -12,7 +12,7 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 public:
-	BlurShader(shared_ptr<CreateManager> pCreateManager);
+	BlurShader(CreateManager* pCreateManager);
 
 	BlurShader(const BlurShader& rhs) = delete;
 	BlurShader& operator=(const BlurShader& rhs) = delete;

@@ -200,6 +200,7 @@
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Scenes\EndScene.h" />
     <ClInclude Include="Scenes\GameScene.h" />
+    <ClInclude Include="Scenes\ItemGameScene.h" />
     <ClInclude Include="Scenes\LobbyScene.h" />
     <ClInclude Include="Scenes\RoomScene.h" />
     <ClInclude Include="Scenes\StartScene.h" />
@@ -259,6 +260,7 @@
     <ClCompile Include="Scenes\BaseScene.cpp" />
     <ClCompile Include="Scenes\EndScene.cpp" />
     <ClCompile Include="Scenes\GameScene.cpp" />
+    <ClCompile Include="Scenes\ItemGameScene.cpp" />
     <ClCompile Include="Scenes\LobbyScene.cpp" />
     <ClCompile Include="Scenes\RoomScene.cpp" />
     <ClCompile Include="Scenes\StartScene.cpp" />

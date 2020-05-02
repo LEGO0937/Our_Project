@@ -6,7 +6,7 @@
 class SkyBoxObject : public CGameObject
 {
 public:
-	SkyBoxObject(shared_ptr<CreateManager> pCreateManager);
+	SkyBoxObject(CreateManager* pCreateManager);
 	virtual ~SkyBoxObject();
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);

@@ -113,10 +113,8 @@ void GameScene::ReleaseObjects()
 	instacingModelShaders.clear();
 	instacingAnimatedModelShaders.clear();
 }
-void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void GameScene::BuildObjects(CreateManager* pCreateManager)
 {
-
-	ComPtr<ID3D12Device> m_pd3dDevice = pCreateManager->GetDevice();
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
@@ -347,34 +345,34 @@ void GameScene::Render(float fTimeElapsed)
 	BaseScene::Render(fTimeElapsed);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_CUBE_MAP]);
-	if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList.Get(), m_pCamera);
+	if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SKIN_MESH]);
-	m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MODEL_INSTANCING]);
 	for (CObInstancingShader* shader : instacingModelShaders)
 	{
 		if (shader)
-			shader->Render(m_pd3dCommandList.Get(), m_pCamera);
+			shader->Render(m_pd3dCommandList, m_pCamera);
 	}
-	m_pCheckPointShader->Render(m_pd3dCommandList.Get(), m_pCamera);
+	m_pCheckPointShader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList.Get(), m_pCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_TERRAIN]);
-	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList.Get(), m_pCamera);
+	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SKIN_MESH_INSTANCING]);
 	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
 		if (shader) {
-			shader->Render(m_pd3dCommandList.Get(), m_pCamera);
+			shader->Render(m_pd3dCommandList, m_pCamera);
 		}
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE_CALC]);
-	//particleSystem->AnimateObjects(fTimeElapsed);
+	
 	m_pPlayer->m_pParticleSystem->AnimateObjects(fTimeElapsed);
 	
 	for(list<ParticleSystem*>::iterator i = particleSystems.begin(); i != particleSystems.end();)
@@ -389,12 +387,13 @@ void GameScene::Render(float fTimeElapsed)
 		else
 			i++;
 	}
+	
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE]);
 	//particleSystem->Render(m_pd3dCommandList.Get(), m_pCamera);
-	m_pPlayer->m_pParticleSystem->Render(m_pd3dCommandList.Get(), m_pCamera);
+	m_pPlayer->m_pParticleSystem->Render(m_pd3dCommandList, m_pCamera);
 	for (ParticleSystem* system : particleSystems)
 	{
-		system->Render(m_pd3dCommandList.Get(), m_pCamera);
+		system->Render(m_pd3dCommandList, m_pCamera);
 	}
 #ifdef _WITH_BOUND_BOX
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_WIRE]);
@@ -411,38 +410,38 @@ void GameScene::RenderShadow()
 	BaseScene::RenderShadow();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_SKIN_MESH]);
-	m_pPlayer->Render(m_pd3dCommandList.Get(), m_pCamera);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_MODEL_INSTANCING]);
 	for (CObInstancingShader* shader : instacingModelShaders)
-		if (shader) shader->Render(m_pd3dCommandList.Get(), m_pCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList.Get(), m_pCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 }
 void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
-	//blurShader->Dispatch(m_pd3dCommandList.Get(), m_ppd3dPipelineStates[17], m_ppd3dPipelineStates[18], curBuffer.Get(), 1);
+	//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_GAUGE]);
 	if (instacingUiShaders[0])
-		instacingUiShaders[0]->Render(m_pd3dCommandList.Get(), m_pCamera);
+		instacingUiShaders[0]->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_NUMBER]);
 	if (instacingUiShaders[1])
-		instacingUiShaders[1]->Render(m_pd3dCommandList.Get(), m_pCamera);
+		instacingUiShaders[1]->Render(m_pd3dCommandList, m_pCamera);
 	if (instacingUiShaders[2])
-		instacingUiShaders[2]->Render(m_pd3dCommandList.Get(), m_pCamera);
+		instacingUiShaders[2]->Render(m_pd3dCommandList, m_pCamera);
 
-	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
-	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList.Get());
+	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList);
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MINIMAP]);
 	if (m_pMinimapShader)
-		m_pMinimapShader->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
+		m_pMinimapShader->Render(m_pd3dCommandList, m_pMinimapCamera);
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	if(m_pIconShader)
-		m_pIconShader->Render(m_pd3dCommandList.Get(), m_pMinimapCamera);
+		m_pIconShader->Render(m_pd3dCommandList, m_pMinimapCamera);
 }
 void GameScene::AnimateObjects(float fTimeElapsed)  
 {
@@ -616,16 +615,16 @@ void GameScene::UpdateShadow()
 	XMStoreFloat4x4(&m_pcbMappedShadow->m_xmf4x4ShadowProjection, XMMatrixTranspose(ShadowProj));
 	XMStoreFloat4x4(&m_pcbMappedShadow->m_xmf4x4InvShadowViewProjection, XMMatrixTranspose(S));
 }
-void GameScene::CreateShaderVariables(shared_ptr<CreateManager> pCreateManager)
+void GameScene::CreateShaderVariables(CreateManager* pCreateManager)
 {
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
-	m_pd3dcbLights = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList.Get(), NULL,
+	m_pd3dcbLights = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList, NULL,
 		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
 
 	ncbElementBytes = ((sizeof(CB_GAME_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbShadow = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList.Get(), NULL,
+	m_pd3dcbShadow = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList, NULL,
 		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbShadow->Map(0, NULL, (void **)&m_pcbMappedShadow);
@@ -672,7 +671,7 @@ void GameScene::setCamera(CCamera* camera)
 	m_pPlayer->SetCameraUpdatedContext((CHeightMapTerrain*)m_pTerrain);
 }
 
-void GameScene::ResetShadowBuffer(shared_ptr<CreateManager> pCreateManager)
+void GameScene::ResetShadowBuffer(CreateManager* pCreateManager)
 {
 	m_pTerrain->resetShadowTexture(pCreateManager);
 }

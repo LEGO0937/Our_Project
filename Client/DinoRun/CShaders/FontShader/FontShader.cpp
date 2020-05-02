@@ -11,7 +11,7 @@ FontShader::~FontShader()
 
 }
 
-void FontShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
+void FontShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
 	
 	arialFont = LoadFont(L"Resources/Fonts/Arial.fnt", FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -51,13 +51,16 @@ void FontShader::ReleaseObjects()
 
 void FontShader::ReleaseShaderVariables()
 {
-	for (int i = 0; i < 18; ++i)
+	if (textVertexBuffer)
 	{
-		if (textVertexBuffer)
+		for (int i = 0; i < 18; ++i)
 		{
-			textVertexBuffer[i]->Unmap(0, NULL);
-			textVertexBuffer[i]->Release();
-			textVertexBuffer[i] = NULL;
+			if (textVertexBuffer[i])
+			{
+				textVertexBuffer[i]->Unmap(0, NULL);
+				textVertexBuffer[i]->Release();
+				textVertexBuffer[i] = NULL;
+			}
 		}
 	}
 	if (fontTex)

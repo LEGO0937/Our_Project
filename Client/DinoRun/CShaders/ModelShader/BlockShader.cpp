@@ -9,7 +9,7 @@ BlockShader::~BlockShader()
 {
 }
 
-void BlockShader::Load(shared_ptr<CreateManager> pCreateManager, const char* filename, const char* Loadname)
+void BlockShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	isEnable = false;
 	FILE *pInFile = NULL;

@@ -28,6 +28,7 @@ public:
 	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 	float life = 0;
 
+	Particle() {}
 	Particle(XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, float fLife) :m_xmf3Position(xmf3Position),
 		m_xmf3Velocity(xmf3Velocity), life(fLife) {}
 
@@ -74,13 +75,13 @@ private:
 
 	float m_fGravity = 0;
 
-	ComPtr<ID3D12GraphicsCommandList> m_pd3dCommandList = NULL;
+	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
 
 	ID3D12Resource *m_pd3dcbStruct = NULL;	
 	CB_Particle *particleCb;
 	
 public:
-	ParticleSystem(shared_ptr<CreateManager> pCreateManager, const char& cPattern, const char& cShape, const float& fGravity, 
+	ParticleSystem(CreateManager* pCreateManager, const char& cPattern, const char& cShape, const float& fGravity, 
 		const float& fSize, CGameObject* pTarget, const XMFLOAT3& xmf3Position,
 		 const float& fVelocity,
 		string pTextureName, const float& fLife, const UINT& uMaxSize);
@@ -90,7 +91,7 @@ public:
 	void Update(float fTimeElapsed);
 	void FixedUpdate(float fTimeElapsed);
 
-	void BuildResource(shared_ptr<CreateManager> pCreateManager);
+	void BuildResource(CreateManager* pCreateManager);
 	void ReleaseUploadBuffers();
 	void ChangeResourceState(ID3D12GraphicsCommandList* pCommandList, ID3D12Resource* pResource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter);
 	void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);

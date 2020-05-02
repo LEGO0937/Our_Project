@@ -10,7 +10,7 @@ IconShader::~IconShader()
 }
 
 
-void IconShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
+void IconShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
 
 	string* name = (string*)pInformation;

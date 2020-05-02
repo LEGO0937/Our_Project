@@ -45,7 +45,7 @@ CPlayer::~CPlayer()
 	if (m_pCamera) delete m_pCamera;
 }
 
-void CPlayer::CreateShaderVariables(shared_ptr<CreateManager> pCreateManager)
+void CPlayer::CreateShaderVariables(CreateManager* pCreateManager)
 {
 	if (m_pCamera) m_pCamera->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 }
@@ -264,8 +264,8 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		}
 		//w = Vector3::Length(m_xmf3Velocity)* sin(XMConvertToRadians(degree)) / (3.8);
 		/*
-		float s = (3.8f*sin(XMConvertToRadians(degree)) / 1.6f);
-			w = Vector3::Length(m_xmf3Velocity)* sin(s) / 3.8f;
+		float R = (3.8f*sin(XMConvertToRadians(degree)) / 1.6f);
+			w = Vector3::Length(m_xmf3Velocity)* sin(R) / 3.8f;
 		*/
 		//이부분에  10인 값을 4.8정도로 바꾸면 드리프트도 가능할 듯?
 		Rotate(0, XMConvertToDegrees(w)*fTimeElapsed, 0.0f); //degree로 바꿔서 회전 시작 
@@ -459,7 +459,7 @@ void CFuncCallbackHandler::HandleCallback(void *pAnimationController, int nSet)
 	controller->SetTrackEnable(nSet, true);
 }
 
-CDinoRunPlayer::CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager) : CPlayer()
+CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager) : CPlayer()
 {
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);

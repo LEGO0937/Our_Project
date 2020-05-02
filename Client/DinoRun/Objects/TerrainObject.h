@@ -5,7 +5,7 @@
 class CHeightMapTerrain : public CGameObject
 {
 public:
-	CHeightMapTerrain(shared_ptr<CreateManager> pCreateManager, LPCTSTR pFileName, int
+	CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFileName, int
 		nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale);
 	virtual ~CHeightMapTerrain();
 private:

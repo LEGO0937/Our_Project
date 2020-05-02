@@ -54,11 +54,17 @@ void DrawManager::RenderDepth(shared_ptr<BaseScene> pScene)
 	pScene->RenderShadow();
 
 	ChangeResourceState(m_pd3dShadowDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
-	//ExecuteCommandList();
+	ExecuteCommandList();
 }
 
 void DrawManager::RenderLight(shared_ptr<BaseScene> pScene, float fTimeElapsed)
 {
+	//WaitForGpuComplete();
+	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+
+	m_pd3dCommandList->SetGraphicsRootSignature(m_pGraphicsRootSignature.Get());
+	m_pd3dCommandList->SetComputeRootSignature(m_pComputeRootSignature.Get());
+
 	ChangeResourceState(m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	m_pd3dCommandList->ClearDepthStencilView(m_dsvDepthStencilBufferCPUHandle,
@@ -113,7 +119,7 @@ void DrawManager::WaitForGpuComplete()
 void DrawManager::MoveToNextFrame()
 {
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
-	WaitForGpuComplete();
+	//WaitForGpuComplete();
 }
 
 void DrawManager::ResetCommandList()

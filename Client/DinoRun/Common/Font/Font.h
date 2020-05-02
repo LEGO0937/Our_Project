@@ -43,7 +43,7 @@ struct Font
 	FontChar* CharList; // list of characters
 	int numKernings; // the number of kernings
 	FontKerning* KerningsList; // list to hold kerning values
-	ID3D12Resource* textureBuffer; // the font texture resource
+	ComPtr<ID3D12Resource> textureBuffer; // the font texture resource
 	D3D12_GPU_DESCRIPTOR_HANDLE srvHandle; // the font srv
 
 	// these are how much the character is padded in the texture. We

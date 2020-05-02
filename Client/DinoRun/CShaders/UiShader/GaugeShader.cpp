@@ -11,7 +11,7 @@ GaugeShader::~GaugeShader()
 }
 
 
-void GaugeShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
+void GaugeShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
 	
 	CTexture * Guage = new CTexture(1, RESOURCE_TEXTURE2D, 0);

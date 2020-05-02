@@ -40,10 +40,8 @@ void LobbyScene::ReleaseObjects()
 	instacingBillBoardShaders.clear();
 
 }
-void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void LobbyScene::BuildObjects(CreateManager* pCreateManager)
 {
-
-	ComPtr<ID3D12Device> m_pd3dDevice = pCreateManager->GetDevice();
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
@@ -310,18 +308,18 @@ void LobbyScene::Render(float fTimeElapsed)
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList.Get(), m_pCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	for (CUiShader* shader : instacingUiShaders)
 	{
 		if(shader)
-			shader->Render(m_pd3dCommandList.Get(), m_pCamera);
+			shader->Render(m_pd3dCommandList, m_pCamera);
 	}
 	
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
 	if (fontShader)
-		fontShader->Render(m_pd3dCommandList.Get(), m_pCamera, gameTexts);
+		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 
 #ifdef _WITH_BOUND_BOX
 
@@ -356,7 +354,7 @@ SceneType LobbyScene::Update(float fTimeElapsed)
 }
 
 
-void LobbyScene::CreateShaderVariables(shared_ptr<CreateManager> pCreateManager)
+void LobbyScene::CreateShaderVariables(CreateManager* pCreateManager)
 {
 }
 

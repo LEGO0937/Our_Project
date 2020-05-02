@@ -15,7 +15,7 @@ cbuffer cbParticleCS : register(b1)
 	float gElapsedTime;
 	float gSize;
 };
-cbuffer cbParticleVS : register(b5)
+cbuffer cbParticleVS : register(b6)
 {
 	float3 f3Position;
 	float fGravity;
@@ -34,8 +34,8 @@ float rand(float2 uv)
 	return abs(noise.x + noise.y) * 0.5;
 }
 
-[numthreads(1000, 1, 1)]
-void ParticleCS( uint3 id : SV_GroupThreadID)
+[numthreads(1, 1, 1)]
+void ParticleCS( uint3 id : SV_GroupID)
 {
 	Particle prevParticle = appendBuf[id.x];
 	Particle curParticle;

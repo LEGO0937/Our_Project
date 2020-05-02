@@ -8,7 +8,7 @@ FenceShader::~FenceShader()
 {
 }
 
-void FenceShader::Load(shared_ptr<CreateManager> pCreateManager, const char* filename, const char* Loadname)
+void FenceShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	isEnable = false;
 

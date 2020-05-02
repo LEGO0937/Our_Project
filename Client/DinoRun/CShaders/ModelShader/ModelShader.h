@@ -6,11 +6,11 @@ public:
 	ModelShader();
 	virtual ~ModelShader();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename = NULL);
+	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL);
 	virtual void Update(float fTimeElapsed){}
 	virtual void FixedUpdate(float fTimeElapsed) {}
 
-	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
+	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 };
 
 class TreeShader : public ModelShader
@@ -19,7 +19,7 @@ public:
 	TreeShader();
 	virtual ~TreeShader();
 
-	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
+	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 };
 
 class FenceShader : public ModelShader
@@ -28,7 +28,7 @@ public:
 	FenceShader();
 	virtual ~FenceShader();
 
-	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
+	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
 };
 
@@ -38,7 +38,7 @@ public:
 	BlockShader();
 	virtual ~BlockShader();
 
-	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
+	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 };
 
 class ItemShader : public ModelShader
@@ -47,7 +47,7 @@ public:
 	ItemShader();
 	virtual ~ItemShader();
 
-	virtual void Load(shared_ptr<CreateManager> pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
+	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
 };
 

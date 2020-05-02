@@ -88,7 +88,12 @@ void CTexture::ReleaseUploadBuffers()
 {
 	if (m_ppd3dTextureUploadBuffers)
 	{
-		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextureUploadBuffers[i]) m_ppd3dTextureUploadBuffers[i]->Release();
+		for (int i = 0; i < m_nTextures; i++) 
+			if (m_ppd3dTextureUploadBuffers[i])
+			{
+				m_ppd3dTextureUploadBuffers[i]->Release();
+				m_ppd3dTextureUploadBuffers[i] = NULL;
+			}
 		delete[] m_ppd3dTextureUploadBuffers;
 		m_ppd3dTextureUploadBuffers = NULL;
 	}
@@ -101,6 +106,10 @@ void CTexture::ReleaseShaderVariables()
 void CTexture::LoadTextureFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, const wchar_t *pszFileName, UINT nIndex)
 {
 	m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromFile(pd3dDevice, pd3dCommandList, pszFileName, &(m_ppd3dTextureUploadBuffers[nIndex]), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	m_ppd3dTextures[nIndex]->SetName(pszFileName);
+	wstring str = pszFileName;
+	str += L"Upload";
+	m_ppd3dTextureUploadBuffers[nIndex]->SetName(str.c_str());
 }
 void CTexture::SetTexture(ComPtr<ID3D12Resource> resouce, UINT nIndex)
 {
@@ -326,7 +335,7 @@ void CGameObject::SetMaterial(int nMaterial, CMaterial *pMaterial)
 	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
 }
 
-void CGameObject::resetShadowTexture(shared_ptr<CreateManager> pCreateManager)
+void CGameObject::resetShadowTexture(CreateManager* pCreateManager)
 {
 	CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(), 0);
@@ -799,7 +808,7 @@ int ReadStringFromFile(FILE *pInFile, char *pstrToken)
 	return(nStrLength);
 }
 
-void CGameObject::LoadMaterialsFromFile(shared_ptr<CreateManager> pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader)
+void CGameObject::LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader)
 {
 	char pstrToken[64] = { '\0' };
 
@@ -871,7 +880,7 @@ void CGameObject::LoadMaterialsFromFile(shared_ptr<CreateManager> pCreateManager
 	}
 }
 
-CGameObject *CGameObject::LoadFrameHierarchyFromFile(shared_ptr<CreateManager> pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes)
+CGameObject *CGameObject::LoadFrameHierarchyFromFile(CreateManager* pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes)
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -1048,7 +1057,7 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 	}
 }
 
-CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(shared_ptr<CreateManager> pCreateManager,  const char *pstrFileName, CShader *pShader)
+CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(CreateManager* pCreateManager,  const char *pstrFileName, CShader *pShader)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
@@ -1110,7 +1119,7 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(shared_ptr<Creat
 }
 
 
-void CGameObject::CreateInstanceBuffer(shared_ptr<CreateManager> pCreateManager,
+void CGameObject::CreateInstanceBuffer(CreateManager* pCreateManager,
 	UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer)
 {
 	if (nInstances > 0)
@@ -1127,7 +1136,7 @@ void CGameObject::CreateInstanceBuffer(shared_ptr<CreateManager> pCreateManager,
 	}
 }
 
-void CGameObject::CreateSkinedInstanceBuffer(shared_ptr<CreateManager> pCreateManager,
+void CGameObject::CreateSkinedInstanceBuffer(CreateManager* pCreateManager,
 	UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer)
 {
 	if (nInstances > 0)

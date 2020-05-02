@@ -9,7 +9,7 @@ ModelShader::~ModelShader()
 {
 }
 
-void ModelShader::Load(shared_ptr<CreateManager> pCreateManager, const char* filename, const char* Loadname)
+void ModelShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, Loadname, "rb");
@@ -37,7 +37,7 @@ void ModelShader::Load(shared_ptr<CreateManager> pCreateManager, const char* fil
 	::fclose(pInFile);
 }
 
-void ModelShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename)
+void ModelShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
 {
 	if (!pszFileName)
 		return;

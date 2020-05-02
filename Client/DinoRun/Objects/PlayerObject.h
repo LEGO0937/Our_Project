@@ -98,7 +98,7 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
-	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager);
+	virtual void CreateShaderVariables(CreateManager* pCreateManager);
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 
@@ -136,7 +136,7 @@ protected:
 class CDinoRunPlayer : public CPlayer
 {
 public:
-	CDinoRunPlayer(shared_ptr<CreateManager> pCreateManager);
+	CDinoRunPlayer(CreateManager* pCreateManager);
 	virtual ~CDinoRunPlayer();
 	
 public:

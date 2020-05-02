@@ -341,6 +341,45 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		XMFLOAT3 xmf3Position = Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset);
 		//현재의 카메라의 위치에서 회전한 카메라의 위치까지의 방향과 거리를 나타내는 벡터이다. 
 		XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
+		/*
+		float angle = Vector3::Angle(xmf3Position, m_xmf3Position);
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Up),
+			XMConvertToRadians(angle -90 ));
+
+		m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
+		//플레이어의 위치를 중심으로 카메라의 위치 벡터(플레이어를 기준으로 한)를 회전한다. 
+		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
+		//회전시킨 카메라의 위치 벡터에 플레이어의 위치를 더하여 카메라의 위치 벡터를 구한다. 
+		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
+		*/
+		
+		xmf3Position = Vector3::Subtract(xmf3Position, m_pPlayer->GetPosition());
+		m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
+		XMFLOAT3 p1, p2;
+
+		p1 = m_xmf3Position;
+		p2 = xmf3Position;
+
+		p1 = Vector3::Normalize(p1);
+		p2 = Vector3::Normalize(p2); 
+		XMFLOAT3 crossProduct = Vector3::CrossProduct(p1, p2,false);
+		float angle = Vector3::DotProduct(p1, p2);
+		angle = (angle > 0.0f) ? XMConvertToDegrees(acosf(angle)) : 90.0f;
+		angle *= (crossProduct.y > 0.0f) ? 1.0f : -1.0f;
+	
+		if (isnan(angle))
+		{
+			angle = 0;
+		}
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Up),
+			XMConvertToRadians(angle));
+		
+		//m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
+		//플레이어의 위치를 중심으로 카메라의 위치 벡터(플레이어를 기준으로 한)를 회전한다. 
+		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
+		//회전시킨 카메라의 위치 벡터에 플레이어의 위치를 더하여 카메라의 위치 벡터를 구한다. 
+		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
+		/*
 		float fLength = Vector3::Length(xmf3Direction);
 		xmf3Direction = Vector3::Normalize(xmf3Direction);
 		
@@ -355,6 +394,8 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			//카메라가 플레이어를 바라보도록 한다. 
 			SetLookAt(xmf3LookAt);
 		}
+		*/
+		SetLookAt(xmf3LookAt);
 	}
 }
 

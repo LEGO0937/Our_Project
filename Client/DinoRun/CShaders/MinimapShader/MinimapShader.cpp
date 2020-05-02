@@ -11,7 +11,7 @@ MinimapShader::~MinimapShader()
 {
 }
 
-void MinimapShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename)
+void MinimapShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
 {
 	if (!pszFileName)
 		return;

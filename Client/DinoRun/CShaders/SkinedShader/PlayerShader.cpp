@@ -8,7 +8,7 @@ PlayerShader::PlayerShader()
 PlayerShader::~PlayerShader()
 {
 }
-void PlayerShader::Load(shared_ptr<CreateManager> pCreateManager, const char* filename, const char* Loadname)
+void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, Loadname, "rb");

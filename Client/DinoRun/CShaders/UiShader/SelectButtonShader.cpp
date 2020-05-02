@@ -10,7 +10,7 @@ SelectButtonShader::~SelectButtonShader()
 }
 
 
-void SelectButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
+void SelectButtonShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
 
 	const char* name = *(const char**)pInformation;

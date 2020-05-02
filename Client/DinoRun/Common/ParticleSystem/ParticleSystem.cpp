@@ -2,13 +2,13 @@
 #include <time.h>
 
 
-ParticleSystem::ParticleSystem(shared_ptr<CreateManager> pCreateManager, const char& cPattern, 
+ParticleSystem::ParticleSystem(CreateManager* pCreateManager, const char& cPattern, 
 	const char& cShape, const float& fGravity,	const float& fSize,	CGameObject* pTarget,
 	const XMFLOAT3& xmf3Position, const float& fVelocity,	string pTextureName, 
 	const float& fLife, const UINT& uMaxSize): m_cPattern(cPattern),m_cShape(cShape), m_fSize(fSize),
 	m_fParticleLife(fLife), m_fVelocity(fVelocity),m_fGravity(fGravity),m_uMaxSize(uMaxSize)
 {
-	m_pd3dCommandList = pCreateManager->GetCommandList();
+	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CTexture * texture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	texture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(pTextureName.c_str()), 0);
@@ -28,6 +28,7 @@ ParticleSystem::ParticleSystem(shared_ptr<CreateManager> pCreateManager, const c
 	
 	
 	m_vParticles.reserve(m_uMaxSize);
+	//m_vParticles.resize(m_uMaxSize);
 
 	m_pTarget = pTarget;
 
@@ -95,10 +96,10 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 	else
 		pos = m_xmf3Position;
 
-	particleCb[0].xmf3Position = pos;
-	particleCb[0].fElapsedTime = fTimeElapsed;
-	particleCb[0].fGravity = m_fGravity;
-	particleCb[0].fSize = m_fSize;
+	particleCb->xmf3Position = pos;
+	particleCb->fElapsedTime = fTimeElapsed;
+	particleCb->fGravity = m_fGravity;
+	particleCb->fSize = m_fSize;
 
 	if (m_bEnable)
 	{
@@ -131,8 +132,9 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 		else
 			++i;
 	}
-	memcpy(m_pSrbMappedParticles, m_vParticles.data(), sizeof(Particle) * m_uMaxSize);
-	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dUbParticles, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
+	memcpy(m_pSrbMappedParticles, m_vParticles.data(), sizeof(Particle) * m_vParticles.size());
+	ChangeResourceState(m_pd3dCommandList, m_pd3dUbParticles, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	m_pd3dCommandList->SetComputeRootShaderResourceView(4,
 		m_pd3dSrbParticles->GetGPUVirtualAddress());
@@ -140,9 +142,9 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 		m_pd3dUbParticles->GetGPUVirtualAddress());
 	m_pd3dCommandList->SetComputeRootConstantBufferView(6, m_pd3dcbStruct->GetGPUVirtualAddress());
 
-	m_pd3dCommandList->Dispatch(1, 1, 1);
+	m_pd3dCommandList->Dispatch(m_vParticles.size(), 1, 1);
 
-	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dUbParticles, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	ChangeResourceState(m_pd3dCommandList, m_pd3dUbParticles, D3D12_RESOURCE_STATE_UNORDERED_ACCESS, D3D12_RESOURCE_STATE_COPY_SOURCE);
 	m_pd3dCommandList->CopyResource(m_pd3dReadBackParticles, m_pd3dUbParticles);
 	return false;
 }
@@ -218,7 +220,7 @@ void ParticleSystem::Update(float fTimeElapsed)
 }
 void ParticleSystem::FixedUpdate(float fTimeElapsed) {}
 
-void ParticleSystem::BuildResource(shared_ptr<CreateManager> pCreateManager)
+void ParticleSystem::BuildResource(CreateManager* pCreateManager)
 {
 
 	m_pd3dUbParticles = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
@@ -227,7 +229,7 @@ void ParticleSystem::BuildResource(shared_ptr<CreateManager> pCreateManager)
 	//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
 	//m_pd3dcbParticles1->Map(0, NULL, (void **)m_vParticles.data());
 
-	ChangeResourceState(m_pd3dCommandList.Get(), m_pd3dUbParticles, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE);
+	ChangeResourceState(m_pd3dCommandList, m_pd3dUbParticles, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 	//버퍼는 세개 만든다 하나는 uav , upload, readback
 	//업데이트 전에 업로드힙에서 오브젝트 정보를 업데이트하고 uav로 복사, 업데이트 실행후 uav의 내용을 readBack으로
@@ -245,7 +247,7 @@ void ParticleSystem::BuildResource(shared_ptr<CreateManager> pCreateManager)
 	m_pd3dCommandList->CopyResource(m_pd3dReadBackParticles, m_pd3dSrbParticles);
 
 	UINT ncbElementBytes = ((sizeof(CB_Particle) + 255) & ~255); //256의 배수
-	m_pd3dcbStruct = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList.Get(), NULL,
+	m_pd3dcbStruct = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList, NULL,
 		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbStruct->Map(0, NULL, (void **)&particleCb);
@@ -276,7 +278,9 @@ void ParticleSystem::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 {
 	m_pd3dCommandList->SetGraphicsRootShaderResourceView(3,
 		m_pd3dSrbParticles->GetGPUVirtualAddress());
-	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 6, particleCb, 0);
+
+	m_pd3dCommandList->SetGraphicsRootConstantBufferView(11, m_pd3dcbStruct->GetGPUVirtualAddress());
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(11, 6, particleCb, 0);
 
 	if (m_pShader)
 		m_pShader->Render(pd3dCommandList, pCamera);

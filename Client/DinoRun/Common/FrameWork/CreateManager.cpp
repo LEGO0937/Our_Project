@@ -32,10 +32,12 @@ void CreateManager::Initialize(HINSTANCE hInstance, HWND hWnd)
 void CreateManager::Release()
 {
 	HRESULT hResult;
+	m_pDrawManager->WaitForGpuComplete();
 
 	hResult = m_pdxgiSwapChain->SetFullscreenState(FALSE, NULL);
 
 	m_pDrawManager->Release();
+	m_pDrawManager.reset();
 
 	m_pd3dCommandQueue.Reset();
 	m_pd3dCommandAllocator.Reset();
@@ -188,18 +190,17 @@ D3D12_RESOURCE_STATES CreateBufferInitialStates(D3D12_HEAP_TYPE heapType)
 void CreateManager::ResetCommandList()
 {
 	m_pDrawManager->WaitForGpuComplete();
-
-	HRESULT hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
+	m_pDrawManager->ResetCommandList();
 }
 
 void CreateManager::ExecuteCommandList()
 {
-	HRESULT hResult = m_pd3dCommandList->Close();
-	
-	ID3D12CommandList *CommandLists[] = { m_pd3dCommandList.Get() };
-	m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
+	//HRESULT hResult = m_pd3dCommandList->Close();
+	//
+	//ID3D12CommandList *CommandLists[] = { m_pd3dCommandList.Get() };
+	//m_pd3dCommandQueue->ExecuteCommandLists(1, CommandLists);
 
-	m_pDrawManager->WaitForGpuComplete();
+	m_pDrawManager->ExecuteCommandList();
 }
 
 
@@ -218,7 +219,7 @@ void CreateManager::CreateDirect3dDevice()
 	const char factoryName[]{ "m_pFactory" };
 	//모든 하드웨어 어댑터 대하여 특성 레벨 12.0을 지원하는 하드웨어 디바이스를 생성한다.
 	IDXGIAdapter1 *pd3dAdapter = NULL;
-	for (UINT i = 0; DXGI_ERROR_NOT_FOUND != m_pdxgiFactory->EnumAdapters1(i, &pd3dAdapter); i++)
+	for (UINT i = 1; DXGI_ERROR_NOT_FOUND != m_pdxgiFactory->EnumAdapters1(i, &pd3dAdapter); i++)
 	{
 		DXGI_ADAPTER_DESC1 dxgiAdapterDesc; pd3dAdapter->GetDesc1(&dxgiAdapterDesc);
 		if (dxgiAdapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) continue;
@@ -481,7 +482,7 @@ void CreateManager::CreateGraphicsRootSignature()
 	pd3dDescriptorRanges[2].RegisterSpace = 0;
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = 0;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[11];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[12];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; //Camera
@@ -539,6 +540,10 @@ void CreateManager::CreateGraphicsRootSignature()
 	pd3dRootParameters[10].DescriptorTable.pDescriptorRanges = &pd3dDescriptorRanges[2]; //Shadow map
 	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
+	pd3dRootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[11].Descriptor.ShaderRegister = 6; //Particle
+	pd3dRootParameters[11].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	auto staticSamplers = GetStaticSamplers();
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =

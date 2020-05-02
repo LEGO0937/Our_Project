@@ -9,7 +9,7 @@ ItemShader::~ItemShader()
 {
 }
 
-void ItemShader::Load(shared_ptr<CreateManager> pCreateManager, const char* filename, const char* Loadname)
+void ItemShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	isEnable = true;
 

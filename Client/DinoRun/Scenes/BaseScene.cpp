@@ -16,13 +16,13 @@ void BaseScene::ReleaseObjects()
 
 void BaseScene::SetViewportsAndScissorRects()
 {
-	if (m_pCamera) m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
+	if (m_pCamera) m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 }
 
 void BaseScene::Render(float fTimeElapsed)
 {
-	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
-	m_pCamera->UpdateShaderVariables(m_pd3dCommandList.Get());
+	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
+	m_pCamera->UpdateShaderVariables(m_pd3dCommandList);
 
 	UpdateShaderVariables();
 	if (m_pd3dcbLights)
@@ -35,12 +35,13 @@ void BaseScene::Render(float fTimeElapsed)
 
 void BaseScene::RenderShadow()
 {
-	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList.Get());
+	m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	UpdateShaderVariables();
 }
 
 BaseScene::~BaseScene()
 {
+
 }
 
 void BaseScene::ReleaseUploadBuffers()

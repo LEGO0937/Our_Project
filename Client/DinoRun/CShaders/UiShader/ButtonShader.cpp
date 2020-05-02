@@ -10,7 +10,7 @@ ButtonShader::~ButtonShader()
 }
 
 
-void ButtonShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
+void ButtonShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {	
 	UI_INFO* ui_Infomation = (UI_INFO*)pInformation;
 	if (ui_Infomation->positions.size() <= 0)

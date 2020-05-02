@@ -43,11 +43,11 @@ public:
 	void BuildMinimapCamera(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 		*pd3dCommandList);
 
-	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
+	void BuildObjects(CreateManager* pCreateManager);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
-	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager);
+	virtual void CreateShaderVariables(CreateManager* pCreateManager);
 	virtual void UpdateShaderVariables();
 	virtual void ReleaseShaderVariables();
 
@@ -61,7 +61,7 @@ public:
 	void RenderShadow();
 	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer);
 
-	virtual void ResetShadowBuffer(shared_ptr<CreateManager> pCreateManager);
+	virtual void ResetShadowBuffer(CreateManager* pCreateManager);
 
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);

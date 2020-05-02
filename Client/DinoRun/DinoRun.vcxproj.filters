@@ -223,6 +223,9 @@
     <Filter Include="CShaders\UiShader\07Icon">
       <UniqueIdentifier>{f588377e-8e1c-4ca4-9ddf-50e0778e0e2c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scenes\ItemGameScene">
+      <UniqueIdentifier>{64e936bd-939e-47c8-82db-b92c3cf8b653}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -365,6 +368,9 @@
     </ClInclude>
     <ClInclude Include="CShaders\MinimapShader\MinimapShader.h">
       <Filter>CShaders\MinimapShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Scenes\ItemGameScene.h">
+      <Filter>Scenes\ItemGameScene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -538,6 +544,9 @@
     </ClCompile>
     <ClCompile Include="CShaders\UiShader\IconShader.cpp">
       <Filter>CShaders\UiShader\07Icon</Filter>
+    </ClCompile>
+    <ClCompile Include="Scenes\ItemGameScene.cpp">
+      <Filter>Scenes\ItemGameScene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -11,7 +11,7 @@ BillBoardShader::~BillBoardShader()
 {
 }
 
-void BillBoardShader::Load(shared_ptr<CreateManager> pCreateManager, const char* filename)
+void BillBoardShader::Load(CreateManager* pCreateManager, const char* filename)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, filename, "rb");
@@ -34,7 +34,7 @@ void BillBoardShader::Load(shared_ptr<CreateManager> pCreateManager, const char*
 	::fclose(pInFile);
 }
 
-void BillBoardShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, const char *pszFileName, const char* filename)
+void BillBoardShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
 {
 	if (!pszFileName)
 		return;

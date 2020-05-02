@@ -10,7 +10,7 @@ BackGroundShader::~BackGroundShader()
 }
 
 
-void BackGroundShader::BuildObjects(shared_ptr<CreateManager> pCreateManager, void* pInformation)
+void BackGroundShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
 
 	string* name = (string*)pInformation;

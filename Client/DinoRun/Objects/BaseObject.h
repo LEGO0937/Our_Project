@@ -257,7 +257,7 @@ public:
 	void SetShader(int nMaterial, CShader *pShader);
 	void SetMaterial(int nMaterial, CMaterial *pMaterial);
 
-	virtual void resetShadowTexture(shared_ptr<CreateManager> pCreateManager);
+	virtual void resetShadowTexture(CreateManager* pCreateManager);
 
 	void SetChild(CGameObject *pChild, bool bReferenceUpdate = false);
 
@@ -277,16 +277,16 @@ public:
 	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
 #endif
 
-	virtual void CreateShaderVariables(shared_ptr<CreateManager> pCreateManager) {}
+	virtual void CreateShaderVariables(CreateManager* pCreateManager) {}
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) {}
 	virtual void ReleaseShaderVariables();
 
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
 
-	void CreateInstanceBuffer(shared_ptr<CreateManager> pCreateManager,
+	void CreateInstanceBuffer(CreateManager* pCreateManager,
 		UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& uMap);
-	void CreateSkinedInstanceBuffer(shared_ptr<CreateManager> pCreateManager,
+	void CreateSkinedInstanceBuffer(CreateManager* pCreateManager,
 		UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& uMap);
 
 	virtual void ReleaseUploadBuffers();
@@ -332,12 +332,12 @@ public:
 	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
 	void SetTrackAnimationPosition(int nAnimationTrack, float fPosition);
 
-	void LoadMaterialsFromFile(shared_ptr<CreateManager> pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader);
+	void LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader);
 
 	static void LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoadedModel);
-	static CGameObject *LoadFrameHierarchyFromFile(shared_ptr<CreateManager> pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
+	static CGameObject *LoadFrameHierarchyFromFile(CreateManager* pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
 
-	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(shared_ptr<CreateManager> pCreateManager, const char *pstrFileName, CShader *pShader);
+	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(CreateManager* pCreateManager, const char *pstrFileName, CShader *pShader);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 };
