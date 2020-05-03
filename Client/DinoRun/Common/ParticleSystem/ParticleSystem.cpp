@@ -103,7 +103,7 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 
 	if (m_bEnable)
 	{
-		if (curNumParticle + m_cShape > m_uMaxSize)
+		if (curNumParticle >= m_uMaxSize)
 		{
 			if (m_cPattern == ONES)
 			{
@@ -201,6 +201,9 @@ void ParticleSystem::CreateParticles()
 		}
 		break;
 	case BOOM:
+		XMFLOAT3 vel = XMFLOAT3(0, 0, 0);
+		m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
+		curNumParticle++;
 		break;
 	default:
 		break;
@@ -209,7 +212,10 @@ void ParticleSystem::CreateParticles()
 void ParticleSystem::Update(float fTimeElapsed) 
 {
 	coolTime += fTimeElapsed;
-	
+	if (m_cShape == BOOM)
+	{
+		m_fSize += fTimeElapsed * 200;
+	}
 	if (coolTime > 0.05)
 	{
 		coolTime = 0.f;

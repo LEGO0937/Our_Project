@@ -62,7 +62,10 @@ void RoomScene::BuildObjects(CreateManager* pCreateManager)
 	button_info.positions.emplace_back(XMFLOAT3(0.55f, -0.57f, 0.0f));
 	button_info.f_uvY.emplace_back(0.0f);
 
-	uiShader = new ButtonShader;
+	button_info.maxUv = XMFLOAT2(0.5f, 0.25f);
+	button_info.minUv = XMFLOAT2(0.0f, 0.0f);
+
+	uiShader = new ImageShader;
 	uiShader->BuildObjects(pCreateManager, &button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
@@ -93,7 +96,7 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			{
 				instacingUiShaders[1]->getUvXs()[0] = 0.5f;
 				//임시적인 씬이동을 위해 여기서 씬타입 전환
-				sceneType = Game_Scene;
+				sceneType = ItemGame_Scene;
 			}
 			else
 				instacingUiShaders[1]->getUvXs()[0] = 0.0f;
@@ -179,7 +182,7 @@ void RoomScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-SceneType RoomScene::Update(float fTimeElapsed)
+SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	//물리 및 충돌을 위한 update
 	if (sceneType != SceneType::Room_Scene)

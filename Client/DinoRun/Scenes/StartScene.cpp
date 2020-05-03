@@ -56,8 +56,10 @@ void StartScene::BuildObjects(CreateManager* pCreateManager)
 	button_info.meshSize = XMFLOAT2(0.15f, 0.12f);
 	button_info.positions.emplace_back(XMFLOAT3(0.31f, -0.5f, 0.0f));
 	button_info.f_uvY.emplace_back(0.25f);
-	
-	uiShader = new ButtonShader;
+	button_info.maxUv = XMFLOAT2(0.5f, 0.25f);
+	button_info.minUv = XMFLOAT2(0.0f, 0.0f);
+
+	uiShader = new ImageShader;
 	uiShader->BuildObjects(pCreateManager, &button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
@@ -259,7 +261,7 @@ void StartScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-SceneType StartScene::Update(float fTimeElapsed)
+SceneType StartScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	//물리 및 충돌을 위한 update
 	if (sceneType != SceneType::Start_Scene)

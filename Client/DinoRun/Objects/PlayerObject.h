@@ -26,6 +26,8 @@ class CCamera;
 
 #define Pi 3.1415f
 #define WHEELROTATEPERSEC 30
+
+
 class CPlayer : public CGameObject
 {
 protected:

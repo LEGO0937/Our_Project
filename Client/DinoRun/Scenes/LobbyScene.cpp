@@ -79,8 +79,9 @@ void LobbyScene::BuildObjects(CreateManager* pCreateManager)
 
 	view_info.positions.emplace_back(XMFLOAT3(0.175f, 0.087f, 0.0f));
 	view_info.f_uvY.emplace_back(0.5f);
-
-	uiShader = new ButtonShader;
+	view_info.maxUv = XMFLOAT2(0.5f, 0.25f);
+	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
+	uiShader = new ImageShader;
 	uiShader->BuildObjects(pCreateManager, &view_info);
 	instacingUiShaders.emplace_back(uiShader);
 
@@ -99,7 +100,7 @@ void LobbyScene::BuildObjects(CreateManager* pCreateManager)
 	view_info.positions.emplace_back(XMFLOAT3(0.77f, -0.75f, 0.0f));
 	view_info.f_uvY.emplace_back(0.0f);
 
-	uiShader = new ButtonShader;
+	uiShader = new ImageShader;
 	uiShader->BuildObjects(pCreateManager, &view_info);
 	instacingUiShaders.emplace_back(uiShader);
 
@@ -306,10 +307,6 @@ void LobbyScene::Render(float fTimeElapsed)
 {
 	BaseScene::Render(fTimeElapsed);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
-	for (CObInstancingShader* shader : instacingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
-
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	for (CUiShader* shader : instacingUiShaders)
 	{
@@ -333,7 +330,7 @@ void LobbyScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-SceneType LobbyScene::Update(float fTimeElapsed)
+SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	if (sceneType != SceneType::Lobby_Scene)
 	{

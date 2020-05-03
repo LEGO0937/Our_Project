@@ -51,3 +51,13 @@ public:
 	virtual void Update(float fTimeElapsed);
 };
 
+class MeatShader : public ModelShader
+{
+public:
+	MeatShader();
+	virtual ~MeatShader();
+
+	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
+	virtual void Update(float fTimeElapsed);
+};
+

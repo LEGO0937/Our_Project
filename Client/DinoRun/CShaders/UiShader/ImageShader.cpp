@@ -2,15 +2,15 @@
 #include "../../Common//FrameWork/CreateManager.h"
 #include "../../Meshes/PlaneMesh.h"
 
-ButtonShader::ButtonShader()
+ImageShader::ImageShader()
 {
 }
-ButtonShader::~ButtonShader()
+ImageShader::~ImageShader()
 {
 }
 
 
-void ButtonShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void ImageShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {	
 	UI_INFO* ui_Infomation = (UI_INFO*)pInformation;
 	if (ui_Infomation->positions.size() <= 0)
@@ -33,7 +33,8 @@ void ButtonShader::BuildObjects(CreateManager* pCreateManager, void* pInformatio
 	m_ppObjects->SetMaterial(0, material);
 
 	PlaneMesh *mesh = NULL;
-	mesh = new PlaneMesh(ui_Infomation->meshSize.x, ui_Infomation->meshSize.y, 0.1f, 0.0f, 0.5f, 0.0f, 0.25f);
+	mesh = new PlaneMesh(ui_Infomation->meshSize.x, ui_Infomation->meshSize.y, 0.1f, ui_Infomation->minUv.x, 
+		ui_Infomation->maxUv.x, ui_Infomation->minUv.y, ui_Infomation->maxUv.y);
 	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	m_ppObjects->SetMesh(mesh);
@@ -58,7 +59,7 @@ void ButtonShader::BuildObjects(CreateManager* pCreateManager, void* pInformatio
 }
 
 
-void ButtonShader::Update(float fTimeElapsed, void* pInformation)
+void ImageShader::Update(float fTimeElapsed, void* pInformation)
 {
 
 }

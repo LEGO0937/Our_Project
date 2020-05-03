@@ -17,12 +17,12 @@ bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
 	m_hWnd = hWnd;
 
-	m_pCreateMgr = shared_ptr<CreateManager>(new CreateManager);
+	m_pCreateManager = shared_ptr<CreateManager>(new CreateManager);
 
-	m_pCreateMgr->Initialize(hInstance, hWnd);
-	m_pDrawMgr = m_pCreateMgr->GetDrawMgr();
+	m_pCreateManager->Initialize(hInstance, hWnd);
+	m_pDrawManager = m_pCreateManager->GetDrawMgr();
 
-	::gnCbvSrvDescriptorIncrementSize = m_pCreateMgr->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	::gnCbvSrvDescriptorIncrementSize = m_pCreateManager->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	m_pCamera = new CMinimapCamera;
 	m_pCamera->SetPosition(XMFLOAT3(0, 300, 0));
@@ -32,7 +32,7 @@ bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
 	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
 	m_pCamera->GenerateViewMatrix(XMFLOAT3(0, 0, 0), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
-	m_pCamera->CreateShaderVariables(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetCommandList().Get());
+	m_pCamera->CreateShaderVariables(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetCommandList().Get());
 	
 	
 	return(true);
@@ -53,7 +53,7 @@ void CGameFramework::Release()
 		m_pCamera->ReleaseShaderVariables();
 		delete m_pCamera;
 	}
-	m_pCreateMgr->Release();
+	m_pCreateManager->Release();
 }
 
 void CGameFramework::FrameAdvance()
@@ -62,11 +62,16 @@ void CGameFramework::FrameAdvance()
 	float fTimeElapsed = m_GameTimer.DeltaTime();
 	m_pScene->ProcessInput(m_hWnd, fTimeElapsed);
 	// processinput과 플레이어 animate의 순서를 뒤바꾸면 플레이어가 움직일 시 흔들림 발생 왜?
-	m_pScene->FixedUpdate(fTimeElapsed);
+	m_pScene->FixedUpdate(m_pCreateManager.get(), fTimeElapsed);
 	m_pScene->AnimateObjects(fTimeElapsed); //바뀐 행렬값으로 애니메이션 수행
-	m_CurState = m_pScene->Update(fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
-
-	m_pDrawMgr->Render(m_pScene, fTimeElapsed);
+	m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();
+	m_pCreateManager->GetDrawMgr()->ResetCommandAllocator();
+	m_pCreateManager->ResetCommandList();
+	m_CurState = m_pScene->Update(m_pCreateManager.get(),fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
+	m_pCreateManager->ExecuteCommandList();
+	//m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();
+	//fixed에서 충돌처리도 하게하여 오브젝트도 생성하게 하고 update에서 releaseUploadBuffer하는건 어떨까
+	m_pDrawManager->Render(m_pScene, fTimeElapsed);
 
 	if (m_CurState != m_PrevState)
 	{
@@ -85,10 +90,10 @@ void CGameFramework::BuildObjects()
 	BuildPipelineState();
 
 	//m_pCreateMgr->GetDrawMgr()->WaitForGpuComplete();
-	m_pCreateMgr->ResetCommandList();
+	m_pCreateManager->ResetCommandList();
 
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
-	m_pFontManager->Initialize(m_pCreateMgr.get());
+	m_pFontManager->Initialize(m_pCreateManager.get());
 	//-----------
 	/*
 	m_pScene = shared_ptr<GameScene>(new GameScene());
@@ -106,15 +111,15 @@ void CGameFramework::BuildObjects()
 	//--------
 	
 	m_pScene = shared_ptr<StartScene>(new StartScene());
-	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
+	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateMgr.get());
+	m_pScene->BuildObjects(m_pCreateManager.get());
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pScene->setCamera(m_pCamera);
 	
 	//-----------------------
 
-	m_pCreateMgr->ExecuteCommandList();
+	m_pCreateManager->ExecuteCommandList();
 
 	if (m_pScene)
 		m_pScene->ReleaseUploadBuffers();
@@ -142,7 +147,7 @@ void CGameFramework::CalculateFrameStats()
 		::GetCursorPos(&m_ptOldCursorPos);
 
 		ScreenToClient(m_hWnd, &m_ptOldCursorPos);
-		Point2D p = ScreenToProj(m_pCreateMgr->GetWindowWidth(), m_pCreateMgr->GetWindowHeight(), m_ptOldCursorPos);
+		Point2D p = ScreenToProj(m_pCreateManager->GetWindowWidth(), m_pCreateManager->GetWindowHeight(), m_ptOldCursorPos);
 		wstring windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x)+L"   y:"+ to_wstring(p.y);
 			
 			/*+ L"  x:" +
@@ -170,15 +175,15 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	{
 		if (LOWORD(lParam) == 0 || HIWORD(lParam) == 0)
 			break;
-		m_pCreateMgr->Resize(LOWORD(lParam), HIWORD(lParam));
+		m_pCreateManager->Resize(LOWORD(lParam), HIWORD(lParam));
 
 		m_pCamera->SetViewport(0, 0, LOWORD(lParam), HIWORD(lParam), 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, LOWORD(lParam), HIWORD(lParam));
 
 		if (m_pScene)
 		{
-			m_pScene->ResetShadowBuffer(m_pCreateMgr.get());
-			m_pScene->SetWindowSize(m_pCreateMgr->GetWindowWidth(), m_pCreateMgr->GetWindowHeight());
+			m_pScene->ResetShadowBuffer(m_pCreateManager.get());
+			m_pScene->SetWindowSize(m_pCreateManager->GetWindowWidth(), m_pCreateManager->GetWindowHeight());
 		}
 		if (m_pPlayer)
 		{
@@ -227,7 +232,7 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ChangeSceneByType(SceneType type)
 {
-	m_pCreateMgr->ResetCommandList();
+	m_pCreateManager->ResetCommandList();
 	
 	
 	if (m_PrevState == Start_Scene)
@@ -240,8 +245,11 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 	// 게임씬에 들어가는 액션에서는 기존의 player를 메모리 반납 후 캐릭터 번호에 맞는 모델로 새로 생성할것
 	//이때 반납전에 아이디와 모델타입을 이곳에 만든 지역변수에 저장후 반납할 것.
-	if (type == SceneType::Start_Scene)
+	switch (type)
 	{
+	case Default_Scene:
+		break;
+	case Start_Scene:
 		if (m_PrevState == SceneType::Lobby_Scene)
 		{
 			m_sPlayerID = "";
@@ -250,49 +258,54 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
 		}
-	}
-	else if (type == SceneType::Lobby_Scene)
-	{
-		if(m_PrevState == SceneType::Start_Scene || m_PrevState == SceneType::Room_Scene)
-		{ 
+		break;
+	case Lobby_Scene:
+		if (m_PrevState == SceneType::Start_Scene || m_PrevState == SceneType::Room_Scene)
+		{
 			m_pScene = shared_ptr<LobbyScene>(new LobbyScene());
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
 		}
-	}
-	else if (type == SceneType::Room_Scene)
-	{
+		break;
+	case Room_Scene:
 		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::End_Scene)
 		{
 			m_pScene = shared_ptr<RoomScene>(new RoomScene());
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
 		}
-	}
-	else if (type == SceneType::Game_Scene)
-	{
+		break;
+	case Game_Scene:
 		if (m_PrevState == SceneType::Room_Scene)
 		{
 			m_pScene = shared_ptr<GameScene>(new GameScene());
 		}
-	}
-	else if (type == SceneType::End_Scene)
-	{
-		if (m_PrevState == SceneType::Game_Scene)
+		break;
+	case ItemGame_Scene:
+		if (m_PrevState == SceneType::Room_Scene)
+		{
+			m_pScene = shared_ptr<ItemGameScene>(new ItemGameScene());
+		}
+		break;
+	case End_Scene:
+		if (m_PrevState == SceneType::Game_Scene || m_PrevState == SceneType::ItemGame_Scene)
 		{
 			m_pScene = shared_ptr<EndScene>(new EndScene());
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
 		}
+		break;
+	default:
+		break;
 	}
 
-	m_pScene->SetGraphicsRootSignature(m_pCreateMgr->GetGraphicsRootSignature().Get());
+	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateMgr.get());
+	m_pScene->BuildObjects(m_pCreateManager.get());
 
-	if (type == SceneType::Game_Scene)
+	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{
-		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateMgr.get());
+		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get());
 		pPlayer->SetMaxForce(MIN_FORCE);
 		m_pPlayer = pPlayer;
 
@@ -302,7 +315,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 	}
 
-	m_pCreateMgr->ExecuteCommandList();
+	m_pCreateManager->ExecuteCommandList();
 
 	if (m_pScene)
 		m_pScene->ReleaseUploadBuffers();
@@ -326,33 +339,33 @@ void CGameFramework::BuildPipelineState()
 void CGameFramework::CreatePSOs()
 {
 	//Base Pipelines
-	CreatePsoCube(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_CUBE_MAP);
-	CreatePsoSkinMesh(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH);
-	CreatePsoTextedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MODEL_INSTANCING);
-	CreatePsoBillBoardInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_BILLBOARD);
-	CreatePsoTerrain(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_TERRAIN);
-	CreatePsoSkinedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH_INSTANCING);
-	CreatePsoUi(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI);
-	CreatePsoUiGuage(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_GAUGE);
-	CreatePsoUiNumber(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_NUMBER);
-	CreatePsoParticle(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE);
-	CreatePsoMinimap(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MINIMAP);
+	CreatePsoCube(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_CUBE_MAP);
+	CreatePsoSkinMesh(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH);
+	CreatePsoTextedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MODEL_INSTANCING);
+	CreatePsoBillBoardInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_BILLBOARD);
+	CreatePsoTerrain(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_TERRAIN);
+	CreatePsoSkinedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH_INSTANCING);
+	CreatePsoUi(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI);
+	CreatePsoUiGuage(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_GAUGE);
+	CreatePsoUiNumber(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_NUMBER);
+	CreatePsoParticle(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE);
+	CreatePsoMinimap(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MINIMAP);
 	//Shadow Pipelines
 
-	CreatePsoShadowSkinMesh(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKIN_MESH);//수정
-	CreatePsoShadowTextedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_MODEL_INSTANCING);
-	CreatePsoShadowBillBoardInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_BILLBOARD);
-	CreatePsoShadowTerrain(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_TERRAIN);
-	CreatePsoShadowSkinedInstancing(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKINED_INSTANCING);
+	CreatePsoShadowSkinMesh(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKIN_MESH);//수정
+	CreatePsoShadowTextedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_MODEL_INSTANCING);
+	CreatePsoShadowBillBoardInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_BILLBOARD);
+	CreatePsoShadowTerrain(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_TERRAIN);
+	CreatePsoShadowSkinedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKINED_INSTANCING);
 
 	//Wire Pipelines
-	CreatePsoWire(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE);
-	CreatePsoWireInstance(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE_INSTANCING);
+	CreatePsoWire(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE);
+	CreatePsoWireInstance(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE_INSTANCING);
 	//Font
-	CreatePsoFont(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PONT);
+	CreatePsoFont(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PONT);
 	//Blur
-	CreatePsoHorzBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_HORZ_BLUR);
-	CreatePsoVertBlur(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_VERT_BLUR);
+	CreatePsoHorzBlur(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_HORZ_BLUR);
+	CreatePsoVertBlur(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_VERT_BLUR);
 
-	CreatePsoParticleCs(m_pCreateMgr->GetDevice().Get(), m_pCreateMgr->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE_CALC);
+	CreatePsoParticleCs(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE_CALC);
 }

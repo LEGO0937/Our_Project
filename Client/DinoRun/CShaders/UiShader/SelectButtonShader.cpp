@@ -2,15 +2,15 @@
 #include "../../Common//FrameWork/CreateManager.h"
 #include "../../Meshes/PlaneMesh.h"
 
-SelectButtonShader::SelectButtonShader()
+SelectImageShader::SelectImageShader()
 {
 }
-SelectButtonShader::~SelectButtonShader()
+SelectImageShader::~SelectImageShader()
 {
 }
 
 
-void SelectButtonShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void SelectImageShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
 
 	const char* name = *(const char**)pInformation;
@@ -50,7 +50,7 @@ void SelectButtonShader::BuildObjects(CreateManager* pCreateManager, void* pInfo
 }
 
 
-void SelectButtonShader::Update(float fTimeElapsed, void* pInformation)
+void SelectImageShader::Update(float fTimeElapsed, void* pInformation)
 {
 
 }

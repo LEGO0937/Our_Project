@@ -5,6 +5,7 @@
 #include "../../Scenes/StartScene.h"
 #include "../../Scenes/EndScene.h"
 #include "../../Scenes/RoomScene.h"
+#include "../../Scenes/ItemGameScene.h"
 
 class DrawManager
 {
@@ -28,6 +29,7 @@ public:
 	void WaitForGpuComplete();
 	void MoveToNextFrame();
 
+	void ResetCommandAllocator();
 	void ResetCommandList();
 	void ExecuteCommandList();
 

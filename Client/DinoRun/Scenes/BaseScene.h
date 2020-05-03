@@ -38,6 +38,13 @@ struct LIGHTS
 	float fogrange;
 };
 
+struct CB_GAME_INFO
+{
+	XMFLOAT4X4 m_xmf4x4ShadowView;
+	XMFLOAT4X4 m_xmf4x4ShadowProjection;
+	XMFLOAT4X4 m_xmf4x4InvShadowViewProjection;
+	XMFLOAT3 m_xmf3ShadowCameraPosition;
+};
 
 class BaseScene
 {
@@ -66,8 +73,8 @@ public:
 	virtual void UpdateShaderVariables() {}
 	virtual void ReleaseShaderVariables() {}
 
-	virtual SceneType Update(float fTimeElapsed) = 0;
-	virtual void FixedUpdate(float fTimeElapsed) {};
+	virtual SceneType Update(CreateManager* pCreateManager, float fTimeElapsed) = 0;
+	virtual void FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed) {};
 	virtual void AnimateObjects(float fTimeElapsed) {}
 
 	virtual void Render(float fTimeElapsed);

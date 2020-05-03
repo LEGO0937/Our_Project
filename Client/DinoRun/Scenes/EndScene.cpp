@@ -109,7 +109,7 @@ void EndScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-SceneType EndScene::Update(float fTimeElapsed)
+SceneType EndScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	//물리 및 충돌을 위한 update
 	if (sceneType != SceneType::End_Scene)

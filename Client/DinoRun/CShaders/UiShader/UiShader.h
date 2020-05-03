@@ -8,6 +8,8 @@ struct UI_INFO
 	vector<float> f_uvY;
 	XMFLOAT2 meshSize;
 	string textureName;
+	XMFLOAT2 minUv = XMFLOAT2(0, 0);
+	XMFLOAT2 maxUv = XMFLOAT2(0, 0);
 };
 
 class TimeCountShader : public CUiShader
@@ -51,6 +53,20 @@ public:
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
 };
 
+class RankCountShader : public CUiShader
+{
+private:
+
+public:
+	RankCountShader();
+	virtual ~RankCountShader();
+
+	virtual void AnimateObjects(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+};
+
 
 class BackGroundShader : public CUiShader
 {
@@ -66,13 +82,13 @@ public:
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
 };
 
-class ButtonShader : public CUiShader
+class ImageShader : public CUiShader
 {
 private:
 
 public:
-	ButtonShader();
-	virtual ~ButtonShader();
+	ImageShader();
+	virtual ~ImageShader();
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
@@ -80,13 +96,13 @@ public:
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
 };
 
-class SelectButtonShader : public CUiShader
+class SelectImageShader : public CUiShader
 {
 private:
 
 public:
-	SelectButtonShader();
-	virtual ~SelectButtonShader();
+	SelectImageShader();
+	virtual ~SelectImageShader();
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}

@@ -44,11 +44,16 @@ void ParticleCS( uint3 id : SV_GroupID)
 
 	float3 flat = curParticle.position.xyz;
 	flat.y = 0;
-
-	float3 force = normalize(flat) / length(curParticle.position);
-	curParticle.velocity = prevParticle.velocity - ((force * gElapsedTime) * 0.5);
-	curParticle.velocity.y -= gGravity;
-
+	if (length(prevParticle.velocity) != 0)
+	{
+		float3 force = normalize(flat) / length(curParticle.position);
+		curParticle.velocity = prevParticle.velocity - ((force * gElapsedTime) * 0.5);
+		curParticle.velocity.y -= gGravity;
+	}
+	else
+	{
+		curParticle.velocity = prevParticle.velocity;
+	}
 	curParticle.life = prevParticle.life - gElapsedTime;
 	
 	consumeBuf[id.x] = curParticle;

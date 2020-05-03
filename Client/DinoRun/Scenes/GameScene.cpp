@@ -146,7 +146,7 @@ void GameScene::BuildObjects(CreateManager* pCreateManager)
 	m_pCheckPointShader->BuildObjects(pCreateManager, "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
 	m_pCheckPointShader->AddRef();
 	
-	shader = new ItemShader;
+	shader = new MeatShader;
 	shader->BuildObjects(pCreateManager, "Resources/Models/Item_Meat.bin", "Resources/ObjectData/MeatData");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
@@ -162,6 +162,10 @@ void GameScene::BuildObjects(CreateManager* pCreateManager)
 	instacingUiShaders.emplace_back(uiShader);
 
 	uiShader = new TrackCountShader;
+	uiShader->BuildObjects(pCreateManager, m_pTerrain);
+	instacingUiShaders.emplace_back(uiShader);
+
+	uiShader = new RankCountShader;
 	uiShader->BuildObjects(pCreateManager, m_pTerrain);
 	instacingUiShaders.emplace_back(uiShader);
 	
@@ -433,6 +437,8 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 		instacingUiShaders[1]->Render(m_pd3dCommandList, m_pCamera);
 	if (instacingUiShaders[2])
 		instacingUiShaders[2]->Render(m_pd3dCommandList, m_pCamera);
+	if (instacingUiShaders[3])
+		instacingUiShaders[3]->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList);
@@ -453,7 +459,20 @@ void GameScene::AnimateObjects(float fTimeElapsed)
 		if (shader) { shader->AnimateObjects(fTimeElapsed); }
 }
 
-SceneType GameScene::Update(float fTimeElapsed)
+
+void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
+{
+	//물리
+	m_pPlayer->FixedUpdate(fTimeElapsed);
+
+	for (CObjectsShader* shader : UpdatedShaders)
+	{
+		shader->FixedUpdate(fTimeElapsed);  //물리 적용할 것
+	}
+}
+
+
+SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 	{
@@ -471,20 +490,26 @@ SceneType GameScene::Update(float fTimeElapsed)
 		m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 	}
 
-	for(CUiShader* shader : instacingUiShaders)
-			shader->Update(fTimeElapsed, m_pPlayer);
-	
 	for (CObjectsShader* shader : UpdatedShaders)
 	{
-		for (auto p = begin(shader->getList());p< end(shader->getList());)
+		for (auto p = begin(shader->getList()); p < end(shader->getList());)
 		{
 			//플레이어 충돌처리할 곳
 			if (m_pPlayer->IsCollide(*p))
 			{
 				if (m_pPlayer->Update(fTimeElapsed, *p))  //true반환 시 충돌된 오브젝트는 리스트에서 삭제
 				{
-					(*p)->Release();
-					p = shader->getList().erase(p);
+					if ((*p)->m_ModelType == Fence || (*p)->m_ModelType == Player)
+					{
+						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
+							0, "Resources/Images/smoke.dds", 0.5, 1));
+						p++;
+					}
+					else
+					{
+						(*p)->Release();
+						p = shader->getList().erase(p);
+					}
 				}
 				else
 					p++;
@@ -505,6 +530,11 @@ SceneType GameScene::Update(float fTimeElapsed)
 			m_pPlayer->UpCheckPoint();
 	}
 
+	for (CUiShader* shader : instacingUiShaders)
+		shader->Update(fTimeElapsed, m_pPlayer);
+
+
+
 	XMFLOAT3 playerPosition = m_pPlayer->GetPosition();
 	if (m_pMinimapCamera)
 	{
@@ -512,17 +542,6 @@ SceneType GameScene::Update(float fTimeElapsed)
 		m_pMinimapCamera->RegenerateViewMatrix();
 	}
 	return Game_Scene;
-}
-
-void GameScene::FixedUpdate(float fTimeElapsed)
-{
-	//물리
-	m_pPlayer->FixedUpdate(fTimeElapsed);
-
-	for (CObjectsShader* shader : UpdatedShaders)
-	{
-		shader->FixedUpdate(fTimeElapsed);  //물리 적용할 것
-	}
 }
 
 void GameScene::BuildLights()

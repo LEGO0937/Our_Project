@@ -1,6 +1,5 @@
 #include "UiShader.h"
 #include "../../Common//FrameWork/CreateManager.h"
-#include "../../Objects/TerrainObject.h"
 #include "../../Meshes/PlaneMesh.h"
 
 TimeCountShader::TimeCountShader()

@@ -35,7 +35,7 @@ void DrawManager::RenderDepth(shared_ptr<BaseScene> pScene)
 {
 	HRESULT hResult;
 	WaitForGpuComplete();
-	hResult = m_pd3dCommandAllocator->Reset();
+	//ResetCommandAllocator();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);
 
 	m_pd3dCommandList->SetGraphicsRootSignature(m_pGraphicsRootSignature.Get());
@@ -121,7 +121,11 @@ void DrawManager::MoveToNextFrame()
 	m_nSwapChainBufferIndex = m_pdxgiSwapChain->GetCurrentBackBufferIndex();
 	//WaitForGpuComplete();
 }
-
+void DrawManager::ResetCommandAllocator()
+{
+	HRESULT hResult;
+	hResult = m_pd3dCommandAllocator->Reset();
+}
 void DrawManager::ResetCommandList()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator.Get(), NULL);

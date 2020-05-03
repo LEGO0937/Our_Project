@@ -225,10 +225,10 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		UpdateDistance(fTimeElapsed, target);
 		m_fForce = 0;
 		//Move(XMFLOAT3(fVx,fVy,fVz),true);
-		break;
+		return true;
 	case ModelType::Player:
 		//Èû Àü¼Û
-		break;
+		return true;
 	case ModelType::Item_Box:
 		//¾ÆÀÌÅÛ ½Àµæ
 		target->isEnable = false;
@@ -533,7 +533,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager) : CPlayer()
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager, 0, RAND, -0.05f, 5, this, XMFLOAT3(0.0f, 0, 18),
+	m_pParticleSystem = new ParticleSystem(pCreateManager, LOOP, RAND, -0.05f, 5, this, XMFLOAT3(0.0f, 0, 18),
 		15, "Resources/Images/dust.dds", 0.5,60);
 	//SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
 	

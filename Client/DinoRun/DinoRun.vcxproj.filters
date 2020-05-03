@@ -169,9 +169,6 @@
     <Filter Include="CShaders\UiShader\04BackGround">
       <UniqueIdentifier>{9378677a-d14f-4607-a06b-6c7a35c587c2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CShaders\UiShader\05ButtonShader">
-      <UniqueIdentifier>{d340ed2f-c291-4ac7-ad53-12cf890ff8d5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CShaders\UiShader\06SelectButtonShader">
       <UniqueIdentifier>{a98e90a9-4bcd-4f66-b6b3-effa2abeeea7}</UniqueIdentifier>
     </Filter>
@@ -225,6 +222,12 @@
     </Filter>
     <Filter Include="Scenes\ItemGameScene">
       <UniqueIdentifier>{64e936bd-939e-47c8-82db-b92c3cf8b653}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\UiShader\08RankCounter">
+      <UniqueIdentifier>{eca0492c-a6fa-4d75-ba9a-7c009bec61aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\UiShader\05ImageShader">
+      <UniqueIdentifier>{d340ed2f-c291-4ac7-ad53-12cf890ff8d5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -494,9 +497,6 @@
     <ClCompile Include="CShaders\UiShader\BackGroundShader.cpp">
       <Filter>CShaders\UiShader\04BackGround</Filter>
     </ClCompile>
-    <ClCompile Include="CShaders\UiShader\ButtonShader.cpp">
-      <Filter>CShaders\UiShader\05ButtonShader</Filter>
-    </ClCompile>
     <ClCompile Include="CShaders\UiShader\SelectButtonShader.cpp">
       <Filter>CShaders\UiShader\06SelectButtonShader</Filter>
     </ClCompile>
@@ -547,6 +547,15 @@
     </ClCompile>
     <ClCompile Include="Scenes\ItemGameScene.cpp">
       <Filter>Scenes\ItemGameScene</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\ModelShader\MeatShader.cpp">
+      <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\UiShader\RankCountShader.cpp">
+      <Filter>CShaders\UiShader\08RankCounter</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\UiShader\ImageShader.cpp">
+      <Filter>CShaders\UiShader\05ImageShader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

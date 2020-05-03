@@ -38,8 +38,8 @@ private: // 내부 함수
 
 private: // 변수
 	HWND m_hWnd{ NULL };
-	shared_ptr<CreateManager> m_pCreateMgr;
-	shared_ptr<DrawManager> m_pDrawMgr;
+	shared_ptr<CreateManager> m_pCreateManager;
+	shared_ptr<DrawManager> m_pDrawManager;
 	shared_ptr<FontManager> m_pFontManager;
 
 	shared_ptr<BaseScene> m_pScene;

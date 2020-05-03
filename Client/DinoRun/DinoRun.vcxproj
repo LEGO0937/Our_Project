@@ -225,6 +225,7 @@
     <ClCompile Include="CShaders\ModelShader\BlockShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\FenceShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\ItemShader.cpp" />
+    <ClCompile Include="CShaders\ModelShader\MeatShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\ModelShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\TreeShader.cpp" />
     <ClCompile Include="CShaders\Shader.cpp" />
@@ -233,9 +234,10 @@
     <ClCompile Include="CShaders\SkyBoxShader\SkyBoxShader.cpp" />
     <ClCompile Include="CShaders\TerrainShader\TerrainShader.cpp" />
     <ClCompile Include="CShaders\UiShader\BackGroundShader.cpp" />
-    <ClCompile Include="CShaders\UiShader\ButtonShader.cpp" />
     <ClCompile Include="CShaders\UiShader\GaugeShader.cpp" />
     <ClCompile Include="CShaders\UiShader\IconShader.cpp" />
+    <ClCompile Include="CShaders\UiShader\ImageShader.cpp" />
+    <ClCompile Include="CShaders\UiShader\RankCountShader.cpp" />
     <ClCompile Include="CShaders\UiShader\SelectButtonShader.cpp" />
     <ClCompile Include="CShaders\UiShader\TimeCountShader.cpp" />
     <ClCompile Include="CShaders\UiShader\TrackCountShader.cpp" />
