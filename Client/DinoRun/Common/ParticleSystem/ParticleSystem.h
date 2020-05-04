@@ -10,6 +10,7 @@
 #define RAND 1
 #define CONE 15
 #define BOOM 2
+#define DUST 3
 
 
 

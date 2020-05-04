@@ -204,7 +204,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 	}
 	float fVx, fVy, fVz;
 
-	switch (target->m_ModelType)
+	switch (target->m_ModelType)   //충돌처리로 씬내에 무언가를 삭제 or 생성하려면 return true 할 것
 	{
 	case ModelType::CheckPoint:
 		++m_uCheckpointCount;
@@ -232,7 +232,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 	case ModelType::Item_Box:
 		//아이템 습득
 		target->isEnable = false;
-		break;
+		return true;
 	case ModelType::Item_Meat:
 		m_fMaxForce += 200;
 		if (m_fMaxForce > MAX_FORCE)
@@ -533,7 +533,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager) : CPlayer()
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager, LOOP, RAND, -0.05f, 5, this, XMFLOAT3(0.0f, 0, 18),
+	m_pParticleSystem = new ParticleSystem(pCreateManager, LOOP, DUST, -0.05f, 5, this, XMFLOAT3(0.0f, 0, 18),
 		15, "Resources/Images/dust.dds", 0.5,60);
 	//SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
 	

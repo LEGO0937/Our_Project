@@ -2,7 +2,7 @@
 ItemObject::ItemObject(int nMeshes) :CGameObject(nMeshes)
 {
 	isKinematic = true;
-	m_ModelType = ModelType::Item_Meat;
+	m_ModelType = ModelType::Item_Box;
 }
 ItemObject::~ItemObject()
 {

@@ -229,6 +229,9 @@
     <Filter Include="CShaders\UiShader\05ImageShader">
       <UniqueIdentifier>{d340ed2f-c291-4ac7-ad53-12cf890ff8d5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Objects\ItemObject\04ItemStone">
+      <UniqueIdentifier>{4f9d200f-64f2-4e0f-9668-08558a40fba3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -556,6 +559,9 @@
     </ClCompile>
     <ClCompile Include="CShaders\UiShader\ImageShader.cpp">
       <Filter>CShaders\UiShader\05ImageShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\ItemStone.cpp">
+      <Filter>Objects\ItemObject\04ItemStone</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -256,6 +256,7 @@
     <ClCompile Include="Objects\ItemMeat.cpp" />
     <ClCompile Include="Objects\ItemObject.cpp" />
     <ClCompile Include="Objects\ItemOil.cpp" />
+    <ClCompile Include="Objects\ItemStone.cpp" />
     <ClCompile Include="Objects\PlayerObject.cpp" />
     <ClCompile Include="Objects\SkyBoxObject.cpp" />
     <ClCompile Include="Objects\TerrainObject.cpp" />

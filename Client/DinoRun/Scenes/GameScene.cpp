@@ -43,13 +43,15 @@ void GameScene::ReleaseUploadBuffers()
 		if (shader) shader->ReleaseUploadBuffers();
 	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
 		if (shader) shader->ReleaseUploadBuffers();
-	for (CUiShader* shader : instacingUiShaders)
+	for (CUiShader* shader : instacingNumberUiShaders)
 		if (shader) { shader->ReleaseUploadBuffers(); }
 
 	if (m_pMinimapShader)
 		m_pMinimapShader->ReleaseUploadBuffers();
 	if (m_pIconShader)
 		m_pIconShader->ReleaseUploadBuffers();
+	if (m_pGuageShader)
+		m_pGuageShader->ReleaseUploadBuffers();
 }
 void GameScene::ReleaseObjects()
 {
@@ -82,7 +84,7 @@ void GameScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
-	for (CUiShader* shader : instacingUiShaders)
+	for (CUiShader* shader : instacingNumberUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 	if (m_pMinimapCamera)
@@ -106,9 +108,14 @@ void GameScene::ReleaseObjects()
 		m_pIconShader->ReleaseObjects();
 		m_pIconShader->Release();
 	}
-
+	if (m_pGuageShader)
+	{
+		m_pGuageShader->ReleaseShaderVariables();
+		m_pGuageShader->ReleaseObjects();
+		m_pGuageShader->Release();
+	}
 	UpdatedShaders.clear();
-	instacingUiShaders.clear();
+	instacingNumberUiShaders.clear();
 	instacingBillBoardShaders.clear();
 	instacingModelShaders.clear();
 	instacingAnimatedModelShaders.clear();
@@ -153,21 +160,21 @@ void GameScene::BuildObjects(CreateManager* pCreateManager)
 	UpdatedShaders.emplace_back(shader);
 
 	
-	uiShader = new GaugeShader;
-	uiShader->BuildObjects(pCreateManager, m_pTerrain);
-	instacingUiShaders.emplace_back(uiShader);
+	m_pGuageShader = new GaugeShader;
+	m_pGuageShader->BuildObjects(pCreateManager, m_pTerrain);
+
 
 	uiShader = new TimeCountShader;
 	uiShader->BuildObjects(pCreateManager, m_pTerrain);
-	instacingUiShaders.emplace_back(uiShader);
+	instacingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new TrackCountShader;
 	uiShader->BuildObjects(pCreateManager, m_pTerrain);
-	instacingUiShaders.emplace_back(uiShader);
+	instacingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new RankCountShader;
 	uiShader->BuildObjects(pCreateManager, m_pTerrain);
-	instacingUiShaders.emplace_back(uiShader);
+	instacingNumberUiShaders.emplace_back(uiShader);
 	
 	//animatedShader = new PlayerShader;
 	//animatedShader->BuildObjects(pCreateManager, "Resources/Models/Dino.bin", "Resources/ObjectData/TreeData");
@@ -429,16 +436,15 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 	//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_GAUGE]);
-	if (instacingUiShaders[0])
-		instacingUiShaders[0]->Render(m_pd3dCommandList, m_pCamera);
+	if (m_pGuageShader)
+		m_pGuageShader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_NUMBER]);
-	if (instacingUiShaders[1])
-		instacingUiShaders[1]->Render(m_pd3dCommandList, m_pCamera);
-	if (instacingUiShaders[2])
-		instacingUiShaders[2]->Render(m_pd3dCommandList, m_pCamera);
-	if (instacingUiShaders[3])
-		instacingUiShaders[3]->Render(m_pd3dCommandList, m_pCamera);
+	for (CUiShader* shader : instacingNumberUiShaders)
+	{
+		if (shader)
+			shader->Render(m_pd3dCommandList, m_pCamera);
+	}
 
 	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList);
@@ -530,10 +536,11 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			m_pPlayer->UpCheckPoint();
 	}
 
-	for (CUiShader* shader : instacingUiShaders)
+	if (m_pGuageShader)
+		m_pGuageShader->Update(fTimeElapsed, m_pPlayer);
+
+	for (CUiShader* shader : instacingNumberUiShaders)
 		shader->Update(fTimeElapsed, m_pPlayer);
-
-
 
 	XMFLOAT3 playerPosition = m_pPlayer->GetPosition();
 	if (m_pMinimapCamera)

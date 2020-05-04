@@ -19,6 +19,8 @@ class CHeightMapTerrain;
 class SkyBoxObject;
 
 
+enum ItemIcon_type {IconDefault=0,IconBanana,IconOil,IconStone,IconMeat,IconMugen};
+
 class ItemGameScene : public BaseScene
 {
 public:
@@ -71,7 +73,10 @@ private:
 
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CObInstancingShader*> instacingModelShaders;
-	vector<CUiShader*> instacingUiShaders;
+
+	vector<CUiShader*> instacingNumberUiShaders;
+	vector<CUiShader*> instacingImageUiShaders;
+
 	vector<CSkinedObInstancingShader*> instacingAnimatedModelShaders;
 
 	CObInstancingShader* m_pCheckPointShader;
@@ -84,4 +89,6 @@ private:
 
 	MinimapShader* m_pMinimapShader = NULL;
 	IconShader* m_pIconShader = NULL;
+
+	ItemIcon_type m_eCurrentItem = ItemIcon_type::IconDefault;
 };

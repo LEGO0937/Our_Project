@@ -70,10 +70,14 @@ private:
 
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CObInstancingShader*> instacingModelShaders;
-	vector<CUiShader*> instacingUiShaders;
+
+	vector<CUiShader*> instacingNumberUiShaders;
+	vector<CUiShader*> instacingImageUiShaders;
+	
 	vector<CSkinedObInstancingShader*> instacingAnimatedModelShaders;
 
 	CObInstancingShader* m_pCheckPointShader;
+	CUiShader* m_pGuageShader;
 
 	CCamera* m_pMinimapCamera = NULL;
 
