@@ -63,7 +63,7 @@ public:
 
 	virtual void SetViewportsAndScissorRects();
 
-	virtual void BuildObjects(CreateManager* pCreateManager) = 0;
+	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager) = 0;
 	virtual void BuildLights() {};
 
 	virtual void ReleaseObjects();
@@ -101,6 +101,7 @@ public:
 	virtual string GetId() { return ""; }
 	virtual string GetPassWord() { return ""; }
 protected:
+	shared_ptr<CreateManager> m_pCreateManager = NULL;
 	SceneType sceneType;
 
 	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;

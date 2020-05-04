@@ -21,9 +21,7 @@ void MeatShader::Load(CreateManager* pCreateManager, const char* filename, const
 	UINT nReads;
 	int nLength = 0;
 
-	string string = filename;
-	string.insert(string.find("."), "_ins");
-	const char* fileName = string.c_str();
+	const char* fileName = instancingModelName.c_str();
 
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)

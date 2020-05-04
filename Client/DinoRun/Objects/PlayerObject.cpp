@@ -240,8 +240,8 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		target->isEnable = false;
 		break;
 	case ModelType::Item_Banana:
-		target->isEnable = false;
-		return true;
+		break;
+		//return true;
 	default:
 		break;
 	}

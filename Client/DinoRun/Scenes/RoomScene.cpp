@@ -34,15 +34,16 @@ void RoomScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 }
-void RoomScene::BuildObjects(CreateManager* pCreateManager)
+void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
+	m_pCreateManager = pCreateManager;
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/Room.dds";
-	uiShader->BuildObjects(pCreateManager, &name);
+	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 
 	UI_INFO button_info;
@@ -66,7 +67,7 @@ void RoomScene::BuildObjects(CreateManager* pCreateManager)
 	button_info.minUv = XMFLOAT2(0.0f, 0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager, &button_info);
+	uiShader->BuildObjects(pCreateManager.get(), &button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 
@@ -76,7 +77,7 @@ void RoomScene::BuildObjects(CreateManager* pCreateManager)
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.61f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.75f)));
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables(pCreateManager.get());
 }
 
 void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM

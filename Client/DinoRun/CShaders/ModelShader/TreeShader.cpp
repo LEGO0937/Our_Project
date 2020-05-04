@@ -18,10 +18,7 @@ void TreeShader::Load(CreateManager* pCreateManager, const char* filename, const
 	UINT nReads;
 	int nLength = 0;
 
-	string string = filename;
-	string.insert(string.find("."), "_ins");  //인스턴싱 전용 모델파일을 불러온다
-											  //텍스처,메시의 정보들이 들어 있지않음.
-	const char* fileName = string.c_str();
+	const char* fileName = instancingModelName.c_str();
 
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)

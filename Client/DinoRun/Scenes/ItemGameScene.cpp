@@ -122,15 +122,17 @@ void ItemGameScene::ReleaseObjects()
 	instacingModelShaders.clear();
 	instacingAnimatedModelShaders.clear();
 }
-void ItemGameScene::BuildObjects(CreateManager* pCreateManager)
+void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
+	m_pCreateManager = pCreateManager;
+
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 
-	m_pSkyBox = new SkyBoxObject(pCreateManager);
+	m_pSkyBox = new SkyBoxObject(pCreateManager.get());
 
-	m_pTerrain = new CHeightMapTerrain(pCreateManager, _T("Resources\\Images\\First_Map.raw"), 257, 257, 17,
+	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 17,
 		17, xmf3Scale);
 
 	CObInstancingShader* shader;
@@ -138,39 +140,54 @@ void ItemGameScene::BuildObjects(CreateManager* pCreateManager)
 	//CSkinedObInstancingShader* animatedShader;
 
 	shader = new BillBoardShader;
-	shader->BuildObjects(pCreateManager, "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
 	instacingBillBoardShaders.emplace_back(shader);
 
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager, "Resources/Models/Tree1.bin", "Resources/ObjectData/TreeData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree1.bin", "Resources/ObjectData/TreeData");
 	instacingModelShaders.emplace_back(shader);
 
 	shader = new FenceShader;
-	shader->BuildObjects(pCreateManager, "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	m_pCheckPointShader = new BlockShader;
-	m_pCheckPointShader->BuildObjects(pCreateManager, "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
+	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
 	m_pCheckPointShader->AddRef();
 
 	shader = new ItemShader;
-	shader->BuildObjects(pCreateManager, "Resources/Models/ItemBox.bin", "Resources/ObjectData/MeatData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/ItemBox.bin", "Resources/ObjectData/MeatData");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
+	shader = new BananaShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/ItemBanana.bin", NULL);
+	instacingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+
+	//shader = new ItemShader;
+	//shader->BuildObjects(pCreateManager, "Resources/Models/ItemBanana.bin", NULL);
+	//instacingModelShaders.emplace_back(shader);
+	//shader->AddRef();
+	//UpdatedShaders.emplace_back(shader);
+
+
+
+
 	uiShader = new TimeCountShader;
-	uiShader->BuildObjects(pCreateManager, NULL);
+	uiShader->BuildObjects(pCreateManager.get(), NULL);
 	instacingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new TrackCountShader;
-	uiShader->BuildObjects(pCreateManager, NULL);
+	uiShader->BuildObjects(pCreateManager.get(), NULL);
 	instacingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new RankCountShader;
-	uiShader->BuildObjects(pCreateManager, NULL);
+	uiShader->BuildObjects(pCreateManager.get(), NULL);
 	instacingNumberUiShaders.emplace_back(uiShader);
 
 	UI_INFO ItemUi_info;
@@ -184,7 +201,7 @@ void ItemGameScene::BuildObjects(CreateManager* pCreateManager)
 	ItemUi_info.minUv = XMFLOAT2(0.0f, 0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager, &ItemUi_info);
+	uiShader->BuildObjects(pCreateManager.get(), &ItemUi_info);
 	instacingImageUiShaders.emplace_back(uiShader);
 
 	//보유 아이템 사진
@@ -192,7 +209,7 @@ void ItemGameScene::BuildObjects(CreateManager* pCreateManager)
 	ItemUi_info.maxUv = XMFLOAT2(0.125f, 1.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager, &ItemUi_info);
+	uiShader->BuildObjects(pCreateManager.get(), &ItemUi_info);
 	uiShader->getUvXs()[0] = 0.0f;  //스프라이트의 간격은 0.125f
 	instacingImageUiShaders.emplace_back(uiShader);
 	//animatedShader = new PlayerShader;
@@ -201,24 +218,24 @@ void ItemGameScene::BuildObjects(CreateManager* pCreateManager)
 	//animatedShader->AddRef();
 	//UpdatedShaders.emplace_back(animatedShader);
 	m_pMinimapShader = new MinimapShader();
-	m_pMinimapShader->BuildObjects(pCreateManager, "Resources/Images/MiniMap.dds", NULL);
+	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds", NULL);
 
 	string name = "Resources/Images/Face_Icon.dds";
 	m_pIconShader = new IconShader();
-	m_pIconShader->BuildObjects(pCreateManager, &name);
+	m_pIconShader->BuildObjects(pCreateManager.get(), &name);
 
-	blurShader = new BlurShader(pCreateManager);
+	blurShader = new BlurShader(pCreateManager.get());
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(800.0f, 80, 940),
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(800.0f, 80, 940),
 		15, "Resources/Images/smoke.dds", 2, 30));
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(750.0f, 80, 900),
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(750.0f, 80, 900),
 		15, "Resources/Images/smoke.dds", 5, 50));
 	BuildLights();
 
 	BuildMinimapCamera(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables(pCreateManager.get());
 }
 
 void ItemGameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -281,6 +298,10 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		switch (wParam)
 		{
 		case VK_CONTROL:
+			//바나나
+			XMFLOAT3 pos = m_pPlayer->GetPosition();
+			pos.y = m_pTerrain->GetHeight(pos.x, pos.y)+2;
+			instacingModelShaders[3]->addObject(m_pCreateManager.get(),pos);
 			break;
 		case VK_F2:
 		case VK_F3:

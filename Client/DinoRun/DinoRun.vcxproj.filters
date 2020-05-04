@@ -563,6 +563,15 @@
     <ClCompile Include="Objects\ItemStone.cpp">
       <Filter>Objects\ItemObject\04ItemStone</Filter>
     </ClCompile>
+    <ClCompile Include="CShaders\ModelShader\BananaShader.cpp">
+      <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\ModelShader\OilShader.cpp">
+      <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\ModelShader\StoneShader.cpp">
+      <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DinoRun.rc">

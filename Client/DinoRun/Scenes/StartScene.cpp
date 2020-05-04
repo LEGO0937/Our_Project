@@ -40,15 +40,16 @@ void StartScene::ReleaseObjects()
 	instacingBillBoardShaders.clear();
 
 }
-void StartScene::BuildObjects(CreateManager* pCreateManager)
+void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
+	m_pCreateManager = pCreateManager;
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/LoginBackGround.dds";
-	uiShader->BuildObjects(pCreateManager, &name);
+	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 
 	UI_INFO button_info;
@@ -60,14 +61,14 @@ void StartScene::BuildObjects(CreateManager* pCreateManager)
 	button_info.minUv = XMFLOAT2(0.0f, 0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager, &button_info);
+	uiShader->BuildObjects(pCreateManager.get(), &button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 	
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.27f, 0.60f)));// ID구간
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.27f, 0.75f)));// PassWord구간
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables(pCreateManager.get());
 }
 
 void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM

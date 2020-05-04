@@ -40,15 +40,16 @@ void LobbyScene::ReleaseObjects()
 	instacingBillBoardShaders.clear();
 
 }
-void LobbyScene::BuildObjects(CreateManager* pCreateManager)
+void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
+	m_pCreateManager = pCreateManager;
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/LobbyBackGround.dds";
-	uiShader->BuildObjects(pCreateManager, &name);
+	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.28f),XMFLOAT2(1.05f,1.05f)));  //유저 목록 8줄
@@ -82,7 +83,7 @@ void LobbyScene::BuildObjects(CreateManager* pCreateManager)
 	view_info.maxUv = XMFLOAT2(0.5f, 0.25f);
 	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager, &view_info);
+	uiShader->BuildObjects(pCreateManager.get(), &view_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 
@@ -101,14 +102,14 @@ void LobbyScene::BuildObjects(CreateManager* pCreateManager)
 	view_info.f_uvY.emplace_back(0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager, &view_info);
+	uiShader->BuildObjects(pCreateManager.get(), &view_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 
 	//fontShader = new FontShader;
 	//fontShader->BuildObjects(pCreateManager, NULL);
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables(pCreateManager.get());
 }
 
 void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
