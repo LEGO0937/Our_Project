@@ -53,6 +53,9 @@ void ModelShader::BuildObjects(CreateManager* pCreateManager, const char *pszFil
 		pModel = NULL;
 	}
 
+	instancingModelName = pszFileName;
+	instancingModelName.insert(instancingModelName.find("."), "_ins");  //인스턴싱 전용 모델파일을 불러온다
+											  //텍스처,메시의 정보들이 들어 있지않음.
 	if(filename)
 		Load(pCreateManager, pszFileName, filename);
 

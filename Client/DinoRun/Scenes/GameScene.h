@@ -34,7 +34,7 @@ public:
 	void BuildMinimapCamera(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 		*pd3dCommandList);
 
-	void BuildObjects(CreateManager* pCreateManager);
+	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
@@ -70,10 +70,14 @@ private:
 
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CObInstancingShader*> instacingModelShaders;
-	vector<CUiShader*> instacingUiShaders;
+
+	vector<CUiShader*> instacingNumberUiShaders;
+	vector<CUiShader*> instacingImageUiShaders;
+	
 	vector<CSkinedObInstancingShader*> instacingAnimatedModelShaders;
 
 	CObInstancingShader* m_pCheckPointShader;
+	CUiShader* m_pGuageShader;
 
 	CCamera* m_pMinimapCamera = NULL;
 

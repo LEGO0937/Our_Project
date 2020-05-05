@@ -167,7 +167,6 @@ void ParticleSystem::CreateParticles()
 				vel = XMFLOAT3(vel.x*0.5f, vel.x, 0.0f);
 			}
 
-
 			XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
 			XMVECTOR up = XMLoadFloat3(&xmf3Up);
 
@@ -190,6 +189,26 @@ void ParticleSystem::CreateParticles()
 			std::mt19937 mtRand(randomSeed);                  
 			std::uniform_real_distribution<double> randX(-1.0f, 1.0f);
 			std::uniform_real_distribution<double> randY(0.1f, 2.0f);
+			std::uniform_real_distribution<double> randZ(-1.0f, 0.1f);
+
+
+			XMFLOAT3 vel = XMFLOAT3(m_fVelocity*randX(mtRand), m_fVelocity * randY(mtRand),
+				m_fVelocity * randZ(mtRand));
+
+			m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
+			curNumParticle++;
+		}
+		break;
+	case DUST:
+		if (curNumParticle < m_uMaxSize)
+		{
+			auto time = std::chrono::system_clock::now();
+			auto duration = time.time_since_epoch();
+			auto randomSeed = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+
+			std::mt19937 mtRand(randomSeed);
+			std::uniform_real_distribution<double> randX(-1.0f, 1.0f);
+			std::uniform_real_distribution<double> randY(0.1f, 0.5f);
 			std::uniform_real_distribution<double> randZ(-1.0f, 0.1f);
 
 

@@ -222,11 +222,14 @@
     <ClCompile Include="CShaders\BlurShader\BlurShader.cpp" />
     <ClCompile Include="CShaders\FontShader\FontShader.cpp" />
     <ClCompile Include="CShaders\MinimapShader\MinimapShader.cpp" />
+    <ClCompile Include="CShaders\ModelShader\BananaShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\BlockShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\FenceShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\ItemShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\MeatShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\ModelShader.cpp" />
+    <ClCompile Include="CShaders\ModelShader\OilShader.cpp" />
+    <ClCompile Include="CShaders\ModelShader\StoneShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\TreeShader.cpp" />
     <ClCompile Include="CShaders\Shader.cpp" />
     <ClCompile Include="CShaders\SkinedShader\PlayerShader.cpp" />
@@ -256,6 +259,7 @@
     <ClCompile Include="Objects\ItemMeat.cpp" />
     <ClCompile Include="Objects\ItemObject.cpp" />
     <ClCompile Include="Objects\ItemOil.cpp" />
+    <ClCompile Include="Objects\ItemStone.cpp" />
     <ClCompile Include="Objects\PlayerObject.cpp" />
     <ClCompile Include="Objects\SkyBoxObject.cpp" />
     <ClCompile Include="Objects\TerrainObject.cpp" />

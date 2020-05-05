@@ -19,6 +19,11 @@
 
 #include "../Common/Camera/Camera.h"
 
+#include <time.h>
+
+#define ITEM_TILE 0
+#define ITEM_UI 1   //아이템 틀안의 이미지의 쉐이더 리스트상에서의 인덱스
+
 ItemGameScene::ItemGameScene() :BaseScene()
 {
 	sceneType = SceneType::ItemGame_Scene;
@@ -43,9 +48,10 @@ void ItemGameScene::ReleaseUploadBuffers()
 		if (shader) shader->ReleaseUploadBuffers();
 	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
 		if (shader) shader->ReleaseUploadBuffers();
-	for (CUiShader* shader : instacingUiShaders)
+	for (CUiShader* shader : instacingNumberUiShaders)
 		if (shader) { shader->ReleaseUploadBuffers(); }
-
+	for (CUiShader* shader : instacingImageUiShaders)
+		if (shader) { shader->ReleaseUploadBuffers(); }
 	if (m_pMinimapShader)
 		m_pMinimapShader->ReleaseUploadBuffers();
 	if (m_pIconShader)
@@ -82,7 +88,9 @@ void ItemGameScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
-	for (CUiShader* shader : instacingUiShaders)
+	for (CUiShader* shader : instacingNumberUiShaders)
+		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
+	for (CUiShader* shader : instacingImageUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 	if (m_pMinimapCamera)
@@ -108,20 +116,23 @@ void ItemGameScene::ReleaseObjects()
 	}
 
 	UpdatedShaders.clear();
-	instacingUiShaders.clear();
+	instacingNumberUiShaders.clear();
+	instacingImageUiShaders.clear();
 	instacingBillBoardShaders.clear();
 	instacingModelShaders.clear();
 	instacingAnimatedModelShaders.clear();
 }
-void ItemGameScene::BuildObjects(CreateManager* pCreateManager)
+void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
+	m_pCreateManager = pCreateManager;
+
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 
-	m_pSkyBox = new SkyBoxObject(pCreateManager);
+	m_pSkyBox = new SkyBoxObject(pCreateManager.get());
 
-	m_pTerrain = new CHeightMapTerrain(pCreateManager, _T("Resources\\Images\\First_Map.raw"), 257, 257, 17,
+	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 17,
 		17, xmf3Scale);
 
 	CObInstancingShader* shader;
@@ -129,42 +140,59 @@ void ItemGameScene::BuildObjects(CreateManager* pCreateManager)
 	//CSkinedObInstancingShader* animatedShader;
 
 	shader = new BillBoardShader;
-	shader->BuildObjects(pCreateManager, "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
 	instacingBillBoardShaders.emplace_back(shader);
 
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager, "Resources/Models/Tree1.bin", "Resources/ObjectData/TreeData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree1.bin", "Resources/ObjectData/TreeData");
 	instacingModelShaders.emplace_back(shader);
 
 	shader = new FenceShader;
-	shader->BuildObjects(pCreateManager, "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	m_pCheckPointShader = new BlockShader;
-	m_pCheckPointShader->BuildObjects(pCreateManager, "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
+	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
 	m_pCheckPointShader->AddRef();
 
 	shader = new ItemShader;
-	shader->BuildObjects(pCreateManager, "Resources/Models/ItemBox.bin", "Resources/ObjectData/MeatData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/ItemBox.bin", "Resources/ObjectData/MeatData");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
+	shader = new BananaShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/ItemBanana.bin", NULL);
+	instacingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+
+	//shader = new ItemShader;
+	//shader->BuildObjects(pCreateManager, "Resources/Models/ItemBanana.bin", NULL);
+	//instacingModelShaders.emplace_back(shader);
+	//shader->AddRef();
+	//UpdatedShaders.emplace_back(shader);
+
+
+
+
 	uiShader = new TimeCountShader;
-	uiShader->BuildObjects(pCreateManager, NULL);
-	instacingUiShaders.emplace_back(uiShader);
+	uiShader->BuildObjects(pCreateManager.get(), NULL);
+	instacingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new TrackCountShader;
-	uiShader->BuildObjects(pCreateManager, NULL);
-	instacingUiShaders.emplace_back(uiShader);
+	uiShader->BuildObjects(pCreateManager.get(), NULL);
+	instacingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new RankCountShader;
-	uiShader->BuildObjects(pCreateManager, NULL);
-	instacingUiShaders.emplace_back(uiShader);
+	uiShader->BuildObjects(pCreateManager.get(), NULL);
+	instacingNumberUiShaders.emplace_back(uiShader);
 
 	UI_INFO ItemUi_info;
+
+	//---- 아이템 틀
 	ItemUi_info.textureName = "Resources/Images/Item_Cast.dds";
 	ItemUi_info.meshSize = XMFLOAT2(0.15f, 0.15f);
 	ItemUi_info.positions.emplace_back(XMFLOAT3(0.0f, -0.8f, 0.0f));
@@ -173,33 +201,41 @@ void ItemGameScene::BuildObjects(CreateManager* pCreateManager)
 	ItemUi_info.minUv = XMFLOAT2(0.0f, 0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager, &ItemUi_info);
-	instacingUiShaders.emplace_back(uiShader);
+	uiShader->BuildObjects(pCreateManager.get(), &ItemUi_info);
+	instacingImageUiShaders.emplace_back(uiShader);
 
+	//보유 아이템 사진
+	ItemUi_info.textureName = "Resources/Images/Item_Sprite.dds";
+	ItemUi_info.maxUv = XMFLOAT2(0.125f, 1.0f);
+
+	uiShader = new ImageShader;
+	uiShader->BuildObjects(pCreateManager.get(), &ItemUi_info);
+	uiShader->getUvXs()[0] = 0.0f;  //스프라이트의 간격은 0.125f
+	instacingImageUiShaders.emplace_back(uiShader);
 	//animatedShader = new PlayerShader;
 	//animatedShader->BuildObjects(pCreateManager, "Resources/Models/Dino.bin", "Resources/ObjectData/TreeData");
 	//instacingAnimatedModelShaders.emplace_back(animatedShader);
 	//animatedShader->AddRef();
 	//UpdatedShaders.emplace_back(animatedShader);
 	m_pMinimapShader = new MinimapShader();
-	m_pMinimapShader->BuildObjects(pCreateManager, "Resources/Images/MiniMap.dds", NULL);
+	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds", NULL);
 
 	string name = "Resources/Images/Face_Icon.dds";
 	m_pIconShader = new IconShader();
-	m_pIconShader->BuildObjects(pCreateManager, &name);
+	m_pIconShader->BuildObjects(pCreateManager.get(), &name);
 
-	blurShader = new BlurShader(pCreateManager);
+	blurShader = new BlurShader(pCreateManager.get());
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(800.0f, 80, 940),
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(800.0f, 80, 940),
 		15, "Resources/Images/smoke.dds", 2, 30));
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(750.0f, 80, 900),
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(750.0f, 80, 900),
 		15, "Resources/Images/smoke.dds", 5, 50));
 	BuildLights();
 
 	BuildMinimapCamera(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables(pCreateManager.get());
 }
 
 void ItemGameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -262,6 +298,10 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		switch (wParam)
 		{
 		case VK_CONTROL:
+			//바나나
+			XMFLOAT3 pos = m_pPlayer->GetPosition();
+			pos.y = m_pTerrain->GetHeight(pos.x, pos.y)+2;
+			instacingModelShaders[3]->addObject(m_pCreateManager.get(),pos);
 			break;
 		case VK_F2:
 		case VK_F3:
@@ -437,16 +477,13 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_NUMBER]);
-	if (instacingUiShaders[0])
-		instacingUiShaders[0]->Render(m_pd3dCommandList, m_pCamera);
-	if (instacingUiShaders[1])
-		instacingUiShaders[1]->Render(m_pd3dCommandList, m_pCamera);
-	if (instacingUiShaders[2])
-		instacingUiShaders[2]->Render(m_pd3dCommandList, m_pCamera);
+	for (CUiShader* shader : instacingNumberUiShaders)
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
-	if (instacingUiShaders[3])
-		instacingUiShaders[3]->Render(m_pd3dCommandList, m_pCamera);
+	for (CUiShader* shader : instacingImageUiShaders)
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+
 
 	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList);
@@ -516,6 +553,16 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							0, "Resources/Images/smoke.dds", 0.5, 1));
 						p++;
 					}
+					else if ((*p)->m_ModelType == Item_Box)
+					{
+						auto time = std::chrono::system_clock::now();
+						auto duration = time.time_since_epoch();
+						auto randomSeed = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
+						
+						std::mt19937 mtRand(randomSeed);
+						std::uniform_int_distribution<int> randType(IconBanana, IconMugen);
+						instacingImageUiShaders[ITEM_UI]->getUvXs()[0] =  0.125f * randType(mtRand);
+					}
 					else
 					{
 						(*p)->Release();
@@ -541,7 +588,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 			m_pPlayer->UpCheckPoint();
 	}
 
-	for (CUiShader* shader : instacingUiShaders)
+	for (CUiShader* shader : instacingNumberUiShaders)
 		shader->Update(fTimeElapsed, m_pPlayer);
 
 	XMFLOAT3 playerPosition = m_pPlayer->GetPosition();

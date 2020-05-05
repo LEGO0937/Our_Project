@@ -113,7 +113,7 @@ void CGameFramework::BuildObjects()
 	m_pScene = shared_ptr<StartScene>(new StartScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateManager.get());
+	m_pScene->BuildObjects(m_pCreateManager);
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pScene->setCamera(m_pCamera);
 	
@@ -301,7 +301,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateManager.get());
+	m_pScene->BuildObjects(m_pCreateManager);
 
 	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{

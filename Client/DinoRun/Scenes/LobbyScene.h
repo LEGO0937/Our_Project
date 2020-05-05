@@ -17,7 +17,7 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 		lParam, float deltaTime);
 
-	void BuildObjects(CreateManager* pCreateManager);
+	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
 
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();

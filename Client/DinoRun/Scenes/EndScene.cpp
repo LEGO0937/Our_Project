@@ -32,18 +32,19 @@ void EndScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 }
-void EndScene::BuildObjects(CreateManager* pCreateManager)
+void EndScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
+	m_pCreateManager = pCreateManager;
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/Win.dds";
-	uiShader->BuildObjects(pCreateManager, &name);
+	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables(pCreateManager.get());
 }
 
 void EndScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
