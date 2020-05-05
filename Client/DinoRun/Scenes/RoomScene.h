@@ -4,7 +4,13 @@
 
 class CUiShader;
 
+struct User
+{
+	string m_sName;
+	float m_fButtonState;
 
+	User(string name = "", float state = 0) :m_sName(name), m_fButtonState(state) {}
+};
 class RoomScene : public BaseScene
 {
 public:
@@ -37,5 +43,5 @@ public:
 private:
 	vector<CUiShader*> instacingUiShaders;
 	bool isClickedButton = false;
-
+	vector<User> m_vUsers;
 };

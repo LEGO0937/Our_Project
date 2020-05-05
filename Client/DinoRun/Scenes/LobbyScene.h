@@ -5,6 +5,18 @@ class CObInstancingShader;
 class CUiShader;
 class CObjectsShader;
 
+struct Room
+{
+	int m_iRoomNumber;
+	int m_iUserNumber;
+	float m_iIsGaming;
+	int m_iMaxUserNumber = 5;
+	
+	Room(int roomNum,int userNum, float isGameing):m_iRoomNumber(roomNum), 
+		m_iUserNumber(userNum), m_iIsGaming(isGameing)  //isGameing 0: 대기중, 1: 게임중
+	{}
+};
+
 class LobbyScene : public BaseScene
 {
 public:
@@ -45,4 +57,9 @@ private:
 
 	bool isClicked = false;
 	float m_fClickedTime = 0.f;
+
+	int m_iRoomPageNum = 0;
+	int m_iUserPageNum = 0;
+	vector<Room> m_vRooms;
+	vector<string> m_vUsers;
 };

@@ -113,6 +113,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			{
 				//서버 적용 시 이 구간에서 서버와 연결하여 아이디와 패스워드가 일치하면 씬 전환
 				//씬 전환 
+				//m_sPlayerId = 로그인 성공 시 서버로부터 닉네임 받음;
 				sceneType = Lobby_Scene;
 			}
 		}

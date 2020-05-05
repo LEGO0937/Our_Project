@@ -237,9 +237,8 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	
 	if (m_PrevState == Start_Scene)
 	{
-		//씬전환 시 이전 상태가 스타트인 경우 아이디와 비밀번호를 멤버에 저장해야함.
-		m_sPlayerID = m_pScene->GetId();
-		m_sPlayerPASSWORD = m_pScene->GetPassWord();
+		//씬전환 시 이전 상태가 스타트인 경우 닉네임을 멤버에 저장해야함.
+		m_sPlayerID = m_pScene->GetId(); 
 	}
 	ReleaseObjects();
 
@@ -253,7 +252,6 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		if (m_PrevState == SceneType::Lobby_Scene)
 		{
 			m_sPlayerID = "";
-			m_sPlayerPASSWORD = "";
 			m_pScene = shared_ptr<StartScene>(new StartScene());
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
@@ -263,6 +261,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		if (m_PrevState == SceneType::Start_Scene || m_PrevState == SceneType::Room_Scene)
 		{
 			m_pScene = shared_ptr<LobbyScene>(new LobbyScene());
+			m_pScene->SetId(m_sPlayerID);
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
 		}
@@ -271,6 +270,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::End_Scene)
 		{
 			m_pScene = shared_ptr<RoomScene>(new RoomScene());
+			m_pScene->SetId(m_sPlayerID);
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
 		}
@@ -291,6 +291,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		if (m_PrevState == SceneType::Game_Scene || m_PrevState == SceneType::ItemGame_Scene)
 		{
 			m_pScene = shared_ptr<EndScene>(new EndScene());
+			m_pScene->SetId(m_sPlayerID);
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
 		}
@@ -305,6 +306,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 
 	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{
+		m_pScene->SetId(m_sPlayerID);
 		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get());
 		pPlayer->SetMaxForce(MIN_FORCE);
 		m_pPlayer = pPlayer;

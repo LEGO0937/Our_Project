@@ -10,7 +10,7 @@ struct TextVertex {
 	XMFLOAT4 color;
 };
 struct GameText {
-	string text ="None";
+	string text ="";
 	XMFLOAT2 pos;
 	XMFLOAT2 scale = XMFLOAT2(1,1);
 	XMFLOAT4 color = XMFLOAT4(1, 1, 1, 1);
