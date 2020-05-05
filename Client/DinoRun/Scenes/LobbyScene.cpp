@@ -30,6 +30,8 @@ void LobbyScene::ReleaseObjects()
 {
 	BaseScene::ReleaseObjects();
 	
+	m_vRooms.clear();
+	m_vUsers.clear();
 
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
@@ -51,8 +53,47 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	string name = "Resources/Images/LobbyBackGround.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
+	/*
+	m_vRooms 초기화
+	m_vUsers 초기화
+	*/
+	//==================================임시로 작성한 부분
+	m_vRooms.emplace_back(Room(1, 5, 0.0f));
+	m_vRooms.emplace_back(Room(2, 2, 0.0f));
+	m_vRooms.emplace_back(Room(3, 1, 0.5f));
+	m_vRooms.emplace_back(Room(4, 0, 0.5f));
+	m_vRooms.emplace_back(Room(5, 3, 0.0f));
+	m_vRooms.emplace_back(Room(6, 2, 0.0f));
+	m_vRooms.emplace_back(Room(7, 0, 0.5f));
+	m_vRooms.emplace_back(Room(8, 3, 0.0f));
+	m_vRooms.emplace_back(Room(9, 2, 0.0f));
 
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.28f),XMFLOAT2(1.05f,1.05f)));  //유저 목록 8줄
+
+	m_vUsers.emplace_back("das");
+	m_vUsers.emplace_back("das1");
+	m_vUsers.emplace_back("das2");
+	m_vUsers.emplace_back("das3");
+	m_vUsers.emplace_back("das4");
+	m_vUsers.emplace_back("das5");
+	m_vUsers.emplace_back("das6");
+	m_vUsers.emplace_back("das7");
+	m_vUsers.emplace_back("das8");
+	m_vUsers.emplace_back("das9");
+	m_vUsers.emplace_back("das10");
+	m_vUsers.emplace_back("das11");
+	m_vUsers.emplace_back("das12");
+	m_vUsers.emplace_back("das13");
+	m_vUsers.emplace_back("das14");
+	m_vUsers.emplace_back("das15");
+	m_vUsers.emplace_back("das16");
+	m_vUsers.emplace_back("das17");
+	m_vUsers.emplace_back("das18");
+	m_vUsers.emplace_back("das19");
+	m_vUsers.emplace_back("das20");
+	m_vUsers.emplace_back("das21");
+	//=================================
+		
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.28f),XMFLOAT2(1.05f,1.05f)));  //유저 목록 8줄 0~7 idx
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.35f),XMFLOAT2(1.05f,1.05f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.42f),XMFLOAT2(1.05f,1.05f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.49f),XMFLOAT2(1.05f,1.05f)));
@@ -61,7 +102,7 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.70f),XMFLOAT2(1.05f,1.05f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.77f),XMFLOAT2(1.05f,1.05f)));
 
-	gameTexts.emplace_back(GameText(XMFLOAT2(0.09f, 0.24f), XMFLOAT2(0.8f, 0.8f)));  //방 인원 수
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.09f, 0.24f), XMFLOAT2(0.8f, 0.8f)));  //방 인원 수 8~11 idx
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.09f, 0.43f), XMFLOAT2(0.8f, 0.8f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.40f, 0.24f), XMFLOAT2(0.8f, 0.8f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.40f, 0.43f), XMFLOAT2(0.8f, 0.8f)));
@@ -152,22 +193,44 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			}
 			else
 			{
+				int clickNum = m_iRoomPageNum * 4;
 				//더블 클릭 구간 
-				if (point.x > -0.87f && point.x < -0.34f && point.y > 0.22f && point.y < 0.51f) //1번 방 충돌체크
+				//입장 시 m_vRooms의 m_iRoomPageNum * 4 + a 째방 번호를 네트워크 구조체에 값을 넣어주도록한다.
+				// 다음 룸씬에서 동일한 방의 유저들과 정보를 나눠주기 위해.
+				if (m_vRooms.size())
 				{
-					sceneType = SceneType::Room_Scene;
-				}
-				else if (point.x > -0.24f && point.x < 0.28f && point.y > 0.22f && point.y < 0.51f) //2번 방 충돌체크
-				{
-					sceneType = SceneType::Room_Scene;
-				}
-				else if (point.x > -0.87f && point.x < -0.34f && point.y > -0.17f && point.y < 0.14f) //3번 방 충돌체크
-				{
-					sceneType = SceneType::Room_Scene;
-				}
-				else if (point.x > -0.24f && point.x < 0.28f && point.y > -0.17f && point.y < 0.14f) //4번 방 충돌체크
-				{
-					sceneType = SceneType::Room_Scene;
+					if (point.x > -0.87f && point.x < -0.34f && point.y > 0.22f && point.y < 0.51f) //1번 방 충돌체크
+					{
+						if (clickNum <= m_vRooms.size() - 1)
+						{
+							if (m_vRooms[clickNum].m_iIsGaming == 0 && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
+								sceneType = SceneType::Room_Scene;
+						}
+					}
+					else if (point.x > -0.87f && point.x < -0.34f && point.y > -0.17f && point.y < 0.14f) //2번 방 충돌체크
+					{
+						if (clickNum + 1 <= m_vRooms.size() - 1)
+						{
+							if (m_vRooms[clickNum + 1].m_iIsGaming == 0 && m_vRooms[clickNum + 1].m_iUserNumber < m_vRooms[clickNum + 1].m_iMaxUserNumber)
+								sceneType = SceneType::Room_Scene;
+						}
+					}
+					else if (point.x > -0.24f && point.x < 0.28f && point.y > 0.22f && point.y < 0.51f) //3번 방 충돌체크
+					{
+						if (clickNum + 2 <= m_vRooms.size() - 1)
+						{
+							if (m_vRooms[clickNum + 2].m_iIsGaming == 0 && m_vRooms[clickNum + 2].m_iUserNumber < m_vRooms[clickNum + 2].m_iMaxUserNumber)
+								sceneType = SceneType::Room_Scene;
+						}
+					}
+					else if (point.x > -0.24f && point.x < 0.28f && point.y > -0.17f && point.y < 0.14f) //4번 방 충돌체크
+					{
+						if (clickNum + 3 <= m_vRooms.size() - 1)
+						{
+							if (m_vRooms[clickNum + 3].m_iIsGaming == 0 && m_vRooms[clickNum + 3].m_iUserNumber < m_vRooms[clickNum + 3].m_iMaxUserNumber)
+								sceneType = SceneType::Room_Scene;
+						}
+					}
 				}
 			}
 		}
@@ -178,11 +241,14 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
-		if (point.x > -0.32f && point.x < -0.48f && point.y > -0.36f && point.y < -0.24f) //방목록 왼쪽화살표 충돌체크
+		if (point.x > -0.48f && point.x < -0.32f && point.y > -0.36f && point.y < -0.24f) //방목록 왼쪽화살표 충돌체크
 		{
 			if (isClickedLeftRoom)
 			{
 				//방목록 변경
+				m_iRoomPageNum -= 1;
+				if (m_iRoomPageNum < 0)
+					m_iRoomPageNum = 0;
 			}
 					
 		}
@@ -191,6 +257,10 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (isClickedRightRoom)
 			{
 				//방목록 변경
+				m_iRoomPageNum += 1;
+				if (m_iRoomPageNum > ((m_vRooms.size()*0.25)))
+					m_iRoomPageNum = ((m_vRooms.size()*0.25));
+
 			}
 		}
 		else if (point.x > 0.47f && point.x < 0.63f && point.y > -0.81f && point.y < -0.69f) //유저목록 왼쪽화살표 충돌체크
@@ -198,6 +268,9 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (isClickedLeftUser)
 			{
 				//유저목록 변경
+				m_iUserPageNum -= 1;
+				if (m_iUserPageNum < 0)
+					m_iUserPageNum = 0;
 			}
 		}
 		else if (point.x > 0.69f && point.x < 0.85f && point.y > -0.81f && point.y < -0.69f) //유저목록 오른쪽화살표 충돌체크
@@ -205,7 +278,10 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (isClickedRightUser)
 			{
 				//유저목록 변경
-				
+				m_iUserPageNum += 1;
+				if (m_iUserPageNum > ((m_vUsers.size()*0.125)))
+					m_iUserPageNum = ((m_vUsers.size()*0.125));
+
 			}
 		}
 		else
@@ -338,6 +414,46 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		return sceneType;
 	}
 
+	//----------------- 매번 서버로부터 방들의 정보를 갱신 
+	//m_iPageNum 
+	//m_vRooms.clear();
+	/*
+	for () 5~6초 지날때마다 갱신
+	{
+		m_vRooms.emplace_back(Room(1, 1, 0));
+	}
+	*/
+	if (m_vUsers.size())
+	{
+		for (int i = m_iUserPageNum * 8, n = 0; i < (m_iUserPageNum * 8) + 8; ++i, ++n)
+		{
+			if (i <= m_vUsers.size() - 1)
+			{
+				gameTexts[n].text = m_vUsers[i];
+			}
+			else
+			{
+				gameTexts[n].text = "";
+			}
+		}
+	}
+	if (m_vRooms.size())
+	{
+		for (int i = m_iRoomPageNum * 4, n = 0; i < (m_iRoomPageNum * 4) + 4; ++i, ++n)
+		{
+			if (i <= m_vRooms.size() - 1)
+			{
+				gameTexts[n + 8].text = to_string(m_vRooms[i].m_iUserNumber) + " / " + to_string(m_vRooms[i].m_iMaxUserNumber);
+				instacingUiShaders[1]->getUvXs()[n] = m_vRooms[i].m_iIsGaming;
+			}
+			else
+			{
+				gameTexts[n + 8].text = "None";
+				instacingUiShaders[1]->getUvXs()[n] = 0;
+			}
+		}
+	}
+	
 	//물리 및 충돌을 위한 update
 	if (isClicked)
 		m_fClickedTime += fTimeElapsed;

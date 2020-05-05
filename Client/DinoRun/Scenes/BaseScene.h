@@ -89,7 +89,6 @@ public:
 
 	CPlayer* m_pPlayer = NULL;
 	CCamera* m_pCamera = NULL;
-	string m_sPlayerId;
 
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
@@ -98,9 +97,10 @@ public:
 		m_nWndClientWidth = width; m_nWndClientHeight = height;
 	}
 
-	virtual string GetId() { return ""; }
-	virtual string GetPassWord() { return ""; }
+	virtual string GetId() { return m_sPlayerId; }
+	virtual void SetId(const string& str) { m_sPlayerId = str; }
 protected:
+	string m_sPlayerId;
 	shared_ptr<CreateManager> m_pCreateManager = NULL;
 	SceneType sceneType;
 

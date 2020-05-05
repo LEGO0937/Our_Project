@@ -28,7 +28,7 @@ void RoomScene::ReleaseObjects()
 {
 	BaseScene::ReleaseObjects();
 
-
+	m_vUsers.clear();
 	
 	for (CUiShader* shader : instacingUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
@@ -45,6 +45,11 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	string name = "Resources/Images/Room.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
+
+	m_vUsers.emplace_back(User("user1", 0.5f));
+	m_vUsers.emplace_back(User("user2", 0.5f));
+	m_vUsers.emplace_back(User("user3", 0.5f));
+	m_vUsers.emplace_back(User("user4", 0.5f));
 
 	UI_INFO button_info;
 	button_info.textureName = "Resources/Images/Button.dds";
@@ -76,6 +81,7 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.47f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.61f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.75f)));
+	gameTexts[0].text = m_sPlayerId;
 
 	CreateShaderVariables(pCreateManager.get());
 }
@@ -96,13 +102,17 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			if (instacingUiShaders[1]->getUvXs()[0] == 0.0f)
 			{
 				instacingUiShaders[1]->getUvXs()[0] = 0.5f;
+				instacingUiShaders[1]->getUvXs()[1] = 0.5f;
 				//임시적인 씬이동을 위해 여기서 씬타입 전환
-				sceneType = ItemGame_Scene;
+				//sceneType = ItemGame_Scene;
 			}
 			else
+			{
 				instacingUiShaders[1]->getUvXs()[0] = 0.0f;
+				instacingUiShaders[1]->getUvXs()[1] = 0.0f;
+			}
 		}
-		
+		::ReleaseCapture();
 		break;
 	case WM_RBUTTONDOWN:
 		//마우스 캡쳐를 하고 현재 마우스 위치를 가져온다. 
@@ -185,14 +195,32 @@ void RoomScene::AnimateObjects(float fTimeElapsed)
 
 SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
-	//물리 및 충돌을 위한 update
 	if (sceneType != SceneType::Room_Scene)
 	{
 		return sceneType;
 	}
-
+	//m_vUsers.clear();
+	//m_vUsers.emplace_back(User("user1", 0));
+	//m_vUsers.emplace_back(User("user2", 0));
+	//m_vUsers.emplace_back(User("user3", 0));
+	//m_vUsers.emplace_back(User("user4", 0));
+	for (int i = 0; i < 4; ++i)
+	{
+		if (i < m_vUsers.size())
+		{
+			gameTexts[i + 1].text = m_vUsers[i].m_sName;
+			instacingUiShaders[1]->getUvXs()[i + 2] = m_vUsers[i].m_fButtonState;
+		}
+	}
 	for (CUiShader* shader : instacingUiShaders)
 		shader->Update(fTimeElapsed, NULL);
+
+	for (int i = 0; i < 5; ++i)
+	{
+		if (instacingUiShaders[1]->getUvXs()[i + 1] != 0.5f)
+			return SceneType::Room_Scene;
+	}
+	sceneType = SceneType::ItemGame_Scene;
 	return SceneType::Room_Scene;
 }
 

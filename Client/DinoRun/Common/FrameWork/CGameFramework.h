@@ -10,7 +10,6 @@ class CGameFramework
 
 private: 
 	string m_sPlayerID = "";
-	string m_sPlayerPASSWORD = "";
 public:
 	CGameFramework();
 	~CGameFramework();
