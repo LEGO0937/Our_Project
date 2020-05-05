@@ -1,0 +1,66 @@
+<< Init 패킷 종류 >>
+
+[ 클라 -> 서버 ]
+struct CS_INIT_PACKET
+{
+}
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+[ 서버 -> 클라 ]
+struct SC_INIT_PACKET
+{
+	XMFLOAT3 ObjPos[ ];	// 오브젝트들 위치
+	XMFLOAT4 Dir[ ];		// 방향(쿼터니언)
+}
+
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+<< InGame 패킷 종류 >> 
+
+[ 클라 -> 서버 ]
+struct CS_INGAME_PACKET
+{
+	byte PlayerNum;	// 플레이어 번호
+	byte Key		// 키 버튼
+}
+
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+[ 서버 -> 클라 ]
+struct SC_INGAME_PACKET
+{
+	PLAYER Player_Packet[6];
+	float Timer;		// 게임 시간
+	bool End;		// 게임이 끝났는지
+}
+
+enum PLAYER_NUM {1P, 2P, 3P, 4P, 5P, 6P }; // 몇번 플레이어 인지 
+enum PLAYER_ANIMATION_NUM { Idle, Run, ... }; // 플레이어 애니메이션 번호
+enum PLAYER_STATE {  }; // 플레이어 상태
+struct PLAYER
+{
+	char place		// 플레이어들의 등수
+	XMFLOAT3 Pos;		// 플레이어 위치
+	//XMFLOAT4 Dir;		// 방향(쿼터니언)
+	byte AnimationNum; 	// 애니메이션 번호
+	bool ItemUse;		// 아이템 사용 여부
+	ITEM ItemType;		// 아이템 종류
+	byte PlayerState;		// 플레이어 상태
+}
+
+struct ITEM
+{
+	bool Banana;		// 바나나
+}
+
+enum STATE_TYPE { Init, Run, Over };
+
+
+ㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡㅡ
+
+추가사항 : 움직이지 않는 오브젝트(나무, 돌 등)는 서버랑 클라 둘다 
+위치 정보를 가지고 있고, 충돌체크만 서버에서 처리하여, 클라에게 알려줌.
+ 
