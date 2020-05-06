@@ -52,6 +52,8 @@ void GameScene::ReleaseUploadBuffers()
 		m_pIconShader->ReleaseUploadBuffers();
 	if (m_pGuageShader)
 		m_pGuageShader->ReleaseUploadBuffers();
+	if (m_pEffectShader)
+		m_pEffectShader->ReleaseUploadBuffers();
 }
 void GameScene::ReleaseObjects()
 {
@@ -108,6 +110,12 @@ void GameScene::ReleaseObjects()
 		m_pIconShader->ReleaseObjects();
 		m_pIconShader->Release();
 	}
+	if (m_pEffectShader)
+	{
+		m_pEffectShader->ReleaseShaderVariables();
+		m_pEffectShader->ReleaseObjects();
+		m_pEffectShader->Release();
+	}
 	if (m_pGuageShader)
 	{
 		m_pGuageShader->ReleaseShaderVariables();
@@ -135,7 +143,18 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CObInstancingShader* shader;
 	CUiShader* uiShader;
 	//CSkinedObInstancingShader* animatedShader;
-	
+
+	UI_INFO view_info;    //게임중 or 대기중 뷰
+	view_info.textureName = "Resources/Images/Blur_Effect.dds";
+	view_info.meshSize = XMFLOAT2(1.0f, 1.0f);
+	view_info.positions.emplace_back(XMFLOAT3(0.0f, 0.0f, 0.0f));
+	view_info.maxUv = XMFLOAT2(0.25f, 1.0f);
+	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
+	view_info.f_uvY.emplace_back(0);
+	m_pEffectShader = new ImageShader;
+	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
+
+
 	shader = new BillBoardShader;
 	shader->BuildObjects(pCreateManager.get(), "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
 	instacingBillBoardShaders.emplace_back(shader);
@@ -434,7 +453,19 @@ void GameScene::RenderShadow()
 }
 void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
-	//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
+	static float deltaUvX = 0.0f;
+	XMFLOAT3 vel = m_pPlayer->GetVelocity();
+	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
+	if (length > 61)
+	{
+		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
+		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
+		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
+		m_pEffectShader->getUvXs()[0] = deltaUvX;
+		deltaUvX += 0.25f;
+		if (deltaUvX >= 1.0)
+			deltaUvX = 0.0f;
+	}
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_GAUGE]);
 	if (m_pGuageShader)
@@ -509,7 +540,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 					if ((*p)->m_ModelType == Fence || (*p)->m_ModelType == Player)
 					{
 						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
-							0, "Resources/Images/smoke.dds", 0.5, 1));
+							0, "Resources/Images/Collision.dds", 0.5, 1));
 						p++;
 					}
 					else

@@ -56,6 +56,8 @@ void ItemGameScene::ReleaseUploadBuffers()
 		m_pMinimapShader->ReleaseUploadBuffers();
 	if (m_pIconShader)
 		m_pIconShader->ReleaseUploadBuffers();
+	if (m_pEffectShader)
+		m_pEffectShader->ReleaseUploadBuffers();
 }
 void ItemGameScene::ReleaseObjects()
 {
@@ -114,7 +116,12 @@ void ItemGameScene::ReleaseObjects()
 		m_pIconShader->ReleaseObjects();
 		m_pIconShader->Release();
 	}
-
+	if (m_pEffectShader)
+	{
+		m_pEffectShader->ReleaseShaderVariables();
+		m_pEffectShader->ReleaseObjects();
+		m_pEffectShader->Release();
+	}
 	UpdatedShaders.clear();
 	instacingNumberUiShaders.clear();
 	instacingImageUiShaders.clear();
@@ -138,6 +145,16 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CObInstancingShader* shader;
 	CUiShader* uiShader;
 	//CSkinedObInstancingShader* animatedShader;
+
+	UI_INFO view_info;    //게임중 or 대기중 뷰
+	view_info.textureName = "Resources/Images/Blur_Effect.dds";
+	view_info.meshSize = XMFLOAT2(1.0f, 1.0f);
+	view_info.positions.emplace_back(XMFLOAT3(0.0f, 0.0f, 0.1f));
+	view_info.maxUv = XMFLOAT2(0.25f, 1.0f);
+	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
+	view_info.f_uvY.emplace_back(0);
+	m_pEffectShader = new ImageShader;
+	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
 
 	shader = new BillBoardShader;
 	shader->BuildObjects(pCreateManager.get(), "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
@@ -473,9 +490,19 @@ void ItemGameScene::RenderShadow()
 }
 void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
-	//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
-
-
+	static float deltaUvX = 0.0f;
+	XMFLOAT3 vel = m_pPlayer->GetVelocity();
+	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
+	//if (length > 61)
+	{
+		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
+		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
+		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
+		m_pEffectShader->getUvXs()[0] = deltaUvX;
+		deltaUvX += 0.25f;
+		if (deltaUvX >= 1.0)
+			deltaUvX = 0.0f;
+	}
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_NUMBER]);
 	for (CUiShader* shader : instacingNumberUiShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
@@ -550,7 +577,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 					if ((*p)->m_ModelType == Fence || (*p)->m_ModelType == Player)
 					{
 						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
-							0, "Resources/Images/smoke.dds", 0.5, 1));
+							0, "Resources/Images/Collision.dds", 0.5, 1));
 						p++;
 					}
 					else if ((*p)->m_ModelType == Item_Box)

@@ -203,6 +203,8 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 					{
 						if (clickNum <= m_vRooms.size() - 1)
 						{
+							//연결 성공 시 네트워크 클래스에 m_vRooms[clickNum].m_iRoomNumber를 받아서 
+							//현재 접속중인 방번호 저장할것.
 							if (m_vRooms[clickNum].m_iIsGaming == 0 && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
 								sceneType = SceneType::Room_Scene;
 						}

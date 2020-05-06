@@ -76,6 +76,7 @@ private:
 
 	vector<CUiShader*> instacingNumberUiShaders;
 	vector<CUiShader*> instacingImageUiShaders;
+	CUiShader* m_pEffectShader = NULL;
 
 	vector<CSkinedObInstancingShader*> instacingAnimatedModelShaders;
 

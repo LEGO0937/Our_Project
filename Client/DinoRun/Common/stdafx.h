@@ -414,6 +414,7 @@ void CreatePsoUiNumber(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGrap
 void CreatePsoUiGuage(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 void CreatePsoParticle(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 void CreatePsoMinimap(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
+void CreatePsoPostEffect(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 
 
 //Shadow Pipelines

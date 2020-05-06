@@ -60,6 +60,7 @@ void EndScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wP
 		switch (wParam)
 		{
 		case VK_ESCAPE:
+			//네트워크 클래스에 있는 방번호가 아직 있으므로 그 번호의 RoomScene으로 넘어가도록 한다.
 			sceneType = SceneType::Room_Scene;
 			break;
 		default:

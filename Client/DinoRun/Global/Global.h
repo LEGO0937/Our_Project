@@ -19,6 +19,8 @@
 
 #define PSO_PARTICLE 11
 
+#define PSO_EFFECT 22
+
 //PSO shadow
 #define PSO_SHADOW_SKIN_MESH 12
 #define PSO_SHADOW_MODEL_INSTANCING 13

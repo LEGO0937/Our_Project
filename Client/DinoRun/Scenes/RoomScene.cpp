@@ -40,7 +40,7 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
-
+	//네트워크 클래스에 저장되어있는 방번호를 보내고 해당 방에서의 플레이어 정보를 받아온다.
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/Room.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
