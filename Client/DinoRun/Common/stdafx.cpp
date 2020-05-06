@@ -624,6 +624,8 @@ void CreatePsoPostEffect(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGr
 	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Ui.hlsl", "PSUi", "ps_5_1",
 		&pd3dPixelShaderBlob);
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
+	d3dPipelineStateDesc.BlendState = CreateBlendState();
+
 	D3D12_BLEND_DESC d3dBlendDesc;
 	::ZeroMemory(&d3dBlendDesc, sizeof(D3D12_BLEND_DESC));
 	d3dBlendDesc.AlphaToCoverageEnable = FALSE;

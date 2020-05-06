@@ -41,6 +41,12 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	CUiShader* uiShader;
 	//네트워크 클래스에 저장되어있는 방번호를 보내고 해당 방에서의 플레이어 정보를 받아온다.
+
+	//*서버*
+	//들어오기 성공을 하면 방번호와 자신의 닉네임을 서버에게 보냄 
+	//서버는 해당 번호의 방 정보에 유저를 추가한다.
+	//서버는 클라 자신의 정보를 제외한 나머지 유저들의 이름과 버튼 상태를 전송한다.-> User클래스 사용
+
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/Room.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
@@ -111,6 +117,9 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				instacingUiShaders[1]->getUvXs()[0] = 0.0f;
 				instacingUiShaders[1]->getUvXs()[1] = 0.0f;
 			}
+			//*서버*
+			//버튼이 클릭 되는 구간
+			//클릭하여 버튼상태 변화 시 클라에게 버튼의 현재상태 정보를 보냄
 		}
 		::ReleaseCapture();
 		break;
@@ -199,6 +208,12 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	{
 		return sceneType;
 	}
+	//*서버*
+	//먼저 방에 있는 인원이 full이고 모두 레디한 상태인지 물어볼 것이다.
+	//준비가 모두 되어 있다면 게임씬으로 이동.
+	//안돼있다면 vector를 clear하고 
+	//본인의 닉네임을 보내주고나서 다시 유저들의 이름 및 버튼 상태의 정보를 받아서 vector<User>에 담는다.
+	//이 때 클라 본인의 정보는 받지 않아야 함.
 	//m_vUsers.clear();
 	//m_vUsers.emplace_back(User("user1", 0));
 	//m_vUsers.emplace_back(User("user2", 0));

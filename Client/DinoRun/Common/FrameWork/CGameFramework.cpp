@@ -308,7 +308,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	{
 		m_pScene->SetId(m_sPlayerID);
 		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get());
-		pPlayer->SetMaxForce(MIN_FORCE);
+		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
 
 		m_pScene->setPlayer(m_pPlayer);

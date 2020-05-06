@@ -111,7 +111,10 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		{
 			if (isClickedLogin)
 			{
-				//서버 적용 시 이 구간에서 서버와 연결하여 아이디와 패스워드가 일치하면 씬 전환
+				//*서버*
+				//이 구간에서 서버와 연결하여 아이디와 패스워드를 보냄, 서버에서 확인후 존재하는 아이디가 맞다면
+				//닉네임을 보내줌, 없을 시 ""빈 문자열(string형으로 받을 것)
+				// 닉네임을 받았다면 네트워크 클래스에 닉네임 저장 후, Lobbyscene으로 이동.
 				//씬 전환 
 				//m_sPlayerId = 로그인 성공 시 서버로부터 닉네임 받음;
 				sceneType = Lobby_Scene;

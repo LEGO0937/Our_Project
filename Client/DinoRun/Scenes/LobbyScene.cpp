@@ -14,7 +14,10 @@ LobbyScene::LobbyScene() :BaseScene()
 }
 LobbyScene::~LobbyScene()
 {
-
+	//*서버*
+	//로비씬을 나가는 부분 다시 로그인 창으로 돌아가기때문에
+	//이 곳에서 서버에게 자신의 닉네임을 알려주고 나감.
+	//서버는 닉네임을 받고 접속중인 유저 리스트에서 이 닉네임을 제거한다.
 }
 void LobbyScene::ReleaseUploadBuffers()
 {
@@ -57,6 +60,12 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_vRooms 초기화
 	m_vUsers 초기화
 	*/
+	//*서버*
+	//로비씬에 들어오기를 성공하면 서버에게 자신의 닉네임을 전송해줌. 접속중 유저 리스트에 자신을 추가하기 위해서임
+	//로비씬에 들어오면 서버로부터 방 정보와 유저 이름 정보를 받아서
+	//vector형식의 방,유저목록에 저장함, 방정보는 Room클래스, 유저 이름 정보 string 사용
+	//방 정보에는 방 번호, 현재 인원수, 게임중 or 대기중 상태의 변수를 가짐
+
 	//==================================임시로 작성한 부분
 	m_vRooms.emplace_back(Room(1, 5, 0.0f));
 	m_vRooms.emplace_back(Room(2, 2, 0.0f));
@@ -203,8 +212,11 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 					{
 						if (clickNum <= m_vRooms.size() - 1)
 						{
+							//*서버*
+							//방 클릭 시 해당 방의 번호를 서버에게 보냄 서버는 방에 여유인원이 있고, 대기중 상태라면
+							//들어오라는 신호를 보낸다.
 							//연결 성공 시 네트워크 클래스에 m_vRooms[clickNum].m_iRoomNumber를 받아서 
-							//현재 접속중인 방번호 저장할것.
+							//접속할 방의 번호 저장할것.
 							if (m_vRooms[clickNum].m_iIsGaming == 0 && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
 								sceneType = SceneType::Room_Scene;
 						}
@@ -423,6 +435,7 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	for () 5~6초 지날때마다 갱신
 	{
 		m_vRooms.emplace_back(Room(1, 1, 0));
+
 	}
 	*/
 	if (m_vUsers.size())
