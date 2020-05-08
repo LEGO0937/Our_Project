@@ -76,7 +76,7 @@ void SkinedShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	{
 		CShader::Render(pd3dCommandList, pCamera);
 		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
-		UpdateShaderVariables(pd3dCommandList);
+		UpdateShaderVariables(pd3dCommandList, pCamera);
 		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
 		m_ppObjects->Render(pd3dCommandList, pCamera, objectList.size());
 	}

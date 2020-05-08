@@ -205,9 +205,6 @@
     <Filter Include="Objects\ItemObject\02ItemBanana">
       <UniqueIdentifier>{ec4577bb-18be-4dbc-8976-8061b240a1de}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\ItemObject\03ItemOil">
-      <UniqueIdentifier>{284e0d6b-6074-41d9-8898-4de18454dae0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Meshes\LiePlaneMesh">
       <UniqueIdentifier>{33862513-9039-4c7f-b55a-089937c31c49}</UniqueIdentifier>
     </Filter>
@@ -231,6 +228,9 @@
     </Filter>
     <Filter Include="Objects\ItemObject\04ItemStone">
       <UniqueIdentifier>{4f9d200f-64f2-4e0f-9668-08558a40fba3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\ItemObject\03ItemMud">
+      <UniqueIdentifier>{284e0d6b-6074-41d9-8898-4de18454dae0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -536,9 +536,6 @@
     <ClCompile Include="Objects\ItemBanana.cpp">
       <Filter>Objects\ItemObject\02ItemBanana</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\ItemOil.cpp">
-      <Filter>Objects\ItemObject\03ItemOil</Filter>
-    </ClCompile>
     <ClCompile Include="Meshes\LiePlaneMesh.cpp">
       <Filter>Meshes\LiePlaneMesh</Filter>
     </ClCompile>
@@ -566,11 +563,14 @@
     <ClCompile Include="CShaders\ModelShader\BananaShader.cpp">
       <Filter>CShaders\ModelShader\04Item</Filter>
     </ClCompile>
-    <ClCompile Include="CShaders\ModelShader\OilShader.cpp">
-      <Filter>CShaders\ModelShader\04Item</Filter>
-    </ClCompile>
     <ClCompile Include="CShaders\ModelShader\StoneShader.cpp">
       <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\ModelShader\MudShader.cpp">
+      <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\ItemMud.cpp">
+      <Filter>Objects\ItemObject\03ItemMud</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

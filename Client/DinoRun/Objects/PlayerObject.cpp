@@ -291,7 +291,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	float drag;
 	if (isShift && m_fWheelDegree != 0)
 	{
-		drag = 0.0f;
+		drag = 0.5f* 0.3f* AIR *2.3f*3;
 	}
 	else
 	{
@@ -310,7 +310,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Frr);
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Fdrag);  //총합
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);//힘의 최종합을 구함
-	xmf3Ftraction.y -= 9.8f * m_fMass;
+	xmf3Ftraction.y -= 9.8f * m_fMass * 4;
 	m_xmf3AcceleratingForce = Vector3::DivProduct(xmf3Ftraction, m_fMass, false); //힘에 질량을 나눠서 가속력을 구함
 	//ㄴ> 단위 m/s^2
 	//if (m_xmf3AcceleratingForce.z < 0)
@@ -392,10 +392,10 @@ void CPlayer::Animate(float fTimeElapsed)
 	}
 	else
 	{
-		if (m_fWheelDegree > 50)
-			m_fWheelDegree = 50;
-		else if (m_fWheelDegree < -50)
-			m_fWheelDegree = -50;
+		if (m_fWheelDegree > 30)
+			m_fWheelDegree = 30;
+		else if (m_fWheelDegree < -30)
+			m_fWheelDegree = -30;
 	}
 	CGameObject::Animate(fTimeElapsed);
 }

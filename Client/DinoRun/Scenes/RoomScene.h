@@ -7,9 +7,9 @@ class CUiShader;
 struct User
 {
 	string m_sName;
-	float m_fButtonState;
+	bool m_bButtonState;
 
-	User(string name = "", float state = 0) :m_sName(name), m_fButtonState(state) {}
+	User(string name = "", bool state = 0) :m_sName(name), m_bButtonState(state) {}
 };
 class RoomScene : public BaseScene
 {

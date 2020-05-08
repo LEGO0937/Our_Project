@@ -52,10 +52,10 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 
-	m_vUsers.emplace_back(User("user1", 0.5f));
-	m_vUsers.emplace_back(User("user2", 0.5f));
-	m_vUsers.emplace_back(User("user3", 0.5f));
-	m_vUsers.emplace_back(User("user4", 0.5f));
+	m_vUsers.emplace_back(User("user1", true));
+	m_vUsers.emplace_back(User("user2", true));
+	m_vUsers.emplace_back(User("user3", true));
+	m_vUsers.emplace_back(User("user4", true));
 
 	UI_INFO button_info;
 	button_info.textureName = "Resources/Images/Button.dds";
@@ -113,6 +113,7 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 				instacingUiShaders[1]->getUvXs()[1] = 0.0f;
 				//임시적인 씬이동을 위해 여기서 씬타입 전환
 				//sceneType = ItemGame_Scene;
+				//클릭마다 네트워크에 버튼상태 전송할것
 			}
 			else
 			{
@@ -217,16 +218,16 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	//본인의 닉네임을 보내주고나서 다시 유저들의 이름 및 버튼 상태의 정보를 받아서 vector<User>에 담는다.
 	//이 때 클라 본인의 정보는 받지 않아야 함.
 	//m_vUsers.clear();
-	//m_vUsers.emplace_back(User("user1", 0));
-	//m_vUsers.emplace_back(User("user2", 0));
-	//m_vUsers.emplace_back(User("user3", 0));
-	//m_vUsers.emplace_back(User("user4", 0));
+	//m_vUsers.emplace_back(User("user1", true));
+	//m_vUsers.emplace_back(User("user2", true));
+	//m_vUsers.emplace_back(User("user3", true));
+	//m_vUsers.emplace_back(User("user4", true));
 	for (int i = 0; i < 4; ++i)
 	{
 		if (i < m_vUsers.size())
 		{
 			gameTexts[i + 1].text = m_vUsers[i].m_sName;
-			instacingUiShaders[1]->getUvXs()[i + 2] = m_vUsers[i].m_fButtonState;
+			instacingUiShaders[1]->getUvXs()[i + 2] = 0.5 * m_vUsers[i].m_bButtonState;
 		}
 	}
 	for (CUiShader* shader : instacingUiShaders)
@@ -237,6 +238,7 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		if (instacingUiShaders[1]->getUvXs()[i + 1] != 0.5f)
 			return SceneType::Room_Scene;
 	}
+	//네트워크 클래스에 저장되있는 방 모드 종류에 따라서 다른 게임씬전환
 	sceneType = SceneType::ItemGame_Scene;
 	return SceneType::Room_Scene;
 }

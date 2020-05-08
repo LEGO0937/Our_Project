@@ -162,7 +162,13 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader = new TreeShader;
 	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree1.bin", "Resources/ObjectData/TreeData");
 	instacingModelShaders.emplace_back(shader); 
-	
+	shader = new TreeShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", "Resources/ObjectData/StoneData");
+	instacingModelShaders.emplace_back(shader);
+	shader = new TreeShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Weed.bin", "Resources/ObjectData/WeedData");
+	instacingModelShaders.emplace_back(shader);
+
 	shader = new FenceShader;
 	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
 	instacingModelShaders.emplace_back(shader);
@@ -456,9 +462,9 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 	static float deltaUvX = 0.0f;
 	XMFLOAT3 vel = m_pPlayer->GetVelocity();
 	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
-	if (length > 61)
+	if (length > 35)
 	{
-		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
+	//	blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
 		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
 		m_pEffectShader->getUvXs()[0] = deltaUvX;

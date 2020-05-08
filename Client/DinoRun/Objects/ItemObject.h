@@ -34,15 +34,15 @@ public:
 	~ItemBanana();
 };
 
-class ItemOil : public CGameObject
+class ItemMud : public CGameObject
 {
 private:
 	float m_fEnableCount = 0;
 public:
 	virtual bool Update(float fTimeElapsed, CGameObject* target);
 
-	ItemOil(int nMeshes = 1);
-	~ItemOil();
+	ItemMud(int nMeshes = 1);
+	~ItemMud();
 };
 
 

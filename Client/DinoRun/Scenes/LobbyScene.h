@@ -9,11 +9,12 @@ struct Room
 {
 	int m_iRoomNumber;
 	int m_iUserNumber;
-	float m_iIsGaming;
+	bool m_bIsGaming;
+	bool m_bMode;
 	int m_iMaxUserNumber = 5;
 	
-	Room(int roomNum,int userNum, float isGameing):m_iRoomNumber(roomNum), 
-		m_iUserNumber(userNum), m_iIsGaming(isGameing)  //isGameing 0: 대기중, 1: 게임중
+	Room(int roomNum,int userNum, bool isGameing, bool mode):m_iRoomNumber(roomNum), 
+		m_iUserNumber(userNum), m_bIsGaming(isGameing),m_bMode(mode)  //isGameing 0: 대기중, 1: 게임중
 	{}
 };
 
@@ -60,6 +61,7 @@ private:
 
 	int m_iRoomPageNum = 0;
 	int m_iUserPageNum = 0;
+	float m_fMode = 0.0f;
 	vector<Room> m_vRooms;
 	vector<string> m_vUsers;
 };

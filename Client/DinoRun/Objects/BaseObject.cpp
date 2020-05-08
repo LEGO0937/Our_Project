@@ -386,13 +386,13 @@ void CGameObject::UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent)
 }
 void CGameObject::UpdateTransform_Instancing(unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer, const int& idx, XMFLOAT4X4 *pxmf4x4Parent)
 {
-	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : m_xmf4x4ToParent;
+	//m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : m_xmf4x4ToParent;
 
 	XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4World),
 		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
 
 	if (m_pSibling) m_pSibling->UpdateTransform_Instancing(instancedTransformBuffer, idx, pxmf4x4Parent);
-	if (m_pChild) m_pChild->UpdateTransform_Instancing(instancedTransformBuffer, idx, &m_xmf4x4World);
+	if (m_pChild) m_pChild->UpdateTransform_Instancing(instancedTransformBuffer, idx, pxmf4x4Parent);
 }
 
 void CGameObject::UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer, const int& idx)
@@ -1156,10 +1156,31 @@ void CGameObject::CreateSkinedInstanceBuffer(CreateManager* pCreateManager,
 bool CGameObject::IsVisible(CCamera *pCamera)
 {
 	bool bIsVisible = false;
-	BoundingOrientedBox xmBoundingBox = m_pMesh->GetBoundingBox();
-	//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
-	xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
-	if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
+	if (m_pMesh)
+	{
+		BoundingOrientedBox xmBoundingBox = m_pMesh->GetBoundingBox();
+		//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
+		xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+		if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
+	}
+	return(bIsVisible);
+}
+
+bool CGameObject::IsVisible_Ins(CCamera *pCamera)
+{
+	bool bIsVisible = false;
+	if (m_pMesh)
+	{
+		BoundingOrientedBox xmBoundingBox = m_pMesh->GetBoundingBox();
+		//모델 좌표계의 바운딩 박스를 월드 좌표계로 변환한다. 
+		xmBoundingBox.Transform(xmBoundingBox, XMLoadFloat4x4(&m_xmf4x4World));
+		if (pCamera) bIsVisible = pCamera->IsInFrustum(xmBoundingBox);
+	}
+	if (m_pSibling && !bIsVisible)
+		bIsVisible = m_pSibling->IsVisible_Ins(pCamera);
+	if (m_pChild && !bIsVisible)
+		bIsVisible = m_pChild->IsVisible_Ins(pCamera);
+
 	return(bIsVisible);
 }
 

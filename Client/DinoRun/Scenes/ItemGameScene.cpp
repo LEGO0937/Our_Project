@@ -24,6 +24,7 @@
 #define ITEM_TILE 0
 #define ITEM_UI 1   //아이템 틀안의 이미지의 쉐이더 리스트상에서의 인덱스
 
+
 ItemGameScene::ItemGameScene() :BaseScene()
 {
 	sceneType = SceneType::ItemGame_Scene;
@@ -160,22 +161,8 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
 	instacingBillBoardShaders.emplace_back(shader);
 
-	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree1.bin", "Resources/ObjectData/TreeData");
-	instacingModelShaders.emplace_back(shader);
-
 	shader = new FenceShader;
 	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
-	instacingModelShaders.emplace_back(shader);
-	shader->AddRef();
-	UpdatedShaders.emplace_back(shader);
-
-	m_pCheckPointShader = new BlockShader;
-	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
-	m_pCheckPointShader->AddRef();
-
-	shader = new ItemShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/ItemBox.bin", "Resources/ObjectData/MeatData");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
@@ -193,19 +180,31 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
-	shader = new OilShader;
+	shader = new MudShader;
 	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Mud.bin", NULL);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
-	//shader = new ItemShader;
-	//shader->BuildObjects(pCreateManager, "Resources/Models/ItemBanana.bin", NULL);
-	//instacingModelShaders.emplace_back(shader);
-	//shader->AddRef();
-	//UpdatedShaders.emplace_back(shader);
 
+	shader = new TreeShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree1.bin", "Resources/ObjectData/TreeData");
+	instacingModelShaders.emplace_back(shader);
+	shader = new TreeShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", "Resources/ObjectData/StoneData");
+	instacingModelShaders.emplace_back(shader);
+	shader = new TreeShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Weed.bin", "Resources/ObjectData/WeedData");
+	instacingModelShaders.emplace_back(shader);
 
+	m_pCheckPointShader = new BlockShader;
+	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
+	m_pCheckPointShader->AddRef();
 
+	shader = new ItemShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/ItemBox.bin", "Resources/ObjectData/MeatData");
+	instacingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
 
 	uiShader = new TimeCountShader;
 	uiShader->BuildObjects(pCreateManager.get(), NULL);
@@ -328,9 +327,27 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		{
 		case VK_CONTROL:
 			//바나나= -8   머드= -8
-			XMFLOAT4X4 matrix = m_pPlayer->m_xmf4x4ToParent;
-			matrix._42 -=8;
-			instacingModelShaders[5]->addObject(m_pCreateManager.get(), matrix);
+			switch (m_eCurrentItem)
+			{
+			case IconBanana:
+			case IconStone:
+			case IconMud:
+				XMFLOAT4X4 matrix = m_pPlayer->m_xmf4x4ToParent;
+				XMFLOAT3 pos = m_pPlayer->GetLook();
+				pos = Vector3::ScalarProduct(pos, 30, false);
+				matrix._41 -= pos.x;
+				matrix._42 -= 8+pos.y;
+				matrix._43 -= pos.z;
+				instacingModelShaders[(int)m_eCurrentItem]->addObject(m_pCreateManager.get(), matrix);
+				break;
+			case IconMeat:
+				break;
+			case IconMugen:
+				break;
+			
+			}
+			m_eCurrentItem = IconDefault;
+			instacingImageUiShaders[ITEM_UI]->getUvXs()[0] = 0.125f * m_eCurrentItem;
 			break;
 		case VK_F2:
 		case VK_F3:
@@ -505,7 +522,7 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 	static float deltaUvX = 0.0f;
 	XMFLOAT3 vel = m_pPlayer->GetVelocity();
 	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
-	//if (length > 61)
+	if (length > 35)
 	{
 		//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
@@ -600,7 +617,8 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 						
 						std::mt19937 mtRand(randomSeed);
 						std::uniform_int_distribution<int> randType(IconBanana, IconMugen);
-						instacingImageUiShaders[ITEM_UI]->getUvXs()[0] =  0.125f * randType(mtRand);
+						m_eCurrentItem = ItemIcon_type(randType(mtRand));
+						instacingImageUiShaders[ITEM_UI]->getUvXs()[0] =  0.125f * m_eCurrentItem;
 					}
 					else
 					{

@@ -317,6 +317,7 @@ public:
 	UINT GetMeshType() { return((m_pMesh) ? m_pMesh->GetType() : 0x00); }
 
 	bool IsVisible(CCamera *pCamera);
+	bool IsVisible_Ins(CCamera *pCamera);
 	bool IsCollide(CGameObject* ob);
 	bool IsCollide(CGameObject* a, CGameObject* b);
 

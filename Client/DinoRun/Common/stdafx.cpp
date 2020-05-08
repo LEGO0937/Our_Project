@@ -1165,6 +1165,7 @@ void CreatePsoMinimap(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraph
 
 	d3dPipelineStateDesc.BlendState = d3dBlendDesc;
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
+	d3dPipelineStateDesc.DepthStencilState.DepthEnable = false;
 	d3dPipelineStateDesc.InputLayout = CreateUiInputLayout();
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
 	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;

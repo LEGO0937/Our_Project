@@ -2,14 +2,14 @@
 #include "../../Common//FrameWork/CreateManager.h"
 #include "../../Objects/ItemObject.h"
 
-OilShader::OilShader()
+MudShader::MudShader()
 {
 }
-OilShader::~OilShader()
+MudShader::~MudShader()
 {
 }
 
-void OilShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void MudShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	isEnable = true;
 
@@ -17,7 +17,7 @@ void OilShader::Load(CreateManager* pCreateManager, const char* filename, const 
 	::fopen_s(&pInFile, Loadname, "rb");
 	if (!pInFile)
 		return;
-	ItemOil* pItemObject = NULL;
+	ItemMud* pItemObject = NULL;
 	UINT nReads;
 	int nLength = 0;
 
@@ -27,7 +27,7 @@ void OilShader::Load(CreateManager* pCreateManager, const char* filename, const 
 	for (int i = 0; i < nLength; ++i)
 	{
 		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
-		pItemObject = new ItemOil;
+		pItemObject = new ItemMud;
 		pItemObject->SetChild(pModel->m_pModelRootObject->m_pChild);
 		pItemObject->AddRef();
 
@@ -44,7 +44,7 @@ void OilShader::Load(CreateManager* pCreateManager, const char* filename, const 
 	::fclose(pInFile);
 }
 
-void OilShader::Update(float fTimeElapsed)
+void MudShader::Update(float fTimeElapsed)
 {
 	if (objectList.size())
 	{
@@ -55,12 +55,12 @@ void OilShader::Update(float fTimeElapsed)
 	}
 }
 
-void OilShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position)
+void MudShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position)
 {
-	ItemOil* pItemObject = NULL;
+	ItemMud* pItemObject = NULL;
 	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
 
-	pItemObject = new ItemOil;
+	pItemObject = new ItemMud;
 	pItemObject->SetChild(pModel->m_pModelRootObject->m_pChild);
 	pItemObject->AddRef();
 

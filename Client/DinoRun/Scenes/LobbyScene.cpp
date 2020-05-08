@@ -67,15 +67,15 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//방 정보에는 방 번호, 현재 인원수, 게임중 or 대기중 상태의 변수를 가짐
 
 	//==================================임시로 작성한 부분
-	m_vRooms.emplace_back(Room(1, 5, 0.0f));
-	m_vRooms.emplace_back(Room(2, 2, 0.0f));
-	m_vRooms.emplace_back(Room(3, 1, 0.5f));
-	m_vRooms.emplace_back(Room(4, 0, 0.5f));
-	m_vRooms.emplace_back(Room(5, 3, 0.0f));
-	m_vRooms.emplace_back(Room(6, 2, 0.0f));
-	m_vRooms.emplace_back(Room(7, 0, 0.5f));
-	m_vRooms.emplace_back(Room(8, 3, 0.0f));
-	m_vRooms.emplace_back(Room(9, 2, 0.0f));
+	m_vRooms.emplace_back(Room(1, 5, false, false));
+	m_vRooms.emplace_back(Room(2, 2, false,false));
+	m_vRooms.emplace_back(Room(3, 1, true,false));
+	m_vRooms.emplace_back(Room(4, 0, true,false));  //0.5 = true*0.5f
+	m_vRooms.emplace_back(Room(5, 3, false,false));
+	m_vRooms.emplace_back(Room(6, 2, false,false));
+	m_vRooms.emplace_back(Room(7, 0, true, false));
+	m_vRooms.emplace_back(Room(8, 3, false,false));
+	m_vRooms.emplace_back(Room(9, 2, false,false));
 
 
 	m_vUsers.emplace_back("das");
@@ -217,32 +217,44 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							//들어오라는 신호를 보낸다.
 							//연결 성공 시 네트워크 클래스에 m_vRooms[clickNum].m_iRoomNumber를 받아서 
 							//접속할 방의 번호 저장할것.
-							if (m_vRooms[clickNum].m_iIsGaming == 0 && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
+							if (!m_vRooms[clickNum].m_bIsGaming && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
+							{
+								m_fMode = m_vRooms[clickNum].m_bMode;
 								sceneType = SceneType::Room_Scene;
+							}
 						}
 					}
 					else if (point.x > -0.87f && point.x < -0.34f && point.y > -0.17f && point.y < 0.14f) //2번 방 충돌체크
 					{
 						if (clickNum + 1 <= m_vRooms.size() - 1)
 						{
-							if (m_vRooms[clickNum + 1].m_iIsGaming == 0 && m_vRooms[clickNum + 1].m_iUserNumber < m_vRooms[clickNum + 1].m_iMaxUserNumber)
+							if (!m_vRooms[clickNum + 1].m_bIsGaming && m_vRooms[clickNum + 1].m_iUserNumber < m_vRooms[clickNum + 1].m_iMaxUserNumber)
+							{
+								m_fMode = m_vRooms[clickNum + 1].m_bMode;
 								sceneType = SceneType::Room_Scene;
+							}
 						}
 					}
 					else if (point.x > -0.24f && point.x < 0.28f && point.y > 0.22f && point.y < 0.51f) //3번 방 충돌체크
 					{
 						if (clickNum + 2 <= m_vRooms.size() - 1)
 						{
-							if (m_vRooms[clickNum + 2].m_iIsGaming == 0 && m_vRooms[clickNum + 2].m_iUserNumber < m_vRooms[clickNum + 2].m_iMaxUserNumber)
+							if (!m_vRooms[clickNum + 2].m_bIsGaming && m_vRooms[clickNum + 2].m_iUserNumber < m_vRooms[clickNum + 2].m_iMaxUserNumber)
+							{
+								m_fMode = m_vRooms[clickNum + 2].m_bMode;
 								sceneType = SceneType::Room_Scene;
+							}
 						}
 					}
 					else if (point.x > -0.24f && point.x < 0.28f && point.y > -0.17f && point.y < 0.14f) //4번 방 충돌체크
 					{
 						if (clickNum + 3 <= m_vRooms.size() - 1)
 						{
-							if (m_vRooms[clickNum + 3].m_iIsGaming == 0 && m_vRooms[clickNum + 3].m_iUserNumber < m_vRooms[clickNum + 3].m_iMaxUserNumber)
+							if (!m_vRooms[clickNum + 3].m_bIsGaming && m_vRooms[clickNum + 3].m_iUserNumber < m_vRooms[clickNum + 3].m_iMaxUserNumber)
+							{
+								m_fMode = m_vRooms[clickNum + 3].m_bMode;
 								sceneType = SceneType::Room_Scene;
+							}
 						}
 					}
 				}
@@ -425,6 +437,7 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	if (sceneType != SceneType::Lobby_Scene)
 	{
+		//네트워크 클래스에 방의 모드 저장할 것
 		return sceneType;
 	}
 
@@ -459,7 +472,7 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			if (i <= m_vRooms.size() - 1)
 			{
 				gameTexts[n + 8].text = to_string(m_vRooms[i].m_iUserNumber) + " / " + to_string(m_vRooms[i].m_iMaxUserNumber);
-				instacingUiShaders[1]->getUvXs()[n] = m_vRooms[i].m_iIsGaming;
+				instacingUiShaders[1]->getUvXs()[n] = 0.5f * m_vRooms[i].m_bIsGaming;
 			}
 			else
 			{

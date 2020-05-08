@@ -236,14 +236,15 @@ void CObInstancingShader::ReleaseShaderVariables()
 }
 //인스턴싱 정보(객체의 월드 변환 행렬과 색상)를 정점 버퍼에 복사한다.
 void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
-	*pd3dCommandList)
+	*pd3dCommandList , CCamera *pCamera)
 {
 	drawingCount = 0;
 	if (objectList.size())
 	{
 		for (CGameObject* ob : objectList)
 		{
-			if (ob->isEnable)
+			ob->UpdateTransform(NULL);
+			if (ob->isEnable && ob->IsVisible_Ins(pCamera))
 			{
 				ob->UpdateTransform_Instancing(instancedObjectInfo, drawingCount, NULL);
 				drawingCount++;
@@ -256,7 +257,7 @@ void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 void CObInstancingShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {
-	UpdateShaderVariables(pd3dCommandList);  //그림자 적용시 여기에선 더이상 사용안함
+	UpdateShaderVariables(pd3dCommandList, pCamera);  //그림자 적용시 여기에선 더이상 사용안함
 	if (objectList.size() > 0 && isEnable)
 	{
 		CShader::Render(pd3dCommandList, pCamera);
@@ -270,7 +271,7 @@ void CObInstancingShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCa
 void CObInstancingShader::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {
-	UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables(pd3dCommandList, pCamera);
 	if (objectList.size() > 0 && isEnable)
 	{
 		CShader::Render(pd3dCommandList, pCamera);
@@ -332,7 +333,7 @@ void CSkinedObInstancingShader::ReleaseShaderVariables()
 }
 //인스턴싱 정보(객체의 월드 변환 행렬과 색상)를 정점 버퍼에 복사한다.
 void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
-	*pd3dCommandList)
+	*pd3dCommandList, CCamera *pCamera)
 {
 
 	drawingCount = 0;
@@ -340,8 +341,12 @@ void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 	{
 		for (CGameObject* ob : objectList)
 		{
-			ob->UpdateTransform_SkinedInstancing(instancedObjectInfo, drawingCount);
-			drawingCount++;
+			ob->UpdateTransform(NULL);
+			if (ob->isEnable && ob->IsVisible_Ins(pCamera))
+			{
+				ob->UpdateTransform_SkinedInstancing(instancedObjectInfo, drawingCount);
+				drawingCount++;
+			}
 		}
 	}
 }
@@ -350,7 +355,7 @@ void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 void CSkinedObInstancingShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {
-	UpdateShaderVariables(pd3dCommandList);  //그림자 적용시 여기에선 더이상 사용안함
+	UpdateShaderVariables(pd3dCommandList, pCamera);  //그림자 적용시 여기에선 더이상 사용안함
 	if (objectList.size() > 0 && isEnable)
 	{
 		CShader::Render(pd3dCommandList, pCamera);
@@ -364,7 +369,7 @@ void CSkinedObInstancingShader::Render(ID3D12GraphicsCommandList *pd3dCommandLis
 void CSkinedObInstancingShader::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {
-	UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables(pd3dCommandList, pCamera);
 	if (objectList.size() > 0 && isEnable)
 	{
 		CShader::Render(pd3dCommandList, pCamera);
@@ -419,7 +424,7 @@ void CUiShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 
 void CUiShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
-	UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables(pd3dCommandList, pCamera);
 	if (objectList.size() > 0 && isEnable)
 	{
 		CShader::Render(pd3dCommandList, pCamera);
@@ -452,7 +457,7 @@ void CUiShader::ReleaseShaderVariables()
 }
 
 void CUiShader::UpdateShaderVariables(ID3D12GraphicsCommandList
-	*pd3dCommandList)
+	*pd3dCommandList, CCamera *pCamera)
 {
 	int idx = 0;
 	for (CGameObject* ob : objectList)

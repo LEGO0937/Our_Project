@@ -17,7 +17,7 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 	virtual void CreateShaderVariables(CreateManager* pCreateManager) {};
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) {};
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {};
 	virtual void ReleaseShaderVariables() {};
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nPipelineState = 0);
@@ -81,7 +81,7 @@ public:
 	virtual void FixedUpdate(float fTimeElapsed) {}
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position) {}
 
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) = 0;
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) = 0;
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {};
@@ -107,7 +107,7 @@ public:
 
 
 	virtual void CreateShaderVariables(CreateManager* pCreateManager);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ReleaseShaderVariables();
 
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
@@ -139,7 +139,7 @@ public:
 
 
 	virtual void CreateShaderVariables(CreateManager* pCreateManager);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ReleaseShaderVariables();
 
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
@@ -176,7 +176,7 @@ public:
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation) {}
 	virtual void CreateShaderVariables(CreateManager* pCreateManager);
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ReleaseShaderVariables();
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);

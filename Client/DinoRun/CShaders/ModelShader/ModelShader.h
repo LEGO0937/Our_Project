@@ -74,11 +74,11 @@ public:
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position);
 };
 
-class OilShader : public ModelShader
+class MudShader : public ModelShader
 {
 public:
-	OilShader();
-	virtual ~OilShader();
+	MudShader();
+	virtual ~MudShader();
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
