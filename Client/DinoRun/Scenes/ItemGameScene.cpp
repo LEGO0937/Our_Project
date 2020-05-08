@@ -186,6 +186,18 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
+
+	shader = new StoneShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", NULL);
+	instacingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+
+	shader = new OilShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Mud.bin", NULL);
+	instacingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
 	//shader = new ItemShader;
 	//shader->BuildObjects(pCreateManager, "Resources/Models/ItemBanana.bin", NULL);
 	//instacingModelShaders.emplace_back(shader);
@@ -315,10 +327,10 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		switch (wParam)
 		{
 		case VK_CONTROL:
-			//바나나
-			XMFLOAT3 pos = m_pPlayer->GetPosition();
-			pos.y = m_pTerrain->GetHeight(pos.x, pos.y)+2;
-			instacingModelShaders[3]->addObject(m_pCreateManager.get(),pos);
+			//바나나= -8   머드= -8
+			XMFLOAT4X4 matrix = m_pPlayer->m_xmf4x4ToParent;
+			matrix._42 -=8;
+			instacingModelShaders[5]->addObject(m_pCreateManager.get(), matrix);
 			break;
 		case VK_F2:
 		case VK_F3:

@@ -55,7 +55,7 @@ void StoneShader::Update(float fTimeElapsed)
 	}
 }
 
-void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position)
+void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position)
 {
 	ItemStone* pItemObject = NULL;
 	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
@@ -64,7 +64,7 @@ void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3P
 	pItemObject->SetChild(pModel->m_pModelRootObject->m_pChild);
 	pItemObject->AddRef();
 
-	pItemObject->SetPosition(xmf3Position);
+	pItemObject->SetMatrix(xmf3Position);
 
 	objectList.emplace_back(pItemObject);
 	if (pModel)

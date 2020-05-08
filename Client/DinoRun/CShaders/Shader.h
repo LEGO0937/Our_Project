@@ -117,7 +117,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed) {}
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position) {}
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position) {}
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);

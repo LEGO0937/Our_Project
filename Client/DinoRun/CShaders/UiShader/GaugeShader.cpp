@@ -54,14 +54,15 @@ void GaugeShader::BuildObjects(CreateManager* pCreateManager, void* pInformation
 void GaugeShader::Update(float fTimeElapsed, void* pInformation)
 {
 	CPlayer* pPlayer = (CPlayer*)pInformation;
-	UINT nGauge = (UINT)pPlayer->GetMaxForce();
-	pPlayer->SetMaxForce(pPlayer->GetMaxForce() - fTimeElapsed * 2);
-	if (pPlayer->GetMaxForce() < MIN_FORCE) pPlayer->SetMaxForce(MIN_FORCE);
-	if (uvX[0] < (int)(nGauge * 0.05))
+	UINT nGauge = (UINT)pPlayer->GetMaxVelocityXZ();
+	pPlayer->SetMaxVelocityXZ(pPlayer->GetMaxVelocityXZ() - fTimeElapsed * 0.2);
+	if (pPlayer->GetMaxVelocityXZ() < MIN_VELOCITY)
+		pPlayer->SetMaxVelocityXZ(MIN_VELOCITY);
+	if (uvX[0] < (int)(nGauge * 2))
 	{
 		uvX[0] += 1;
 	}
-	else if (uvX[0] > (int)(nGauge * 0.05))
+	else if (uvX[0] > (int)(nGauge * 2))
 	{
 		uvX[0] -= 1;
 	}

@@ -192,7 +192,7 @@ class CGameObject
 {
 protected:
 	int								m_nReferences = 0;
-	float m_fMaxForce = 0; // 힘의 크기 이 이상 넘을 경우 이 값을 유지함
+	float m_fMaxForce = 0; // 힘의 크기 이 이상 넘을 경우 이 값을 유지함 N단위
 
 	float m_nScale = 1;
 
@@ -218,10 +218,10 @@ public:
 
 	ModelType						m_ModelType = ModelType::Default;   //충돌체크시 사용될 오브젝트의 유형(player, wall 등등)
 	//-----------------------rigidBody----------------------
-	float							m_fMass = 0; 
+	float							m_fMass = 0;   //kg 단위
 	
 	XMFLOAT3 m_xmf3Angle;
-	XMFLOAT3 m_xmf3Force;
+	XMFLOAT3 m_xmf3Force;      
 
 
 	XMFLOAT3 m_xmf3RotateVelocity =XMFLOAT3(0.0f,0.0f,0.0f);
@@ -230,7 +230,7 @@ public:
 
 	float m_fForce = 0;    //앞키 누를 시 증가하는 변수, 룩벡터에 곱함으로써 진행 방향에 대한 힘벡터를 구함.
 
-	XMFLOAT3 m_xmf3Forces = { 0,0,0 };  // 충돌 시 적용할 힘을 추가 하기 위한 변수.
+	XMFLOAT3 m_xmf3Forces = { 0,0,0 };  // 충돌 시 적용할 힘을 추가 하기 위한 변수.  N단위
 
 
 	//---------------------------------------------------
@@ -260,7 +260,7 @@ public:
 	virtual void resetShadowTexture(CreateManager* pCreateManager);
 
 	void SetChild(CGameObject *pChild, bool bReferenceUpdate = false);
-
+	void SetMatrix(const XMFLOAT4X4& xmf4x4Matrix) { m_xmf4x4ToParent = xmf4x4Matrix; }
 	virtual void OnPrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed); // 애니메이션 처리
 	virtual void FixedUpdate(float fTimeElapsed); //물리

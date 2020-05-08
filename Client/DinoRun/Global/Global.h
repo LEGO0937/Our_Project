@@ -41,13 +41,13 @@
 #define MAX_FORCE 2000
 #define MIDDLE_FORCE 1300
 #define MIN_FORCE 600
-
+#define MIN_VELOCITY 15.0f
+#define MAX_VELOCITY 50.f
 
 //¥‹¿ß ¿Ø¥÷ vs Meter or Kilometer
 #define METER_PER_UNIT 0.1
 #define UNIT_PER_METER 10
 #define UNIT_PER_KILOMETER 10000
-
 
 //CheckPoint max
 #define CHECKPOINT_GOAL 362

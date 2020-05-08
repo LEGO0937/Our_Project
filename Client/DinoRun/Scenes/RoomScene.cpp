@@ -89,6 +89,8 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.17f, 0.75f)));
 	gameTexts[0].text = m_sPlayerId;
 
+
+	instacingUiShaders[1]->getUvXs()[0] = 0.5f;
 	CreateShaderVariables(pCreateManager.get());
 }
 
@@ -108,14 +110,14 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			if (instacingUiShaders[1]->getUvXs()[0] == 0.0f)
 			{
 				instacingUiShaders[1]->getUvXs()[0] = 0.5f;
-				instacingUiShaders[1]->getUvXs()[1] = 0.5f;
+				instacingUiShaders[1]->getUvXs()[1] = 0.0f;
 				//임시적인 씬이동을 위해 여기서 씬타입 전환
 				//sceneType = ItemGame_Scene;
 			}
 			else
 			{
 				instacingUiShaders[1]->getUvXs()[0] = 0.0f;
-				instacingUiShaders[1]->getUvXs()[1] = 0.0f;
+				instacingUiShaders[1]->getUvXs()[1] = 0.5f;
 			}
 			//*서버*
 			//버튼이 클릭 되는 구간

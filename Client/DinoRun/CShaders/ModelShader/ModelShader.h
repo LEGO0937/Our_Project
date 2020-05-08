@@ -9,7 +9,7 @@ public:
 	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL);
 	virtual void Update(float fTimeElapsed){}
 	virtual void FixedUpdate(float fTimeElapsed) {}
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position) {}
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position) {}
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 };
@@ -71,7 +71,7 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position);
 };
 
 class OilShader : public ModelShader
@@ -82,7 +82,7 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position);
 };
 
 class StoneShader : public ModelShader
@@ -93,6 +93,6 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position);
 };
 
