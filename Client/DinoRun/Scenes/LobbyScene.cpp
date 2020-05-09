@@ -1,5 +1,6 @@
 #include "LobbyScene.h"
 #include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/NetWorkManager.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -57,6 +58,8 @@ void LobbyScene::ReleaseObjects()
 void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
+	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
@@ -248,6 +251,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							//접속할 방의 번호 저장할것.
 							if (!m_vRooms[clickNum].m_bIsGaming && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
 							{
+								m_iResultNum = m_vRooms[clickNum].m_iRoomNumber;
 								m_bMode = m_vRooms[clickNum].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -259,6 +263,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 						{
 							if (!m_vRooms[clickNum + 1].m_bIsGaming && m_vRooms[clickNum + 1].m_iUserNumber < m_vRooms[clickNum + 1].m_iMaxUserNumber)
 							{
+								m_iResultNum = m_vRooms[clickNum + 1].m_iRoomNumber;
 								m_bMode = m_vRooms[clickNum + 1].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -270,6 +275,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 						{
 							if (!m_vRooms[clickNum + 2].m_bIsGaming && m_vRooms[clickNum + 2].m_iUserNumber < m_vRooms[clickNum + 2].m_iMaxUserNumber)
 							{
+								m_iResultNum = m_vRooms[clickNum + 2].m_iRoomNumber;
 								m_bMode = m_vRooms[clickNum + 2].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -281,6 +287,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 						{
 							if (!m_vRooms[clickNum + 3].m_bIsGaming && m_vRooms[clickNum + 3].m_iUserNumber < m_vRooms[clickNum + 3].m_iMaxUserNumber)
 							{
+								m_iResultNum = m_vRooms[clickNum + 3].m_iRoomNumber;
 								m_bMode = m_vRooms[clickNum + 3].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -420,6 +427,8 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	if (sceneType != SceneType::Lobby_Scene)
 	{
 		//네트워크 클래스에 방의 모드 저장할 것
+		m_pNetWorkManager->SetRoomNum(m_iResultNum);
+		m_pNetWorkManager->SetGameMode(m_bMode);
 		return sceneType;
 	}
 

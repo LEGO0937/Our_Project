@@ -22,9 +22,8 @@ struct CB_Particle
 	float fSize;
 };
 
-class Particle
+struct Particle
 {
-public:
 	XMFLOAT3 m_xmf3Position = XMFLOAT3(0, 0, 0);
 	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 	float life = 0;

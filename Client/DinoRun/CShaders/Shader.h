@@ -66,8 +66,8 @@ class CObjectsShader : public CShader
 {
 protected:
 	bool isEnable = true;
-	int drawingCount = 0;
-	string instancingModelName;
+	int drawingCount = 0;         // after culling, instancing number
+	string instancingModelName;   // model's name for instancing
 public:
 	CObjectsShader();
 	virtual ~CObjectsShader();
@@ -184,8 +184,8 @@ public:
 protected:
 	CB_UI_INFO *m_pcbMappedUis = NULL;
 	ID3D12Resource *m_pd3dcbUis = NULL;
-	vector<float> uvX;
-	vector<float> uvY;
+	vector<float> uvX;      //it is uv.x's  offsets
+	vector<float> uvY;		//it is uv.y's  offsets
 };
 
 

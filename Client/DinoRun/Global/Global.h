@@ -49,8 +49,9 @@
 #define UNIT_PER_METER 10
 #define UNIT_PER_KILOMETER 10000
 
-//CheckPoint max
+//CheckPoint max  ,   2 track
 #define CHECKPOINT_GOAL 362
+
 enum SceneType { Default_Scene = 0, Start_Scene, Lobby_Scene, Room_Scene, Game_Scene,ItemGame_Scene, End_Scene };
 enum ModelType { Default = 0, CheckPoint, Player, Fence, Item_Box, Item_Banana, 
 	Item_Meat, Item_Oil, Item_Stone,Item_Mugen

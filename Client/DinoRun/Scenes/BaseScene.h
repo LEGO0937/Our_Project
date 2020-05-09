@@ -10,6 +10,7 @@
 class CPlayer;
 class CCamera;
 class CreateManager;
+class NetWorkManager;
 struct LIGHT
 {
 	XMFLOAT4 m_xmf4Ambient;
@@ -103,6 +104,7 @@ public:
 protected:
 	string m_sPlayerId;
 	shared_ptr<CreateManager> m_pCreateManager = NULL;
+	shared_ptr<NetWorkManager> m_pNetWorkManager= NULL;
 	SceneType sceneType;
 
 	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;

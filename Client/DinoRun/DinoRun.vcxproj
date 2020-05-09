@@ -164,6 +164,7 @@
     <ClInclude Include="Common\FrameWork\CreateManager.h" />
     <ClInclude Include="Common\FrameWork\DrawManager.h" />
     <ClInclude Include="Common\FrameWork\FontManager.h" />
+    <ClInclude Include="Common\FrameWork\NetworkManager.h" />
     <ClInclude Include="Common\FrameWork\SoundManager.h" />
     <ClInclude Include="Common\ParticleSystem\ParticleSystem.h" />
     <ClInclude Include="Common\Resource.h" />
@@ -213,6 +214,7 @@
     <ClCompile Include="Common\FrameWork\CreateManager.cpp" />
     <ClCompile Include="Common\FrameWork\DrawManager.cpp" />
     <ClCompile Include="Common\FrameWork\FontManager.cpp" />
+    <ClCompile Include="Common\FrameWork\NetworkManager.cpp" />
     <ClCompile Include="Common\FrameWork\SoundManager.cpp" />
     <ClCompile Include="Common\ParticleSystem\ParticleSystem.cpp" />
     <ClCompile Include="Common\stdafx.cpp" />

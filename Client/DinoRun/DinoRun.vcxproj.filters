@@ -232,6 +232,9 @@
     <Filter Include="Objects\ItemObject\03ItemMud">
       <UniqueIdentifier>{284e0d6b-6074-41d9-8898-4de18454dae0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Framework\NetworkManager">
+      <UniqueIdentifier>{de07a1f1-7761-41ff-b9ac-02c16f1d58f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -377,6 +380,9 @@
     </ClInclude>
     <ClInclude Include="Scenes\ItemGameScene.h">
       <Filter>Scenes\ItemGameScene</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\FrameWork\NetworkManager.h">
+      <Filter>Common\Framework\NetworkManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -571,6 +577,9 @@
     </ClCompile>
     <ClCompile Include="Objects\ItemMud.cpp">
       <Filter>Objects\ItemObject\03ItemMud</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\FrameWork\NetworkManager.cpp">
+      <Filter>Common\Framework\NetworkManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

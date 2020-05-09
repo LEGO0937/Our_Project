@@ -1,5 +1,6 @@
 #include "ItemGameScene.h"
 #include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/NetWorkManager.h"
 
 #include "../Objects/PlayerObject.h"
 #include "../Objects/SkyBoxObject.h"
@@ -133,6 +134,7 @@ void ItemGameScene::ReleaseObjects()
 void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
+	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 

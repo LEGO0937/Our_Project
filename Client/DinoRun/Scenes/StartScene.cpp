@@ -1,5 +1,6 @@
 #include "StartScene.h"
 #include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/NetWorkManager.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -45,6 +46,8 @@ void StartScene::ReleaseObjects()
 void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
+	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
@@ -119,6 +122,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				// 닉네임을 받았다면 네트워크 클래스에 닉네임 저장 후, Lobbyscene으로 이동.
 				//씬 전환 
 				//m_sPlayerId = 로그인 성공 시 서버로부터 닉네임 받음;
+				m_pNetWorkManager->SetPlayerName(m_sPlayerId);
 				sceneType = Lobby_Scene;
 			}
 		}

@@ -1,6 +1,7 @@
 #include "RoomScene.h"
 
 #include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/NetWorkManager.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -37,6 +38,8 @@ void RoomScene::ReleaseObjects()
 void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
+	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CUiShader* uiShader;
@@ -239,7 +242,11 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			return SceneType::Room_Scene;
 	}
 	//네트워크 클래스에 저장되있는 방 모드 종류에 따라서 다른 게임씬전환
-	sceneType = SceneType::Game_Scene;
+	if (m_pNetWorkManager->GetGameMode())
+		sceneType = SceneType::ItemGame_Scene;
+	else
+		sceneType = SceneType::Game_Scene;
+
 	return SceneType::Room_Scene;
 }
 

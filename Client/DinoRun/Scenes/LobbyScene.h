@@ -62,6 +62,7 @@ private:
 	int m_iRoomPageNum = 0;
 	int m_iUserPageNum = 0;
 	bool m_bMode = 0.0f;
+	int m_iResultNum = 0; 
 	vector<Room> m_vRooms;
 	vector<string> m_vUsers;
 };

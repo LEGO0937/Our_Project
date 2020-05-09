@@ -43,8 +43,8 @@ void SelectImageShader::BuildObjects(CreateManager* pCreateManager, void* pInfor
 
 	objectList.emplace_back(pObject);
 
-	uvX.emplace_back(0);
-	uvY.emplace_back(0);
+	uvX.emplace_back(0.0f);
+	uvY.emplace_back(0.0f);
 
 	CreateShaderVariables(pCreateManager);
 }
