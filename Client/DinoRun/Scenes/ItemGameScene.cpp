@@ -173,15 +173,14 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
-
-	shader = new StoneShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", NULL);
+	shader = new MudShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Mud.bin", NULL);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
-	shader = new MudShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Mud.bin", NULL);
+	shader = new StoneShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", NULL);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
@@ -338,7 +337,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				matrix._41 -= pos.x;
 				matrix._42 -= 8+pos.y;
 				matrix._43 -= pos.z;
-				instacingModelShaders[(int)m_eCurrentItem]->addObject(m_pCreateManager.get(), matrix);
+				instacingModelShaders[m_eCurrentItem]->addObject(m_pCreateManager.get(), matrix);
 				break;
 			case IconMeat:
 				break;
