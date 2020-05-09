@@ -31,7 +31,7 @@ public:
 		lParam, float deltaTime);
 
 	virtual void BuildLights();
-	void BuildMinimapCamera(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+	void BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 		*pd3dCommandList);
 
 	void BuildObjects(shared_ptr<CreateManager> pCreateManager);

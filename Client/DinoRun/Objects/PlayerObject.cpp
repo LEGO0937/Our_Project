@@ -238,7 +238,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		if (m_fMaxVelocityXZ > MAX_VELOCITY)
 			m_fMaxVelocityXZ = MAX_VELOCITY;
 		target->isEnable = false;
-		break;
+		return true;
 	case ModelType::Item_Banana:
 		break;
 		//return true;

@@ -223,7 +223,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 		15, "Resources/Images/smoke.dds", 5,50));
 	BuildLights();
 
-	BuildMinimapCamera(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	CreateShaderVariables(pCreateManager.get());
 }
@@ -447,15 +447,15 @@ void GameScene::RenderShadow()
 	BaseScene::RenderShadow();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_SKIN_MESH]);
-	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	m_pPlayer->Render(m_pd3dCommandList, m_pShadowCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_MODEL_INSTANCING]);
 	for (CObInstancingShader* shader : instacingModelShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
 }
 void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
@@ -549,6 +549,12 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 							0, "Resources/Images/Collision.dds", 0.5, 1));
 						p++;
 					}
+					else if ((*p)->m_ModelType == Item_Meat)
+					{
+						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
+							70, "Resources/Images/smoke.dds", 3, 120));
+						p++;
+					}
 					else
 					{
 						(*p)->Release();
@@ -617,31 +623,46 @@ void GameScene::BuildLights()
 	m_pLights->fogrange = 30;
 
 }
-void GameScene::BuildMinimapCamera(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+void GameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 	*pd3dCommandList)
 {
 	m_pMinimapCamera = new CMinimapCamera;
 	m_pMinimapCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pMinimapCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	m_pMinimapCamera->GenerateOrthoProjectionMatrix(1000, 1000, 10, 300.0f);
-	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT-180, 250, 180, 0.0f, 1.0f);
-	m_pMinimapCamera->SetScissorRect(0,0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT - 180, 250, 180, 0.0f, 1.0f);
+	m_pMinimapCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
 	m_pMinimapCamera->GenerateViewMatrix(m_pMinimapCamera->GetPosition(), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
 	m_pMinimapCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_pShadowCamera = new CMinimapCamera;
+	m_pShadowCamera->SetPosition(XMFLOAT3(0, 300, 0));
+	m_pShadowCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+	m_pShadowCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pShadowCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 }
 
 void GameScene::UpdateShadow()
-{	
+{
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
-	float rad = 800;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
+	float rad = 1000;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
 
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
-	lightDir= XMVector3Normalize(lightDir);
+	lightDir = XMVector3Normalize(lightDir);
 
-	XMVECTOR shadowCameraPosition = XMLoadFloat3(&centerPosition)-2.0f*rad*lightDir;
+	XMVECTOR shadowCameraPosition = XMLoadFloat3(&centerPosition) - 2.0f*rad*lightDir;
 	XMVECTOR targetPosition = XMLoadFloat3(&centerPosition);
 	XMVECTOR shadowUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	XMFLOAT3 xmf3CameraPosition;
+	XMFLOAT3 xmf3CameraTarget;
+	XMStoreFloat3(&xmf3CameraPosition, shadowCameraPosition);
+	XMStoreFloat3(&xmf3CameraTarget, targetPosition);
+
+	m_pShadowCamera->GenerateViewMatrix(xmf3CameraPosition, xmf3CameraTarget, XMFLOAT3(0, 1, 0));
+	m_pShadowCamera->GenerateFrustum();
+
 #ifdef _WITH_LEFT_HAND_COORDINATES
 	XMMATRIX shadowView = XMMatrixLookAtLH(shadowCameraPosition, targetPosition, shadowUp);
 #else
@@ -678,6 +699,9 @@ void GameScene::UpdateShadow()
 	XMStoreFloat4x4(&m_pcbMappedShadow->m_xmf4x4ShadowView, XMMatrixTranspose(shadowView));
 	XMStoreFloat4x4(&m_pcbMappedShadow->m_xmf4x4ShadowProjection, XMMatrixTranspose(ShadowProj));
 	XMStoreFloat4x4(&m_pcbMappedShadow->m_xmf4x4InvShadowViewProjection, XMMatrixTranspose(S));
+	XMFLOAT4X4 martrix;
+	XMStoreFloat4x4(&martrix, ShadowProj);
+	m_pShadowCamera->SetProjectionMatrix(martrix);
 }
 void GameScene::CreateShaderVariables(CreateManager* pCreateManager)
 {

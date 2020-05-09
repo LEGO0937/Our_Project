@@ -260,7 +260,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 		15, "Resources/Images/smoke.dds", 5, 50));
 	BuildLights();
 
-	BuildMinimapCamera(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	CreateShaderVariables(pCreateManager.get());
 }
@@ -340,8 +340,13 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				instacingModelShaders[m_eCurrentItem]->addObject(m_pCreateManager.get(), matrix);
 				break;
 			case IconMeat:
+				m_pPlayer->SetMaxVelocityXZ(50);
+				m_fBoostTimer = 10;
+				isBoost = true;
 				break;
 			case IconMugen:
+				m_fMugenTimer = 10;
+				isMugen = true;
 				break;
 			
 			}
@@ -425,8 +430,8 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
 		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
-		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
-		if (dwDirection) m_pPlayer->Move(dwDirection, 50.0f,
+		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 ()로 가정한다.*/
+		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f,
 			true);
 
 	}
@@ -506,15 +511,15 @@ void ItemGameScene::RenderShadow()
 	BaseScene::RenderShadow();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_SKIN_MESH]);
-	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	m_pPlayer->Render(m_pd3dCommandList, m_pShadowCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_MODEL_INSTANCING]);
 	for (CObInstancingShader* shader : instacingModelShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
 }
 void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
@@ -581,7 +586,22 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 	{
 		return End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 	}
+	if (isMugen)
+	{
+		m_fMugenTimer -= fTimeElapsed;
+		if (m_fMugenTimer < 0)
+			isMugen = false;
+	}
+	if (isBoost)
+	{
+		m_fBoostTimer -= fTimeElapsed;
+		if (m_fBoostTimer < 0)
+		{
+			m_pPlayer->SetMaxVelocityXZ(25);
+			isBoost = false;
+		}
 
+	}
 	//충돌을 위한 update
 	if (sceneType != SceneType::ItemGame_Scene)
 	{
@@ -602,7 +622,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 			{
 				if (m_pPlayer->Update(fTimeElapsed, *p))  //true반환 시 충돌된 오브젝트는 리스트에서 삭제
 				{
-					if ((*p)->m_ModelType == Fence || (*p)->m_ModelType == Player)
+					if ((*p)->m_ModelType == Fence || (*p)->m_ModelType == Player || (*p)->m_ModelType == Item_Stone )
 					{
 						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
 							0, "Resources/Images/Collision.dds", 0.5, 1));
@@ -618,6 +638,9 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 						std::uniform_int_distribution<int> randType(IconBanana, IconMugen);
 						m_eCurrentItem = ItemIcon_type(randType(mtRand));
 						instacingImageUiShaders[ITEM_UI]->getUvXs()[0] =  0.125f * m_eCurrentItem;
+
+						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
+							70, "Resources/Images/smoke.dds", 3, 120));
 					}
 					else
 					{
@@ -684,7 +707,7 @@ void ItemGameScene::BuildLights()
 	m_pLights->fogrange = 30;
 
 }
-void ItemGameScene::BuildMinimapCamera(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+void ItemGameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 	*pd3dCommandList)
 {
 	m_pMinimapCamera = new CMinimapCamera;
@@ -696,12 +719,18 @@ void ItemGameScene::BuildMinimapCamera(ID3D12Device *pd3dDevice, ID3D12GraphicsC
 
 	m_pMinimapCamera->GenerateViewMatrix(m_pMinimapCamera->GetPosition(), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
 	m_pMinimapCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	m_pShadowCamera = new CMinimapCamera;
+	m_pShadowCamera->SetPosition(XMFLOAT3(0, 300, 0));
+	m_pShadowCamera->SetLookAt(XMFLOAT3(0, 0, 0));
+	m_pShadowCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+	m_pShadowCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 }
 
 void ItemGameScene::UpdateShadow()
 {
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
-	float rad = 800;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
+	float rad = 1000;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
 
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
 	lightDir = XMVector3Normalize(lightDir);
@@ -709,6 +738,15 @@ void ItemGameScene::UpdateShadow()
 	XMVECTOR shadowCameraPosition = XMLoadFloat3(&centerPosition) - 2.0f*rad*lightDir;
 	XMVECTOR targetPosition = XMLoadFloat3(&centerPosition);
 	XMVECTOR shadowUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+	XMFLOAT3 xmf3CameraPosition;
+	XMFLOAT3 xmf3CameraTarget;
+	XMStoreFloat3(&xmf3CameraPosition, shadowCameraPosition);
+	XMStoreFloat3(&xmf3CameraTarget, targetPosition);
+
+	m_pShadowCamera->GenerateViewMatrix(xmf3CameraPosition, xmf3CameraTarget, XMFLOAT3(0, 1, 0));
+	m_pShadowCamera->GenerateFrustum();
+
 #ifdef _WITH_LEFT_HAND_COORDINATES
 	XMMATRIX shadowView = XMMatrixLookAtLH(shadowCameraPosition, targetPosition, shadowUp);
 #else
@@ -745,6 +783,9 @@ void ItemGameScene::UpdateShadow()
 	XMStoreFloat4x4(&m_pcbMappedShadow->m_xmf4x4ShadowView, XMMatrixTranspose(shadowView));
 	XMStoreFloat4x4(&m_pcbMappedShadow->m_xmf4x4ShadowProjection, XMMatrixTranspose(ShadowProj));
 	XMStoreFloat4x4(&m_pcbMappedShadow->m_xmf4x4InvShadowViewProjection, XMMatrixTranspose(S));
+	XMFLOAT4X4 martrix;
+	XMStoreFloat4x4(&martrix, ShadowProj);
+	m_pShadowCamera->SetProjectionMatrix(martrix);
 }
 void ItemGameScene::CreateShaderVariables(CreateManager* pCreateManager)
 {

@@ -239,7 +239,7 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			return SceneType::Room_Scene;
 	}
 	//네트워크 클래스에 저장되있는 방 모드 종류에 따라서 다른 게임씬전환
-	sceneType = SceneType::ItemGame_Scene;
+	sceneType = SceneType::Game_Scene;
 	return SceneType::Room_Scene;
 }
 

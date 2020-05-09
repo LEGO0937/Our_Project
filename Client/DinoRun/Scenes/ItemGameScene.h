@@ -34,7 +34,7 @@ public:
 		lParam, float deltaTime);
 
 	virtual void BuildLights();
-	void BuildMinimapCamera(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
+	void BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 		*pd3dCommandList);
 
 	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
@@ -92,4 +92,9 @@ private:
 	IconShader* m_pIconShader = NULL;
 
 	ItemIcon_type m_eCurrentItem = ItemIcon_type::IconDefault;
+	float m_fBoostTimer = 0.0f;
+	float m_fMugenTimer = 0.0f;
+
+	bool isMugen = false;
+	bool isBoost = false;
 };

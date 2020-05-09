@@ -89,6 +89,7 @@ public:
 
 	CPlayer* m_pPlayer = NULL;
 	CCamera* m_pCamera = NULL;
+	CCamera* m_pShadowCamera = NULL;
 
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
