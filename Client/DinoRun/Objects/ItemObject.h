@@ -26,7 +26,7 @@ public:
 class ItemBanana : public CGameObject
 {
 private:
-	float m_fEnableCount = 0;
+	float m_fLifeCount = 0;
 public:
 	virtual bool Update(float fTimeElapsed, CGameObject* target);
 
@@ -37,7 +37,7 @@ public:
 class ItemMud : public CGameObject
 {
 private:
-	float m_fEnableCount = 0;
+	float m_fLifeCount = 0;
 public:
 	virtual bool Update(float fTimeElapsed, CGameObject* target);
 
@@ -49,7 +49,7 @@ public:
 class ItemStone : public CGameObject
 {
 private:
-	float m_fEnableCount = 0;
+	float m_fLifeCount = 0;
 public:
 	virtual bool Update(float fTimeElapsed, CGameObject* target);
 

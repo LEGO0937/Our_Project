@@ -38,7 +38,7 @@ void GaugeShader::BuildObjects(CreateManager* pCreateManager, void* pInformation
 	m_ppObjects->SetMesh(mesh);
 	
 	pObject = new CGameObject;
-	pObject->SetPosition(-0.27, -0.85, 0);
+	pObject->SetPosition(-0.27f, -0.85f, 0.0f);
 	pObject->AddRef();
 
 	objectList.emplace_back(pObject);
@@ -55,7 +55,7 @@ void GaugeShader::Update(float fTimeElapsed, void* pInformation)
 {
 	CPlayer* pPlayer = (CPlayer*)pInformation;
 	UINT nGauge = (UINT)pPlayer->GetMaxVelocityXZ();
-	pPlayer->SetMaxVelocityXZ(pPlayer->GetMaxVelocityXZ() - fTimeElapsed * 0.2);
+	pPlayer->SetMaxVelocityXZ(pPlayer->GetMaxVelocityXZ() - fTimeElapsed * 0.2f);
 	if (pPlayer->GetMaxVelocityXZ() < MIN_VELOCITY)
 		pPlayer->SetMaxVelocityXZ(MIN_VELOCITY);
 	if (uvX[0] < (int)(nGauge * 2))

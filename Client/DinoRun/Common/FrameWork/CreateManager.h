@@ -3,6 +3,7 @@
 #include "DrawManager.h"
 #include "FontManager.h"
 #include "NetworkManager.h"
+#include "SoundManager.h"
 
 class CreateManager : public enable_shared_from_this< CreateManager>
 {
@@ -13,6 +14,7 @@ public:
 
 public:
 	void Initialize(HINSTANCE hInstance, HWND hWnd);
+	void InitializeSound();
 	void Release();
 
 	void RenderLoadingScreen(float loadingPercentage = 0.f);
@@ -27,7 +29,10 @@ public:
 
 	shared_ptr<DrawManager> GetDrawMgr() { return m_pDrawManager; }
 	shared_ptr<NetWorkManager> GetNetWorkMgr() { return m_pNetWorkManager; }
+	shared_ptr<SoundManager> GetSoundMgr() { return m_pSoundManager; }
+
 	shared_ptr<CreateManager> getThisSharedPtr() {return shared_from_this();}
+	
 
 	ComPtr<ID3D12Device> GetDevice() { return m_pd3dDevice; }
 	ComPtr<ID3D12GraphicsCommandList> GetCommandList() { return m_pd3dCommandList; }
@@ -110,6 +115,7 @@ private:
 
 	shared_ptr<DrawManager> m_pDrawManager;
 	shared_ptr<NetWorkManager> m_pNetWorkManager;
+	shared_ptr<SoundManager> m_pSoundManager;
 };
 
 array<const D3D12_STATIC_SAMPLER_DESC, 7> GetStaticSamplers();

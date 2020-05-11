@@ -130,8 +130,10 @@ protected:
 	bool isUp = false;
 	bool isRight = false;
 	bool isShift = false;
-
-	float m_fWheelDegree = 0;
+	bool isStun = false;
+	
+	float m_fWheelDegree = 0.0f;
+	float m_fTimeCount = 0.0f;
 };
 
 

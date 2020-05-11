@@ -32,7 +32,6 @@ void PlayerShader::BuildObjects(CreateManager* pCreateManager, const char *pszFi
 void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	CPlayer *pPlayerObject = NULL;
-	UINT nReads;
 	int nLength = 1;
 
 	//nLenght에 플레이어 수를 받음.

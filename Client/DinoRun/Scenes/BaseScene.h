@@ -11,6 +11,8 @@ class CPlayer;
 class CCamera;
 class CreateManager;
 class NetWorkManager;
+class SoundManager;
+
 struct LIGHT
 {
 	XMFLOAT4 m_xmf4Ambient;
@@ -105,6 +107,7 @@ protected:
 	string m_sPlayerId;
 	shared_ptr<CreateManager> m_pCreateManager = NULL;
 	shared_ptr<NetWorkManager> m_pNetWorkManager= NULL;
+	shared_ptr<SoundManager> m_pSoundManager = NULL;
 	SceneType sceneType;
 
 	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;

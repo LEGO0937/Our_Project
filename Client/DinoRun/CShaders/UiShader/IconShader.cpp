@@ -32,13 +32,13 @@ void IconShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 	m_ppObjects->SetMaterial(0, material);
 
 	PlaneMesh *mesh = NULL;
-	mesh = new PlaneMesh(0.1, 0.1, 0.5, 0, 1.0, 0, 1.0);
+	mesh = new PlaneMesh(0.1f, 0.1f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f);
 	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	m_ppObjects->SetMesh(mesh);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0, 0, 0);
+	pObject->SetPosition(0.0f, 0.0f, 0.0f);
 	pObject->AddRef();
 
 	objectList.emplace_back(pObject);

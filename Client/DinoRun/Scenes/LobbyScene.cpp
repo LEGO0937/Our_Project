@@ -1,6 +1,7 @@
 #include "LobbyScene.h"
 #include "../Common/FrameWork/CreateManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
+#include "../Common/FrameWork/SoundManager.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -28,6 +29,7 @@ LobbyScene::~LobbyScene()
 	//로비씬을 나가는 부분 다시 로그인 창으로 돌아가기때문에
 	//이 곳에서 서버에게 자신의 닉네임을 알려주고 나감.
 	//서버는 닉네임을 받고 접속중인 유저 리스트에서 이 닉네임을 제거한다.
+	m_pSoundManager->Stop("Start_BGM");
 }
 void LobbyScene::ReleaseUploadBuffers()
 {
@@ -59,9 +61,11 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
 	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
+	m_pSoundManager->Play("Start_BGM", 0.2f);
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
@@ -205,6 +209,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		m_pSoundManager->Play("Mouse_Down", 0.2f);
 		if (point.x > -0.48f && point.x < -0.32f && point.y > -0.36f && point.y < -0.24f) //방목록 왼쪽화살표 충돌체크
 		{
 			instacingUiShaders[ARROW_BUTTON]->getUvXs()[ROOM_LEFT] = 0.5;
@@ -303,6 +308,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
+		m_pSoundManager->Play("Mouse_Up", 0.2f);
 		if (point.x > -0.48f && point.x < -0.32f && point.y > -0.36f && point.y < -0.24f) //방목록 왼쪽화살표 충돌체크
 		{
 			if (isClickedLeftRoom)

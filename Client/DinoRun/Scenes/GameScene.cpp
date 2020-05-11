@@ -1,6 +1,7 @@
 #include "GameScene.h"
 #include "../Common/FrameWork/CreateManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
+#include "../Common/FrameWork/SoundManager.h"
 
 #include "../Objects/PlayerObject.h"
 #include "../Objects/SkyBoxObject.h"
@@ -26,7 +27,7 @@ GameScene::GameScene() :BaseScene()
 }
 GameScene::~GameScene()
 {
-
+	m_pSoundManager->Stop("InGame_BGM");
 }
 void GameScene::ReleaseUploadBuffers()
 {
@@ -133,6 +134,8 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
 	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	m_pSoundManager = pCreateManager->GetSoundMgr();
+
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
@@ -229,6 +232,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	CreateShaderVariables(pCreateManager.get());
+	m_pSoundManager->Play("InGame_BGM", 0.2f);
 }
 
 void GameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -551,12 +555,14 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 					{
 						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
 							0, "Resources/Images/Collision.dds", 0.5, 1));
+						m_pSoundManager->Play("Heat", 0.2f);
 						p++;
 					}
 					else if ((*p)->m_ModelType == Item_Meat)
 					{
 						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
 							70, "Resources/Images/smoke.dds", 3, 120));
+						m_pSoundManager->Play("MeatEat", 0.5f);
 						p++;
 					}
 					else

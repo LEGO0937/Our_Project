@@ -48,10 +48,17 @@ void MudShader::Update(float fTimeElapsed)
 {
 	if (objectList.size())
 	{
-		for (CGameObject* ob : objectList)
+		for (vector<CGameObject*>::iterator it = objectList.begin(); it != objectList.end();)
 		{
-			ob->Update(fTimeElapsed, NULL);
+			if ((*it)->Update(fTimeElapsed, NULL))
+			{
+				(*it)->Release();
+				it = objectList.erase(it);
+			}
+			else
+				it++;
 		}
+		
 	}
 }
 

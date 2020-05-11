@@ -2,6 +2,7 @@
 
 #include "../Common/FrameWork/CreateManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
+#include "../Common/FrameWork/SoundManager.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -16,7 +17,7 @@ RoomScene::RoomScene() :BaseScene()
 }
 RoomScene::~RoomScene()
 {
-
+	m_pSoundManager->Stop("Start_BGM");
 }
 void RoomScene::ReleaseUploadBuffers()
 {
@@ -39,9 +40,11 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
 	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
+	m_pSoundManager->Play("Start_BGM", 0.2f);
 	CUiShader* uiShader;
 	//네트워크 클래스에 저장되어있는 방번호를 보내고 해당 방에서의 플레이어 정보를 받아온다.
 
@@ -108,6 +111,7 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
+		m_pSoundManager->Play("Mouse_Down", 0.2f);
 		if (point.x > -0.15f && point.x < 0.15f && point.y > -0.92f && point.y < -0.68f) //로그인 버튼 충돌체크
 		{
 			if (instacingUiShaders[1]->getUvXs()[0] == 0.0f)
@@ -133,6 +137,7 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		//마우스 캡쳐를 하고 현재 마우스 위치를 가져온다. 
 		break;
 	case WM_LBUTTONUP:
+		m_pSoundManager->Play("Mouse_Up", 0.2f);
 		::ReleaseCapture();
 		break;
 	case WM_RBUTTONUP:

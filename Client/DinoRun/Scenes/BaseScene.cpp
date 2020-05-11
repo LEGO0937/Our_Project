@@ -1,6 +1,7 @@
 #include "../Common/stdafx.h"
 #include "BaseScene.h"
 #include "../Common/FrameWork/CreateManager.h"
+
 #include "../Objects/PlayerObject.h"
 #include "../Objects/SkyBoxObject.h"
 #include "../Common/Camera/Camera.h"

@@ -36,6 +36,9 @@
 #include <algorithm>
 #include <unordered_map>
 
+#include <fmod.hpp>
+using namespace FMOD;
+
 #include "../Common/TextureLoad/DDSTextureLoader12.h"
 #include "../Global/Global.h"
 using namespace DirectX;

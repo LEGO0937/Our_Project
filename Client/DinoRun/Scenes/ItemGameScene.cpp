@@ -1,6 +1,7 @@
 #include "ItemGameScene.h"
 #include "../Common/FrameWork/CreateManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
+#include "../Common/FrameWork/SoundManager.h"
 
 #include "../Objects/PlayerObject.h"
 #include "../Objects/SkyBoxObject.h"
@@ -32,7 +33,7 @@ ItemGameScene::ItemGameScene() :BaseScene()
 }
 ItemGameScene::~ItemGameScene()
 {
-
+	m_pSoundManager->Stop("InGame_BGM");
 }
 void ItemGameScene::ReleaseUploadBuffers()
 {
@@ -137,8 +138,10 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
 	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+
 
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 
@@ -248,7 +251,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	animatedShader->BuildObjects(pCreateManager.get(), "Resources/Models/Dino.bin", NULL);
 	instacingAnimatedModelShaders.emplace_back(animatedShader);
 	//UpdatedShaders.emplace_back(animatedShader);
-
+	 
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds", NULL);
 
@@ -271,6 +274,8 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	CreateShaderVariables(pCreateManager.get());
+	m_pSoundManager->Play("InGame_BGM", 0.2f);
+
 }
 
 void ItemGameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -341,9 +346,9 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			case IconMud:
 				XMFLOAT4X4 matrix = m_pPlayer->m_xmf4x4ToParent;
 				XMFLOAT3 pos = m_pPlayer->GetLook();
-				pos = Vector3::ScalarProduct(pos, 30, false);
+				pos = Vector3::ScalarProduct(pos, 20, false);
 				matrix._41 -= pos.x;
-				matrix._42 -= 8+pos.y;
+				matrix._42 -= 7+pos.y;
 				matrix._43 -= pos.z;
 				instacingModelShaders[m_eCurrentItem]->addObject(m_pCreateManager.get(), matrix);
 				break;
@@ -635,6 +640,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 					{
 						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
 							0, "Resources/Images/Collision.dds", 0.5, 1));
+						m_pSoundManager->Play("Heat", 0.2f); 							
 						p++;
 					}
 					else if ((*p)->m_ModelType == Item_Box)
@@ -650,6 +656,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 
 						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
 							70, "Resources/Images/smoke.dds", 3, 120));
+						m_pSoundManager->Play("ItemBox", 0.2f);
 					}
 					else
 					{

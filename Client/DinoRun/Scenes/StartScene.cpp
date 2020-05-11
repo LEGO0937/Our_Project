@@ -1,6 +1,7 @@
 #include "StartScene.h"
 #include "../Common/FrameWork/CreateManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
+#include "../Common/FrameWork/SoundManager.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -17,7 +18,7 @@ StartScene::StartScene():BaseScene()
 }
 StartScene::~StartScene()
 {
-
+	m_pSoundManager->Stop("Start_BGM");
 }
 void StartScene::ReleaseUploadBuffers()
 {
@@ -47,9 +48,11 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
 	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
+	m_pSoundManager->Play("Start_BGM", 0.2f);
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;

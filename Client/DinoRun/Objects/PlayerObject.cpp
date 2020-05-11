@@ -142,7 +142,7 @@ void CPlayer::Rotate(float x, float y, float z)
 
 			if (!isShift)
 			{
-				//m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
+				m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
 			}
 			else
 			{
@@ -182,7 +182,6 @@ void CPlayer::Rotate(float x, float y, float z)
 bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 {
 	//충돌 처리
-
 	if (!target->isKinematic)
 	{
 		//타깃의 충돌에 대한 운동처리
@@ -240,8 +239,18 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		target->isEnable = false;
 		return true;
 	case ModelType::Item_Banana:
+		if (m_fWheelDegree > 0)
+			m_fWheelDegree = 30;
+		else if (m_fWheelDegree < 0)
+			m_fWheelDegree = -30;
+		isStun = true;
+		m_fTimeCount = 0.5f;
+		return true;
+		
+	case ModelType::Item_Mud:
+		isStun = true;
+		m_fTimeCount = 0.5f;
 		break;
-		//return true;
 	case ModelType::Item_Stone:
 		fVx = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.x
 			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.x;
@@ -265,6 +274,13 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 
 void CPlayer::FixedUpdate(float fTimeElapsed)
 {
+	if (isStun)
+	{
+		m_fTimeCount -= fTimeElapsed;
+		if (m_fTimeCount < 0)
+			isStun = false;
+	}
+
 	if (m_fWheelDegree != 0.0f)
 	{
 		float degree = m_fWheelDegree;  //현재 머리의 회전 각도
@@ -358,44 +374,48 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 
 void CPlayer::Animate(float fTimeElapsed)
 {
-	UINT curTrack = m_pSkinnedAnimationController->m_CurrentTrack;
-	if (curTrack >= RUN)
-		curTrack -= ANIMATIONGAP;
-	switch (curTrack)
+	if (!isStun)
 	{
-	case IDLE:
-		m_fWheelDegree = 0;
-		break;
-	case IDLE_LEFT_TURN:
-	case IDLE_RIGHT_RETURN:
-	case IDLE_LEFT_TURNING:
+
+		UINT curTrack = m_pSkinnedAnimationController->m_CurrentTrack;
+		if (curTrack >= RUN)
+			curTrack -= ANIMATIONGAP;
+		switch (curTrack)
+		{
+		case IDLE:
+			m_fWheelDegree = 0;
+			break;
+		case IDLE_LEFT_TURN:
+		case IDLE_RIGHT_RETURN:
+		case IDLE_LEFT_TURNING:
+			if (!isShift)
+				m_fWheelDegree -= 30 * fTimeElapsed;
+			else
+				m_fWheelDegree -= 50 * fTimeElapsed;
+			break;
+		case IDLE_RIGHT_TURN:
+		case IDLE_LEFT_RETURN:
+		case IDLE_RIGHT_TURNING:
+			if (!isShift)
+				m_fWheelDegree += 30 * fTimeElapsed;
+			else
+				m_fWheelDegree += 50 * fTimeElapsed;
+			break;
+		}
 		if (!isShift)
-			m_fWheelDegree -= 30 * fTimeElapsed;
+		{
+			if (m_fWheelDegree > 10)
+				m_fWheelDegree = 10;
+			else if (m_fWheelDegree < -10)
+				m_fWheelDegree = -10;
+		}
 		else
-			m_fWheelDegree -= 50 * fTimeElapsed;
-		break;
-	case IDLE_RIGHT_TURN:
-	case IDLE_LEFT_RETURN:
-	case IDLE_RIGHT_TURNING:
-		if (!isShift)
-			m_fWheelDegree += 30 * fTimeElapsed;
-		else
-			m_fWheelDegree += 50 * fTimeElapsed;
-		break;
-	}
-	if (!isShift)
-	{
-		if (m_fWheelDegree > 10)
-			m_fWheelDegree = 10;
-		else if (m_fWheelDegree < -10)
-			m_fWheelDegree = -10;
-	}
-	else
-	{
-		if (m_fWheelDegree > 30)
-			m_fWheelDegree = 30;
-		else if (m_fWheelDegree < -30)
-			m_fWheelDegree = -30;
+		{
+			if (m_fWheelDegree > 30)
+				m_fWheelDegree = 30;
+			else if (m_fWheelDegree < -30)
+				m_fWheelDegree = -30;
+		}
 	}
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -547,7 +567,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	CreateShaderVariables(pCreateManager);
 
-	SetPosition(XMFLOAT3(800.0f, 76.0f, 900.0f));//800,76,900
+	SetPosition(XMFLOAT3(700.0f, 76.0f, 1450.0f));//800,76,900
 
 	UpdateTransform(NULL);
 
