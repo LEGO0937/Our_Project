@@ -261,7 +261,12 @@ CGameObject::~CGameObject()
 		m_pd3dcbGameObjects->Release();
 		m_pd3dcbGameObjects = NULL;
 	}
-
+	if (m_pd3dcbSkinedGameObjects)
+	{
+		m_pd3dcbSkinedGameObjects->Unmap(0, NULL);
+		m_pd3dcbSkinedGameObjects->Release();
+		m_pd3dcbSkinedGameObjects = NULL;
+	}
 	if (m_pSkinnedAnimationController)
 	{
 		delete m_pSkinnedAnimationController;
@@ -577,7 +582,6 @@ void CGameObject::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 	if (m_pMesh)
 	{
 		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-
 		
 		m_pMesh->BbxRender(pd3dCommandList);
 	}

@@ -45,6 +45,7 @@ void SkinedShader::Load(CreateManager* pCreateManager, const char* filename, con
 
 void SkinedShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
 {
+	/*
 	if (!pszFileName)
 		return;
 
@@ -67,17 +68,18 @@ void SkinedShader::BuildObjects(CreateManager* pCreateManager, const char *pszFi
 		Load(pCreateManager, pszFileName, filename);
 
 	CreateShaderVariables(pCreateManager);
+	*/
 }
 
 void SkinedShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {
-	if (objectList.size() > 0)
+	UpdateShaderVariables(pd3dCommandList, pCamera);
+	if (m_vSkinedObjectList.size() > 0)
 	{
 		CShader::Render(pd3dCommandList, pCamera);
 		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
-		UpdateShaderVariables(pd3dCommandList, pCamera);
 		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
-		m_ppObjects->Render(pd3dCommandList, pCamera, objectList.size());
+		m_ppSkinedObjects->Render(pd3dCommandList, pCamera, drawingCount);
 	}
 }

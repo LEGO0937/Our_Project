@@ -96,7 +96,6 @@ public:
 protected:
 	CGameObject *m_ppObjects = NULL;   //인스턴싱drawing 대상
 	vector<CGameObject*> objectList;   // 인스턴싱될 오브젝트들
-	vector<CGameObject*> drawingObjectList;   //오브젝트들중 enable이 아닌 것들.(최종 drawing)
 };
 
 class CObInstancingShader : public CObjectsShader
@@ -113,7 +112,7 @@ public:
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
 	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL){}
 	virtual void ReleaseObjects();
-
+	
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed) {}
@@ -145,8 +144,9 @@ public:
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
 	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL) {}
 	virtual void ReleaseObjects();
+	virtual void ReleaseUploadBuffers();
 
-	virtual void AnimateObjects(float fTimeElapsed) {}
+	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed) {}
 
@@ -157,7 +157,14 @@ public:
 #endif
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL) {}
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL) {}
+
+	vector<CGameObject*>& getSkiendList()
+	{
+		return objectList;
+	}
 protected:
+	CPlayer *m_ppSkinedObjects = NULL;   //인스턴싱drawing 대상 SkinedObject로 바꿀 예정.
+	vector<CPlayer*> m_vSkinedObjectList;   // 인스턴싱될 오브젝트들
 	unordered_map<string, CB_SKINEOBJECT_INFO*> instancedObjectInfo;
 };
 

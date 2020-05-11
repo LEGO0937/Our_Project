@@ -285,12 +285,14 @@ void CObInstancingShader::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandLis
 void CObInstancingShader::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {
-	if (objectList.size() > 0)
+	UpdateShaderVariables(pd3dCommandList, pCamera);  //그림자 적용시 여기에선 더이상 사용안함
+	if (objectList.size() > 0 && isEnable)
 	{
+		CShader::Render(pd3dCommandList, pCamera);
 		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
-		UpdateShaderVariables(pd3dCommandList);
+
+		m_ppObjects->BbxRender(pd3dCommandList, pCamera, drawingCount);
 		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
-		m_ppObjects->BbxRender(pd3dCommandList, pCamera, objectList.size());
 	}
 }
 #endif
@@ -325,11 +327,11 @@ CSkinedObInstancingShader::~CSkinedObInstancingShader()
 
 void CSkinedObInstancingShader::CreateShaderVariables(CreateManager* pCreateManager)
 {
-	m_ppObjects->CreateSkinedInstanceBuffer(pCreateManager, objectList.size(), instancedObjectInfo);
+	m_ppSkinedObjects->CreateSkinedInstanceBuffer(pCreateManager, m_vSkinedObjectList.size(), instancedObjectInfo);
 }
 void CSkinedObInstancingShader::ReleaseShaderVariables()
 {
-	m_ppObjects->ReleaseShaderVariables();
+	m_ppSkinedObjects->ReleaseShaderVariables();
 }
 //인스턴싱 정보(객체의 월드 변환 행렬과 색상)를 정점 버퍼에 복사한다.
 void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
@@ -337,9 +339,9 @@ void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 {
 
 	drawingCount = 0;
-	if (objectList.size())
+	if (m_vSkinedObjectList.size())
 	{
-		for (CGameObject* ob : objectList)
+		for (CPlayer* ob : m_vSkinedObjectList)
 		{
 			ob->UpdateTransform(NULL);
 			if (ob->isEnable && ob->IsVisible_Ins(pCamera))
@@ -351,18 +353,29 @@ void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 	}
 }
 
+void CSkinedObInstancingShader::AnimateObjects(float fTimeElapsed)
+{
+	if (m_vSkinedObjectList.size())
+	{
+		for (CGameObject* ob : m_vSkinedObjectList)
+		{
+			ob->Animate(fTimeElapsed);
+		}
+	}
+}
 
 void CSkinedObInstancingShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {
 	UpdateShaderVariables(pd3dCommandList, pCamera);  //그림자 적용시 여기에선 더이상 사용안함
-	if (objectList.size() > 0 && isEnable)
+	if (m_vSkinedObjectList.size() > 0 && isEnable)
 	{
 		CShader::Render(pd3dCommandList, pCamera);
 		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
 		
 		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
-		m_ppObjects->Render(pd3dCommandList, pCamera, drawingCount);
+		
+		m_ppSkinedObjects->Render(pd3dCommandList, pCamera, drawingCount);
 	}
 }
 
@@ -370,13 +383,13 @@ void CSkinedObInstancingShader::ShadowRender(ID3D12GraphicsCommandList *pd3dComm
 	*pCamera)
 {
 	UpdateShaderVariables(pd3dCommandList, pCamera);
-	if (objectList.size() > 0 && isEnable)
+	if (m_vSkinedObjectList.size() > 0 && isEnable)
 	{
 		CShader::Render(pd3dCommandList, pCamera);
 		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
 		
 		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
-		m_ppObjects->ShadowRender(pd3dCommandList, pCamera, drawingCount);
+		m_ppSkinedObjects->ShadowRender(pd3dCommandList, pCamera, drawingCount);
 	}
 }
 
@@ -384,30 +397,42 @@ void CSkinedObInstancingShader::ShadowRender(ID3D12GraphicsCommandList *pd3dComm
 void CSkinedObInstancingShader::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {
-	if (objectList.size() > 0)
+	if (m_vSkinedObjectList.size() > 0)
 	{
 		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
-		UpdateShaderVariables(pd3dCommandList);
+		UpdateShaderVariables(pd3dCommandList, pCamera);
 		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
-		m_ppObjects->BbxRender(pd3dCommandList, pCamera, objectList.size());
+		m_ppSkinedObjects->BbxRender(pd3dCommandList, pCamera, drawingCount);
 	}
 }
 #endif
 void CSkinedObInstancingShader::ReleaseObjects()
 {
-	if (objectList.size())
+	if (m_vSkinedObjectList.size())
 	{
-		for (CGameObject* ob : objectList)
+		for (CGameObject* ob : m_vSkinedObjectList)
 		{
 			ob->Release();
 		}
-		objectList.clear();
+		m_vSkinedObjectList.clear();
 	}
-	if (m_ppObjects)
+	if (m_ppSkinedObjects)
 	{
-		m_ppObjects->Release();
-		m_ppObjects = NULL;
+		m_ppSkinedObjects->Release();
+		m_ppSkinedObjects = NULL;
 	}
+}
+
+void CSkinedObInstancingShader::ReleaseUploadBuffers()
+{
+	if (m_vSkinedObjectList.size())
+	{
+		for (CGameObject* ob : m_vSkinedObjectList)
+		{
+			ob->ReleaseUploadBuffers();
+		}
+	}
+	m_ppSkinedObjects->ReleaseUploadBuffers();
 }
 
 CUiShader::CUiShader()

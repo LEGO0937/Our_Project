@@ -452,12 +452,6 @@ void CPlayer::OnPrepareRender()
 	m_xmf4x4ToParent._41 = m_xmf3Position.x; m_xmf4x4ToParent._42 = m_xmf3Position.y; m_xmf4x4ToParent._43 = m_xmf3Position.z;
 }
 
-void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
-{
-	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
-	if (nCameraMode == THIRD_PERSON_CAMERA || nCameraMode == MiniMap_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
 #define _WITH_DEBUG_CALLBACK_DATA
@@ -483,11 +477,11 @@ void CFuncCallbackHandler::HandleCallback(void *pAnimationController, int nSet)
 	controller->SetTrackEnable(nSet, true);
 }
 
-CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager) : CPlayer()
+CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName) : CPlayer()
 {
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, "Resources/Models/Dino2.bin", NULL);
+	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, sModelName.c_str(), NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject->m_pChild, true);
 	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 14, pAngrybotModel);
 
@@ -553,11 +547,11 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager) : CPlayer()
 
 	CreateShaderVariables(pCreateManager);
 
-	SetPosition(XMFLOAT3(800.0f, 0, 900));
+	SetPosition(XMFLOAT3(800.0f, 76.0f, 900.0f));//800,76,900
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager, LOOP, DUST, -0.05f, 5, this, XMFLOAT3(0.0f, 0, 18),
+	m_pParticleSystem = new ParticleSystem(pCreateManager, LOOP, DUST, -0.05f, 2.5f, this, XMFLOAT3(0.0f, 0, 18),
 		15, "Resources/Images/dust.dds", 0.5, 60);
 	//SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
 

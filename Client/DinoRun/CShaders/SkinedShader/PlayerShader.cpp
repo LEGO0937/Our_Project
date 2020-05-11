@@ -8,37 +8,42 @@ PlayerShader::PlayerShader()
 PlayerShader::~PlayerShader()
 {
 }
+
+void PlayerShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
+{
+	
+	if (!pszFileName)
+		return;
+	instancingModelName = pszFileName;
+	instancingModelName.insert(instancingModelName.find("."), "_ins");  //인스턴싱 전용 모델파일을 불러온다
+
+	CDinoRunPlayer *pModel = new CDinoRunPlayer(pCreateManager, pszFileName);
+	m_ppSkinedObjects = pModel;
+	//m_ppSkinedObjects->AddRef();
+
+	if (pszFileName)
+		Load(pCreateManager, pszFileName, filename);
+
+	CreateShaderVariables(pCreateManager);
+	
+}
+
+
 void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
-	FILE *pInFile = NULL;
-	::fopen_s(&pInFile, Loadname, "rb");
-	if (!pInFile)
-		return;
-	CGameObject *pPlayerObject = NULL;
+	CPlayer *pPlayerObject = NULL;
 	UINT nReads;
-	int nLength = 0;
+	int nLength = 1;
 
-	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
+	//nLenght에 플레이어 수를 받음.
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, filename, NULL);
-		pPlayerObject = pModel->m_pModelRootObject;
-		pPlayerObject->AddRef();
-		//이곳에서 findFrame을 통해 각 오브젝트에 질량 및 키네마틱 값 추가할 것 애니메이션도 포함.
-		pPlayerObject->m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 2, pModel);
-		pPlayerObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); //left_turn_start
-		pPlayerObject->m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		pPlayerObject->m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1); //left_turn_start
-		pPlayerObject->m_pSkinnedAnimationController->SetTrackEnable(1, false);
-
-		nReads = (UINT)::fread(&(pPlayerObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
-		objectList.emplace_back(pPlayerObject);
-		if (pModel)
-		{
-			delete pModel;
-			pModel = NULL;
-		}
+		pPlayerObject = new CDinoRunPlayer(pCreateManager, instancingModelName);
+		//pPlayerObject->AddRef();
+		//pPlayerObject->SetPosition(XMFLOAT3(800.0f, 73.6, 920));
+		//pPlayerObject->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
+		//pPlayerObject->OnPrepareRender();
+		m_vSkinedObjectList.emplace_back(pPlayerObject);
 	}
-
-	::fclose(pInFile);
 }
+

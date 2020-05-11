@@ -254,14 +254,14 @@ void CMesh::ComputeBoundBox(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList 
 	float y = m_xmf3AABBExtents.y;
 	float z = m_xmf3AABBExtents.z;
 	m_pxmf3BoundVertex = new XMFLOAT3[8];
-	m_pxmf3BoundVertex[0] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(x, y, z));
-	m_pxmf3BoundVertex[1] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(-x, y, z));
-	m_pxmf3BoundVertex[2] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(-x, -y, z));
-	m_pxmf3BoundVertex[3] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(x, -y, z));
-	m_pxmf3BoundVertex[4] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(x, y, -z));
-	m_pxmf3BoundVertex[5] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(-x, y, -z));
-	m_pxmf3BoundVertex[6] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(-x, -y, -z));
-	m_pxmf3BoundVertex[7] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(x, -y, -z));
+	m_pxmf3BoundVertex[0] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(x, -y, z));
+	m_pxmf3BoundVertex[1] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(-x, -y, z));
+	m_pxmf3BoundVertex[2] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(-x, y, z));
+	m_pxmf3BoundVertex[3] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(x, y, z));
+	m_pxmf3BoundVertex[4] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(x, -y, -z));
+	m_pxmf3BoundVertex[5] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(-x, -y, -z));
+	m_pxmf3BoundVertex[6] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(-x, y, -z));
+	m_pxmf3BoundVertex[7] = Vector3::Add(m_xmf3AABBCenter, XMFLOAT3(x, y, -z));
 
 	m_pd3dBoundBoxBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, m_pxmf3BoundVertex, sizeof(XMFLOAT3) * 8, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dBoundBoxUploadBuffer);
 
@@ -414,6 +414,7 @@ void CMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
 						m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 						m_d3dPositionBufferView.StrideInBytes = sizeof(XMFLOAT3);
 						m_d3dPositionBufferView.SizeInBytes = sizeof(XMFLOAT3) * m_nVertices;
+
 					}
 
 				}

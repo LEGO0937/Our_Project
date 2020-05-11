@@ -20,6 +20,6 @@ class PlayerShader : public SkinedShader
 public:
 	PlayerShader();
 	virtual ~PlayerShader();
-
+	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename);
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 };

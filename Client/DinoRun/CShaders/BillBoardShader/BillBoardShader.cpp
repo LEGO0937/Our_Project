@@ -23,11 +23,16 @@ void BillBoardShader::Load(CreateManager* pCreateManager, const char* filename)
 	int nLength = 0;
 
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
+
+	BillBoardMesh *mesh = NULL;
+	mesh = new BillBoardMesh();
+
 	for (int i = 0; i < nLength; ++i)
 	{
 		pBillBoardObject = new BillBoardObject(1);
 		pBillBoardObject->AddRef();
 		nReads = (UINT)::fread(&(pBillBoardObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
+		pBillBoardObject->SetMesh(mesh);
 		objectList.emplace_back(pBillBoardObject);
 	}
 

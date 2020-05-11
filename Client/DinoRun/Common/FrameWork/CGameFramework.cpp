@@ -148,7 +148,16 @@ void CGameFramework::CalculateFrameStats()
 
 		ScreenToClient(m_hWnd, &m_ptOldCursorPos);
 		Point2D p = ScreenToProj(m_pCreateManager->GetWindowWidth(), m_pCreateManager->GetWindowHeight(), m_ptOldCursorPos);
-		wstring windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x)+L"   y:"+ to_wstring(p.y);
+		wstring windowText;
+		if (m_pPlayer)
+		{
+			windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x) + L"   y:" + to_wstring(p.y)
+				+ L"pX: " + to_wstring(m_pPlayer->GetPosition().x) + L"  z:" + to_wstring(m_pPlayer->GetPosition().z);
+		}
+		else
+		{
+			windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x) + L"   y:" + to_wstring(p.y);
+		}
 			
 			/*+ L"  x:" +
 			to_wstring(m_pPlayer->m_xmf4x4World._41)
@@ -307,7 +316,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{
 		m_pScene->SetId(m_sPlayerID);
-		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get());
+		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/Dino2.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
 

@@ -109,7 +109,6 @@ public:
 
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return NULL; }
 	virtual void OnPrepareRender();
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 
 	virtual void Animate(float fTimeElapsed);
 
@@ -139,7 +138,7 @@ protected:
 class CDinoRunPlayer : public CPlayer
 {
 public:
-	CDinoRunPlayer(CreateManager* pCreateManager);
+	CDinoRunPlayer(CreateManager* pCreateManager,string sModelName);
 	virtual ~CDinoRunPlayer();
 	
 public:

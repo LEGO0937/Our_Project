@@ -91,7 +91,9 @@ void ItemGameScene::ReleaseObjects()
 	for (CObInstancingShader* shader : instacingModelShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
-		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
+		if (shader) { 
+			shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); 
+		}
 	for (CUiShader* shader : instacingNumberUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 	for (CUiShader* shader : instacingImageUiShaders)
@@ -147,7 +149,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	CObInstancingShader* shader;
 	CUiShader* uiShader;
-	//CSkinedObInstancingShader* animatedShader;
+	CSkinedObInstancingShader* animatedShader;
 
 	UI_INFO view_info;    //게임중 or 대기중 뷰
 	view_info.textureName = "Resources/Images/Blur_Effect.dds";
@@ -241,11 +243,12 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader->BuildObjects(pCreateManager.get(), &ItemUi_info);
 	uiShader->getUvXs()[0] = 0.0f;  //스프라이트의 간격은 0.125f
 	instacingImageUiShaders.emplace_back(uiShader);
-	//animatedShader = new PlayerShader;
-	//animatedShader->BuildObjects(pCreateManager, "Resources/Models/Dino.bin", "Resources/ObjectData/TreeData");
-	//instacingAnimatedModelShaders.emplace_back(animatedShader);
-	//animatedShader->AddRef();
+
+	animatedShader = new PlayerShader;
+	animatedShader->BuildObjects(pCreateManager.get(), "Resources/Models/Dino.bin", NULL);
+	instacingAnimatedModelShaders.emplace_back(animatedShader);
 	//UpdatedShaders.emplace_back(animatedShader);
+
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds", NULL);
 
@@ -255,11 +258,14 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	blurShader = new BlurShader(pCreateManager.get());
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(800.0f, 80, 940),
-		15, "Resources/Images/smoke.dds", 2, 30));
+	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
+		15, "Resources/Images/smoke.dds", 2, 50));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
+		15, "Resources/Images/smoke.dds", 2, 50));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
+		15, "Resources/Images/smoke.dds", 2, 50));
 
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), ONES, RAND, 1.8f, 0.5, NULL, XMFLOAT3(750.0f, 80, 900),
-		15, "Resources/Images/smoke.dds", 5, 50));
 	BuildLights();
 
 	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
@@ -492,7 +498,7 @@ void ItemGameScene::Render(float fTimeElapsed)
 	}
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE]);
-	//particleSystem->Render(m_pd3dCommandList.Get(), m_pCamera);
+
 	m_pPlayer->m_pParticleSystem->Render(m_pd3dCommandList, m_pCamera);
 	for (ParticleSystem* system : particleSystems)
 	{
@@ -500,10 +506,10 @@ void ItemGameScene::Render(float fTimeElapsed)
 	}
 #ifdef _WITH_BOUND_BOX
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_WIRE]);
-	m_pPlayer->BbxRender(m_pd3dCommandList.Get(), m_pCamera);
+	m_pPlayer->BbxRender(m_pd3dCommandList, m_pCamera);
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_WIRE_INSTANCING]);
 	for (CObInstancingShader* shader : instacingModelShaders)
-		if (shader) shader->BbxRender(m_pd3dCommandList.Get(), m_pCamera);
+		if (shader) shader->BbxRender(m_pd3dCommandList, m_pCamera);
 
 #endif
 }
@@ -530,7 +536,8 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
 	if (length > 35)
 	{
-		//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), 2);
+		int idx = length - 35;
+		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/5);
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
 		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
 		m_pEffectShader->getUvXs()[0] = deltaUvX;
@@ -715,7 +722,7 @@ void ItemGameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsComm
 	m_pMinimapCamera = new CMinimapCamera;
 	m_pMinimapCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pMinimapCamera->SetLookAt(XMFLOAT3(0, 0, 0));
-	m_pMinimapCamera->GenerateOrthoProjectionMatrix(1000, 1000, 10, 300.0f);
+	m_pMinimapCamera->GenerateOrthoProjectionMatrix(1000, 1000, 10, 1000.0f);
 	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT - 180, 250, 180, 0.0f, 1.0f);
 	m_pMinimapCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 

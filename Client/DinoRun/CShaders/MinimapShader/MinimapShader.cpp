@@ -45,6 +45,7 @@ void MinimapShader::BuildObjects(CreateManager* pCreateManager, const char *pszF
 
 	pObject = new CGameObject(1);
 	pObject->SetPosition(257.0*12.5, 100, 257.0*12.5);
+	pObject->SetMesh(mesh);
 	objectList.emplace_back(pObject);
 
 	CreateShaderVariables(pCreateManager);

@@ -43,7 +43,7 @@ void TrackCountShader::BuildObjects(CreateManager* pCreateManager, void* pInform
 	pObject->SetPosition(0.87f, 0.84f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
-	uvX.emplace_back(0);
+	uvX.emplace_back(1);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
@@ -67,5 +67,5 @@ void TrackCountShader::Update(float fTimeElapsed, void* pInformation)
 {
 	//vNum = 181
 	CPlayer* pPlayer = (CPlayer*)pInformation;
-	uvX[0] = pPlayer->GetCheckPoint() / 181;
+	uvX[0] = (pPlayer->GetCheckPoint() / 182) +1;
 }
