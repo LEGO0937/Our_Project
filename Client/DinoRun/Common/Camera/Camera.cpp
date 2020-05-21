@@ -305,7 +305,7 @@ void CFirstPersonCamera::Rotate(float x, float y, float z)
 
 CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 {
-	m_fMass = 0.5f;
+	m_fMass = 1.0f;
 
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)
@@ -352,22 +352,18 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			//f= - cv +k*x
 			//c^2 = 4mk
 			//x,y,z에 대한 변위 각자 따로 구할 것.
-			XMFLOAT3 xmf3PlayerPos = xmf3Position;
-			xmf3PlayerPos.y = 0;
-			XMFLOAT3 xmf3CameraPos = m_xmf3Position;
-			xmf3CameraPos.y = 0;
-
-			XMFLOAT3 xmf3Distance = Vector3::Subtract(m_xmf3Position, xmf3Position);;
+		
+			XMFLOAT3 xmf3Distance = Vector3::Subtract(m_xmf3Position, xmf3Position);
 			
-			float forceX = -10*m_xmf3Velocity.x - 100 * xmf3Distance.x;
-			float forceY = -10*m_xmf3Velocity.y - 100 * xmf3Distance.y;
-			float forceZ = -10*m_xmf3Velocity.z - 100 * xmf3Distance.z;
+			float forceX = (-2*m_xmf3Velocity.x) + (-30 * xmf3Distance.x);
+			float forceY = (-2*m_xmf3Velocity.y) + (-30 * xmf3Distance.y);
+			float forceZ = (-2*m_xmf3Velocity.z) + (-30 * xmf3Distance.z);
 
 			XMFLOAT3 accelerationForce = XMFLOAT3(forceX / m_fMass, forceY / m_fMass, forceZ / m_fMass);
 
 			m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, accelerationForce, fTimeElapsed);
 
-			m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity, fTimeElapsed);
+			m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity, fTimeElapsed * UNIT_PER_METER);
 
 		}
 		//---------------------------------
