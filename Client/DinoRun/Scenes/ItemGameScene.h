@@ -97,4 +97,5 @@ private:
 
 	bool isMugen = false;
 	bool isBoost = false;
+	bool isStart = false;
 };

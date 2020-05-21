@@ -235,6 +235,9 @@
     <Filter Include="Common\Framework\NetworkManager">
       <UniqueIdentifier>{de07a1f1-7761-41ff-b9ac-02c16f1d58f1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\RigidBody">
+      <UniqueIdentifier>{8696683e-7500-4000-80db-c8c474215de6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -383,6 +386,9 @@
     </ClInclude>
     <ClInclude Include="Common\FrameWork\NetworkManager.h">
       <Filter>Common\Framework\NetworkManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\RigidBody\RigidBody.h">
+      <Filter>Common\RigidBody</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -580,6 +586,9 @@
     </ClCompile>
     <ClCompile Include="Common\FrameWork\NetworkManager.cpp">
       <Filter>Common\Framework\NetworkManager</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\RigidBody\RigidBody.cpp">
+      <Filter>Common\RigidBody</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

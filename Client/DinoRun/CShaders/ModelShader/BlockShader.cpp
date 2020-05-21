@@ -29,7 +29,7 @@ void BlockShader::Load(CreateManager* pCreateManager, const char* filename, cons
 		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
 		
 		pBlockObject = new CheckPointObject;
-		pBlockObject->SetChild(pModel->m_pModelRootObject->m_pChild);
+		pBlockObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pBlockObject->AddRef();
 
 		pBlockObject->UpdateTransform(NULL);

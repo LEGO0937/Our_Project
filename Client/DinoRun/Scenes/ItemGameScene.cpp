@@ -350,6 +350,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				matrix._41 -= pos.x;
 				matrix._42 -= 7+pos.y;
 				matrix._43 -= pos.z;
+				//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
 				instacingModelShaders[m_eCurrentItem]->addObject(m_pCreateManager.get(), matrix);
 				break;
 			case IconMeat:
@@ -583,114 +584,132 @@ void ItemGameScene::AnimateObjects(float fTimeElapsed)
 void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	//물리
-	m_pPlayer->FixedUpdate(fTimeElapsed);
-
-	for (CObjectsShader* shader : UpdatedShaders)
+	if (isStart)
 	{
-		shader->FixedUpdate(fTimeElapsed);  //물리 적용할 것
-	}
+		m_pPlayer->FixedUpdate(fTimeElapsed);
 
+		for (CObjectsShader* shader : UpdatedShaders)
+		{
+			shader->FixedUpdate(fTimeElapsed);  //물리 적용할 것
+		}
+	}
 	
 }
 
 
 SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
-	if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
+	if (isStart)
 	{
-		return End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
-	}
-	if (isMugen)
-	{
-		m_fMugenTimer -= fTimeElapsed;
-		if (m_fMugenTimer < 0)
-			isMugen = false;
-	}
-	if (isBoost)
-	{
-		m_fBoostTimer -= fTimeElapsed;
-		if (m_fBoostTimer < 0)
+		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
-			m_pPlayer->SetMaxVelocityXZ(25);
-			isBoost = false;
+			return End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+		}
+		if (isMugen)
+		{
+			m_fMugenTimer -= fTimeElapsed;
+			if (m_fMugenTimer < 0)
+				isMugen = false;
+		}
+		if (isBoost)
+		{
+			m_fBoostTimer -= fTimeElapsed;
+			if (m_fBoostTimer < 0)
+			{
+				m_pPlayer->SetMaxVelocityXZ(25);
+				isBoost = false;
+			}
+
+		}
+		//충돌을 위한 update
+		if (sceneType != SceneType::ItemGame_Scene)
+		{
+			return sceneType;
+		}
+		if (m_pLights)
+		{
+			m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
+			m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 		}
 
-	}
-	//충돌을 위한 update
-	if (sceneType != SceneType::ItemGame_Scene)
-	{
-		return sceneType;
-	}
-	if (m_pLights)
-	{
-		m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-		m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
-	}
-
-	for (CObjectsShader* shader : UpdatedShaders)
-	{
-		for (auto p = begin(shader->getList()); p < end(shader->getList());)
+		for (CObjectsShader* shader : UpdatedShaders)
 		{
-			//플레이어 충돌처리할 곳
-			if (m_pPlayer->IsCollide(*p))
+			for (auto p = begin(shader->getList()); p < end(shader->getList());)
 			{
-				if (m_pPlayer->Update(fTimeElapsed, *p))  //true반환 시 충돌된 오브젝트는 리스트에서 삭제
+				//플레이어 충돌처리할 곳
+				if (m_pPlayer->IsCollide(*p))
 				{
-					if ((*p)->m_ModelType == Fence || (*p)->m_ModelType == Player || (*p)->m_ModelType == Item_Stone )
+					if (m_pPlayer->Update(fTimeElapsed, *p))  //true반환 시 충돌된 오브젝트는 리스트에서 삭제
 					{
-						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
-							0, "Resources/Images/Collision.dds", 0.5, 1));
-						m_pSoundManager->Play("Heat", 0.2f); 							
-						p++;
-					}
-					else if ((*p)->m_ModelType == Item_Box)
-					{
-						auto time = std::chrono::system_clock::now();
-						auto duration = time.time_since_epoch();
-						auto randomSeed = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
-						
-						std::mt19937 mtRand(randomSeed);
-						std::uniform_int_distribution<int> randType(IconBanana, IconMugen);
-						m_eCurrentItem = ItemIcon_type(randType(mtRand));
-						instacingImageUiShaders[ITEM_UI]->getUvXs()[0] =  0.125f * m_eCurrentItem;
+						if ((*p)->GetModelType() == Fence || (*p)->GetModelType() == Player || (*p)->GetModelType() == Item_Stone)
+						{
+							//서버연동 때는 이곳에서 생성하지않고 서버에게 생성하겠다는 신호만을 보낼것임
+							//다음 프레임의 업뎃에서 그 신호를 서버로부터  받아서 그 때 생성하도록 하겠음.
+							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
+								0, "Resources/Images/Collision.dds", 0.5, 1));
+							m_pSoundManager->Play("Heat", 0.2f);
+							p++;
+						}
+						else if ((*p)->GetModelType() == Item_Box)
+						{
+							auto time = std::chrono::system_clock::now();
+							auto duration = time.time_since_epoch();
+							auto randomSeed = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 
-						particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
-							70, "Resources/Images/smoke.dds", 3, 120));
-						m_pSoundManager->Play("ItemBox", 0.2f);
+							std::mt19937 mtRand(randomSeed);
+							std::uniform_int_distribution<int> randType(IconBanana, IconMugen);
+							m_eCurrentItem = ItemIcon_type(randType(mtRand));
+							instacingImageUiShaders[ITEM_UI]->getUvXs()[0] = 0.125f * m_eCurrentItem;
+
+							// 이 곳에서도 서버연동시 바로 안만들고 신호부터 보낼것임.
+							// 비활성화 시키는것 또한 신호를 보낼것임.
+							(*p)->SetEnableState(false);
+							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
+								70, "Resources/Images/smoke.dds", 3, 120));
+							m_pSoundManager->Play("ItemBox", 0.2f);
+						}
+						else
+						{
+							// 오브젝트 삭제를 하는 구간, 서버에 셰이더의 종류 및 오브젝트의 번호를 전송한다.
+							// 삭제 또한 업데이트함수에서 실시.
+							(*p)->Release();
+							p = shader->getList().erase(p);
+						}
 					}
 					else
-					{
-						(*p)->Release();
-						p = shader->getList().erase(p);
-					}
+						p++;
+					//타겟 오브젝트 타입 구해오고 경우에 맞게 처리하도록 작성할 것
 				}
 				else
 					p++;
-				//타겟 오브젝트 타입 구해오고 경우에 맞게 처리하도록 작성할 것
 			}
-			else
-				p++;
+			shader->Update(fTimeElapsed);  //물리 적용할 것
 		}
-		shader->Update(fTimeElapsed);  //물리 적용할 것
+
+		//체크포인트 충돌처리
+		if (m_pCheckPointShader)
+		{
+			UINT currentCheckPoint = m_pPlayer->GetCheckPoint();
+			CGameObject* checkPoint = m_pCheckPointShader->getList()[currentCheckPoint % 181];
+			if (m_pPlayer->IsCollide(checkPoint))
+				m_pPlayer->UpCheckPoint();
+		}
+
+		for (CUiShader* shader : instacingNumberUiShaders)
+			shader->Update(fTimeElapsed, m_pPlayer);
+
+		XMFLOAT3 playerPosition = m_pPlayer->GetPosition();
+		if (m_pMinimapCamera)
+		{
+			m_pMinimapCamera->SetPosition(XMFLOAT3(playerPosition.x, 300, playerPosition.z));
+			m_pMinimapCamera->RegenerateViewMatrix();
+		}
 	}
-
-	//체크포인트 충돌처리
-	if (m_pCheckPointShader)
+	else
 	{
-		UINT currentCheckPoint = m_pPlayer->GetCheckPoint();
-		CGameObject* checkPoint = m_pCheckPointShader->getList()[currentCheckPoint % 181];
-		if (m_pPlayer->IsCollide(checkPoint))
-			m_pPlayer->UpCheckPoint();
-	}
-
-	for (CUiShader* shader : instacingNumberUiShaders)
-		shader->Update(fTimeElapsed, m_pPlayer);
-
-	XMFLOAT3 playerPosition = m_pPlayer->GetPosition();
-	if (m_pMinimapCamera)
-	{
-		m_pMinimapCamera->SetPosition(XMFLOAT3(playerPosition.x, 300, playerPosition.z));
-		m_pMinimapCamera->RegenerateViewMatrix();
+		isStart = true;
+		//서버에서 스타트 신호를 받음. 모든 유저가 접속이 되었다면. start신호를 받고 isStart값을 true로 전환하고 
+		//start대문이미지 출력할 것.
 	}
 	return ItemGame_Scene;
 }

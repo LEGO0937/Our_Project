@@ -179,6 +179,7 @@
     <ClInclude Include="Common\FrameWork\SoundManager.h" />
     <ClInclude Include="Common\ParticleSystem\ParticleSystem.h" />
     <ClInclude Include="Common\Resource.h" />
+    <ClInclude Include="Common\RigidBody\RigidBody.h" />
     <ClInclude Include="Common\stdafx.h" />
     <ClInclude Include="Common\targetver.h" />
     <ClInclude Include="Common\TextureLoad\DDSTextureLoader12.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="Common\FrameWork\NetworkManager.cpp" />
     <ClCompile Include="Common\FrameWork\SoundManager.cpp" />
     <ClCompile Include="Common\ParticleSystem\ParticleSystem.cpp" />
+    <ClCompile Include="Common\RigidBody\RigidBody.cpp" />
     <ClCompile Include="Common\stdafx.cpp" />
     <ClCompile Include="Common\TextureLoad\DDSTextureLoader12.cpp" />
     <ClCompile Include="Common\Timer\Timer.cpp" />

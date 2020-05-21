@@ -912,7 +912,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(CreateManager* pCreateManag
 		}
 		else if (!strcmp(pstrToken, "<SkinDeformations>:"))
 		{
-			pGameObject->isSkined = true;
+			pGameObject->SetSkinedState(true);
 			if (pnSkinnedMeshes) (*pnSkinnedMeshes)++;
 
 			CSkinnedMesh *pSkinnedMesh = new CSkinnedMesh(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());

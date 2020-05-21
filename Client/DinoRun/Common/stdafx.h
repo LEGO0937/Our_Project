@@ -295,6 +295,8 @@ namespace Matrix4x4
 		XMStoreFloat4x4(&xmmtx4x4Result, XMLoadFloat4x4(&xmmtx4x4Matrix1) * xmmtxMatrix2);
 		return(xmmtx4x4Result);
 	}
+
+	//XMMatrixRotationQuaternion
 	inline XMFLOAT4X4 Multiply(const XMMATRIX& xmmtxMatrix1,const XMFLOAT4X4& xmmtx4x4Matrix2)
 	{
 		XMFLOAT4X4 xmmtx4x4Result;
@@ -302,6 +304,13 @@ namespace Matrix4x4
 		return(xmmtx4x4Result);
 	}
 
+	inline XMFLOAT4X4 MultiplyQuarternion(const XMFLOAT4& xmf4Quarternin, const XMFLOAT4X4& xmmtx4x4Matrix1)
+	{
+		XMFLOAT4X4 xmmtx4x4Result;
+		XMMATRIX quarternion = XMMatrixRotationQuaternion(XMLoadFloat4(&xmf4Quarternin));
+		XMStoreFloat4x4(&xmmtx4x4Result, XMLoadFloat4x4(&xmmtx4x4Matrix1) * quarternion);
+		return(xmmtx4x4Result);
+	}
 	inline XMFLOAT4X4 Inverse(XMFLOAT4X4& xmmtx4x4Matrix)
 	{
 		XMFLOAT4X4 xmmtx4x4Result;

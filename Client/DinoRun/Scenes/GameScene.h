@@ -88,4 +88,5 @@ private:
 
 	MinimapShader* m_pMinimapShader = NULL;
 	IconShader* m_pIconShader = NULL;
+	bool isStart = false;
 };

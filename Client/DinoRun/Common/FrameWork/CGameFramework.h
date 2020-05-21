@@ -50,7 +50,7 @@ private: // 변수
 	POINT m_ptOldCursorPos;
 	SceneType m_CurState = Start_Scene;
 	SceneType m_PrevState = Start_Scene;
-public:
+
 	CGameTimer m_GameTimer; //게임 프레임워크에서 사용할 타이머이다.
 	CPlayer* m_pPlayer = NULL;
 	CCamera* m_pCamera = NULL;

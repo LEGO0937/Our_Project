@@ -28,7 +28,7 @@ void StoneShader::Load(CreateManager* pCreateManager, const char* filename, cons
 	{
 		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
 		pItemObject = new ItemStone;
-		pItemObject->SetChild(pModel->m_pModelRootObject->m_pChild);
+		pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pItemObject->AddRef();
 
 		//이곳에서 findFrame을 통해 각 오브젝트에 질량 및 키네마틱 값 추가할 것.
@@ -46,6 +46,8 @@ void StoneShader::Load(CreateManager* pCreateManager, const char* filename, cons
 
 void StoneShader::Update(float fTimeElapsed)
 {
+	// 서버로부터 추가 신호를 받고 addObject(m_pCreateManager.get(), matrix)호출
+	// 제거 명령도 여기서 받고 삭제할 것. 접근 방법은 아이디로 찾을 것.
 	if (objectList.size())
 	{
 		for (vector<CGameObject*>::iterator it = objectList.begin(); it != objectList.end();)
@@ -67,7 +69,7 @@ void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf
 	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
 
 	pItemObject = new ItemStone;
-	pItemObject->SetChild(pModel->m_pModelRootObject->m_pChild);
+	pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 	pItemObject->AddRef();
 
 	pItemObject->SetMatrix(xmf3Position);

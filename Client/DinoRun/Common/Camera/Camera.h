@@ -59,6 +59,8 @@ protected:
 	ID3D12Resource *m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
 
+	XMFLOAT3 m_xmf3Velocity;
+	float m_fMass;
 public:
 	CCamera();
 	CCamera(CCamera *pCamera);

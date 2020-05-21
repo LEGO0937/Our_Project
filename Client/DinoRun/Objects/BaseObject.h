@@ -66,7 +66,6 @@ private:
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE		*m_pd3dSamplerGpuDescriptorHandles = NULL;
 
-public:
 	SRVROOTARGUMENTINFO				*m_pRootArgumentInfos = NULL;
 
 public:
@@ -110,14 +109,15 @@ public:
 private:
 	int								m_nReferences = 0;
 
+private:
+	ID3D12Resource *m_pd3dcbMaterials = NULL;
+	MATERIAL *m_pcbMappedMaterials = NULL;
 public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 public:
 	CShader							*m_pShader = NULL;
-
-	UINT							m_nType = 0x00;
 
 	XMFLOAT4						m_xmf4DiffuseColor = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	XMFLOAT4						m_xmf4EmissiveColor = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -130,11 +130,8 @@ public:
 	float							m_fMetallic = 0.0f;
 	float							m_fGlossyReflection = 0.0f;
 
-	ID3D12Resource *m_pd3dcbMaterials = NULL;
-	MATERIAL *m_pcbMappedMaterials = NULL;
 
 	void SetShader(CShader *pShader);
-	void SetMaterialType(UINT nType) { m_nType |= nType; }
 	void SetTexture(CTexture *pTexture, UINT nTexture = 0);
 
 	virtual void CreateShaderVariable(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
@@ -174,18 +171,6 @@ public:
 };
 
 
-typedef struct RigidBody
-{
-	float m_fMass = 0.f;
-	XMFLOAT3 m_xmf3AcceleratingForce = { 0.f,0.f,0.f };
-	float m_fGravity = 9.8f;
-
-	float m_fSpeed = 0.f;
-	float m_fMaxSpeed = 0.f;
-	XMFLOAT3 m_xmf3Forces = { 0.f,0.f,0.f };
-	XMFLOAT3 m_xmf3Moments = { 0.f,0.f,0.f };
-}RigidBody;
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CGameObject
@@ -209,14 +194,35 @@ public:
 	CGameObject();
 	CGameObject(int nMaterials);
 	virtual ~CGameObject();
-
-public:
-	char							m_pstrFrameName[64] = "RootNode";
-	bool							isSkined = false;  //스킨 매시를 사용하는지 
+protected:
+	bool							isSkined = false;  //스킨 매시를 사용하는지
 	bool							isKinematic = false; //충돌 체크시 물리효과를 적용할 것인가 y or n 
 	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n
+	ModelType						m_ModelType = ModelType::Default;
 
-	ModelType						m_ModelType = ModelType::Default;   //충돌체크시 사용될 오브젝트의 유형(player, wall 등등)
+	CMesh							*m_pMesh = NULL;
+
+	int								m_nMaterials = 0;
+	CMaterial						**m_ppMaterials = NULL;
+
+	CGameObject 					*m_pParent = NULL;
+	CGameObject 					*m_pChild = NULL;
+	CGameObject 					*m_pSibling = NULL;
+
+public:
+	CGameObject* GetChild() { return m_pChild; }
+	void SetSkinedState(bool bIsSkined) { isSkined = bIsSkined; }
+	
+	void SetKinematicState(bool bIsKinematic) { isKinematic = bIsKinematic; }
+	bool GetKinematicState() { return isKinematic; }
+
+	void SetEnableState(bool bIsEnable) { isEnable = bIsEnable; }
+	bool GetEnableState() { return isEnable; }
+
+	ModelType GetModelType() { return m_ModelType; }
+	char							m_pstrFrameName[64] = "RootNode";
+
+	   //충돌체크시 사용될 오브젝트의 유형(player, wall 등등)
 	//-----------------------rigidBody----------------------
 	float							m_fMass = 0;   //kg 단위
 	
@@ -235,24 +241,18 @@ public:
 
 	//---------------------------------------------------
 
-	CMesh							*m_pMesh = NULL;
-
-	int								m_nMaterials = 0;
-	CMaterial						**m_ppMaterials = NULL;
-
 	XMFLOAT4X4						m_xmf4x4ToParent;
 	XMFLOAT4X4						m_xmf4x4World;  //현재 프레임의 월드 행렬
 	XMFLOAT4X4						m_xmf4x4PrevWorld;  //이전 프레임의 월드 행렬
-
-	CGameObject 					*m_pParent = NULL;
-	CGameObject 					*m_pChild = NULL;
-	CGameObject 					*m_pSibling = NULL;
 
 	XMFLOAT3					m_xmf3Scale = XMFLOAT3(1.0f, 1.0f, 1.0f);
 
 	ParticleSystem* m_pParticleSystem = NULL;
 public:
+	string serealKey = "";
+
 	void SetMesh(CMesh *pMesh);
+	CMesh* GetMesh() { return m_pMesh; }
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
 	void SetMaterial(int nMaterial, CMaterial *pMaterial);
@@ -261,6 +261,7 @@ public:
 
 	void SetChild(CGameObject *pChild, bool bReferenceUpdate = false);
 	void SetMatrix(const XMFLOAT4X4& xmf4x4Matrix) { m_xmf4x4ToParent = xmf4x4Matrix; }
+	
 	virtual void OnPrepareAnimate() { }
 	virtual void Animate(float fTimeElapsed); // 애니메이션 처리
 	virtual void FixedUpdate(float fTimeElapsed); //물리

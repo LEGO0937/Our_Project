@@ -182,10 +182,10 @@ void CPlayer::Rotate(float x, float y, float z)
 bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 {
 	//충돌 처리
-	if (!target->isKinematic)
+	if (!target->GetKinematicState())
 	{
 		//타깃의 충돌에 대한 운동처리
-		target->Move(XMFLOAT3(0, 0, 0), true);  //방향으로 속력 추가 적용, 시간변수 사용할 것
+		//target->Move(XMFLOAT3(0, 0, 0), true);  //방향으로 속력 추가 적용, 시간변수 사용할 것
 		/*
 
 	bfVX = ((2.f*aMass) / (aMass + bMass))* aVX
@@ -203,7 +203,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 	}
 	float fVx, fVy, fVz;
 
-	switch (target->m_ModelType)   //충돌처리로 씬내에 무언가를 삭제 or 생성하려면 return true 할 것
+	switch (target->GetModelType())   //충돌처리로 씬내에 무언가를 삭제 or 생성하려면 return true 할 것
 	{
 	case ModelType::CheckPoint:
 		++m_uCheckpointCount;
@@ -230,13 +230,12 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		return true;
 	case ModelType::Item_Box:
 		//아이템 습득
-		target->isEnable = false;
 		return true;
 	case ModelType::Item_Meat:
 		m_fMaxVelocityXZ += 15;
 		if (m_fMaxVelocityXZ > MAX_VELOCITY)
 			m_fMaxVelocityXZ = MAX_VELOCITY;
-		target->isEnable = false;
+		target->SetEnableState(false);  //서버 비활성화 신호 서버에 보내주고 쉐이더에서 처리할 것.
 		return true;
 	case ModelType::Item_Banana:
 		if (m_fWheelDegree > 0)
@@ -245,8 +244,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 			m_fWheelDegree = -30;
 		isStun = true;
 		m_fTimeCount = 0.5f;
-		return true;
-		
+		return true;		
 	case ModelType::Item_Mud:
 		isStun = true;
 		m_fTimeCount = 0.5f;
@@ -260,6 +258,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 
 		fVz = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.z
 			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.z;
+
 		SetVelocity(XMFLOAT3(fVx, fVy, fVz));
 		SetPosition(XMFLOAT3(m_xmf4x4PrevWorld._41, m_xmf4x4PrevWorld._42, m_xmf4x4PrevWorld._43));
 
@@ -502,7 +501,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, sModelName.c_str(), NULL);
-	SetChild(pAngrybotModel->m_pModelRootObject->m_pChild, true);
+	SetChild(pAngrybotModel->m_pModelRootObject->GetChild(), true);
 	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 14, pAngrybotModel);
 
 	m_fMass = 70;

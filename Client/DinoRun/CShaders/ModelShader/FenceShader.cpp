@@ -27,7 +27,7 @@ void FenceShader::Load(CreateManager* pCreateManager, const char* filename, cons
 	{
 		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
 		pFenceObject = new FenceObject;
-		pFenceObject->SetChild(pModel->m_pModelRootObject->m_pChild);
+		pFenceObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pFenceObject->AddRef();
 		//이곳에서 findFrame을 통해 각 오브젝트에 질량 및 키네마틱 값 추가할 것.
 		nReads = (UINT)::fread(&(pFenceObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);

@@ -244,7 +244,7 @@ void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 		for (CGameObject* ob : objectList)
 		{
 			ob->UpdateTransform(NULL);
-			if (ob->isEnable && ob->IsVisible_Ins(pCamera))
+			if (ob->GetEnableState()&& ob->IsVisible_Ins(pCamera))
 			{
 				ob->UpdateTransform_Instancing(instancedObjectInfo, drawingCount, NULL);
 				drawingCount++;
@@ -344,7 +344,7 @@ void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 		for (CPlayer* ob : m_vSkinedObjectList)
 		{
 			ob->UpdateTransform(NULL);
-			if (ob->isEnable && ob->IsVisible_Ins(pCamera))
+			if (ob->GetEnableState() && ob->IsVisible_Ins(pCamera))
 			{
 				ob->UpdateTransform_SkinedInstancing(instancedObjectInfo, drawingCount);
 				drawingCount++;
