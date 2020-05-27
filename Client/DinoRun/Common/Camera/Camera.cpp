@@ -355,9 +355,9 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		
 			XMFLOAT3 xmf3Distance = Vector3::Subtract(m_xmf3Position, xmf3Position);
 			
-			float forceX = (-2*m_xmf3Velocity.x) + (-30 * xmf3Distance.x);
-			float forceY = (-2*m_xmf3Velocity.y) + (-30 * xmf3Distance.y);
-			float forceZ = (-2*m_xmf3Velocity.z) + (-30 * xmf3Distance.z);
+			float forceX = (-1.5*m_xmf3Velocity.x) + (-30 * xmf3Distance.x);
+			float forceY = (-1.5*m_xmf3Velocity.y) + (-30 * xmf3Distance.y);
+			float forceZ = (-1.5*m_xmf3Velocity.z) + (-30 * xmf3Distance.z);
 
 			XMFLOAT3 accelerationForce = XMFLOAT3(forceX / m_fMass, forceY / m_fMass, forceZ / m_fMass);
 

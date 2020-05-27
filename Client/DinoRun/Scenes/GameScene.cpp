@@ -222,11 +222,11 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/smoke.dds", 2, 50));
+		15, "Resources/Images/Line_P.dds", 2, 50));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/smoke.dds", 2, 50));
+		15, "Resources/Images/Line_P.dds", 2, 50));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/smoke.dds", 2, 50));
+		15, "Resources/Images/Line_P.dds", 2, 50));
 	BuildLights();
 
 	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
@@ -566,7 +566,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 						else if ((*p)->GetModelType() == Item_Meat)
 						{
 							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
-								70, "Resources/Images/smoke.dds", 3, 120));
+								70, "Resources/Images/Meat_Eat_P.dds", 3, 120));
 							m_pSoundManager->Play("MeatEat", 0.5f);
 							p++;
 						}

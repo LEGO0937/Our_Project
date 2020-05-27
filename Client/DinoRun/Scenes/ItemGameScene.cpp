@@ -263,11 +263,11 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/smoke.dds", 2, 50));
+		15, "Resources/Images/Line_P.dds", 2, 50));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/smoke.dds", 2, 50));
+		15, "Resources/Images/Line_P.dds", 2, 50));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/smoke.dds", 2, 50));
+		15, "Resources/Images/Line_P.dds", 2, 50));
 
 	BuildLights();
 
@@ -665,7 +665,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							// 비활성화 시키는것 또한 신호를 보낼것임.
 							(*p)->SetEnableState(false);
 							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
-								70, "Resources/Images/smoke.dds", 3, 120));
+								70, "Resources/Images/Item_Box_Eat.dds", 3, 120));
 							m_pSoundManager->Play("ItemBox", 0.2f);
 						}
 						else
