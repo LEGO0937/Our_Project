@@ -346,6 +346,13 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		//현재의 카메라의 위치에서 회전한 카메라의 위치까지의 방향과 거리를 나타내는 벡터이다. 
 		XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
 
+		if (Vector3::Length(m_pPlayer->GetVelocity()) != 0.0f)
+		{
+			if (::IsEqual(m_xmf3Velocity.y, 0.0f,0.1f))
+			{
+				m_xmf3Position.y = xmf3Position.y + 4;
+			}
+		}
 		//--------------------------------
 		{
 			//k = 0.04  ,  c = 0.2

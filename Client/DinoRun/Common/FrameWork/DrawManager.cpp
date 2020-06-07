@@ -90,6 +90,7 @@ void DrawManager::RenderPostProcess(shared_ptr<BaseScene> pScene)
 }
 void DrawManager::RenderLoadingScreen(float loadingPercentage)
 {
+	m_pd3dCommandList->SetComputeRootSignature(m_pComputeRootSignature.Get());
 }
 
 void DrawManager::SetDsvCPUHandleWithDsvHeap(ComPtr<ID3D12DescriptorHeap> pDsvDescriptorHeap, UINT incrementSize)
@@ -142,7 +143,10 @@ void DrawManager::ExecuteCommandList()
 
 	WaitForGpuComplete();
 }
-
+void DrawManager::SetComputeRootSignature()
+{
+	m_pd3dCommandList->SetComputeRootSignature(m_pComputeRootSignature.Get());
+}
 void DrawManager::ChangeResourceState(ComPtr<ID3D12Resource> pResource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter)
 {
 	D3D12_RESOURCE_BARRIER resourceBarrier;

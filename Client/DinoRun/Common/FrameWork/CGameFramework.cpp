@@ -67,6 +67,7 @@ void CGameFramework::FrameAdvance()
 	m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();
 	m_pCreateManager->GetDrawMgr()->ResetCommandAllocator();
 	m_pCreateManager->ResetCommandList();
+	m_pCreateManager->SetComputeRootSignature();
 	m_CurState = m_pScene->Update(m_pCreateManager.get(),fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
 	m_pCreateManager->ExecuteCommandList();
 	//m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();

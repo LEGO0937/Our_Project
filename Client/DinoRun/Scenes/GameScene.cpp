@@ -150,10 +150,10 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CSkinedObInstancingShader* animatedShader;
 
 	UI_INFO view_info;    //게임중 or 대기중 뷰
-	view_info.textureName = "Resources/Images/Blur_Effect.dds";
+	view_info.textureName = "Resources/Images/Blur_Effect3.dds";
 	view_info.meshSize = XMFLOAT2(1.0f, 1.0f);
 	view_info.positions.emplace_back(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	view_info.maxUv = XMFLOAT2(0.25f, 1.0f);
+	view_info.maxUv = XMFLOAT2(0.125f, 1.0f);
 	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
 	view_info.f_uvY.emplace_back(0);
 	m_pEffectShader = new ImageShader;
@@ -165,7 +165,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instacingBillBoardShaders.emplace_back(shader);
 	
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree1.bin", "Resources/ObjectData/TreeData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree.bin", "Resources/ObjectData/TreeData");
 	instacingModelShaders.emplace_back(shader); 
 	shader = new TreeShader;
 	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", "Resources/ObjectData/StoneData");
@@ -174,11 +174,11 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Weed.bin", "Resources/ObjectData/WeedData");
 	instacingModelShaders.emplace_back(shader);
 
-	shader = new FenceShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
-	instacingModelShaders.emplace_back(shader);
-	shader->AddRef();
-	UpdatedShaders.emplace_back(shader);
+	//shader = new FenceShader;
+	//shader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
+	//instacingModelShaders.emplace_back(shader);
+	//shader->AddRef();
+	//UpdatedShaders.emplace_back(shader);
 
 	m_pCheckPointShader = new BlockShader;
 	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
@@ -415,22 +415,6 @@ void GameScene::Render(float fTimeElapsed)
 			shader->Render(m_pd3dCommandList, m_pCamera);
 		}
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE_CALC]);
-	
-	m_pPlayer->m_pParticleSystem->AnimateObjects(fTimeElapsed);
-	
-	for(list<ParticleSystem*>::iterator i = particleSystems.begin(); i != particleSystems.end();)
-	{
-		if ((*i)->AnimateObjects(fTimeElapsed))
-		{
-			(*i)->Release();
-			i = particleSystems.erase(i);
-			if (i == particleSystems.end())
-				break;
-		}
-		else
-			i++;
-	}
 	
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE]);
 	//particleSystem->Render(m_pd3dCommandList.Get(), m_pCamera);
@@ -469,14 +453,14 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 	static float deltaUvX = 0.0f;
 	XMFLOAT3 vel = m_pPlayer->GetVelocity();
 	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
-	if (length > 35)
+	if (length > 30)
 	{
-		int idx = length - 35;
-		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/5);
+		int idx = length - 30;
+		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
 		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
 		m_pEffectShader->getUvXs()[0] = deltaUvX;
-		deltaUvX += 0.25f;
+		deltaUvX += 0.125f;
 		if (deltaUvX >= 1.0)
 			deltaUvX = 0.0f;
 	}
@@ -529,6 +513,23 @@ void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 
 SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE_CALC]);
+
+	m_pPlayer->m_pParticleSystem->AnimateObjects(fTimeElapsed);
+
+	for (list<ParticleSystem*>::iterator i = particleSystems.begin(); i != particleSystems.end();)
+	{
+		if ((*i)->AnimateObjects(fTimeElapsed))
+		{
+			(*i)->Release();
+			i = particleSystems.erase(i);
+			if (i == particleSystems.end())
+				break;
+		}
+		else
+			i++;
+	}
+
 	if (isStart)
 	{
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)

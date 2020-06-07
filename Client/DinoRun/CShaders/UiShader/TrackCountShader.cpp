@@ -43,22 +43,22 @@ void TrackCountShader::BuildObjects(CreateManager* pCreateManager, void* pInform
 	pObject->SetPosition(0.87f, 0.84f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
-	uvX.emplace_back(1);
-	uvY.emplace_back(0);
+	uvX.emplace_back(1.0f);
+	uvY.emplace_back(0.0f);
 
 	pObject = new CGameObject;
 	pObject->SetPosition(0.92f, 0.84f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
-	uvX.emplace_back(11);
-	uvY.emplace_back(0);
+	uvX.emplace_back(11.0f);
+	uvY.emplace_back(0.0f);
 
 	pObject = new CGameObject;
 	pObject->SetPosition(0.97f, 0.84f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
-	uvX.emplace_back(2);
-	uvY.emplace_back(0);
+	uvX.emplace_back(2.0f);
+	uvY.emplace_back(0.0f);
 
 	CreateShaderVariables(pCreateManager);
 }

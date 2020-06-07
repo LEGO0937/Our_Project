@@ -15,7 +15,7 @@ LiePlaneMesh::LiePlaneMesh(float fx, float fy, float fz, float minX, float maxX,
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);
-	m_xmf3AABBExtents = XMFLOAT3(fx, 0.01, fz);
+	m_xmf3AABBExtents = XMFLOAT3(fx, 0.01f, fz);
 	m_xmBoundingBox = BoundingOrientedBox(m_xmf3AABBCenter, m_xmf3AABBExtents, XMFLOAT4(0, 0, 0, 1));
 	int i = 0;
 

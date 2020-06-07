@@ -16,6 +16,7 @@ struct INSTANCEDGAMEUIINFO
 struct INSTANCEDSKINEDOBJECTINFO
 {
 	float4x4 gpmtxInstancedBoneTransforms[SKINNED_ANIMATION_BONES];
+	//이전 월드행렬을 저장하기 위해 하나 더 갖게 하고 싶지만 사이즈 초과
 };
 
 cbuffer cbCameraInfo : register(b0)

@@ -54,6 +54,7 @@ public:
 
 	void SetLoadingScene(shared_ptr<BaseScene> pLoadingScene) { m_pLoadingScene = pLoadingScene; }
 
+	void SetComputeRootSignature();
 private:
 	void ChangeResourceState(ComPtr<ID3D12Resource> pResource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter);
 

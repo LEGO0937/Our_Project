@@ -49,6 +49,9 @@ public:
 
 	ComPtr<ID3D12Resource> GetShadowBuffer() { return m_pd3dShadowDepthBuffer; }
 	
+	void SetComputeRootSignature() {
+		m_pDrawManager->SetComputeRootSignature();
+	}
 private:  //d3d ComObject
 	void CreateDirect3dDevice();
 	void CreateCommandQueueAndList();
