@@ -56,7 +56,7 @@ enum SceneType { Default_Scene = 0, Start_Scene, Lobby_Scene, Room_Scene, Game_S
 enum ModelType { Default = 0, CheckPoint, Player, Fence, Item_Box, Item_Banana, 
 	Item_Meat, Item_Mud, Item_Stone,Item_Mugen
 };
-
+enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 
 #define MAX_ROTATE_RADIAN 0.26   //약 15도
 #define MIN_ROTATE_RADIAN -0.26  //약 -15도

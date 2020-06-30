@@ -13,12 +13,12 @@ ParticleSystem::ParticleSystem(CreateManager* pCreateManager, const char& cPatte
 	CTexture * texture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	texture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(pTextureName.c_str()), 0);
 
-    m_pShader = new CShader();
-	m_pShader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
-	m_pShader->CreateShaderResourceViews(pCreateManager, texture, 8, true);
+	CShader* pShader = new CShader();
+	pShader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
+	pShader->CreateShaderResourceViews(pCreateManager, texture, 8, true);
 	
 	m_pMaterial = new CMaterial(1);
-	m_pMaterial->SetShader(m_pShader);
+	m_pMaterial->SetShader(pShader);
 	m_pMaterial->SetTexture(texture, 0);
 
 	m_pMaterial->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
@@ -27,7 +27,7 @@ ParticleSystem::ParticleSystem(CreateManager* pCreateManager, const char& cPatte
 	m_pMesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 	
 	
-	m_vParticles.reserve(m_uMaxSize);
+	//1. m_vParticles.reserve(m_uMaxSize);
 	//m_vParticles.resize(m_uMaxSize);
 
 	m_pTarget = pTarget;
@@ -83,7 +83,8 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 	D3D12_RANGE readbackBufferRange{ 0,sizeof(Particle) * m_vParticles.size() };
 	m_pd3dReadBackParticles->Map(0, &readbackBufferRange, (void **)&m_pReadBackMappedParticles);
 	memcpy(m_pSrbMappedParticles, m_pReadBackMappedParticles, sizeof(Particle) * m_vParticles.size());
-	memcpy(m_vParticles.data(), m_pSrbMappedParticles, sizeof(Particle) * m_vParticles.size());
+	//1. memcpy(m_vParticles.data(), m_pSrbMappedParticles, sizeof(Particle) * m_vParticles.size());
+	copy(m_pSrbMappedParticles, m_pSrbMappedParticles + m_vParticles.size(), m_vParticles.begin());
 	m_pd3dReadBackParticles->Unmap(0, NULL);
 	m_pReadBackMappedParticles = NULL;
 
@@ -123,7 +124,7 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 			Update(fTimeElapsed);
 		}
 	}
-	for (auto i = m_vParticles.begin(); i < m_vParticles.end(); )
+	for (auto i = m_vParticles.begin(); i != m_vParticles.end(); )
 	{
 		if (i->life < 0)
 		{
@@ -133,7 +134,8 @@ bool ParticleSystem::AnimateObjects(float fTimeElapsed)
 			++i;
 	}
 
-	memcpy(m_pSrbMappedParticles, m_vParticles.data(), sizeof(Particle) * m_vParticles.size());
+	//1. memcpy(m_pSrbMappedParticles, m_vParticles.data(), sizeof(Particle) * m_vParticles.size());
+	copy(m_vParticles.begin(), m_vParticles.end(), m_pSrbMappedParticles);
 	ChangeResourceState(m_pd3dCommandList, m_pd3dUbParticles, D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
 	m_pd3dCommandList->SetComputeRootShaderResourceView(4,
@@ -263,8 +265,8 @@ void ParticleSystem::BuildResource(CreateManager* pCreateManager)
 		sizeof(Particle) * m_uMaxSize, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 	m_pd3dSrbParticles->Map(0, NULL, (void **)&m_pSrbMappedParticles);
-	memcpy(m_pSrbMappedParticles, m_vParticles.data(), sizeof(Particle) * m_uMaxSize);
-
+	//1. memcpy(m_pSrbMappedParticles, m_vParticles.data(), sizeof(Particle) * m_vParticles.size());
+	copy(m_vParticles.begin(), m_vParticles.end(), m_pSrbMappedParticles);
 	m_pd3dReadBackParticles = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
 		sizeof(Particle) * m_uMaxSize, D3D12_HEAP_TYPE_READBACK,
 		D3D12_RESOURCE_STATE_COPY_DEST, NULL);
@@ -307,11 +309,11 @@ void ParticleSystem::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 	m_pd3dCommandList->SetGraphicsRootConstantBufferView(11, m_pd3dcbStruct->GetGPUVirtualAddress());
 	//pd3dCommandList->SetGraphicsRoot32BitConstants(11, 6, particleCb, 0);
 
-	if (m_pShader)
-		m_pShader->Render(pd3dCommandList, pCamera);
 	if (m_pMaterial)
+	{
+		if (m_pMaterial->m_pShader) m_pMaterial->m_pShader->Render(pd3dCommandList, pCamera);
 		m_pMaterial->UpdateShaderVariable(pd3dCommandList);
-
+	}
 	if (m_pMesh)
 		m_pMesh->Render(pd3dCommandList, 0, m_vParticles.size());
 }

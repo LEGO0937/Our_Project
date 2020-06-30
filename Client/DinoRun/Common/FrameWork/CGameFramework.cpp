@@ -317,7 +317,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{
 		m_pScene->SetId(m_sPlayerID);
-		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/Dino2.bin");
+		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/Dino3.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
 

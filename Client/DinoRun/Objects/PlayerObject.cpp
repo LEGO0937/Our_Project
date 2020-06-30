@@ -503,7 +503,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, sModelName.c_str(), NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject->GetChild(), true);
 	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 14, pAngrybotModel);
-
+	//위의 매개변수들 중 1은 애니메이션 트랙의 갯수 현재는 idle 뿐이니 1임 늘어날 수록 숫자 높일것.
 	m_fMass = 70;
 
 	m_fMaxForce = 2000;
@@ -511,12 +511,14 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE, IDLE); //left_turn_start
+
+	
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE_LEFT_TURN, IDLE_LEFT_TURN);
 	m_pSkinnedAnimationController->SetCallbackFuncKeys(IDLE_LEFT_TURN, 1);
 	m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_TURN, 0, 0.5f, IDLE_LEFT_TURN, IDLE_LEFT_TURNING);
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE_RIGHT_TURN, IDLE_RIGHT_TURN);
-	m_pSkinnedAnimationController->SetCallbackFuncKeys(IDLE_RIGHT_TURN, 1);
+	m_pSkinnedAnimationController->SetCallbackFuncKeys(IDLE_RIGHT_TURN, 1); //라이트 턴에대한 예약애니메이션의 갯수는 1
 	m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_TURN, 0, 0.5f, IDLE_RIGHT_TURN, IDLE_RIGHT_TURNING);
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE_LEFT_TURNING, IDLE_LEFT_TURNING);
@@ -541,7 +543,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	m_pSkinnedAnimationController->SetCallbackFuncKeys(RUN_LEFT_RETURN, 1);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(RUN_RIGHT_RETURN, RUN_RIGHT_RETURN);
 	m_pSkinnedAnimationController->SetCallbackFuncKeys(RUN_RIGHT_RETURN, 1);
-
+	
 	m_pSkinnedAnimationController->SetTrackEnable(IDLE, true);
 
 
@@ -572,7 +574,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	m_pParticleSystem = new ParticleSystem(pCreateManager, LOOP, DUST, -0.05f, 2.5f, this, XMFLOAT3(0.0f, 0, 18),
 		15, "Resources/Images/dust.dds", 0.5, 60);
-	//SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
+	//SetScale(XMFLOAT3(0.05f, 0.05f, 0.05f));
 
 }
 

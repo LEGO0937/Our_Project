@@ -171,6 +171,12 @@ public:
 };
 
 
+class RigidBody
+{
+private:
+	BodyType m_bodyType;
+
+};
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 class CGameObject
@@ -197,8 +203,9 @@ public:
 protected:
 	bool							isSkined = false;  //스킨 매시를 사용하는지
 	bool							isKinematic = false; //충돌 체크시 물리효과를 적용할 것인가 y or n 
-	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n
-	ModelType						m_ModelType = ModelType::Default;
+	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n false이면 update,render X
+
+	ModelType						m_ModelType = ModelType::Default;   //Layer와 유사
 
 	CMesh							*m_pMesh = NULL;
 

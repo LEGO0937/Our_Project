@@ -50,7 +50,6 @@ private:
 	char m_cShape = CONE;
 
 	CMaterial* m_pMaterial = NULL;
-	CShader* m_pShader = NULL;
 
 	float m_fSize = 0;
 	UINT m_uMaxSize = 1000;
@@ -62,7 +61,7 @@ private:
 	float curNumParticle = 0;
 
 	CGameObject* m_pTarget = NULL;
-	vector<Particle> m_vParticles;
+	list<Particle> m_vParticles;
 	float m_fParticleLife = 0;
 
 	ID3D12Resource *m_pd3dUbParticles = NULL;
@@ -86,7 +85,7 @@ public:
 		 const float& fVelocity,
 		string pTextureName, const float& fLife, const UINT& uMaxSize);
 	~ParticleSystem();
-	vector<Particle> GetParticles() { return m_vParticles; }
+	list<Particle> GetParticles() { return m_vParticles; }
 	bool AnimateObjects(float fTimeElapsed);
 	void Update(float fTimeElapsed);
 	void FixedUpdate(float fTimeElapsed);
