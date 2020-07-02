@@ -210,6 +210,7 @@
     <ClInclude Include="Objects\PlayerObject.h" />
     <ClInclude Include="Objects\SkyBoxObject.h" />
     <ClInclude Include="Objects\TerrainObject.h" />
+    <ClInclude Include="protocol.h" />
     <ClInclude Include="Scenes\BaseScene.h" />
     <ClInclude Include="Scenes\EndScene.h" />
     <ClInclude Include="Scenes\GameScene.h" />
