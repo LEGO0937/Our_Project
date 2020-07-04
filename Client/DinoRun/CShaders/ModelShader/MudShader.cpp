@@ -7,6 +7,7 @@ MudShader::MudShader()
 }
 MudShader::~MudShader()
 {
+
 }
 
 void MudShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)

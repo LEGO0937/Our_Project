@@ -7,6 +7,7 @@ BananaShader::BananaShader()
 }
 BananaShader::~BananaShader()
 {
+
 }
 
 void BananaShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)

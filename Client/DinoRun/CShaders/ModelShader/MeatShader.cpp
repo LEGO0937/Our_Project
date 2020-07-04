@@ -7,6 +7,7 @@ MeatShader::MeatShader()
 }
 MeatShader::~MeatShader()
 {
+
 }
 
 void MeatShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)

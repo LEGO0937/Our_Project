@@ -6,6 +6,7 @@ FenceShader::FenceShader()
 }
 FenceShader::~FenceShader()
 {
+
 }
 
 void FenceShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)

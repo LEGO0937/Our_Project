@@ -557,16 +557,16 @@ void CreatePsoTerrain(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraph
 		&pd3dVertexShaderBlob);
 	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "PSTer", "ps_5_1",
 		&pd3dPixelShaderBlob);
-	d3dPipelineStateDesc.HS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "HS", "hs_5_1",
-		&pd3dHullShaderBlob);
-	d3dPipelineStateDesc.DS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "DS", "ds_5_1",
-		&pd3dDomainShaderBlob);
+	//d3dPipelineStateDesc.HS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "HS", "hs_5_1",
+	//	&pd3dHullShaderBlob);
+	//d3dPipelineStateDesc.DS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "DS", "ds_5_1",
+	//	&pd3dDomainShaderBlob);
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = CreateTextureInputLayout();
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
-	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 
 	d3dPipelineStateDesc.NumRenderTargets = 1;
 	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -905,17 +905,17 @@ void CreatePsoShadowTerrain(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3
 		&pd3dVertexShaderBlob);
 	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "PSShadowTer", "ps_5_1",
 		&pd3dPixelShaderBlob);
-	d3dPipelineStateDesc.HS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "HS", "hs_5_1",
-		&pd3dHullShaderBlob);
-	d3dPipelineStateDesc.DS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "DSShadow", "ds_5_1",
-		&pd3dDomainShaderBlob);
+	//d3dPipelineStateDesc.HS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "HS", "hs_5_1",
+	//	&pd3dHullShaderBlob);
+	//d3dPipelineStateDesc.DS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "DSShadow", "ds_5_1",
+	//	&pd3dDomainShaderBlob);
 	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateShadowDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = CreateTextureInputLayout();
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
-	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_PATCH;
-
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	
 	d3dPipelineStateDesc.NumRenderTargets = 0;
 	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
 	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;

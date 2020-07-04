@@ -7,6 +7,7 @@ ItemShader::ItemShader()
 }
 ItemShader::~ItemShader()
 {
+
 }
 
 void ItemShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
@@ -42,6 +43,7 @@ void ItemShader::Load(CreateManager* pCreateManager, const char* filename, const
 	}
 
 	::fclose(pInFile);
+
 }
 
 void ItemShader::Update(float fTimeElapsed)

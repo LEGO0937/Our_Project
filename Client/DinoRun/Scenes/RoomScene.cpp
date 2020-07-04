@@ -54,7 +54,7 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//서버는 클라 자신의 정보를 제외한 나머지 유저들의 이름과 버튼 상태를 전송한다.-> User클래스 사용
 
 	uiShader = new BackGroundShader;
-	string name = "Resources/Images/Room.dds";
+	string name = "Resources/Images/T_Room.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 
@@ -64,7 +64,7 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_vUsers.emplace_back(User("user4", true));
 
 	UI_INFO button_info;
-	button_info.textureName = "Resources/Images/Button.dds";
+	button_info.textureName = "Resources/Images/T_Button.dds";
 	button_info.meshSize = XMFLOAT2(0.15f, 0.12f);
 	button_info.positions.emplace_back(XMFLOAT3(0.0f, -0.8f, 0.0f));
 	button_info.f_uvY.emplace_back(0.0f);

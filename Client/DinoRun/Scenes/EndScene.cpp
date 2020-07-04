@@ -40,7 +40,7 @@ void EndScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
-	string name = "Resources/Images/Win.dds";
+	string name = "Resources/Images/T_Win.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 

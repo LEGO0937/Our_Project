@@ -56,12 +56,12 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
-	string name = "Resources/Images/LoginBackGround.dds";
+	string name = "Resources/Images/T_LoginBackGround.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 
 	UI_INFO button_info;
-	button_info.textureName = "Resources/Images/Button.dds";
+	button_info.textureName = "Resources/Images/T_Button.dds";
 	button_info.meshSize = XMFLOAT2(0.15f, 0.12f);
 	button_info.positions.emplace_back(XMFLOAT3(0.31f, -0.5f, 0.0f));
 	button_info.f_uvY.emplace_back(0.25f);

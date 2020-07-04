@@ -150,7 +150,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CSkinedObInstancingShader* animatedShader;
 
 	UI_INFO view_info;    //게임중 or 대기중 뷰
-	view_info.textureName = "Resources/Images/Blur_Effect3.dds";
+	view_info.textureName = "Resources/Images/T_Blureffect.dds";
 	view_info.meshSize = XMFLOAT2(1.0f, 1.0f);
 	view_info.positions.emplace_back(XMFLOAT3(0.0f, 0.0f, 0.0f));
 	view_info.maxUv = XMFLOAT2(0.125f, 1.0f);
@@ -161,31 +161,31 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 
 	shader = new BillBoardShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
+	shader->BuildObjects(pCreateManager.get(), 100,"Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
 	instacingBillBoardShaders.emplace_back(shader);
 	
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree.bin", "Resources/ObjectData/TreeData");
+	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Tree.bin", "Resources/ObjectData/TreeData");
 	instacingModelShaders.emplace_back(shader); 
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", "Resources/ObjectData/StoneData");
+	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Stone.bin", "Resources/ObjectData/StoneData");
 	instacingModelShaders.emplace_back(shader);
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Weed.bin", "Resources/ObjectData/WeedData");
+	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Bush.bin", "Resources/ObjectData/WeedData");
 	instacingModelShaders.emplace_back(shader);
 
 	//shader = new FenceShader;
-	//shader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
+	//shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(Fence)");
 	//instacingModelShaders.emplace_back(shader);
 	//shader->AddRef();
 	//UpdatedShaders.emplace_back(shader);
 
 	m_pCheckPointShader = new BlockShader;
-	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
-	m_pCheckPointShader->AddRef();
+	m_pCheckPointShader->BuildObjects(pCreateManager.get(),"Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(LineBox)");
+	//m_pCheckPointShader->AddRef();
 	
 	shader = new MeatShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Item_Meat.bin", "Resources/ObjectData/MeatData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Meat.bin", "Resources/ObjectData/MeatData");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
@@ -214,7 +214,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds",NULL);
 
-	string name = "Resources/Images/Face_Icon.dds";
+	string name = "Resources/Images/T_Faceicon.dds";
 	m_pIconShader = new IconShader();
 	m_pIconShader->BuildObjects(pCreateManager.get(), &name);
 
@@ -222,11 +222,11 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/Line_P.dds", 2, 50));
+		15, "Resources/Images/T_Linepoint.dds", 2, 50));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/Line_P.dds", 2, 50));
+		15, "Resources/Images/T_Linepoint.dds", 2, 50));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/Line_P.dds", 2, 50));
+		15, "Resources/Images/T_Linepoint.dds", 2, 50));
 	BuildLights();
 
 	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
@@ -405,6 +405,11 @@ void GameScene::Render(float fTimeElapsed)
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+	for (CObInstancingShader* shader : instacingModelShaders)
+	{
+		if (shader)
+			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
+	}
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_TERRAIN]);
 	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
@@ -534,7 +539,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	{
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
-			return End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 		}
 
 		//충돌을 위한 update
@@ -560,14 +565,14 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 						if ((*p)->GetModelType() == Fence || (*p)->GetModelType() == Player)
 						{
 							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
-								0, "Resources/Images/Collision.dds", 0.5, 1));
+								0, "Resources/Images/T_Damage1.dds", 0.5, 1));
 							m_pSoundManager->Play("Heat", 0.2f);
 							p++;
 						}
 						else if ((*p)->GetModelType() == Item_Meat)
 						{
 							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
-								70, "Resources/Images/Meat_Eat_P.dds", 3, 120));
+								70, "Resources/Images/T_Meateat_P.dds", 3, 120));
 							m_pSoundManager->Play("MeatEat", 0.5f);
 							p++;
 						}

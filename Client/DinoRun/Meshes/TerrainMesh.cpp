@@ -125,7 +125,8 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice,
 
 	m_nSubMeshes = 1;
 
-	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_3_CONTROL_POINT_PATCHLIST;
+	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	//D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST
 	m_nWidth = nWidth;
 	m_nLength = nLength;
 	m_xmf3Scale = xmf3Scale;

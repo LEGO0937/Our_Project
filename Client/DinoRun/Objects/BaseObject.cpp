@@ -399,7 +399,11 @@ void CGameObject::UpdateTransform_Instancing(unordered_map<string, CB_OBJECT_INF
 	if (m_pSibling) m_pSibling->UpdateTransform_Instancing(instancedTransformBuffer, idx, pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform_Instancing(instancedTransformBuffer, idx, pxmf4x4Parent);
 }
-
+void CGameObject::UpdateTransform_BillBoardInstancing(CB_OBJECT_INFO* buffer,const int& idx, XMFLOAT4X4 *pxmf4x4Parent)
+{
+	XMStoreFloat4x4(&(buffer[idx].m_xmf4x4World),
+		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+}
 void CGameObject::UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer, const int& idx)
 {
 	if (m_pMesh)
@@ -549,9 +553,13 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 		}
 		else
 		{
+			//여기서 if로 빌보드인지 확인해서 그릴것
 			if (m_pcbMappedGameObjects)
 				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
 					m_pd3dcbGameObjects->GetGPUVirtualAddress());
+			else if(m_pcbMappedBillBoardObjects)
+				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
+					m_pd3dcbBillBoardObjects->GetGPUVirtualAddress());
 		}
 		if (m_nMaterials > 0)
 		{
@@ -694,6 +702,13 @@ void CGameObject::ReleaseShaderVariables()
 		m_pd3dcbGameObjects->Release();
 		m_pd3dcbGameObjects = NULL;
 	}
+	if (m_pd3dcbBillBoardObjects)
+	{
+		m_pd3dcbBillBoardObjects->Unmap(0, NULL);
+		m_pd3dcbBillBoardObjects->Release();
+		m_pd3dcbBillBoardObjects = NULL;
+	}
+
 	if (m_pd3dcbSkinedGameObjects)
 	{
 		m_pd3dcbSkinedGameObjects->Unmap(0, NULL);
@@ -1139,7 +1154,18 @@ void CGameObject::CreateInstanceBuffer(CreateManager* pCreateManager,
 		if (m_pChild) m_pChild->CreateInstanceBuffer(pCreateManager, nInstances, instancedTransformBuffer);
 	}
 }
-
+void CGameObject::CreateBillBoardInstanceBuffer(CreateManager* pCreateManager,
+	UINT nInstances)
+{
+	if (nInstances > 0)
+	{
+		m_pd3dcbBillBoardObjects = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+			sizeof(CB_OBJECT_INFO) * nInstances, D3D12_HEAP_TYPE_UPLOAD,
+			D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+		//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
+		m_pd3dcbBillBoardObjects->Map(0, NULL, (void **)&m_pcbMappedBillBoardObjects);
+	}
+}
 void CGameObject::CreateSkinedInstanceBuffer(CreateManager* pCreateManager,
 	UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer)
 {

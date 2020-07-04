@@ -151,11 +151,12 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 		17, xmf3Scale);
 
 	CObInstancingShader* shader;
+	BillBoardShader* bShader;
 	CUiShader* uiShader;
 	CSkinedObInstancingShader* animatedShader;
 
 	UI_INFO view_info;    //게임중 or 대기중 뷰
-	view_info.textureName = "Resources/Images/Blur_Effect.dds";
+	view_info.textureName = "Resources/Images/T_BlurEffect.dds";
 	view_info.meshSize = XMFLOAT2(1.0f, 1.0f);
 	view_info.positions.emplace_back(XMFLOAT3(0.0f, 0.0f, 0.1f));
 	view_info.maxUv = XMFLOAT2(0.125f, 1.0f);
@@ -164,50 +165,50 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pEffectShader = new ImageShader;
 	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
 
-	shader = new BillBoardShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
-	instacingBillBoardShaders.emplace_back(shader);
+	bShader = new BillBoardShader;
+	bShader->BuildObjects(pCreateManager.get(),150,"Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
+	instacingBillBoardShaders.emplace_back(bShader);
 
 	shader = new FenceShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(Fence)");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(Fence)");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new BananaShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/ItemBanana.bin", NULL);
+	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Banana.bin", NULL);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new MudShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Mud.bin", NULL);
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Mud.bin", NULL);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new StoneShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", NULL);
+	shader->BuildObjects(pCreateManager.get(), 1, "Resources/Models/M_Stone.bin", NULL);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Tree.bin", "Resources/ObjectData/TreeData");
+	shader->BuildObjects(pCreateManager.get(), 1, "Resources/Models/M_Tree.bin", "Resources/ObjectData/TreeData");
 	instacingModelShaders.emplace_back(shader);
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Stone.bin", "Resources/ObjectData/StoneData");
+	shader->BuildObjects(pCreateManager.get(), 1, "Resources/Models/M_Stone.bin", "Resources/ObjectData/StoneData");
 	instacingModelShaders.emplace_back(shader);
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/Weed.bin", "Resources/ObjectData/WeedData");
+	shader->BuildObjects(pCreateManager.get(), 1, "Resources/Models/M_Bush.bin", "Resources/ObjectData/WeedData");
 	instacingModelShaders.emplace_back(shader);
 
 	m_pCheckPointShader = new BlockShader;
-	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/Block.bin", "Resources/ObjectData/RectData(LineBox)");
-	m_pCheckPointShader->AddRef();
+	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(LineBox)");
+	//m_pCheckPointShader->AddRef();
 
 	shader = new ItemShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/ItemBox.bin", "Resources/ObjectData/MeatData");
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Itembox.bin", "Resources/ObjectData/MeatData");
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
@@ -227,7 +228,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	UI_INFO ItemUi_info;
 
 	//---- 아이템 틀
-	ItemUi_info.textureName = "Resources/Images/Item_Cast.dds";
+	ItemUi_info.textureName = "Resources/Images/T_Itemcast.dds";
 	ItemUi_info.meshSize = XMFLOAT2(0.15f, 0.15f);
 	ItemUi_info.positions.emplace_back(XMFLOAT3(0.0f, -0.8f, 0.0f));
 	ItemUi_info.f_uvY.emplace_back(0.0f);
@@ -239,7 +240,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instacingImageUiShaders.emplace_back(uiShader);
 
 	//보유 아이템 사진
-	ItemUi_info.textureName = "Resources/Images/Item_Sprite.dds";
+	ItemUi_info.textureName = "Resources/Images/T_Itemsprite.dds";
 	ItemUi_info.maxUv = XMFLOAT2(0.125f, 1.0f);
 
 	uiShader = new ImageShader;
@@ -255,7 +256,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds", NULL);
 
-	string name = "Resources/Images/Face_Icon.dds";
+	string name = "Resources/Images/T_Faceicon.dds";
 	m_pIconShader = new IconShader();
 	m_pIconShader->BuildObjects(pCreateManager.get(), &name);
 
@@ -263,11 +264,11 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/Line_P.dds", 2, 50));
+		15, "Resources/Images/T_Linepoint.dds", 2, 50));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/Line_P.dds", 2, 50));
+		15, "Resources/Images/T_Linepoint.dds", 2, 50));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/Line_P.dds", 2, 50));
+		15, "Resources/Images/T_Linepoint.dds", 2, 50));
 
 	BuildLights();
 
@@ -476,6 +477,11 @@ void ItemGameScene::Render(float fTimeElapsed)
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+	for (CObInstancingShader* shader : instacingModelShaders)
+	{
+		if (shader)
+			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
+	}
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_TERRAIN]);
 	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
@@ -605,7 +611,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 	{
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
-			return End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 		}
 		if (isMugen)
 		{
@@ -648,7 +654,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							//서버연동 때는 이곳에서 생성하지않고 서버에게 생성하겠다는 신호만을 보낼것임
 							//다음 프레임의 업뎃에서 그 신호를 서버로부터  받아서 그 때 생성하도록 하겠음.
 							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
-								0, "Resources/Images/Collision.dds", 0.5, 1));
+								0, "Resources/Images/T_Damage1.dds", 0.5, 1));
 							m_pSoundManager->Play("Heat", 0.2f);
 							p++;
 						}
@@ -667,7 +673,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							// 비활성화 시키는것 또한 신호를 보낼것임.
 							(*p)->SetEnableState(false);
 							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
-								70, "Resources/Images/Item_Box_Eat.dds", 3, 120));
+								70, "Resources/Images/T_Itemboxeat.dds", 3, 120));
 							m_pSoundManager->Play("ItemBox", 0.2f);
 						}
 						else

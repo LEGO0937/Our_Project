@@ -7,10 +7,12 @@ StoneShader::StoneShader()
 }
 StoneShader::~StoneShader()
 {
+
 }
 
 void StoneShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
+	billBoardCb->fSize = 50;
 	isEnable = true;
 
 	FILE *pInFile = NULL;

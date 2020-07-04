@@ -69,7 +69,7 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
-	string name = "Resources/Images/LobbyBackGround.dds";
+	string name = "Resources/Images/T_LobbyBackground.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 	/*
@@ -134,7 +134,7 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	//------------------isGmaing? Image----  1'st
 	UI_INFO view_info;    
-	view_info.textureName = "Resources/Images/Button.dds";
+	view_info.textureName = "Resources/Images/T_Button.dds";
 	view_info.meshSize = XMFLOAT2(0.087f, 0.05f);
 	view_info.positions.emplace_back(XMFLOAT3(-0.45f, 0.475f, 0.0f));
 	view_info.f_uvY.emplace_back(0.5f);
@@ -173,7 +173,7 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instacingUiShaders.emplace_back(uiShader);
 
 	//----------------ArrowButton Image-  3'st
-	view_info.textureName = "Resources/Images/Arrow_Button.dds";  
+	view_info.textureName = "Resources/Images/T_ArrowButton.dds";  
 	view_info.meshSize = XMFLOAT2(0.08f, 0.06f);
 	view_info.positions.clear();
 	view_info.f_uvY.clear();

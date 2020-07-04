@@ -39,7 +39,7 @@ void BillBoardShader::Load(CreateManager* pCreateManager, const char* filename)
 	::fclose(pInFile);
 }
 
-void BillBoardShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
+void BillBoardShader::BuildObjects(CreateManager* pCreateManager, float size, const char *pszFileName, const char* filename)
 {
 	if (!pszFileName)
 		return;
@@ -72,4 +72,22 @@ void BillBoardShader::BuildObjects(CreateManager* pCreateManager, const char *ps
 	if (filename)
 		Load(pCreateManager, filename);
 	CreateShaderVariables(pCreateManager);
+
+	UINT ncbElementBytes = ((sizeof(CB_BillBoard) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbStruct = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbStruct->Map(0, NULL, (void **)&billBoardCb);
+	billBoardCb->fSize = size;
+}
+
+void BillBoardShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+{
+	pd3dCommandList->SetGraphicsRootConstantBufferView(11, m_pd3dcbStruct->GetGPUVirtualAddress());
+	CObInstancingShader::Render(pd3dCommandList, pCamera);
+}
+void BillBoardShader::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+{
+	pd3dCommandList->SetGraphicsRootConstantBufferView(11, m_pd3dcbStruct->GetGPUVirtualAddress());
+	CObInstancingShader::ShadowRender(pd3dCommandList, pCamera);
 }

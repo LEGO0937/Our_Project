@@ -1,8 +1,15 @@
 #pragma once
 #include "../Objects/BaseObject.h"
 #include "../Objects/PlayerObject.h"
+#include "../Common/Camera/Camera.h"
 
 class CreateManager;
+
+struct CB_BillBoard
+{
+	float fSize;
+};
+
 
 class CShader
 {
@@ -67,7 +74,11 @@ class CObjectsShader : public CShader
 protected:
 	bool isEnable = true;
 	int drawingCount = 0;         // after culling, instancing number
+	int drawingBillBoardCount = 0;         // after culling, instancing BillBoard's number
+
 	string instancingModelName;   // model's name for instancing
+	
+	ID3D12Resource *m_pd3dcbStruct = NULL;
 public:
 	CObjectsShader();
 	virtual ~CObjectsShader();
@@ -96,6 +107,7 @@ public:
 protected:
 	CGameObject *m_ppObjects = NULL;   //인스턴싱drawing 대상
 	vector<CGameObject*> objectList;   // 인스턴싱될 오브젝트들
+	CGameObject *m_pBillBoardObject = NULL;   //인스턴싱drawing 빌보드 대상
 };
 
 class CObInstancingShader : public CObjectsShader
@@ -111,6 +123,8 @@ public:
 
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
 	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL){}
+	virtual void BuildObjects(CreateManager* pCreateManager, float size, const char *pszFileName, const char* filename = NULL) {}
+
 	virtual void ReleaseObjects();
 	
 	virtual void AnimateObjects(float fTimeElapsed) {}
@@ -120,6 +134,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
+	virtual void BillBoardRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 #ifdef _WITH_BOUND_BOX
 	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 #endif
@@ -127,6 +142,7 @@ public:
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL) {}
 protected:
 	unordered_map<string, CB_OBJECT_INFO*> instancedObjectInfo;
+	unordered_map<string, CB_OBJECT_INFO*> instancedBillBoardObjectInfo;
 };
 
 

@@ -6,10 +6,14 @@ TreeShader::TreeShader()
 }
 TreeShader::~TreeShader()
 {
+
 }
 
 void TreeShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
+	if (m_pd3dcbStruct)
+		billBoardCb->fSize = 50;
+
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, Loadname, "rb");
 	if (!pInFile)

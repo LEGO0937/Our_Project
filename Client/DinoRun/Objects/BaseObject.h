@@ -196,6 +196,9 @@ public:
 	void AddRef();
 	void Release();
 
+	CB_OBJECT_INFO *m_pcbMappedBillBoardObjects = NULL;  //BillBoard Object's instancing buffer
+	ID3D12Resource *m_pd3dcbBillBoardObjects = NULL;
+
 public:
 	CGameObject();
 	CGameObject(int nMaterials);
@@ -294,6 +297,8 @@ public:
 
 	void CreateInstanceBuffer(CreateManager* pCreateManager,
 		UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& uMap);
+	void CreateBillBoardInstanceBuffer(CreateManager* pCreateManager,
+		UINT nInstances);
 	void CreateSkinedInstanceBuffer(CreateManager* pCreateManager,
 		UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& uMap);
 
@@ -318,6 +323,7 @@ public:
 
 	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent = NULL);
 	void UpdateTransform_Instancing(unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer, const int& idx, XMFLOAT4X4 *pxmf4x4Parent);
+	void UpdateTransform_BillBoardInstancing(CB_OBJECT_INFO* buffer, const int& idx, XMFLOAT4X4 *pxmf4x4Parent);
 	void UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer, const int& idx);
 
 	CGameObject *FindFrame(char *pstrFrameName);

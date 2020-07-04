@@ -1,11 +1,15 @@
 #pragma once
 #include "../Shader.h"
+
 class ModelShader : public CObInstancingShader
 {
+protected:
+	CB_BillBoard* billBoardCb;
 public:
 	ModelShader();
 	virtual ~ModelShader();
 
+	virtual void BuildObjects(CreateManager* pCreateManager, float size, const char *pszFileName, const char* filename = NULL);
 	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL);
 	virtual void Update(float fTimeElapsed){}
 	virtual void FixedUpdate(float fTimeElapsed) {}

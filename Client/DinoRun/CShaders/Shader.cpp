@@ -161,7 +161,12 @@ CObjectsShader::CObjectsShader()
 }
 CObjectsShader::~CObjectsShader()
 {
-
+	if (m_pd3dcbStruct)
+	{
+		m_pd3dcbStruct->Unmap(0, NULL);
+		m_pd3dcbStruct->Release();
+		m_pd3dcbStruct = NULL;
+	}
 }
 
 void CObjectsShader::ReleaseObjects()
@@ -178,6 +183,11 @@ void CObjectsShader::ReleaseObjects()
 	{
 		m_ppObjects->Release();
 		m_ppObjects = NULL;
+	}
+	if (m_pBillBoardObject)
+	{
+		m_pBillBoardObject->Release();
+		m_pBillBoardObject = NULL;
 	}
 }
 
@@ -202,6 +212,8 @@ void CObjectsShader::ReleaseUploadBuffers()
 		}
 	}
 	m_ppObjects->ReleaseUploadBuffers();
+	if (m_pBillBoardObject)
+		m_pBillBoardObject->ReleaseUploadBuffers();
 }
 
 void CObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
@@ -229,16 +241,24 @@ CObInstancingShader::~CObInstancingShader()
 void CObInstancingShader::CreateShaderVariables(CreateManager* pCreateManager)
 {
 	m_ppObjects->CreateInstanceBuffer(pCreateManager, objectList.size(), instancedObjectInfo);
+	if (m_pBillBoardObject)
+	{
+		m_pBillBoardObject->CreateBillBoardInstanceBuffer(pCreateManager, objectList.size());
+	}
 }
 void CObInstancingShader::ReleaseShaderVariables()
 {
 	m_ppObjects->ReleaseShaderVariables();
+	if (m_pBillBoardObject)
+		m_pBillBoardObject->ReleaseShaderVariables();
 }
 //인스턴싱 정보(객체의 월드 변환 행렬과 색상)를 정점 버퍼에 복사한다.
 void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 	*pd3dCommandList , CCamera *pCamera)
 {
 	drawingCount = 0;
+	drawingBillBoardCount = 0;
+
 	if (objectList.size())
 	{
 		for (CGameObject* ob : objectList)
@@ -246,8 +266,24 @@ void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 			ob->UpdateTransform(NULL);
 			if (ob->GetEnableState()&& ob->IsVisible_Ins(pCamera))
 			{
-				ob->UpdateTransform_Instancing(instancedObjectInfo, drawingCount, NULL);
-				drawingCount++;
+				if (m_pBillBoardObject)
+				{
+					if (Vector3::Length(ob->GetPosition(), pCamera->GetPosition()) < 100000)
+					{
+						ob->UpdateTransform_Instancing(instancedObjectInfo, drawingCount, NULL);
+						drawingCount++;
+					}
+					else
+					{
+						ob->UpdateTransform_BillBoardInstancing(m_pBillBoardObject->m_pcbMappedBillBoardObjects,drawingBillBoardCount, NULL);
+						drawingBillBoardCount++;
+					}
+				}
+				else
+				{
+					ob->UpdateTransform_Instancing(instancedObjectInfo, drawingCount, NULL);
+					drawingCount++;
+				}
 			}
 		}
 	}
@@ -277,6 +313,23 @@ void CObInstancingShader::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandLis
 		CShader::Render(pd3dCommandList, pCamera);
 		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
 		m_ppObjects->ShadowRender(pd3dCommandList, pCamera, drawingCount);
+		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
+	}
+}
+void CObInstancingShader::BillBoardRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
+	*pCamera)
+{
+	if (!m_pBillBoardObject)
+		return;
+	//UpdateShaderVariables(pd3dCommandList, pCamera);  //그림자 적용시 여기에선 더이상 사용안함
+	if (objectList.size() > 0 && isEnable)
+	{
+		CShader::Render(pd3dCommandList, pCamera);
+		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
+		if (m_pd3dcbStruct)
+			pd3dCommandList->SetGraphicsRootConstantBufferView(11, m_pd3dcbStruct->GetGPUVirtualAddress());
+
+		m_pBillBoardObject->Render(pd3dCommandList, pCamera, drawingBillBoardCount);
 		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
 	}
 }
@@ -312,6 +365,11 @@ void CObInstancingShader::ReleaseObjects()
 	{
 		m_ppObjects->Release();
 		m_ppObjects = NULL;
+	}
+	if (m_pBillBoardObject)
+	{
+		m_pBillBoardObject->Release();
+		m_pBillBoardObject = NULL;
 	}
 }
 
