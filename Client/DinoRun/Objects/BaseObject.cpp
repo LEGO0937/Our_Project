@@ -874,9 +874,9 @@ void CGameObject::LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObje
 			{
 				(UINT)::fread(&pMaterial->m_xmf4AmbientColor, sizeof(float), 3, pInFile);
 				(UINT)::fread(&pMaterial->m_xmf4DiffuseColor, sizeof(float), 3, pInFile);
-				pMaterial->m_xmf4DiffuseColor.z = 0.2f;
+				//pMaterial->m_xmf4DiffuseColor.z = 0.2f;
 				(UINT)::fread(&pMaterial->m_xmf4SpecularColor, sizeof(float), 3, pInFile);
-				pMaterial->m_xmf4SpecularColor.z = 0.1f;
+				//pMaterial->m_xmf4SpecularColor.z = 0.1f;
 				(UINT)::fread(&pMaterial->m_xmf4EmissiveColor, sizeof(float), 3, pInFile);
 			}
 			else if (!strcmp(pstrToken, "<Lambert>:"))

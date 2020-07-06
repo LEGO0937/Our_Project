@@ -119,10 +119,10 @@ public:
 public:
 	CShader							*m_pShader = NULL;
 
-	XMFLOAT4						m_xmf4DiffuseColor = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	XMFLOAT4						m_xmf4EmissiveColor = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	XMFLOAT4						m_xmf4SpecularColor = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	XMFLOAT4						m_xmf4AmbientColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	XMFLOAT4						m_xmf4DiffuseColor = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	XMFLOAT4						m_xmf4EmissiveColor = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	XMFLOAT4						m_xmf4SpecularColor = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+	XMFLOAT4						m_xmf4AmbientColor = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
 
 	float							m_fGlossiness = 0.0f;
 	float							m_fSmoothness = 0.0f;
