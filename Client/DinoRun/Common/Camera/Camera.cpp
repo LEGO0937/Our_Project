@@ -305,7 +305,7 @@ void CFirstPersonCamera::Rotate(float x, float y, float z)
 
 CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 {
-	m_fMass = 1.0f;
+	m_fMass = 1.0f; //이전은 1이었음
 
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)
@@ -328,6 +328,11 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	if (m_pPlayer)
 	{
 		XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
+
+		XMFLOAT3 xmf3Right1 = m_pPlayer->GetRightVector();
+		XMFLOAT3 xmf3Up1 = m_pPlayer->GetUpVector();
+		XMFLOAT3 xmf3Look1 = m_pPlayer->GetLookVector();
+
 		XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
 		XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
@@ -354,12 +359,116 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		//	}
 		//}
 		//--------------------------------
+		
 		{
 			//k = 0.04  ,  c = 0.2
-			//f= - cv +k*x
-			//c^2 = 4mk
+			//f= - cv -k*x   -cv -kx아닌가?..
+			//c^2 = 4mk  이전  c=1.5   k = -30
 			//x,y,z에 대한 변위 각자 따로 구할 것.
+			
+			//작업구간 현재 구현중
+			//xmf3Position-> 새로운 카메라 위치
+			
+			XMFLOAT4X4 viewM = Matrix4x4::LookAtLH(xmf3Position, m_pPlayer->GetPosition(), xmf3Up1);
+			
+			xmf3Right = XMFLOAT3(viewM._11, viewM._21, viewM._31);
+			xmf3Look = XMFLOAT3(viewM._13, viewM._23, viewM._33);
+			xmf3Up = XMFLOAT3(viewM._12, viewM._22, viewM._32);
+
+			xmf3Look = Vector3::Normalize(xmf3Look);
+
+			xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
+			//카메라의 z-축과 x-축에 수직인 벡터를 y-축으로 설정한다.
+			xmf3Up = Vector3::CrossProduct(xmf3Look, xmf3Right, true);
+			viewM._11 = xmf3Right.x; viewM._12 = xmf3Up.x; viewM._13 =
+				xmf3Look.x;
+			viewM._21 = xmf3Right.y; viewM._22 = xmf3Up.y; viewM._23 =
+				xmf3Look.y;
+			viewM._31 = xmf3Right.z; viewM._32 = xmf3Up.z; viewM._33 =
+				xmf3Look.z;
+			viewM._41 = -Vector3::DotProduct(xmf3Position, xmf3Right);
+			viewM._42 = -Vector3::DotProduct(xmf3Position, xmf3Up);
+			viewM._43 = -Vector3::DotProduct(xmf3Position, xmf3Look);
+
+
+			XMFLOAT4X4 inverseViewM;
+			inverseViewM._11 = xmf3Right.x; inverseViewM._12 = xmf3Right.y; inverseViewM._13 =
+				xmf3Right.z; inverseViewM._14 = 0;
+			inverseViewM._21 = xmf3Up.x; inverseViewM._22 = xmf3Up.y; inverseViewM._23 =
+				xmf3Up.z; inverseViewM._24 = 0;
+			inverseViewM._31 = xmf3Look.x; inverseViewM._32 = xmf3Look.y; inverseViewM._33 =
+				xmf3Look.z; inverseViewM._34 = 0;
+			inverseViewM._41 = xmf3Position.x;
+			inverseViewM._42 = xmf3Position.y;
+			inverseViewM._43 = xmf3Position.z;
+			inverseViewM._44 = 1;
+			XMFLOAT3 xmf3ResultVec;
+			XMFLOAT3 xmf3ResultVel;
+
+			XMFLOAT4 xmf4Position(m_xmf3Position.x, m_xmf3Position.y, m_xmf3Position.z, 1);
+			XMFLOAT4 xmf4Velocity(m_xmf3Velocity.x, m_xmf3Velocity.y, m_xmf3Velocity.z, 0);
+			XMVECTOR xmvResultVec = XMVector3TransformCoord(XMLoadFloat4(&xmf4Position), XMLoadFloat4x4(&viewM));
+
+			XMVECTOR xmVResultVel = XMVector4Transform(XMLoadFloat4(&xmf4Velocity), XMLoadFloat4x4(&viewM));
+			
+			XMStoreFloat3(&xmf3ResultVec, xmvResultVec);
+			XMStoreFloat3(&xmf3ResultVel, xmVResultVel);
+
+			//XMVECTOR det2 = XMMatrixDeterminant(XMLoadFloat4x4(&viewM));
+			//XMMATRIX xmvViewInverse = XMMatrixInverse(&det2, XMLoadFloat4x4(&viewM));  //view의 역행렬
+
+
+			float forceX = (-2 * xmf3ResultVel.x) + (-30 * xmf3ResultVec.x);
+			float forceY = (-2 * xmf3ResultVel.y) + (-30 * xmf3ResultVec.y);
+			float forceZ = (-2 * xmf3ResultVel.z) + (-30 * xmf3ResultVec.z);
+
+			XMFLOAT4 xmf4Force = XMFLOAT4(forceX, forceY, forceZ,0);
+			XMFLOAT3 accelerationForce;
+
+			XMStoreFloat3(&accelerationForce,XMVector4Transform(XMLoadFloat4(&xmf4Force), XMLoadFloat4x4(&inverseViewM)));
+			//if (xmf3ResultVec.x > 3.01)
+			//	xmf3ResultVec.x = 3.01;
+			//else if (xmf3ResultVec.x < -3.01)
+			//	xmf3ResultVec.x = -3.01;
+			//
+			//if (xmf3ResultVec.y > 3.01)
+			//	xmf3ResultVec.y = 3.01;
+			//else if (xmf3ResultVec.y < -3.01)
+			//	xmf3ResultVec.y = -3.01;
+			//
+			//if (xmf3ResultVec.z > 5.01)
+			//	xmf3ResultVec.z = 5.01;
+			//else if (xmf3ResultVec.z < -5.01)
+			//	xmf3ResultVec.z = -5.01;
+			
+			
+			//float forceX = (-1 * m_xmf3Velocity.x) + (-4 * xmf3ResultVec.x);
+			//float forceY = (-1 * m_xmf3Velocity.y) + (-4 * xmf3ResultVec.y);
+			//float forceZ = (-1 * m_xmf3Velocity.z) + (-4 * xmf3ResultVec.z);
+			//forceX *= 0.5;
+			//forceY *= 0.5;
+			//forceZ *= 0.5;
+
+			//m_xmf3Look = Vector3::Normalize(xmf3Look);
+			//m_xmf3Up = Vector3::Normalize(xmf3Up);
+			//m_xmf3Right = Vector3::Normalize(xmf3Right);
+			//
+			//m_xmf3Look = Vector3::ScalarProduct(m_xmf3Look, forceZ, false);
+			//m_xmf3Up = Vector3::ScalarProduct(m_xmf3Up, forceY, false);
+			//m_xmf3Right = Vector3::ScalarProduct(m_xmf3Right, forceX, false);
+			//
+			//xmf3ResultVec = Vector3::Add(m_xmf3Look, m_xmf3Up);
+			//xmf3ResultVec = Vector3::Add(xmf3ResultVec, m_xmf3Right);
 		
+
+
+			m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, accelerationForce, fTimeElapsed);
+
+			m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity, fTimeElapsed);
+			
+			//--- 
+			//이전 카메라 알고리즘
+			/*
 			XMFLOAT3 xmf3Distance = Vector3::Subtract(m_xmf3Position, xmf3Position);
 			
 			float forceX = (-1.5*m_xmf3Velocity.x) + (-30 * xmf3Distance.x);
@@ -371,7 +480,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, accelerationForce, fTimeElapsed);
 
 			m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity, fTimeElapsed * UNIT_PER_METER);
-
+			*/
 		}
 		//---------------------------------
 		/*

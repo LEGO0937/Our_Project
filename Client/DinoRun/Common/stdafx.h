@@ -368,7 +368,7 @@ namespace Matrix4x4
 		return(xmmtx4x4Result);
 	}
 
-	inline XMFLOAT4X4 LookAtLH(XMFLOAT3& xmf3EyePosition, const XMFLOAT3& xmf3LookAtPosition,
+	inline XMFLOAT4X4 LookAtLH(const XMFLOAT3& xmf3EyePosition, const XMFLOAT3& xmf3LookAtPosition,
 		const XMFLOAT3& xmf3UpDirection)
 	{
 		XMFLOAT4X4 xmmtx4x4Result;
