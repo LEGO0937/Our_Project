@@ -368,16 +368,12 @@ void Network::SendPlayerCollision(unsigned char playerID)
 	SendPacket();
 }
 
-//void Network::SendBomberTouch(char targetID)
-//{
-//	pTouch = reinterpret_cast<CS_PACKET_BOMBER_TOUCH*>(send_buffer);
-//	pTouch->size = sizeof(pTouch);
-//	pTouch->type = CS_BOMBER_TOUCH;
-//	pTouch->touchId = targetID;
-//	send_wsabuf.len = sizeof(pTouch);
-//
-//	SendPacket();
-//}
+// 아이템 -> 고기, 바위, 바나나, 진흙
+// ItemColllision <- 아이템과 플레이어간의 충돌
+// 리스트에 넣어났는디... 특정 아이템들 분류 시켰다라... 
+// 아이템 저희 지금 클라에서 다루는게 플레이어 자신에 대해서만 처리하는 것인디 타 플레이어의 업뎃 같은거는 신경안쓰고 있는거
+// 그르치?! 충돌때는 플레이어 자신의 처리만
+// 아이템 같은 경우에는 충돌을 했잖아 아이템충돌
 
 void Network::SendGetItem(const string& itemIndex)
 {
@@ -405,36 +401,10 @@ void Network::SendUseItem(int useItem, int targetID)
 
 	SendPacket();
 }
+// Use아이템으로 사용했다는 신호와 동시에 사라지게 하는거야
+// 
 
-//void Network::SendBombExplosion()
-//{
-//	pBomb = reinterpret_cast<CS_PACKET_BOMB_EXPLOSION*>(send_buffer);
-//	pBomb->type = CS_BOMB_EXPLOSION;
-//	pBomb->size = sizeof(pBomb);
-//	send_wsabuf.len = sizeof(pBomb);
-//
-//	SendPacket();
-//
-//}
-//void Network::SendFreezeState()
-//{
-//	pFreeze = reinterpret_cast<CS_PACKET_FREEZE*>(send_buffer);
-//	pFreeze->type = CS_FREEZE;
-//	pFreeze->size = sizeof(pFreeze);
-//	send_wsabuf.len = sizeof(pFreeze);
-//
-//	SendPacket();
-//}
-//
-//void Network::SendReleaseFreezeState()
-//{
-//	pReleaseFreeze = reinterpret_cast<CS_PACKET_RELEASE_FREEZE*>(send_buffer);
-//	pReleaseFreeze->type = CS_RELEASE_FREEZE;
-//	pReleaseFreeze->size = sizeof(pReleaseFreeze);
-//	send_wsabuf.len = sizeof(pReleaseFreeze);
-//
-//	SendPacket();
-//}
+
 // 소켓 함수 오류 출력 후 종료
 void Network::err_quit(const char* msg)
 {

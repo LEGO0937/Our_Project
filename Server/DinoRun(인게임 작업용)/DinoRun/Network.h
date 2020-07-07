@@ -45,11 +45,9 @@ private:
 	CS_PACKET_NOT_COLLISION* pNotCollide = NULL;
 	CS_PACKET_PLAYER_COLLISION* pPlayerCollision = NULL;
 	CS_PACKET_USE_ITEM* pItem = NULL;
-	CS_PACKET_FREEZE* pFreeze = NULL;
-	CS_PACKET_RELEASE_FREEZE* pReleaseFreeze = NULL;
-	CS_PACKET_BOMB_EXPLOSION* pBomb = NULL;
-	CS_PACKET_BOMBER_TOUCH* pTouch = NULL;
 	CS_PACKET_GET_ITEM* pGetItem = NULL;
+
+	
 
 private:
 	//ReadPacket에서 받은 패킷들을 CGameFramework에 전달하기 위한 포인터
@@ -110,10 +108,7 @@ public:
 	void SendPlayerCollision(unsigned char playerID);
 	void SendGetItem(const string& itemIndex);
 	void SendUseItem(int useItem, int targetID);
-	/*void SendFreezeState();
-	void SendReleaseFreezeState();
-	void SendBombExplosion();
-	void SendBomberTouch(char targetID);*/
+	
 
 public:
 	CS_PACKET_REQUEST_START* GetRS() { return pRequestStart; }
