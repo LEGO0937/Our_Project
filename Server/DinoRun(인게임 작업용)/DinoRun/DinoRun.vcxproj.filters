@@ -238,7 +238,7 @@
     <Filter Include="Common\RigidBody">
       <UniqueIdentifier>{8696683e-7500-4000-80db-c8c474215de6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Server">
+    <Filter Include="Network">
       <UniqueIdentifier>{01235604-896f-4eb9-933c-0c6ac9e6d8d1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -394,7 +394,10 @@
       <Filter>Common\RigidBody</Filter>
     </ClInclude>
     <ClInclude Include="protocol.h">
-      <Filter>Server</Filter>
+      <Filter>Network</Filter>
+    </ClInclude>
+    <ClInclude Include="Network.h">
+      <Filter>Network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -595,6 +598,9 @@
     </ClCompile>
     <ClCompile Include="Common\RigidBody\RigidBody.cpp">
       <Filter>Common\RigidBody</Filter>
+    </ClCompile>
+    <ClCompile Include="Network.cpp">
+      <Filter>Network</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

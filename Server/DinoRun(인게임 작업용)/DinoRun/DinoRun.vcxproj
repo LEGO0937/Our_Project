@@ -202,6 +202,7 @@
     <ClInclude Include="Meshes\PlaneMesh.h" />
     <ClInclude Include="Meshes\SkyBoxMesh.h" />
     <ClInclude Include="Meshes\TerrainMesh.h" />
+    <ClInclude Include="Network.h" />
     <ClInclude Include="Objects\BaseObject.h" />
     <ClInclude Include="Objects\BillBoardObject.h" />
     <ClInclude Include="Objects\CheckPointObject.h" />
@@ -267,6 +268,7 @@
     <ClCompile Include="Meshes\PlaneMesh.cpp" />
     <ClCompile Include="Meshes\SkyBoxMesh.cpp" />
     <ClCompile Include="Meshes\TerrainMesh.cpp" />
+    <ClCompile Include="Network.cpp" />
     <ClCompile Include="Objects\BaseObject.cpp" />
     <ClCompile Include="Objects\BillBoardObject.cpp" />
     <ClCompile Include="Objects\CheckPointObject.cpp" />
