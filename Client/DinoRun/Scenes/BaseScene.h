@@ -82,6 +82,7 @@ public:
 
 	virtual void Render(float fTimeElapsed);
 	virtual void RenderShadow();
+	virtual void RenderVelocity() {}
 	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer) {};
 
 	void SetGraphicsRootSignature(ID3D12RootSignature *pd3dRootSignature);

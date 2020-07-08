@@ -525,6 +525,11 @@ void ItemGameScene::RenderShadow()
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
 }
+void ItemGameScene::RenderVelocity()
+{
+	BaseScene::RenderShadow();
+}
+
 void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 {
 	static float deltaUvX = 0.0f;

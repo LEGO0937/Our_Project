@@ -76,8 +76,7 @@ CHeightMapTerrain::CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFil
 
 		}
 	}
-
-
+	CreateBuffer(pCreateManager);
 }
 CHeightMapTerrain::~CHeightMapTerrain(void)
 {

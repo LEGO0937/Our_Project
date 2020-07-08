@@ -15,6 +15,7 @@ struct VS_CB_CAMERA_INFO
 {
 	XMFLOAT4X4 m_xmf4x4View;
 	XMFLOAT4X4 m_xmf4x4Projection;
+	XMFLOAT4X4 m_xmf4x4PrevView;
 	XMFLOAT3 m_cameraPosition;
 };
 
@@ -48,6 +49,7 @@ protected:
 	float m_fTimeLag;
 	
 	XMFLOAT4X4 m_xmf4x4View;
+	XMFLOAT4X4 m_xmf4x4PrevView;
 	XMFLOAT4X4 m_xmf4x4Projection;
 	
 	D3D12_VIEWPORT m_d3dViewport;

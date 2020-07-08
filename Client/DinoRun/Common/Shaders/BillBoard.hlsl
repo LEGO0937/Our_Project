@@ -1,10 +1,6 @@
 #include "Shaders.hlsl"
 
 
-cbuffer cbParticleVS : register(b6)
-{
-	float fSize;
-};
 
 VS_TEXTED_INSTANCING_OUTPUT VSTextedInstancing(VS_TEXTED_INSTANCING_INPUT input, uint nInstanceID : SV_InstanceID)
 {
@@ -13,7 +9,7 @@ VS_TEXTED_INSTANCING_OUTPUT VSTextedInstancing(VS_TEXTED_INSTANCING_INPUT input,
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.normalW = mul(input.normal, (float3x3)gGameObjectInfos[nInstanceID].gmtxGameObject);
 	output.TexC = input.TexC;
-	output.n = fSize;
+	output.n = fBillBoardSize;
 
 	return(output);
 }

@@ -27,6 +27,7 @@ SkyBoxObject::SkyBoxObject(CreateManager* pCreateManager) : CGameObject(1)
 	pSkyBoxMaterial->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 	SetMaterial(0, pSkyBoxMaterial);
 
+	CreateBuffer(pCreateManager);
 }
 
 SkyBoxObject::~SkyBoxObject()

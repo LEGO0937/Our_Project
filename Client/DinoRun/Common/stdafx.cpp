@@ -519,7 +519,7 @@ void CreatePsoShadowBillBoardInstancing(ID3D12Device *pd3dDevice, ID3D12RootSign
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
-	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "VSShadowTextedInstancing", "vs_5_1",
+	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "VSShadowBillBoardInstancing", "vs_5_1",
 		&pd3dVertexShaderBlob);
 	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "PSShadowBillBoardInstancing", "ps_5_1",
 		&pd3dPixelShaderBlob);
@@ -1184,6 +1184,169 @@ void CreatePsoMinimap(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraph
 	if (pd3dPixelShaderBlob)
 		pd3dPixelShaderBlob->Release();
 
+	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
+		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+
+
+void CreatePsoVelocitySkinMesh(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx)
+{
+	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
+	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap.hlsl", "VSShadowSkinnedAnimation", "vs_5_1", &pd3dVertexShaderBlob);
+	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap.hlsl", "PSShadowSkinnedAnimation", "ps_5_1", &pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	d3dPipelineStateDesc.DepthStencilState = CreateShadowDepthStencilState();
+	d3dPipelineStateDesc.InputLayout = CreateSkinMeshLayout();
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	d3dPipelineStateDesc.NumRenderTargets = 0;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT T = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[idx]);
+	if (pd3dVertexShaderBlob)
+		pd3dVertexShaderBlob->Release();
+	if (pd3dPixelShaderBlob)
+		pd3dPixelShaderBlob->Release();
+	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
+		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CreatePsoVelocitySkinedInstancing(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx)
+{
+	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
+	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "VSShadowSkinnedInstancingAnimation", "vs_5_1", &pd3dVertexShaderBlob);
+	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "PSShadowSkinnedAnimation", "ps_5_1", &pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	d3dPipelineStateDesc.DepthStencilState = CreateShadowDepthStencilState();
+	d3dPipelineStateDesc.InputLayout = CreateSkinMeshLayout();
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	d3dPipelineStateDesc.NumRenderTargets = 0;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT T = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[idx]);
+	if (pd3dVertexShaderBlob)
+		pd3dVertexShaderBlob->Release();
+	if (pd3dPixelShaderBlob)
+		pd3dPixelShaderBlob->Release();
+	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
+		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CreatePsoVelocityTextedInstancing(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx)
+{
+	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
+	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "VSShadowTextedInstancing", "vs_5_1",
+		&pd3dVertexShaderBlob);
+	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "PSShadowTextedInstancing", "ps_5_1",
+		&pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_BACK;
+	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	d3dPipelineStateDesc.DepthStencilState = CreateShadowDepthStencilState();
+	d3dPipelineStateDesc.InputLayout = CreateInstancingTextureInputLayout();
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	d3dPipelineStateDesc.NumRenderTargets = 0;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT T = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[idx]);
+	if (pd3dVertexShaderBlob)
+		pd3dVertexShaderBlob->Release();
+	if (pd3dPixelShaderBlob)
+		pd3dPixelShaderBlob->Release();
+	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
+		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+void CreatePsoVelocityBillBoardInstancing(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx)
+{
+	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL, *pd3dGeoShaderBlob = NULL;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
+	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "VSShadowBillBoardInstancing", "vs_5_1",
+		&pd3dVertexShaderBlob);
+	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "PSShadowBillBoardInstancing", "ps_5_1",
+		&pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.GS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "ShadowGS", "gs_5_1",
+		&pd3dGeoShaderBlob);
+	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	d3dPipelineStateDesc.DepthStencilState = CreateShadowDepthStencilState();
+	d3dPipelineStateDesc.InputLayout = CreateInstancingTextureInputLayout();
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	d3dPipelineStateDesc.NumRenderTargets = 0;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT T = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[idx]);
+	if (pd3dVertexShaderBlob)
+		pd3dVertexShaderBlob->Release();
+	if (pd3dPixelShaderBlob)
+		pd3dPixelShaderBlob->Release();
+	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
+		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
+
+
+void CreatePsoVelocityTerrain(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx)
+{
+	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL, *pd3dDomainShaderBlob = NULL, *pd3dHullShaderBlob = NULL;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
+	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "VSShadowTer", "vs_5_1",
+		&pd3dVertexShaderBlob);
+	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "PSShadowTer", "ps_5_1",
+		&pd3dPixelShaderBlob);
+	//d3dPipelineStateDesc.HS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "HS", "hs_5_1",
+	//	&pd3dHullShaderBlob);
+	//d3dPipelineStateDesc.DS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "DSShadow", "ds_5_1",
+	//	&pd3dDomainShaderBlob);
+	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	d3dPipelineStateDesc.DepthStencilState = CreateShadowDepthStencilState();
+	d3dPipelineStateDesc.InputLayout = CreateTextureInputLayout();
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+
+	d3dPipelineStateDesc.NumRenderTargets = 0;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_UNKNOWN;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT T = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[idx]);
+	if (pd3dVertexShaderBlob)
+		pd3dVertexShaderBlob->Release();
+	if (pd3dPixelShaderBlob)
+		pd3dPixelShaderBlob->Release();
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
 		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }

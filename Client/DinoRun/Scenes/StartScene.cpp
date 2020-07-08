@@ -159,7 +159,7 @@ void StartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		switch (wParam)
 		{
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+			sceneType = SceneType::Default_Scene;			
 			break;
 		default:
 			break;

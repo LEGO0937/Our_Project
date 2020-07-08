@@ -50,6 +50,7 @@ public:
 
 	void Render(float fTimeElapsed);
 	void RenderShadow();
+	void RenderVelocity();
 	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer);
 
 	virtual void ResetShadowBuffer(CreateManager* pCreateManager);

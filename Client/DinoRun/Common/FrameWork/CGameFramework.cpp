@@ -60,19 +60,23 @@ void CGameFramework::FrameAdvance()
 {
 	m_GameTimer.Tick();
 	float fTimeElapsed = m_GameTimer.DeltaTime();
+
 	m_pScene->ProcessInput(m_hWnd, fTimeElapsed);
 	// processinput과 플레이어 animate의 순서를 뒤바꾸면 플레이어가 움직일 시 흔들림 발생 왜?
 	m_pScene->FixedUpdate(m_pCreateManager.get(), fTimeElapsed);
 	m_pScene->AnimateObjects(fTimeElapsed); //바뀐 행렬값으로 애니메이션 수행
+	
 	m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();
 	m_pCreateManager->GetDrawMgr()->ResetCommandAllocator();
 	m_pCreateManager->ResetCommandList();
 	m_pCreateManager->SetComputeRootSignature();
+	
 	m_CurState = m_pScene->Update(m_pCreateManager.get(),fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
 	m_pCreateManager->ExecuteCommandList();
 	//m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();
 	//fixed에서 충돌처리도 하게하여 오브젝트도 생성하게 하고 update에서 releaseUploadBuffer하는건 어떨까
-	m_pDrawManager->Render(m_pScene, fTimeElapsed);
+	if(m_pScene)
+		m_pDrawManager->Render(m_pScene, fTimeElapsed);
 
 	if (m_CurState != m_PrevState)
 	{
@@ -231,6 +235,8 @@ void CGameFramework::ReleaseObjects()
 	{
 		m_pScene->ReleaseObjects();
 		m_pScene->ReleaseShaderVariables();
+		m_pScene.reset();
+		m_pScene = NULL;
 	}
 	if (m_pPlayer)
 	{
@@ -257,6 +263,8 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	switch (type)
 	{
 	case Default_Scene:
+		::PostQuitMessage(0);
+		return;
 		break;
 	case Start_Scene:
 		if (m_PrevState == SceneType::Lobby_Scene)

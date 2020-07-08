@@ -238,6 +238,9 @@
     <Filter Include="Common\RigidBody">
       <UniqueIdentifier>{8696683e-7500-4000-80db-c8c474215de6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CShaders\MotionBlurShader">
+      <UniqueIdentifier>{b2719671-4b0e-448b-9c48-0f0e4b2ced61}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -389,6 +392,9 @@
     </ClInclude>
     <ClInclude Include="Common\RigidBody\RigidBody.h">
       <Filter>Common\RigidBody</Filter>
+    </ClInclude>
+    <ClInclude Include="CShaders\MotionBlurShader\MotionBlurShader.h">
+      <Filter>CShaders\MotionBlurShader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -590,6 +596,9 @@
     <ClCompile Include="Common\RigidBody\RigidBody.cpp">
       <Filter>Common\RigidBody</Filter>
     </ClCompile>
+    <ClCompile Include="CShaders\MotionBlurShader\MotionBlurShader.cpp">
+      <Filter>CShaders\MotionBlurShader</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DinoRun.rc">
@@ -643,6 +652,12 @@
     </FxCompile>
     <FxCompile Include="Common\Shaders\Particle.hlsl">
       <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Common\Shaders\MotionBlur.hlsl">
+      <Filter>Shaders\not complete</Filter>
+    </FxCompile>
+    <FxCompile Include="Common\Shaders\DrawVelocityMap.hlsl">
+      <Filter>Shaders\not complete</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

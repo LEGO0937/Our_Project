@@ -48,7 +48,8 @@ public:
 	UINT GetCbvSrvDescriptorIncrementSize() { return m_cbvSrvDescriptorIncrementSize; }
 
 	ComPtr<ID3D12Resource> GetShadowBuffer() { return m_pd3dShadowDepthBuffer; }
-	
+	ComPtr<ID3D12Resource> GetVelocityBuffer() { return m_pd3dVelocityBuffer; }
+
 	void SetComputeRootSignature() {
 		m_pDrawManager->SetComputeRootSignature();
 	}
@@ -92,6 +93,9 @@ private:
 	UINT m_nRtvDescriptorIncrementSize;
 	//렌더 타겟 버퍼, 서술자 힙 인터페이스 포인터, 렌더 타겟 서술자 원소의 크기.
 
+	ComPtr<ID3D12Resource> m_pd3dVelocityBuffer;
+	//속도 버퍼
+
 	ComPtr<ID3D12Resource> m_pd3dDepthStencilBuffer;
 	ComPtr<ID3D12DescriptorHeap> m_pd3dDsvDescriptorHeap;
 	UINT m_nDsvDescriptorIncrementSize;
@@ -99,7 +103,6 @@ private:
 
 	ComPtr<ID3D12Resource> m_pd3dShadowDepthBuffer;
 	//그림자 깊이 버퍼
-
 	// RTV / DSV 버퍼 생성용
 	D3D12_CPU_DESCRIPTOR_HANDLE m_pRtvRenderTargetBufferCPUHandles[N_RENDERTARGETBUFFERS];
 	D3D12_CPU_DESCRIPTOR_HANDLE	m_pRtvSwapChainBackBufferCPUHandles[N_SWAPCHAINBUFFERS];

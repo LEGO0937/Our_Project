@@ -255,6 +255,13 @@ CGameObject::~CGameObject()
 		m_ppMaterials = NULL;
 	}
 
+	if (m_pd3dcbGameObject)
+	{
+		m_pd3dcbGameObject->Unmap(0, NULL);
+		m_pd3dcbGameObject->Release();
+		m_pd3dcbGameObject = NULL;
+	}
+
 	if (m_pd3dcbGameObjects)
 	{
 		m_pd3dcbGameObjects->Unmap(0, NULL);
@@ -395,6 +402,8 @@ void CGameObject::UpdateTransform_Instancing(unordered_map<string, CB_OBJECT_INF
 
 	XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4World),
 		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4PrevWorld),
+		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevWorld)));
 
 	if (m_pSibling) m_pSibling->UpdateTransform_Instancing(instancedTransformBuffer, idx, pxmf4x4Parent);
 	if (m_pChild) m_pChild->UpdateTransform_Instancing(instancedTransformBuffer, idx, pxmf4x4Parent);
@@ -403,6 +412,8 @@ void CGameObject::UpdateTransform_BillBoardInstancing(CB_OBJECT_INFO* buffer,con
 {
 	XMStoreFloat4x4(&(buffer[idx].m_xmf4x4World),
 		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
+	XMStoreFloat4x4(&(buffer[idx].m_xmf4x4PrevWorld),
+		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevWorld)));
 }
 void CGameObject::UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer, const int& idx)
 {
@@ -413,6 +424,9 @@ void CGameObject::UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKIN
 		{
 			XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4Worlds[j]),
 				XMMatrixTranspose(XMLoadFloat4x4(&mesh->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
+
+			XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4PrevWorlds[j]),
+				XMMatrixTranspose(XMLoadFloat4x4(&mesh->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4PrevWorld)));
 		}
 	}
 	if (m_pSibling) m_pSibling->UpdateTransform_SkinedInstancing(instancedTransformBuffer, idx);
@@ -675,8 +689,11 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCame
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World)
 {
 	XMFLOAT4X4 xmf4x4World;
-	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
-	pd3dCommandList->SetGraphicsRoot32BitConstants(2, 16, &xmf4x4World, 0);
+	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
+	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4PrevWorld, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevWorld)));
+	//m_pd3dcbGameObject
+	pd3dCommandList->SetGraphicsRootConstantBufferView(2, m_pd3dcbGameObject->GetGPUVirtualAddress());
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(2, 16, &xmf4x4World, 0);
 }
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList)
 {
@@ -1137,6 +1154,17 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(CreateManager* p
 	return(pLoadedModel);
 }
 
+void CGameObject::CreateBuffer(CreateManager* pCreateManager)
+{
+	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbGameObject = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbGameObject->Map(0, NULL, (void **)&m_pcbMappedGameObject);
+
+	if (m_pSibling) m_pSibling->CreateBuffer(pCreateManager);
+	if (m_pChild) m_pChild->CreateBuffer(pCreateManager);
+}
 
 void CGameObject::CreateInstanceBuffer(CreateManager* pCreateManager,
 	UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer)

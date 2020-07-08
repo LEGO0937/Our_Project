@@ -189,6 +189,7 @@
     <ClInclude Include="CShaders\FontShader\FontShader.h" />
     <ClInclude Include="CShaders\MinimapShader\MinimapShader.h" />
     <ClInclude Include="CShaders\ModelShader\ModelShader.h" />
+    <ClInclude Include="CShaders\MotionBlurShader\MotionBlurShader.h" />
     <ClInclude Include="CShaders\Shader.h" />
     <ClInclude Include="CShaders\SkinedShader\SkinedShader.h" />
     <ClInclude Include="CShaders\SkyBoxShader\SkyBoxShader.h" />
@@ -246,6 +247,7 @@
     <ClCompile Include="CShaders\ModelShader\MudShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\StoneShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\TreeShader.cpp" />
+    <ClCompile Include="CShaders\MotionBlurShader\MotionBlurShader.cpp" />
     <ClCompile Include="CShaders\Shader.cpp" />
     <ClCompile Include="CShaders\SkinedShader\PlayerShader.cpp" />
     <ClCompile Include="CShaders\SkinedShader\SkinedShader.cpp" />
@@ -308,6 +310,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="Common\Shaders\DrawVelocityMap.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Common\Shaders\Font.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -317,6 +323,10 @@
     <FxCompile Include="Common\Shaders\Light.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Common\Shaders\MotionBlur.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Common\Shaders\Particle.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>

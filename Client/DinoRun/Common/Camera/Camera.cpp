@@ -111,6 +111,7 @@ void CCamera::RegenerateViewMatrix()
 {
 	//카메라의 z-축을 기준으로 카메라의 좌표축들이 직교하도록 카메라 변환 행렬을 갱신한다. 
 	//카메라의 z-축 벡터를 정규화한다. 
+	m_xmf4x4PrevView = m_xmf4x4View;
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	//카메라의 z-축과 y-축에 수직인 벡터를 x-축으로 설정한다.
 	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
@@ -153,6 +154,7 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4View, &xmf4x4View, sizeof(XMFLOAT4X4));
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
+	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4PrevView, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevView)));
 	m_pcbMappedCamera->m_cameraPosition = GetPosition();
 
 

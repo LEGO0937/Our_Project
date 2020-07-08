@@ -125,7 +125,7 @@ void CreateManager::OnResizeBackBuffers()
 	CreateSwapChainRenderTargetViews();
 	CreateRenderTargetViews();
 	CreateDepthStencilView();
-	//CreatePostprocessShader();
+	
 
 	ExecuteCommandList();
 }
@@ -382,6 +382,7 @@ void CreateManager::CreateSwapChainRenderTargetViews()
 		rtvCPUDescriptorHandle.ptr += m_nRtvDescriptorIncrementSize;
 		hResult = m_ppd3dSwapChainBackBuffers[i]->SetName(L"m_ppSwapChainBackBuffers");
 	}
+
 	m_pDrawManager->SetSwapChainBackBuffers(m_ppd3dSwapChainBackBuffers);
 	m_pDrawManager->SetRtvSwapChainBackBufferCPUHandles(m_pRtvSwapChainBackBufferCPUHandles);
 }
@@ -451,20 +452,36 @@ void CreateManager::CreateDepthStencilView()
 
 void CreateManager::CreateRenderTargetViews()
 {
+	//속도맵을 위한 리소스 생성
+	HRESULT hResult;
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	rtvCPUDescriptorHandle.ptr += (N_SWAPCHAINBUFFERS * m_nRtvDescriptorIncrementSize);  //이미 스왑체인 버퍼를 생성했다는 전제하에 실행
+
+	D3D12_RENDER_TARGET_VIEW_DESC renderTargetViewDesc;
+	renderTargetViewDesc.Format = m_dxgiRenderBufferFormat;
+	renderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+	renderTargetViewDesc.Texture2D.MipSlice = 0;
+	renderTargetViewDesc.Texture2D.PlaneSlice = 0;
+
+	D3D12_CLEAR_VALUE clearValue = { m_dxgiRenderBufferFormat,{ 0.0f, 0.0f, 0.0f, 1.0f } };
+
+	for (UINT i = 0; i < N_RENDERTARGETBUFFERS; ++i)
+	{
+		m_ppd3dRenderTargetBuffers[i] = CreateTexture2DResource(m_pd3dDevice.Get(), m_nWndClientWidth, m_nWndClientHeight, m_dxgiRenderBufferFormat, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_GENERIC_READ, &clearValue);
+		hResult = m_ppd3dRenderTargetBuffers[i]->SetName(L"m_ppRenderTargetBuffers");
+
+		m_pRtvRenderTargetBufferCPUHandles[i] = rtvCPUDescriptorHandle;
+
+		m_pd3dDevice->CreateRenderTargetView(m_ppd3dRenderTargetBuffers[i].Get(), &renderTargetViewDesc, m_pRtvRenderTargetBufferCPUHandles[i]);
+		rtvCPUDescriptorHandle.ptr += m_nRtvDescriptorIncrementSize;
+	}
+
+	m_pDrawManager->SetRenderTargetBuffers(m_ppd3dRenderTargetBuffers);
+	m_pDrawManager->SetRtvRenderTargetBufferCPUHandles(m_pRtvRenderTargetBufferCPUHandles);
 	
 }
 
-/*
-void CreateManager::CreatePostprocessShader()
-{
-	m_pTextureToFullScreenShader = shared_ptr<CTextureToFullScreenShader>(new CTextureToFullScreenShader(shared_from_this()));
-	m_pTextureToFullScreenShader->CreateGraphicsRootSignature(shared_from_this());
-	m_pTextureToFullScreenShader->CreateShader(shared_from_this(), m_pTextureToFullScreenShader->GetGraphicsRootSignature());
-	m_pTextureToFullScreenShader->BuildObjects(shared_from_this(), m_pTexture);
-	
-	m_pRenderMgr->SetTextureToFullScreenShader(m_pTextureToFullScreenShader);
-}
-*/
 void CreateManager::CreateGraphicsRootSignature()
 {
 	D3D12_DESCRIPTOR_RANGE texTable;
@@ -479,23 +496,23 @@ void CreateManager::CreateGraphicsRootSignature()
 
 	pd3dDescriptorRanges[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[0].NumDescriptors = 1;
-	pd3dDescriptorRanges[0].BaseShaderRegister = 1; //Diffuse
+	pd3dDescriptorRanges[0].BaseShaderRegister = 2; //Diffuse
 	pd3dDescriptorRanges[0].RegisterSpace = 0;
 	pd3dDescriptorRanges[0].OffsetInDescriptorsFromTableStart = 0;
 
 	pd3dDescriptorRanges[1].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[1].NumDescriptors = 1;
-	pd3dDescriptorRanges[1].BaseShaderRegister = 2; //Detail
+	pd3dDescriptorRanges[1].BaseShaderRegister = 3; //Detail
 	pd3dDescriptorRanges[1].RegisterSpace = 0;
 	pd3dDescriptorRanges[1].OffsetInDescriptorsFromTableStart = 0;
 
 	pd3dDescriptorRanges[2].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	pd3dDescriptorRanges[2].NumDescriptors = 1;
-	pd3dDescriptorRanges[2].BaseShaderRegister = 3; //ShadowMap
+	pd3dDescriptorRanges[2].BaseShaderRegister = 4; //ShadowMap
 	pd3dDescriptorRanges[2].RegisterSpace = 0;
 	pd3dDescriptorRanges[2].OffsetInDescriptorsFromTableStart = 0;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[12];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[13];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	pd3dRootParameters[0].Descriptor.ShaderRegister = 0; //Camera
@@ -507,11 +524,16 @@ void CreateManager::CreateGraphicsRootSignature()
 	pd3dRootParameters[1].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
-	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
-	pd3dRootParameters[2].Constants.Num32BitValues = 32;
-	pd3dRootParameters[2].Constants.ShaderRegister = 5; //인스턴싱이 아닌 물체들을 사용
-	pd3dRootParameters[2].Constants.RegisterSpace = 0;
+	//pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
+	//pd3dRootParameters[2].Constants.Num32BitValues = 32;
+	//pd3dRootParameters[2].Constants.ShaderRegister = 5; //인스턴싱이 아닌 물체들을 사용
+	//pd3dRootParameters[2].Constants.RegisterSpace = 0;
+	//pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	pd3dRootParameters[2].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+	pd3dRootParameters[2].Descriptor.ShaderRegister = 5; //Particle or prevMatirx
+	pd3dRootParameters[2].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
 
 	pd3dRootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
 	pd3dRootParameters[3].Descriptor.ShaderRegister = 0; //t0   인스턴싱버퍼 묶음
@@ -554,9 +576,14 @@ void CreateManager::CreateGraphicsRootSignature()
 	pd3dRootParameters[10].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	pd3dRootParameters[11].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-	pd3dRootParameters[11].Descriptor.ShaderRegister = 6; //Particle
+	pd3dRootParameters[11].Descriptor.ShaderRegister = 6; //Particle or prevMatirx
 	pd3dRootParameters[11].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[11].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+
+	pd3dRootParameters[12].ParameterType = D3D12_ROOT_PARAMETER_TYPE_SRV;
+	pd3dRootParameters[12].Descriptor.ShaderRegister = 1; //t1   Prev인스턴싱버퍼 묶음
+	pd3dRootParameters[12].Descriptor.RegisterSpace = 0;
+	pd3dRootParameters[12].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	auto staticSamplers = GetStaticSamplers();
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
@@ -576,7 +603,7 @@ void CreateManager::CreateGraphicsRootSignature()
 	HRESULT h = D3D12SerializeRootSignature(&d3dRootSignatureDesc, D3D_ROOT_SIGNATURE_VERSION_1,
 		&pd3dSignatureBlob, &pd3dErrorBlob);
 
-	m_pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(),
+	h = m_pd3dDevice->CreateRootSignature(0, pd3dSignatureBlob->GetBufferPointer(),
 		pd3dSignatureBlob->GetBufferSize(), IID_PPV_ARGS(m_pGraphicsRootSignature.GetAddressOf()));
 
 	if (pd3dSignatureBlob) pd3dSignatureBlob->Release();

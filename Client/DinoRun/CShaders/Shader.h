@@ -143,6 +143,9 @@ public:
 protected:
 	unordered_map<string, CB_OBJECT_INFO*> instancedObjectInfo;
 	unordered_map<string, CB_OBJECT_INFO*> instancedBillBoardObjectInfo;
+
+	unordered_map<string, CB_OBJECT_INFO*> instancedPrevObjectInfo;
+	unordered_map<string, CB_OBJECT_INFO*> instancedPrevBillBoardObjectInfo;
 };
 
 
@@ -182,6 +185,7 @@ protected:
 	CPlayer *m_ppSkinedObjects = NULL;   //인스턴싱drawing 대상 SkinedObject로 바꿀 예정.
 	vector<CPlayer*> m_vSkinedObjectList;   // 인스턴싱될 오브젝트들
 	unordered_map<string, CB_SKINEOBJECT_INFO*> instancedObjectInfo;
+	unordered_map<string, CB_SKINEOBJECT_INFO*> instancedPrevObjectInfo;
 };
 
 

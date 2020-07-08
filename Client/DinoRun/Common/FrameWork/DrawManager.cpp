@@ -54,6 +54,23 @@ void DrawManager::RenderDepth(shared_ptr<BaseScene> pScene)
 	pScene->RenderShadow();
 
 	ChangeResourceState(m_pd3dShadowDepthBuffer, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ);
+	//------------------------------
+	
+	ChangeResourceState(m_ppd3dRenderTargetBuffers[0], D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	
+	m_pd3dCommandList->ClearRenderTargetView(m_pRtvRenderTargetBufferCPUHandles[0], Colors::Black, 0, NULL);
+	m_pd3dCommandList->ClearDepthStencilView(m_dsvDepthStencilBufferCPUHandle,
+		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
+
+	// Set Render Target and Depth Stencil
+	m_pd3dCommandList->OMSetRenderTargets(1, &m_pRtvRenderTargetBufferCPUHandles[0], TRUE, &m_dsvDepthStencilBufferCPUHandle);
+
+	// Render Scene
+	pScene->RenderVelocity();
+
+	ChangeResourceState(m_ppd3dRenderTargetBuffers[0], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_GENERIC_READ);
+	
+	
 	ExecuteCommandList();
 }
 

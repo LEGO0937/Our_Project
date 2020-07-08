@@ -14,7 +14,7 @@
 #define RESOURCE_TEXTURE2DARRAY		0x03
 #define RESOURCE_TEXTURE_CUBE		0x04
 #define RESOURCE_BUFFER				0x05
-#define MAX_BON_NUM 21
+#define MAX_BON_NUM 10
 
 class CShader;
 class CCamera;
@@ -26,11 +26,13 @@ class CAnimationController;
 struct CB_OBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4World;
+	XMFLOAT4X4 m_xmf4x4PrevWorld;
 };
 
 struct CB_SKINEOBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4Worlds[MAX_BON_NUM];
+	XMFLOAT4X4 m_xmf4x4PrevWorlds[MAX_BON_NUM];
 };
 
 struct CB_UI_INFO
@@ -187,6 +189,9 @@ protected:
 
 	float m_nScale = 1;
 
+	CB_OBJECT_INFO *m_pcbMappedGameObject = NULL;  //no Skined Object's instancing buffer
+	ID3D12Resource *m_pd3dcbGameObject = NULL;
+
 	CB_OBJECT_INFO *m_pcbMappedGameObjects = NULL;  //no Skined Object's instancing buffer
 	ID3D12Resource *m_pd3dcbGameObjects = NULL;
 
@@ -295,6 +300,8 @@ public:
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World);
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
 
+
+	void CreateBuffer(CreateManager* pCreateManager);
 	void CreateInstanceBuffer(CreateManager* pCreateManager,
 		UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& uMap);
 	void CreateBillBoardInstanceBuffer(CreateManager* pCreateManager,
