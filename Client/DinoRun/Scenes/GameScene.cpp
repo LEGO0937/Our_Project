@@ -12,6 +12,7 @@
 #include "../CShaders/ModelShader/ModelShader.h"
 #include "../CShaders/SkinedShader/SkinedShader.h"
 #include "../CShaders/BlurShader/BlurShader.h"
+#include "../CShaders/MotionBlurShader/MotionBlurShader.h"
 #include "../CShaders/MinimapShader/MinimapShader.h"
 
 #include "../Common/ParticleSystem/ParticleSystem.h"
@@ -99,7 +100,8 @@ void GameScene::ReleaseObjects()
 
 	if (blurShader)
 		blurShader->Release();
-
+	if (motionBlurShader)
+		motionBlurShader->Release();
 	if (m_pMinimapShader)
 	{
 		m_pMinimapShader->ReleaseShaderVariables();
@@ -174,11 +176,11 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Bush.bin", "Resources/ObjectData/WeedData");
 	instacingModelShaders.emplace_back(shader);
 
-	//shader = new FenceShader;
-	//shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(Fence)");
-	//instacingModelShaders.emplace_back(shader);
-	//shader->AddRef();
-	//UpdatedShaders.emplace_back(shader);
+	shader = new FenceShader;
+	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(Fence)");
+	instacingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
 
 	m_pCheckPointShader = new BlockShader;
 	m_pCheckPointShader->BuildObjects(pCreateManager.get(),"Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(LineBox)");
@@ -219,6 +221,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pIconShader->BuildObjects(pCreateManager.get(), &name);
 
 	blurShader = new BlurShader(pCreateManager.get());
+	motionBlurShader = new MotionBlurShader(pCreateManager.get());
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
@@ -374,7 +377,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		}
 		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
 		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
-		if (dwDirection) m_pPlayer->Move(dwDirection, 50.0f,
+		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f,
 			true);
 
 	}
@@ -384,9 +387,9 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
 
-void GameScene::Render(float fTimeElapsed)
+void GameScene::Render()
 {
-	BaseScene::Render(fTimeElapsed);
+	BaseScene::Render();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_CUBE_MAP]);
 	if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
@@ -452,13 +455,34 @@ void GameScene::RenderShadow()
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+	for (CObInstancingShader* shader : instacingModelShaders)
+	{
+		if (shader)
+			shader->BillBoardRender(m_pd3dCommandList, m_pShadowCamera);
+	}
 }
 void GameScene::RenderVelocity()
 {
-	BaseScene::RenderShadow();
+	BaseScene::Render();
+
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_SKIN_MESH]);
+	//m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	//
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_MODEL_INSTANCING]);
+	//for (CObInstancingShader* shader : instacingModelShaders)
+	//	if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+	//
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_BILLBOARD]);
+	//for (CObInstancingShader* shader : instacingBillBoardShaders)
+	//	if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+	//for (CObInstancingShader* shader : instacingModelShaders)
+	//{
+	//	if (shader)
+	//		shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
+	//}
 }
 
-void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
+void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D12Resource> velocityMap)
 {
 	static float deltaUvX = 0.0f;
 	XMFLOAT3 vel = m_pPlayer->GetVelocity();
@@ -467,6 +491,11 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
 	{
 		int idx = length - 30;
 		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
+		//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
+		//motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
+
+
+		
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
 		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
 		m_pEffectShader->getUvXs()[0] = deltaUvX;

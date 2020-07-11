@@ -92,13 +92,13 @@ void DrawManager::RenderLight(shared_ptr<BaseScene> pScene, float fTimeElapsed)
 		TRUE, &m_dsvDepthStencilBufferCPUHandle);
 
 	if (pScene)
-		pScene->Render(fTimeElapsed);
+		pScene->Render();
 
 }
 
 void DrawManager::RenderPostProcess(shared_ptr<BaseScene> pScene)
 {
-	pScene->RenderPostProcess(m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex]);
+	pScene->RenderPostProcess(m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex],m_ppd3dRenderTargetBuffers[0]);
 
 	ChangeResourceState(m_ppd3dSwapChainBackBuffers[m_nSwapChainBufferIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 	ExecuteCommandList();

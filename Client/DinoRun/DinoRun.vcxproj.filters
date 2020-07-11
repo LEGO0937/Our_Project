@@ -656,6 +656,12 @@
     <FxCompile Include="Common\Shaders\MotionBlur.hlsl">
       <Filter>Shaders\not complete</Filter>
     </FxCompile>
+    <FxCompile Include="Common\Shaders\MotionBlur2.hlsl">
+      <Filter>Shaders\not complete</Filter>
+    </FxCompile>
+    <FxCompile Include="Common\Shaders\DrawVelocityMap2.hlsl">
+      <Filter>Shaders\not complete</Filter>
+    </FxCompile>
     <FxCompile Include="Common\Shaders\DrawVelocityMap.hlsl">
       <Filter>Shaders\not complete</Filter>
     </FxCompile>

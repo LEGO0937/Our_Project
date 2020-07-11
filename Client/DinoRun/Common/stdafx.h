@@ -407,6 +407,7 @@ Point2D ScreenToProj(int width, int height, POINT& point);
 D3D12_RASTERIZER_DESC CreateRasterizerState();
 D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState();
 D3D12_BLEND_DESC CreateBlendState();
+D3D12_BLEND_DESC CreateAlphaBlendState();
 D3D12_SHADER_BYTECODE CompileShaderFromFile(const WCHAR *pszFileName, LPCSTR pszShaderName, LPCSTR pszShaderProfile, ID3DBlob **ppd3dShaderBlob);
 D3D12_INPUT_LAYOUT_DESC CreateUiInputLayout();
 D3D12_INPUT_LAYOUT_DESC CreateTextureInputLayout();
@@ -452,6 +453,7 @@ void CreatePsoWireInstance(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3d
 void CreatePsoFont(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 
 //Compute PipeLine
+void CreatePsoMotionBlur(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 void CreatePsoHorzBlur(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 void CreatePsoVertBlur(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 void CreatePsoParticleCs(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);

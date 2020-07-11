@@ -28,7 +28,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed);  //애니메이션 업데이트
 	virtual SceneType Update(CreateManager* pCreateManager, float fTimeElapsed);  // 충돌처리 및 물리
 
-	void Render(float fTimeElapsed);
+	void Render();
 
 private:
 	vector<CUiShader*> instacingUiShaders;

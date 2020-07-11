@@ -29,9 +29,7 @@ public:
 
 	void Dispatch(
 		ID3D12GraphicsCommandList* pCommandList,
-		ID3D12PipelineState* pHorzBlurPSO,
-		ID3D12PipelineState* pVertBlurPSO,
-		ID3D12Resource* input,
+		ID3D12Resource* input, ID3D12Resource* VelocityMap,
 		int blurCount);
 
 	void ChangeResourceState(ID3D12GraphicsCommandList* pCommandList, ComPtr<ID3D12Resource> pResource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter);
@@ -58,15 +56,22 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE m_hSecondBlurCpuSrv;
 	D3D12_CPU_DESCRIPTOR_HANDLE m_hSecondBlurCpuUav;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE m_hFirstBlurGpuSrv;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hThirdBlurCpuSrv;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hThirdBlurCpuUav;
+
+	//D3D12_GPU_DESCRIPTOR_HANDLE m_hFirstBlurGpuSrv;
 	D3D12_GPU_DESCRIPTOR_HANDLE m_hFirstBlurGpuUav;
 
 	D3D12_GPU_DESCRIPTOR_HANDLE m_hSecondBlurGpuSrv;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_hSecondBlurGpuUav;
+	//D3D12_GPU_DESCRIPTOR_HANDLE m_hSecondBlurGpuUav;
+
+	D3D12_GPU_DESCRIPTOR_HANDLE m_hThirdBlurGpuSrv;
+	//D3D12_GPU_DESCRIPTOR_HANDLE m_hThirdBlurGpuUav;
 
 	// Two for ping-ponging the textures.
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurMap0 = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurMap1 = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurMap2 = nullptr;
 
 };
 

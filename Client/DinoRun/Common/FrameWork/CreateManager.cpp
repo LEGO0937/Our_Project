@@ -618,9 +618,16 @@ void CreateManager::CreateComputeRootSignature()
 	D3D12_DESCRIPTOR_RANGE srvTable;
 	srvTable.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 	srvTable.NumDescriptors = 1;
-	srvTable.BaseShaderRegister = 0;
+	srvTable.BaseShaderRegister = 2;
 	srvTable.RegisterSpace = 0;
 	srvTable.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	D3D12_DESCRIPTOR_RANGE srvTable1;
+	srvTable1.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	srvTable1.NumDescriptors = 1;
+	srvTable1.BaseShaderRegister = 3;
+	srvTable1.RegisterSpace = 0;
+	srvTable1.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	D3D12_DESCRIPTOR_RANGE uavTable1;
 	uavTable1.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
@@ -636,7 +643,7 @@ void CreateManager::CreateComputeRootSignature()
 	uavTable2.RegisterSpace = 0;
 	uavTable2.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[7];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[8];
 
 	pd3dRootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS;
 	pd3dRootParameters[0].Constants.Num32BitValues = 12;
@@ -673,6 +680,11 @@ void CreateManager::CreateComputeRootSignature()
 	pd3dRootParameters[6].Descriptor.ShaderRegister = 1; // particle structure
 	pd3dRootParameters[6].Descriptor.RegisterSpace = 0;
 	pd3dRootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+
+	pd3dRootParameters[7].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	pd3dRootParameters[7].DescriptorTable.NumDescriptorRanges = 1;
+	pd3dRootParameters[7].DescriptorTable.pDescriptorRanges = &srvTable1;
+	pd3dRootParameters[7].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;

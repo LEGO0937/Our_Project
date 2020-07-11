@@ -268,7 +268,7 @@ void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 			{
 				if (m_pBillBoardObject)
 				{
-					if (Vector3::Length(ob->GetPosition(), pCamera->GetPosition()) < 100000)
+					if (Vector3::Length(ob->GetPosition(), pCamera->GetPosition()) < 800000)
 					{
 						ob->UpdateTransform_Instancing(instancedObjectInfo, drawingCount, NULL);
 						drawingCount++;

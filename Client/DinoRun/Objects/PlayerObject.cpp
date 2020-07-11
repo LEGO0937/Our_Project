@@ -376,6 +376,9 @@ void CPlayer::Animate(float fTimeElapsed)
 	if (!isStun)
 	{
 
+		XMFLOAT3 vel = GetVelocity();
+		float length = (vel.x * vel.x + vel.z * vel.z);
+
 		UINT curTrack = m_pSkinnedAnimationController->m_CurrentTrack;
 		if (curTrack >= RUN)
 			curTrack -= ANIMATIONGAP;
@@ -388,7 +391,12 @@ void CPlayer::Animate(float fTimeElapsed)
 		case IDLE_RIGHT_RETURN:
 		case IDLE_LEFT_TURNING:
 			if (!isShift)
-				m_fWheelDegree -= 30 * fTimeElapsed;
+			{
+				if (length < 30)
+					m_fWheelDegree -= 50 * fTimeElapsed;
+				else
+					m_fWheelDegree -= 30 * fTimeElapsed;
+			}
 			else
 				m_fWheelDegree -= 50 * fTimeElapsed;
 			break;
@@ -396,17 +404,32 @@ void CPlayer::Animate(float fTimeElapsed)
 		case IDLE_LEFT_RETURN:
 		case IDLE_RIGHT_TURNING:
 			if (!isShift)
-				m_fWheelDegree += 30 * fTimeElapsed;
+			{
+				if (length < 30)
+					m_fWheelDegree += 50 * fTimeElapsed;
+				else			   
+					m_fWheelDegree += 30 * fTimeElapsed;
+			}
 			else
 				m_fWheelDegree += 50 * fTimeElapsed;
 			break;
 		}
 		if (!isShift)
 		{
-			if (m_fWheelDegree > 10)
-				m_fWheelDegree = 10;
-			else if (m_fWheelDegree < -10)
-				m_fWheelDegree = -10;
+			if (length > 30)
+			{
+				if (m_fWheelDegree > 10)
+					m_fWheelDegree = 10;
+				else if (m_fWheelDegree < -10)
+					m_fWheelDegree = -10;
+			}
+			else
+			{
+				if (m_fWheelDegree > 30)
+					m_fWheelDegree = 30;
+				else if (m_fWheelDegree < -30)
+					m_fWheelDegree = -30;
+			}
 		}
 		else
 		{
@@ -568,7 +591,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	CreateShaderVariables(pCreateManager);
 
-	SetPosition(XMFLOAT3(700.0f, 76.0f, 1450.0f));//800,76,900
+	SetPosition(XMFLOAT3(700.0f, 76.0f, 1150.0f));//800,76,900
 
 	UpdateTransform(NULL);
 

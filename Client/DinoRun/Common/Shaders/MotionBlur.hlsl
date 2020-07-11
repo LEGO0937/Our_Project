@@ -22,26 +22,26 @@ cbuffer cbSettings : register(b0)
 static const int gMaxBlurRadius = 1;
 
 
-Texture2D velocityMap            : register(t0);
-Texture2D renderImage            : register(t1);
+Texture2D renderImage            : register(t2);
+Texture2D velocityMap            : register(t3);
+
 RWTexture2D<float4> gOutput : register(u0);
 
 #define N 256
 #define CacheSize (N + 2*gMaxBlurRadius)
 groupshared float4 gCache[CacheSize];
 
-[numthreads(N, N, 1)]
+[numthreads(N, 1, 1)]
 void MotionBlurCS(int3 groupThreadID : SV_GroupThreadID,
 	int3 dispatchThreadID : SV_DispatchThreadID)
 {
 
-	// 노망의 부드러움. 수치를 크게하면 매끄럽게된다.
 	int Blur = 10;
 
 	// 속도 맵에서 속도 벡터 및 Z 값을 얻을
 	float4 Velocity = velocityMap[dispatchThreadID.xy];
 
-	Velocity.xy / = (float)Blur;
+	Velocity.xy /= (float)Blur;
 
 	int cnt = 1;
 	float4 BColor;
@@ -52,17 +52,17 @@ void MotionBlurCS(int3 groupThreadID : SV_GroupThreadID,
 	for (int i = cnt; i < Blur; i++)
 	{
 		// 속도 벡터의 방향 텍셀 위치를 참조 장면의 렌더링 이미지의 색상 정보를 얻을 수 있습니다.
-		BColor = renderImage[dispatchThreadID.xy + Velocity.xy * (float)i)];
+		BColor = renderImage[(dispatchThreadID.xy + (Velocity.xy * (float)i))];
 
 		// 속도 맵의 Z 값과 속도 벡터 방향에있는 텍셀 위치를 샘플링 한 장면의 렌더링 이미지의 Z 값을 비교한다. (주의 1)
 		if (Velocity.a < BColor.a + 0.04f)
 		{
 			cnt++;
-			Out + = BColor;
+			Out += BColor;
 		}
 	}
 
-	Out / = (float)cnt;
+	Out /= (float)cnt;
 
 	gOutput[dispatchThreadID.xy] = Out;
 }

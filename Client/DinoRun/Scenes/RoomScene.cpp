@@ -185,9 +185,9 @@ void RoomScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 }
 
-void RoomScene::Render(float fTimeElapsed)
+void RoomScene::Render()
 {
-	BaseScene::Render(fTimeElapsed);
+	BaseScene::Render();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
 	

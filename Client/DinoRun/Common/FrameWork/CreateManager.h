@@ -82,7 +82,7 @@ private:
 	ComPtr<IDXGISwapChain3> m_pdxgiSwapChain; 
 
 	DXGI_FORMAT m_dxgiBackBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
-	DXGI_FORMAT m_dxgiRenderBufferFormat{ DXGI_FORMAT_R32G32B32A32_FLOAT };
+	DXGI_FORMAT m_dxgiRenderBufferFormat{ DXGI_FORMAT_R8G8B8A8_UNORM };
 
 	bool m_bMsaa4xEnable = false;
 	UINT m_nMsaa4xQualityLevels = 0; //MSAA 다중 샘플링을 활성화하고 다중 샘플링 레벨을 설정한다.

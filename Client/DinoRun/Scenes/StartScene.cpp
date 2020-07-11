@@ -203,9 +203,9 @@ void StartScene::ProcessInput(HWND hwnd, float deltaTime)
 	
 }
 
-void StartScene::Render(float fTimeElapsed)
+void StartScene::Render()
 {
-	BaseScene::Render(fTimeElapsed);
+	BaseScene::Render();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)

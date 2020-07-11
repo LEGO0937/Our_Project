@@ -80,8 +80,8 @@ SamplerComparisonState gsamShadow : register(s6);
 
 struct CREATE_VEL_MAP_OUTPUT
 {
-	float4 position : POSITION;
-	float4 TexC: TEXCOORD0;
+	float4 position : SV_POSITION;
+	float2 TexC: TEXCOORD0;
 	float4 direction: TEXCOORD1;
 };
 //-----------------------

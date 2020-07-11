@@ -2,70 +2,169 @@
 
 
 
-VS_SKINNED_OUTPUT VSVelocitySkinnedAnimation(VS_SKINNED_INPUT input)
+CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedAnimation(VS_SKINNED_INPUT input)
 {
-	VS_SKINNED_OUTPUT output;
+	CREATE_VEL_MAP_OUTPUT output;
 
 	float3 positionW = float3(0.0f, 0.0f, 0.0f);
+	float3 prevPositionW = float3(0.0f, 0.0f, 0.0f);
 	float3 normalW = float3(0.0f, 0.0f, 0.0f);
+
 	matrix mtxVertexToBoneWorld;
+	matrix mtxPrevVertexToBoneWorld;
+
+	float4 curPos;
+	float4 prevPos;
+
 	for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
 	{
 		mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
+		mtxPrevVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gpmtxPrevBoneTransforms[input.indices[i]]);
 		positionW += (input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld)).xyz;
-
+		prevPositionW += (input.weights[i] * mul(float4(input.position, 1.0f), mtxPrevVertexToBoneWorld)).xyz;
 		normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 	}
 
-	output.position = mul(mul(float4(positionW, 1.0f), gmtxShadowView), gmtxShadowProjection);
-	output.normal = positionW;
+	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+	prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+
+	float3 dir = curPos.xyz - prevPos.xyz;
+
+	float a = dot(normalize(dir), normalize(normalW));
+
+	if (a < 0.0f)
+		output.position = prevPos;
+	else
+		output.position = curPos;
+
+	output.direction.xy = (curPos.xy / curPos.w - prevPos.xy / prevPos.w) * 0.5f;
+
+	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	output.direction.y *= -1.0f;
+
+	// 장면의 Z 값을 계산하기위한 매개 변수
+	output.direction.z = output.position.z;
+	output.direction.w = output.position.w;
+
 	output.TexC = input.TexC;
-	return(output);
+	return output;
 }
 
-VS_SKINNED_OUTPUT VSVelocitySkinnedInstancingAnimation(VS_SKINNED_INPUT input, uint nInstanceID : SV_InstanceID)
+CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedInstancingAnimation(VS_SKINNED_INPUT input, uint nInstanceID : SV_InstanceID)
 {
-	VS_SKINNED_OUTPUT output;
+	CREATE_VEL_MAP_OUTPUT output;
 
 	float3 positionW = float3(0.0f, 0.0f, 0.0f);
+	float3 prevPositionW = float3(0.0f, 0.0f, 0.0f);
 	float3 normalW = float3(0.0f, 0.0f, 0.0f);
+
 	matrix mtxVertexToBoneWorld;
+	matrix mtxPrevVertexToBoneWorld;
+
+	float4 curPos;
+	float4 prevPos;
+
 	for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
 	{
 		mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gSkinedGameObjectInfos[nInstanceID].gpmtxInstancedBoneTransforms[input.indices[i]]);
-		positionW += input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
-
+		mtxPrevVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gSkinedGameObjectInfos[nInstanceID].gpmtxInstancedPrevBoneTransforms[input.indices[i]]);
+		positionW += (input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld)).xyz;
+		prevPositionW += (input.weights[i] * mul(float4(input.position, 1.0f), mtxPrevVertexToBoneWorld)).xyz;
 		normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 	}
 
-	output.position = mul(mul(float4(positionW, 1.0f), gmtxShadowView), gmtxShadowProjection);
-	output.normal = positionW;
+	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+	prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+
+	float3 dir = curPos.xyz - prevPos.xyz;
+
+	float a = dot(normalize(dir), normalize(normalW));
+
+	if (a < 0.0f)
+		output.position = prevPos;
+	else
+		output.position = curPos;
+
+	output.direction.xy = (curPos.xy / curPos.w - prevPos.xy / prevPos.w) * 0.5f;
+
+	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	output.direction.y *= -1.0f;
+
+	// 장면의 Z 값을 계산하기위한 매개 변수
+	output.direction.z = output.position.z;
+	output.direction.w = output.position.w;
+
 	output.TexC = input.TexC;
-	return(output);
-
+	return output;
 }
 
-void PSVelocitySkinnedAnimation(VS_SKINNED_OUTPUT input)
-{
-}
-
-//----------------
-VS_TEXTED_INSTANCING_OUTPUT VSVelocityTextedInstancing(VS_TEXTED_INSTANCING_INPUT input, uint nInstanceID : SV_InstanceID)
-{
-	VS_TEXTED_INSTANCING_OUTPUT output;
-	output.positionW = (float3)mul(float4(input.position, 1.0f), gGameObjectInfos[nInstanceID].gmtxGameObject);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxShadowView), gmtxShadowProjection);
-	output.normalW = mul(input.normal, (float3x3)gGameObjectInfos[nInstanceID].gmtxGameObject);
-	output.TexC = input.TexC;
-	output.n = nInstanceID;
-	return(output);
-}
-
-void PSVelocityTextedInstancing(VS_TEXTED_INSTANCING_OUTPUT input)
+float4 PSVelocityMap(CREATE_VEL_MAP_OUTPUT input) : SV_TARGET
 {
 	float4 color = gTexture.Sample(gsamAnisotropicWrap, input.TexC);
 	clip(color.a - 0.1);
+
+	float4 output;
+
+	output.xy = input.direction.xy;
+
+	// 미사용
+	output.z = 1.0f;
+
+	// Z 값을 계산
+	output.w = input.direction.z / input.direction.w;
+
+	return output;
 }
+
+//----------------
+CREATE_VEL_MAP_OUTPUT VSVelocityTextedInstancing(VS_TEXTED_INSTANCING_INPUT input, uint nInstanceID : SV_InstanceID)
+{
+
+	CREATE_VEL_MAP_OUTPUT output;
+
+	float3 positionW = float3(0.0f, 0.0f, 0.0f);
+	float3 prevPositionW = float3(0.0f, 0.0f, 0.0f);
+	float3 normalW = float3(0.0f, 0.0f, 0.0f);
+
+	matrix mtxWorld;
+	matrix mtxPrevWorld;
+
+	float4 curPos;
+	float4 prevPos;
+
+
+	mtxWorld = gGameObjectInfos[nInstanceID].gmtxGameObject;
+	mtxPrevWorld = gGameObjectInfos[nInstanceID].gmtxPrevGameObject;
+	positionW = mul(float4(input.position, 1.0f), mtxWorld).xyz;
+	prevPositionW = mul(float4(input.position, 1.0f), mtxPrevWorld).xyz;
+	normalW = mul(input.normal, (float3x3)mtxWorld).xyz;
+
+
+	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+	prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+
+	float3 dir = curPos.xyz - prevPos.xyz;
+
+	float a = dot(normalize(dir), normalize(normalW));
+
+	if (a < 0.0f)
+		output.position = prevPos;
+	else
+		output.position = curPos;
+
+	output.direction.xy = (curPos.xy / curPos.w - prevPos.xy / prevPos.w) * 0.5f;
+
+	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	output.direction.y *= -1.0f;
+
+	// 장면의 Z 값을 계산하기위한 매개 변수
+	output.direction.z = output.position.z;
+	output.direction.w = output.position.w;
+
+	output.TexC = input.TexC;
+	return output;
+}
+
 //---------------
 
 VS_TEXTED_INSTANCING_OUTPUT VSVelocityBillBoardInstancing(VS_TEXTED_INSTANCING_INPUT input, uint nInstanceID : SV_InstanceID)
@@ -80,7 +179,7 @@ VS_TEXTED_INSTANCING_OUTPUT VSVelocityBillBoardInstancing(VS_TEXTED_INSTANCING_I
 }
 
 [maxvertexcount(4)]
-void ShadowGS(point VS_TEXTED_INSTANCING_OUTPUT input[1], inout TriangleStream<VS_TEXTED_INSTANCING_OUTPUT> outStream)
+void VelocityGS(point VS_TEXTED_INSTANCING_OUTPUT input[1], inout TriangleStream<CREATE_VEL_MAP_OUTPUT> outStream)
 {
 	float3 vUp = float3(0, 1, 0);
 	float3 vLook = float3(gvShadowCameraPosition.xyz - input[0].positionW.xyz);
@@ -97,81 +196,87 @@ void ShadowGS(point VS_TEXTED_INSTANCING_OUTPUT input[1], inout TriangleStream<V
 	};
 	float2 pUVs[4] = { float2(1.0f,1.0f),float2(1.0f,0.0f) ,float2(0.0f,1.0f) ,float2(0.0f,0.0f) };
 
-	VS_TEXTED_INSTANCING_OUTPUT output;
+	CREATE_VEL_MAP_OUTPUT output;
+	float3 positionW = float3(0.0f, 0.0f, 0.0f);
+	float3 prevPositionW = float3(0.0f, 0.0f, 0.0f);
+	float3 normalW = float3(0.0f, 0.0f, 0.0f);
 
+	float4 curPos;
+	float4 prevPos;
+
+	float3 dir;
+	float a;
 	for (int i = 0; i < 4; ++i)
 	{
-		output.positionW = pVertices[i].xyz;
-		output.position = mul(mul(float4(output.positionW, 1.0f), gmtxShadowView), gmtxShadowProjection);
-		output.normalW = vLook;
+		curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+		prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
+		normalW = vLook;
+		dir = curPos.xyz - prevPos.xyz;
+
+		a = dot(normalize(dir), normalize(normalW));
+
+		if (a < 0.0f)
+			output.position = prevPos;
+		else
+			output.position = curPos;
+
+		output.direction.xy = (curPos.xy / curPos.w - prevPos.xy / prevPos.w) * 0.5f;
+
+		output.direction.y *= -1.0f;
+
+		output.direction.z = output.position.z;
+		output.direction.w = output.position.w;
+
 		output.TexC = pUVs[i];
-		output.n = input[0].n;
 		outStream.Append(output);
 	}
 }
-void PSVelocityBillBoardInstancing(VS_TEXTED_INSTANCING_OUTPUT input)
-{
-	float3 uvw = float3(input.TexC, input.n);
-	float4 color = gTexarray.Sample(gsamAnisotropicWrap, uvw);
-	clip(color.a - 0.1);
-}
 
 //----------------
-VS_TEXT_OUTPUT VSVelocityTer(VS_TEXT_INPUT input)
+CREATE_VEL_MAP_OUTPUT VSVelocityTer(VS_TEXT_INPUT input)
 {
-	VS_TEXT_OUTPUT output;
-	output.positionW = (float3)mul(float4(input.position, 1.0f), gmtxWorld);
-	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxShadowView), gmtxShadowProjection);
-	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
+	CREATE_VEL_MAP_OUTPUT output;
+
+	float3 positionW = float3(0.0f, 0.0f, 0.0f);
+	float3 prevPositionW = float3(0.0f, 0.0f, 0.0f);
+	float3 normalW = float3(0.0f, 0.0f, 0.0f);
+
+	matrix mtxWorld;
+	matrix mtxPrevWorld;
+
+	float4 curPos;
+	float4 prevPos;
+
+
+	mtxWorld = gmtxWorld;
+	mtxPrevWorld = gmtxPrevWorld;
+	positionW = mul(float4(input.position, 1.0f), mtxWorld).xyz;
+	prevPositionW = mul(float4(input.position, 1.0f), mtxPrevWorld).xyz;
+	normalW = mul(input.normal, (float3x3)mtxWorld).xyz;
+
+
+	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+	prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+
+	float3 dir = curPos.xyz - prevPos.xyz;
+
+	float a = dot(normalize(dir), normalize(normalW));
+
+	if (a < 0.0f)
+		output.position = prevPos;
+	else
+		output.position = curPos;
+
+	output.direction.xy = (curPos.xy / curPos.w - prevPos.xy / prevPos.w) * 0.5f;
+
+	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	output.direction.y *= -1.0f;
+
+	// 장면의 Z 값을 계산하기위한 매개 변수
+	output.direction.z = output.position.z;
+	output.direction.w = output.position.w;
+
 	output.TexC = input.TexC;
-	output.TexC1 = input.TexC1*50.f;
-	return(output);
-}
-
-[domain("tri")]
-VS_TEXT_OUTPUT DSShadow(HS_CONSTANT_OUTPUT input, float3 uv: SV_DomainLocation, OutputPatch<HS_OUTPUT, 3> tri)
-{
-	VS_TEXT_OUTPUT output;
-
-	float u = uv.x;
-	float v = uv.y;
-	float w = uv.z;
-
-	float uu = u * u;
-	float vv = v * v;
-	float ww = w * w;
-	float uu3 = uu * 3.0f;
-	float vv3 = vv * 3.0f;
-	float ww3 = ww * 3.0f;
-
-	float3 Position = tri[0].position[0] * uu*u +
-		tri[1].position[0] * vv*v +
-		tri[2].position[0] * ww*w +
-		tri[0].position[1] * uu3*v +
-		tri[0].position[2] * vv3*u +
-		tri[1].position[1] * vv3*w +
-		tri[1].position[2] * ww3*v +
-		tri[2].position[1] * ww3*u +
-		tri[2].position[2] * uu3*w +
-		input.B11*6.0f*w*u*v;
-	output.positionW = tri[0].positionW*u +
-		tri[1].positionW*v +
-		tri[2].positionW*w;
-	output.position = mul(mul(float4(Position, 1.0f), gmtxShadowView), gmtxShadowProjection);
-
-	output.normalW = tri[0].normalW*u +
-		tri[1].normalW*v +
-		tri[2].normalW*w;
-	output.normalW = normalize(output.normalW);
-
-	output.TexC = tri[0].TexC*u +
-		tri[1].TexC*v +
-		tri[2].TexC*w;
-	output.TexC1 = output.TexC*50.0f;
-
 	return output;
 }
 
-void PSVelocityTer(VS_TEXT_OUTPUT input)
-{
-}

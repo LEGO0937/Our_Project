@@ -456,9 +456,9 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
 
-void ItemGameScene::Render(float fTimeElapsed)
+void ItemGameScene::Render()
 {
-	BaseScene::Render(fTimeElapsed);
+	BaseScene::Render();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_CUBE_MAP]);
 	if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
@@ -524,13 +524,18 @@ void ItemGameScene::RenderShadow()
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instacingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+	for (CObInstancingShader* shader : instacingModelShaders)
+	{
+		if (shader)
+			shader->BillBoardRender(m_pd3dCommandList, m_pShadowCamera);
+	}
 }
 void ItemGameScene::RenderVelocity()
 {
 	BaseScene::RenderShadow();
 }
 
-void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer)
+void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D12Resource> velocityMap)
 {
 	static float deltaUvX = 0.0f;
 	XMFLOAT3 vel = m_pPlayer->GetVelocity();

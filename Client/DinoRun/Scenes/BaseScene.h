@@ -80,10 +80,10 @@ public:
 	virtual void FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed) {};
 	virtual void AnimateObjects(float fTimeElapsed) {}
 
-	virtual void Render(float fTimeElapsed);
+	virtual void Render();
 	virtual void RenderShadow();
 	virtual void RenderVelocity() {}
-	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer) {};
+	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D12Resource> velocityMap) {};
 
 	void SetGraphicsRootSignature(ID3D12RootSignature *pd3dRootSignature);
 	void SetPipelineStates(int nPipelineStates, ID3D12PipelineState** ppd3dPipelineStates);

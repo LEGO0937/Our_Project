@@ -21,7 +21,7 @@ cbuffer cbSettings : register(b0)
 static const int gMaxBlurRadius = 1;
 
 
-Texture2D gInput            : register(t0);
+Texture2D gInput            : register(t2);
 RWTexture2D<float4> gOutput : register(u0);
 
 #define N 256

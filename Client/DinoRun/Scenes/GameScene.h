@@ -11,6 +11,7 @@ class CSkinedObInstancingShader;
 class CObjectsShader;
 class CUiShader;
 class BlurShader;
+class MotionBlurShader;
 class MinimapShader;
 class IconShader;
 
@@ -48,10 +49,10 @@ public:
 	virtual SceneType Update(CreateManager* pCreateManager, float fTimeElapsed);  // 面倒贸府 棺 拱府
 	virtual void FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed);
 
-	void Render(float fTimeElapsed);
+	void Render();
 	void RenderShadow();
 	void RenderVelocity();
-	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer);
+	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D12Resource> velocityMap);
 
 	virtual void ResetShadowBuffer(CreateManager* pCreateManager);
 
@@ -84,6 +85,7 @@ private:
 	CCamera* m_pMinimapCamera = NULL;
 
 	BlurShader* blurShader = NULL;
+	MotionBlurShader* motionBlurShader = NULL;
 
 	list<ParticleSystem*> particleSystems;
 

@@ -370,7 +370,13 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			
 			//작업구간 현재 구현중
 			//xmf3Position-> 새로운 카메라 위치
-			
+			XMFLOAT3 vel = m_pPlayer->GetVelocity();
+			float length = (vel.x * vel.x + vel.z * vel.z);
+			if (length > 900)
+				m_xmf3Offset = XMFLOAT3(0.0f, 25.0f, -70.0f);
+			else
+				m_xmf3Offset = XMFLOAT3(0.0f, 30.0f, -60.0f);
+
 			XMFLOAT4X4 viewM = Matrix4x4::LookAtLH(xmf3Position, m_pPlayer->GetPosition(), xmf3Up1);
 			
 			xmf3Right = XMFLOAT3(viewM._11, viewM._21, viewM._31);
@@ -428,6 +434,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			XMFLOAT3 accelerationForce;
 
 			XMStoreFloat3(&accelerationForce,XMVector4Transform(XMLoadFloat4(&xmf4Force), XMLoadFloat4x4(&inverseViewM)));
+			//force에 질량을 나누어 가속도를 구해야하지만 질량이 1이므로 나누지않고 바로 가속도로 지정.
 			//if (xmf3ResultVec.x > 3.01)
 			//	xmf3ResultVec.x = 3.01;
 			//else if (xmf3ResultVec.x < -3.01)
@@ -462,7 +469,6 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			//xmf3ResultVec = Vector3::Add(m_xmf3Look, m_xmf3Up);
 			//xmf3ResultVec = Vector3::Add(xmf3ResultVec, m_xmf3Right);
 		
-
 
 			m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, accelerationForce, fTimeElapsed);
 

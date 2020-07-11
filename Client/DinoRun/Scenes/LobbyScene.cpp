@@ -401,9 +401,9 @@ void LobbyScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 }
 
-void LobbyScene::Render(float fTimeElapsed)
+void LobbyScene::Render()
 {
-	BaseScene::Render(fTimeElapsed);
+	BaseScene::Render();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	for (CUiShader* shader : instacingUiShaders)
