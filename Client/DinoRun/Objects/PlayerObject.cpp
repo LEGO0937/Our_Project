@@ -59,11 +59,16 @@ void CPlayer::ReleaseShaderVariables()
 	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
 }
 
-void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
+void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bUpdateVelocity)
 {
+	if (isStun)
+		return;
 
 	if (dwDirection)
 	{
+		XMFLOAT3 vel = GetVelocity();
+		float length = (vel.x * vel.x + vel.z * vel.z);
+
 		m_xmf3Forces = XMFLOAT3(0, 0, 0);
 #ifdef _WITH_LEFT_HAND_COORDINATES
 		if (dwDirection & DIR_FORWARD)
@@ -75,9 +80,33 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, +fDistance);
 #endif
 #ifdef _WITH_LEFT_HAND_COORDINATES
-		//if (dwDirection & DIR_RIGHT) 
+		if (dwDirection & DIR_RIGHT)
+		{
+			if (!isShift)
+			{
+				if (length < 30)
+					m_fWheelDegree += 50 * fDeltaTime;
+				else
+					m_fWheelDegree += 30 * fDeltaTime;
+			}
+			else
+				m_fWheelDegree += 50 * fDeltaTime;
+		}
 		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, +fDistance);
-		//if (dwDirection & DIR_LEFT) 
+		else if (dwDirection & DIR_LEFT)
+		{
+			if (!isShift)
+			{
+				if (length < 30)
+					m_fWheelDegree -= 50 * fDeltaTime;
+				else
+					m_fWheelDegree -= 30 * fDeltaTime;
+			}
+			else
+				m_fWheelDegree -= 50 * fDeltaTime;
+		}
+		else
+			m_fWheelDegree = 0;
 		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
 #else
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
@@ -87,11 +116,38 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		//if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
 
 		//Move(xmf3Shift, bUpdateVelocity);
+
+		if (!isShift)
+		{
+			if (length > 30)
+			{
+				if (m_fWheelDegree > 10)
+					m_fWheelDegree = 10;
+				else if (m_fWheelDegree < -10)
+					m_fWheelDegree = -10;
+			}
+			else
+			{
+				if (m_fWheelDegree > 30)
+					m_fWheelDegree = 30;
+				else if (m_fWheelDegree < -30)
+					m_fWheelDegree = -30;
+			}
+		}
+		else
+		{
+			if (m_fWheelDegree > 30)
+				m_fWheelDegree = 30;
+			else if (m_fWheelDegree < -30)
+				m_fWheelDegree = -30;
+		}
 	}
 	if (m_fForce > m_fMaxForce)
 		m_fForce = m_fMaxForce;
 	if (m_fForce < -m_fMaxForce)
 		m_fForce = -m_fMaxForce;
+
+
 }
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
@@ -385,58 +441,18 @@ void CPlayer::Animate(float fTimeElapsed)
 		switch (curTrack)
 		{
 		case IDLE:
-			m_fWheelDegree = 0;
+			//m_fWheelDegree = 0;
 			break;
 		case IDLE_LEFT_TURN:
 		case IDLE_RIGHT_RETURN:
 		case IDLE_LEFT_TURNING:
-			if (!isShift)
-			{
-				if (length < 30)
-					m_fWheelDegree -= 50 * fTimeElapsed;
-				else
-					m_fWheelDegree -= 30 * fTimeElapsed;
-			}
-			else
-				m_fWheelDegree -= 50 * fTimeElapsed;
+
 			break;
 		case IDLE_RIGHT_TURN:
 		case IDLE_LEFT_RETURN:
 		case IDLE_RIGHT_TURNING:
-			if (!isShift)
-			{
-				if (length < 30)
-					m_fWheelDegree += 50 * fTimeElapsed;
-				else			   
-					m_fWheelDegree += 30 * fTimeElapsed;
-			}
-			else
-				m_fWheelDegree += 50 * fTimeElapsed;
+			
 			break;
-		}
-		if (!isShift)
-		{
-			if (length > 30)
-			{
-				if (m_fWheelDegree > 10)
-					m_fWheelDegree = 10;
-				else if (m_fWheelDegree < -10)
-					m_fWheelDegree = -10;
-			}
-			else
-			{
-				if (m_fWheelDegree > 30)
-					m_fWheelDegree = 30;
-				else if (m_fWheelDegree < -30)
-					m_fWheelDegree = -30;
-			}
-		}
-		else
-		{
-			if (m_fWheelDegree > 30)
-				m_fWheelDegree = 30;
-			else if (m_fWheelDegree < -30)
-				m_fWheelDegree = -30;
 		}
 	}
 	CGameObject::Animate(fTimeElapsed);

@@ -15,7 +15,7 @@ void GaugeShader::BuildObjects(CreateManager* pCreateManager, void* pInformation
 {
 	
 	CTexture * Guage = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	Guage->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), L"Resources/Images/gauge.dds", 0);
+	Guage->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), L"Resources/Images/T_Gauge.dds", 0);
 
 	CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
 

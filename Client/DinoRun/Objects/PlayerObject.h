@@ -88,7 +88,7 @@ public:
 	CCamera *GetCamera() { return(m_pCamera); }
 	void SetCamera(CCamera *pCamera) { m_pCamera = pCamera; }
 
-	void Move(DWORD nDirection, float fDistance, bool bVelocity = false);
+	void Move(DWORD nDirection, float fDistance, float fDeltaTime, bool bVelocity = false);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Rotate(float x, float y, float z);
 

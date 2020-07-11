@@ -48,6 +48,8 @@ void GameScene::ReleaseUploadBuffers()
 		if (shader) shader->ReleaseUploadBuffers();
 	for (CUiShader* shader : instacingNumberUiShaders)
 		if (shader) { shader->ReleaseUploadBuffers(); }
+	for(CUiShader* shader : instacingImageUiShaders)
+		if (shader) { shader->ReleaseUploadBuffers(); }
 
 	if (m_pMinimapShader)
 		m_pMinimapShader->ReleaseUploadBuffers();
@@ -91,6 +93,8 @@ void GameScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 	for (CUiShader* shader : instacingNumberUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
+	for (CUiShader* shader : instacingImageUiShaders)
+		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 	if (m_pMinimapCamera)
 	{
@@ -128,6 +132,7 @@ void GameScene::ReleaseObjects()
 	}
 	UpdatedShaders.clear();
 	instacingNumberUiShaders.clear();
+	instacingImageUiShaders.clear();
 	instacingBillBoardShaders.clear();
 	instacingModelShaders.clear();
 	instacingAnimatedModelShaders.clear();
@@ -152,6 +157,20 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CSkinedObInstancingShader* animatedShader;
 
 	UI_INFO view_info;    //게임중 or 대기중 뷰
+
+	view_info.textureName = "Resources/Images/T_Gauge_Frame.dds";
+	view_info.meshSize = XMFLOAT2(0.37f, 0.11f);
+	view_info.positions.emplace_back(XMFLOAT3(-0.033f, -0.844f, 0.0f));
+	view_info.maxUv = XMFLOAT2(1.0f, 1.0f);
+	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
+	view_info.f_uvY.emplace_back(0.0f);
+	uiShader = new ImageShader;
+	uiShader->BuildObjects(pCreateManager.get(), &view_info);
+	instacingImageUiShaders.emplace_back(uiShader);
+	view_info.positions.clear();
+	view_info.f_uvY.clear();
+	
+
 	view_info.textureName = "Resources/Images/T_Blureffect.dds";
 	view_info.meshSize = XMFLOAT2(1.0f, 1.0f);
 	view_info.positions.emplace_back(XMFLOAT3(0.0f, 0.0f, 0.0f));
@@ -163,7 +182,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 
 	shader = new BillBoardShader;
-	shader->BuildObjects(pCreateManager.get(), 100,"Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
+	shader->BuildObjects(pCreateManager.get(), 50,"Resources/Images/B_Tree.dds", "Resources/ObjectData/BillBoardData");
 	instacingBillBoardShaders.emplace_back(shader);
 	
 	shader = new TreeShader;
@@ -209,6 +228,10 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
 	instacingNumberUiShaders.emplace_back(uiShader);
 	
+
+	
+	
+
 	//animatedShader = new PlayerShader;
 	//animatedShader->BuildObjects(pCreateManager.get(), "Resources/Models/Dino.bin", NULL);
 	//instacingAnimatedModelShaders.emplace_back(animatedShader);
@@ -377,7 +400,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		}
 		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
 		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
-		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f,
+		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f,deltaTime,
 			true);
 
 	}
@@ -504,6 +527,10 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 			deltaUvX = 0.0f;
 	}
 
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
+	for (CUiShader* shader : instacingImageUiShaders)
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_GAUGE]);
 	if (m_pGuageShader)
 		m_pGuageShader->Render(m_pd3dCommandList, m_pCamera);
@@ -515,6 +542,7 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 			shader->Render(m_pd3dCommandList, m_pCamera);
 	}
 
+
 	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList);
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MINIMAP]);
@@ -523,6 +551,7 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	if(m_pIconShader)
 		m_pIconShader->Render(m_pd3dCommandList, m_pMinimapCamera);
+
 }
 void GameScene::AnimateObjects(float fTimeElapsed)  
 {

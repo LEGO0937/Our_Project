@@ -446,7 +446,7 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 		}
 		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
 		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 ()로 가정한다.*/
-		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f,
+		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f, deltaTime,
 			true);
 
 	}

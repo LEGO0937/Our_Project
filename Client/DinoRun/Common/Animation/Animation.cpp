@@ -130,7 +130,24 @@ void *CAnimationSet::GetCallbackFuncData(CALLBACKFUNCData& data)
 
 void CAnimationSet::SetPosition(float fTrackPosition)
 {
+
 	m_fPosition = fTrackPosition;
+	if (m_pCallbackFuncKeys)
+	{
+		CALLBACKFUNCData data;
+		void *pCallbackData = GetCallbackFuncData(data);
+		if (pCallbackData)
+		{
+			CAnimationController* controller = (CAnimationController*)data.m_pAnimationController;
+			controller->SetTrackEnable(controller->m_CurrentTrack, false);
+			controller->SetTrackEnable(data.m_pCallbackData, true);
+			controller->SetTrackPosition(data.m_pCallbackData, 0.0f);
+			controller->m_CurrentTrack = data.m_pCallbackData;
+
+			//m_pAnimationCallbackFuncHandler->HandleCallback(&data);
+		}
+	}
+
 	switch (m_nType)
 	{
 	case ANIMATION_TYPE_LOOP:
@@ -149,21 +166,7 @@ void CAnimationSet::SetPosition(float fTrackPosition)
 		void *pCallbackData = GetCallbackData();
 		if (pCallbackData) m_pAnimationCallbackHandler->HandleCallback(pCallbackData);
 	}
-	if (m_pCallbackFuncKeys)
-	{
-		CALLBACKFUNCData data;
-		void *pCallbackData = GetCallbackFuncData(data);
-		if (pCallbackData)
-		{
-			CAnimationController* controller = (CAnimationController*)data.m_pAnimationController;
-			controller->SetTrackEnable(controller->m_CurrentTrack, false);
-			controller->SetTrackEnable(data.m_pCallbackData, true);
-			controller->SetTrackPosition(data.m_pCallbackData, 0.0f);
-			controller->m_CurrentTrack = data.m_pCallbackData;
-
-			//m_pAnimationCallbackFuncHandler->HandleCallback(&data);
-		}
-	}
+	
 }
 
 void CAnimationSet::Animate(float fTrackPosition, float fTrackWeight)
