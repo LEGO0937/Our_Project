@@ -8,7 +8,7 @@ public:
 	BillBoardShader();
 	virtual ~BillBoardShader();
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
+	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
 	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL) {};
 	void BuildObjects(CreateManager* pCreateManager, float size, const char *pszFileName, const char* filename = NULL);
 

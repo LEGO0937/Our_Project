@@ -38,7 +38,50 @@ void BillBoardShader::Load(CreateManager* pCreateManager, const char* filename)
 
 	::fclose(pInFile);
 }
+void BillBoardShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+{
+	MODEL_INFO* info = (MODEL_INFO*)pInformation;
+	if (!info->modelName)
+		return;
+	if (info->updatedContext)
+		m_pUpdatedContext = info->updatedContext;
 
+	CTexture * billboard = new CTexture(1, RESOURCE_TEXTURE2DARRAY, 0);
+	billboard->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(info->modelName), 0);
+
+	CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
+
+	CreateShaderResourceViews(pCreateManager, billboard, 8, true);
+
+	m_ppObjects = new BillBoardObject(1);
+	m_ppObjects->AddRef();
+
+	BillBoardObject *pBillBoardObject = NULL;
+	CMaterial *material = new CMaterial(1);
+
+	//material->m_xmf4AmbientColor = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	//material->m_xmf4DiffuseColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+
+	material->SetTexture(billboard);
+	material->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	m_ppObjects->SetMaterial(0, material);
+
+	BillBoardMesh *mesh = NULL;
+	mesh = new BillBoardMesh();
+	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+
+	m_ppObjects->SetMesh(mesh);
+	if (info->dataFileName)
+		Load(pCreateManager, info->dataFileName);
+	CreateShaderVariables(pCreateManager);
+
+	UINT ncbElementBytes = ((sizeof(CB_BillBoard) + 255) & ~255); //256ÀÇ ¹è¼ö
+	m_pd3dcbStruct = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
+		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dcbStruct->Map(0, NULL, (void **)&billBoardCb);
+	billBoardCb->fSize = info->size;
+}
 void BillBoardShader::BuildObjects(CreateManager* pCreateManager, float size, const char *pszFileName, const char* filename)
 {
 	if (!pszFileName)
@@ -57,8 +100,8 @@ void BillBoardShader::BuildObjects(CreateManager* pCreateManager, float size, co
 	BillBoardObject *pBillBoardObject = NULL;
 	CMaterial *material = new CMaterial(1);
 
-	material->m_xmf4AmbientColor = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	material->m_xmf4DiffuseColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	//material->m_xmf4AmbientColor = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
+	//material->m_xmf4DiffuseColor = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 
 	material->SetTexture(billboard);
 	material->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());

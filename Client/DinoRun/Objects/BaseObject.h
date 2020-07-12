@@ -213,6 +213,8 @@ protected:
 	bool							isKinematic = false; //충돌 체크시 물리효과를 적용할 것인가 y or n 
 	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n false이면 update,render X
 
+	string						m_id = "Default";
+
 	ModelType						m_ModelType = ModelType::Default;   //Layer와 유사
 
 	CMesh							*m_pMesh = NULL;
@@ -224,8 +226,12 @@ protected:
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
 
+	LPVOID						m_pUpdatedContext = NULL;
 public:
+	string GetId() { return m_id; }
+	void SetId(string id) { m_id = id; }
 	CGameObject* GetChild() { return m_pChild; }
+
 	void SetSkinedState(bool bIsSkined) { isSkined = bIsSkined; }
 	
 	void SetKinematicState(bool bIsKinematic) { isKinematic = bIsKinematic; }
@@ -242,8 +248,8 @@ public:
 	float							m_fMass = 0;   //kg 단위
 	
 	XMFLOAT3 m_xmf3Angle;
-	XMFLOAT3 m_xmf3Force;      
-
+	XMFLOAT3 m_xmf3Forces = { 0,0,0 };  // 충돌 시 적용할 힘을 추가 하기 위한 변수.  N단위
+	XMFLOAT3     				m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	XMFLOAT3 m_xmf3RotateVelocity =XMFLOAT3(0.0f,0.0f,0.0f);
 	XMFLOAT3 m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);  //속력
@@ -251,7 +257,6 @@ public:
 
 	float m_fForce = 0;    //앞키 누를 시 증가하는 변수, 룩벡터에 곱함으로써 진행 방향에 대한 힘벡터를 구함.
 
-	XMFLOAT3 m_xmf3Forces = { 0,0,0 };  // 충돌 시 적용할 힘을 추가 하기 위한 변수.  N단위
 
 
 	//---------------------------------------------------
@@ -320,6 +325,10 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 
+	void SetGravity(const XMFLOAT3& xmf3Gravity) { m_xmf3Gravity = xmf3Gravity; }
+	void SetVelocity(const XMFLOAT3& xmf3Velocity) { m_xmf3Velocity = xmf3Velocity; }
+	const XMFLOAT3& GetVelocity() const { return(m_xmf3Velocity); }
+
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 
 	void Rotate(float fPitch = 10.0f, float fYaw = 10.0f, float fRoll = 10.0f);
@@ -345,6 +354,8 @@ public:
 	void SetMaxForce(float fForce) { m_fMaxForce = fForce; }
 	float GetMaxForce() { return m_fMaxForce; }
 
+	void SetUpdatedContext(LPVOID pContext) { m_pUpdatedContext = pContext; }
+	virtual void OnUpdateCallback(float fTimeElapsed);
 public:
 	CAnimationController 			*m_pSkinnedAnimationController = NULL;
 

@@ -43,34 +43,6 @@ void SkinedShader::Load(CreateManager* pCreateManager, const char* filename, con
 	::fclose(pInFile);
 }
 
-void SkinedShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
-{
-	/*
-	if (!pszFileName)
-		return;
-
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, pszFileName, NULL);
-	m_ppObjects = pModel->m_pModelRootObject;
-
-	m_ppObjects->m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 1, pModel);
-	m_ppObjects->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); //left_turn_start
-	m_ppObjects->m_pSkinnedAnimationController->SetTrackEnable(0, false);
-
-	m_ppObjects->AddRef();
-
-	if (pModel)
-	{
-		delete pModel;
-		pModel = NULL;
-	}
-
-	if (filename)
-		Load(pCreateManager, pszFileName, filename);
-
-	CreateShaderVariables(pCreateManager);
-	*/
-}
-
 void SkinedShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {

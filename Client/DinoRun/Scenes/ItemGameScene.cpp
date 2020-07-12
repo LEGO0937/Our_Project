@@ -147,8 +147,8 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	m_pSkyBox = new SkyBoxObject(pCreateManager.get());
 
-	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 17,
-		17, xmf3Scale);
+	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 7,
+		7, xmf3Scale);
 
 	CObInstancingShader* shader;
 	BillBoardShader* bShader;
@@ -156,6 +156,9 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CSkinedObInstancingShader* animatedShader;
 
 	UI_INFO view_info;    //게임중 or 대기중 뷰
+	MODEL_INFO model_info;
+	model_info.updatedContext = m_pTerrain;
+
 	view_info.textureName = "Resources/Images/T_BlurEffect.dds";
 	view_info.meshSize = XMFLOAT2(1.0f, 1.0f);
 	view_info.positions.emplace_back(XMFLOAT3(0.0f, 0.0f, 0.1f));
@@ -166,52 +169,80 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
 
 	bShader = new BillBoardShader;
-	bShader->BuildObjects(pCreateManager.get(),150,"Resources/Images/treearray.dds", "Resources/ObjectData/BillBoardData");
+	model_info.modelName = "Resources/Images/B_Tree.dds";
+	model_info.dataFileName = "Resources/ObjectData/BillBoardData";
+	model_info.size = 50;
+	bShader->BuildObjects(pCreateManager.get(),&model_info);
 	instacingBillBoardShaders.emplace_back(bShader);
 
 	shader = new FenceShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(Fence)");
+	model_info.modelName = "Resources/Models/M_Block.bin";
+	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
+	model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new BananaShader;
-	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Banana.bin", NULL);
+	model_info.modelName = "Resources/Models/M_Banana.bin";
+	model_info.dataFileName = NULL;
+	model_info.useBillBoard = true;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new MudShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Mud.bin", NULL);
+	model_info.modelName = "Resources/Models/M_Mud.bin";
+	model_info.dataFileName = NULL;
+	model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new StoneShader;
-	shader->BuildObjects(pCreateManager.get(), 1, "Resources/Models/M_Stone.bin", NULL);
+	model_info.modelName = "Resources/Models/M_Stone.bin";
+	model_info.dataFileName = NULL;
+	model_info.useBillBoard = true;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), 1, "Resources/Models/M_Tree.bin", "Resources/ObjectData/TreeData");
-	instacingModelShaders.emplace_back(shader);
-	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), 1, "Resources/Models/M_Stone.bin", "Resources/ObjectData/StoneData");
-	instacingModelShaders.emplace_back(shader);
-	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), 1, "Resources/Models/M_Bush.bin", "Resources/ObjectData/WeedData");
+	model_info.modelName = "Resources/Models/M_Tree.bin";
+	model_info.dataFileName = "Resources/ObjectData/TreeData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 
-	m_pCheckPointShader = new BlockShader;
-	m_pCheckPointShader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(LineBox)");
-	//m_pCheckPointShader->AddRef();
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone.bin";
+	model_info.dataFileName = "Resources/ObjectData/StoneData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instacingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Bush.bin";
+	model_info.dataFileName = "Resources/ObjectData/WeedData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instacingModelShaders.emplace_back(shader);
 
 	shader = new ItemShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Itembox.bin", "Resources/ObjectData/MeatData");
+	model_info.modelName = "Resources/Models/M_Itembox.bin";
+	model_info.dataFileName = "Resources/ObjectData/MeatData";
+	model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
+
+	m_pCheckPointShader = new BlockShader;
+	model_info.modelName = "Resources/Models/M_Block.bin";
+	model_info.dataFileName = "Resources/ObjectData/RectData(LineBox)";
+	m_pCheckPointShader->BuildObjects(pCreateManager.get(),&model_info);
+	//m_pCheckPointShader->AddRef();
 
 	uiShader = new TimeCountShader;
 	uiShader->BuildObjects(pCreateManager.get(), NULL);
@@ -249,7 +280,9 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instacingImageUiShaders.emplace_back(uiShader);
 
 	animatedShader = new PlayerShader;
-	animatedShader->BuildObjects(pCreateManager.get(), "Resources/Models/Dino.bin", NULL);
+	model_info.modelName = "Resources/Models/Dino.bin";
+	model_info.dataFileName = NULL;
+	animatedShader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingAnimatedModelShaders.emplace_back(animatedShader);
 	//UpdatedShaders.emplace_back(animatedShader);
 	 
@@ -352,7 +385,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				matrix._42 -= 7+pos.y;
 				matrix._43 -= pos.z;
 				//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
-				instacingModelShaders[m_eCurrentItem]->addObject(m_pCreateManager.get(), matrix);
+				instacingModelShaders[m_eCurrentItem]->addObject(m_pCreateManager.get(), matrix, matrix);
 				break;
 			case IconMeat:
 				m_pPlayer->SetMaxVelocityXZ(50);
@@ -887,7 +920,7 @@ void ItemGameScene::ReleaseShaderVariables()
 void ItemGameScene::setPlayer(CPlayer* player)
 {
 	BaseScene::setPlayer(player);
-	player->SetPlayerUpdatedContext((CHeightMapTerrain*)m_pTerrain);
+	player->SetUpdatedContext((CHeightMapTerrain*)m_pTerrain);
 }
 
 void ItemGameScene::setCamera(CCamera* camera)

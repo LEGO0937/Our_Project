@@ -289,6 +289,15 @@ void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 	}
 }
 
+void CObInstancingShader::FixedUpdate(float fTimeElapsed)
+{
+	if (!isFixedUpdate)
+		return;
+	for (CGameObject* obj : objectList)
+	{
+		obj->FixedUpdate(fTimeElapsed);
+	}
+}
 
 void CObInstancingShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)

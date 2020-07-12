@@ -22,6 +22,8 @@
 
 #include "../Common/Camera/Camera.h"
 
+
+
 GameScene::GameScene() :BaseScene()
 {
 	sceneType = SceneType::Game_Scene;
@@ -149,14 +151,16 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	
 	m_pSkyBox = new SkyBoxObject(pCreateManager.get());
 	
-	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 17,
-		17, xmf3Scale);
+	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 7,
+		7, xmf3Scale);
 
 	CObInstancingShader* shader;
 	CUiShader* uiShader;
 	CSkinedObInstancingShader* animatedShader;
 
 	UI_INFO view_info;    //게임중 or 대기중 뷰
+	MODEL_INFO model_info;
+	model_info.updatedContext = m_pTerrain;
 
 	view_info.textureName = "Resources/Images/T_Gauge_Frame.dds";
 	view_info.meshSize = XMFLOAT2(0.37f, 0.11f);
@@ -182,31 +186,49 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 
 	shader = new BillBoardShader;
-	shader->BuildObjects(pCreateManager.get(), 50,"Resources/Images/B_Tree.dds", "Resources/ObjectData/BillBoardData");
+	model_info.modelName = "Resources/Images/B_Tree.dds";
+	model_info.dataFileName = "Resources/ObjectData/BillBoardData";
+	model_info.size = 50;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingBillBoardShaders.emplace_back(shader);
 	
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Tree.bin", "Resources/ObjectData/TreeData");
+	model_info.modelName = "Resources/Models/M_Tree.bin";
+	model_info.dataFileName = "Resources/ObjectData/TreeData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader); 
+
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Stone.bin", "Resources/ObjectData/StoneData");
+	model_info.modelName = "Resources/Models/M_Stone.bin";
+	model_info.dataFileName = "Resources/ObjectData/StoneData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
+
 	shader = new TreeShader;
-	shader->BuildObjects(pCreateManager.get(), 1,"Resources/Models/M_Bush.bin", "Resources/ObjectData/WeedData");
+	model_info.modelName = "Resources/Models/M_Bush.bin";
+	model_info.dataFileName = "Resources/ObjectData/WeedData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 
 	shader = new FenceShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(Fence)");
+	model_info.modelName = "Resources/Models/M_Block.bin";
+	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
+	model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	m_pCheckPointShader = new BlockShader;
-	m_pCheckPointShader->BuildObjects(pCreateManager.get(),"Resources/Models/M_Block.bin", "Resources/ObjectData/RectData(LineBox)");
+	model_info.modelName = "Resources/Models/M_Block.bin";
+	model_info.dataFileName = "Resources/ObjectData/RectData(LineBox)";
+	m_pCheckPointShader->BuildObjects(pCreateManager.get(), &model_info);
 	//m_pCheckPointShader->AddRef();
 	
 	shader = new MeatShader;
-	shader->BuildObjects(pCreateManager.get(), "Resources/Models/M_Meat.bin", "Resources/ObjectData/MeatData");
+	model_info.modelName = "Resources/Models/M_Meat.bin";
+	model_info.dataFileName = "Resources/ObjectData/MeatData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instacingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
@@ -841,7 +863,7 @@ void GameScene::ReleaseShaderVariables()
 void GameScene::setPlayer(CPlayer* player)
 {
 	BaseScene::setPlayer(player);
-	player->SetPlayerUpdatedContext((CHeightMapTerrain*)m_pTerrain);
+	player->SetUpdatedContext((CHeightMapTerrain*)m_pTerrain);
 }
 
 void GameScene::setCamera(CCamera* camera)

@@ -65,7 +65,7 @@ void MudShader::Update(float fTimeElapsed)
 	}
 }
 
-void MudShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position)
+void MudShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition)
 {
 	ItemMud* pItemObject = NULL;
 	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
@@ -74,7 +74,7 @@ void MudShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3P
 	pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 	pItemObject->AddRef();
 
-	pItemObject->SetMatrix(xmf3Position);
+	pItemObject->SetMatrix(xmf3DepartPosition);
 
 	objectList.emplace_back(pItemObject);
 	if (pModel)

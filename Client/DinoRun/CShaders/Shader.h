@@ -10,6 +10,14 @@ struct CB_BillBoard
 	float fSize;
 };
 
+struct MODEL_INFO
+{
+	const char * modelName;
+	const char * dataFileName;
+	LPVOID updatedContext = NULL;
+	bool useBillBoard = true;
+	int size = 0;
+};
 
 class CShader
 {
@@ -72,7 +80,8 @@ protected:
 class CObjectsShader : public CShader
 {
 protected:
-	bool isEnable = true;
+	bool isEnable = true;          //그리기 유무
+	bool isFixedUpdate = false;	   // 물리 처리 할것인지
 	int drawingCount = 0;         // after culling, instancing number
 	int drawingBillBoardCount = 0;         // after culling, instancing BillBoard's number
 
@@ -108,6 +117,8 @@ protected:
 	CGameObject *m_ppObjects = NULL;   //인스턴싱drawing 대상
 	vector<CGameObject*> objectList;   // 인스턴싱될 오브젝트들
 	CGameObject *m_pBillBoardObject = NULL;   //인스턴싱drawing 빌보드 대상
+
+	LPVOID						m_pUpdatedContext = NULL; //다루는 오브젝트들의 업데이트에 사용될 요소 주로 Terrain 사용
 };
 
 class CObInstancingShader : public CObjectsShader
@@ -122,15 +133,13 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
-	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL){}
-	virtual void BuildObjects(CreateManager* pCreateManager, float size, const char *pszFileName, const char* filename = NULL) {}
 
 	virtual void ReleaseObjects();
 	
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void FixedUpdate(float fTimeElapsed) {}
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position) {}
+	virtual void FixedUpdate(float fTimeElapsed);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition) {}
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
@@ -161,7 +170,7 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
-	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL) {}
+
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 

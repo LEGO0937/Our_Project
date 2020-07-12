@@ -7,6 +7,7 @@
 #include "../CShaders/Shader.h"
 #include "../Scenes/BaseScene.h"
 #include "PlayerObject.h"
+#include "TerrainObject.h"
 
 #include "../Common/ParticleSystem/ParticleSystem.h"
 #include "../../DinoRun/Common/Animation/Animation.h"
@@ -445,29 +446,18 @@ void CGameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition
 
 void CGameObject::FixedUpdate(float fTimeElapsed)
 {
-
-	float drag = 0.5f* cPlayer* AIR *2.2f;
-	float rR = drag * 30;
-	XMFLOAT3 xmf3Look = GetLook();
-	XMFLOAT3 xmf3Fdrag = Vector3::ScalarProduct(m_xmf3Velocity, -drag * Vector3::Length(m_xmf3Velocity), false);
-	XMFLOAT3 xmf3Frr = Vector3::ScalarProduct(m_xmf3Velocity, -rR, false);
-	XMFLOAT3 xmf3Ftraction = Vector3::ScalarProduct(xmf3Look, m_fForce, false);
-	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Frr);
-	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Fdrag);  //รัวี
-	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);
-	m_xmf3AcceleratingForce = Vector3::DivProduct(xmf3Ftraction, m_fMass, false);
-	if (m_xmf3AcceleratingForce.z < 0)
-		drag = 1;
-	Move(Vector3::ScalarProduct(m_xmf3AcceleratingForce, fTimeElapsed, false), true);
-	//float fMaxVelocityY = m_fMaxVelocityY;
-	//fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
-	//if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
-
-	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, 10 * fTimeElapsed, false);
-	Move(xmf3Velocity, false);
-	
-	m_fForce = 0;
-	m_xmf3Forces = XMFLOAT3(0, 0, 0);
+	if (m_fMass && m_pUpdatedContext)
+	{
+		if (Vector3::Length(m_xmf3Forces) != 0)
+		{
+			m_xmf3AcceleratingForce = Vector3::DivProduct(m_xmf3Forces, m_fMass, false);
+			Move(Vector3::ScalarProduct(m_xmf3AcceleratingForce, fTimeElapsed, false), true);
+			m_xmf3Forces = XMFLOAT3(0, 0, 0);
+		}
+		XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, UNIT_PER_METER * fTimeElapsed, false);
+		Move(xmf3Velocity, false);
+		OnUpdateCallback(fTimeElapsed);
+	}
 }
 
 void CGameObject::UpdateDistance(float fTimeElapsed, CGameObject* target)
@@ -1275,4 +1265,27 @@ bool CGameObject::IsCollide(CGameObject* self, CGameObject* target)
 	if (target->m_pChild) if (IsCollide(self, target->m_pChild)) return true;
 
 	return false;
+}
+
+void CGameObject::OnUpdateCallback(float fTimeElapsed)
+{
+	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)m_pUpdatedContext;
+	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
+	XMFLOAT3 xmf3Position = GetPosition();
+	int z = (int)(xmf3Position.z / xmf3Scale.z);
+	bool bReverseQuad = ((z % 2) != 0);
+#ifndef _WITH_LEFT_HAND_COORDINATES
+	float fHeight = pTerrain->GetHeight(xmf3Position.x, 256 * xmf3Scale.z - xmf3Position.z);
+#else
+	float fHeight = pTerrain->GetHeight(xmf3Position.x, 256 * xmf3Scale.z - xmf3Position.z);
+#endif
+
+	if (xmf3Position.y < fHeight)
+	{
+		XMFLOAT3 xmf3Velocity = m_xmf3Velocity;
+		xmf3Velocity.y = 0.0f;
+		m_xmf3Velocity = xmf3Velocity;
+		xmf3Position.y = fHeight;
+		SetPosition(xmf3Position);
+	}
 }

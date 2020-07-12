@@ -8,26 +8,26 @@ PlayerShader::PlayerShader()
 PlayerShader::~PlayerShader()
 {
 }
-
-void PlayerShader::BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename)
+void PlayerShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
 {
-	
-	if (!pszFileName)
+	MODEL_INFO* info = (MODEL_INFO*)pInformation;
+	if (!info->modelName)
 		return;
-	instancingModelName = pszFileName;
+	if (info->updatedContext)
+		m_pUpdatedContext = info->updatedContext;
+
+	instancingModelName = info->modelName;
 	instancingModelName.insert(instancingModelName.find("."), "_ins");  //인스턴싱 전용 모델파일을 불러온다
 
-	CDinoRunPlayer *pModel = new CDinoRunPlayer(pCreateManager, pszFileName);
+	CDinoRunPlayer *pModel = new CDinoRunPlayer(pCreateManager, info->modelName);
 	m_ppSkinedObjects = pModel;
 	//m_ppSkinedObjects->AddRef();
 
-	if (pszFileName)
-		Load(pCreateManager, pszFileName, filename);
+	if (info->modelName)
+		Load(pCreateManager, info->modelName, info->dataFileName);
 
 	CreateShaderVariables(pCreateManager);
-	
 }
-
 
 void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {

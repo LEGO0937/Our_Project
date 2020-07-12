@@ -20,7 +20,9 @@ class CHeightMapTerrain;
 class SkyBoxObject;
 
 
-enum ItemIcon_type {IconDefault=0,IconBanana, IconMud, IconStone,IconMeat,IconMugen};
+enum ItemIcon_type {
+	IconDefault = 0,IconBanana, IconMud, IconStone,IconMeat,IconMugen,
+};
 
 class ItemGameScene : public BaseScene
 {

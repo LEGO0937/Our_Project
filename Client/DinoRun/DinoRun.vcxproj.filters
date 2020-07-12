@@ -241,6 +241,9 @@
     <Filter Include="CShaders\MotionBlurShader">
       <UniqueIdentifier>{b2719671-4b0e-448b-9c48-0f0e4b2ced61}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Objects\MeteoriteObject">
+      <UniqueIdentifier>{3ce986f4-eaa5-403b-93e5-08275f475eb8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -395,6 +398,9 @@
     </ClInclude>
     <ClInclude Include="CShaders\MotionBlurShader\MotionBlurShader.h">
       <Filter>CShaders\MotionBlurShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Objects\MeteoriteObject.h">
+      <Filter>Objects\MeteoriteObject</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -598,6 +604,9 @@
     </ClCompile>
     <ClCompile Include="CShaders\MotionBlurShader\MotionBlurShader.cpp">
       <Filter>CShaders\MotionBlurShader</Filter>
+    </ClCompile>
+    <ClCompile Include="Objects\MeteoriteObject.cpp">
+      <Filter>Objects\MeteoriteObject</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

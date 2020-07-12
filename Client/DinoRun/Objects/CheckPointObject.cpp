@@ -1,7 +1,6 @@
 #include "CheckPointObject.h"
 CheckPointObject::CheckPointObject(int nMeshes) :CGameObject(nMeshes)
 {
-	m_fMass = 0;
 	isKinematic = true;
 	m_ModelType = ModelType::CheckPoint;
 }

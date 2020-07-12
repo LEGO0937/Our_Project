@@ -208,6 +208,7 @@
     <ClInclude Include="Objects\CheckPointObject.h" />
     <ClInclude Include="Objects\FenceObject.h" />
     <ClInclude Include="Objects\ItemObject.h" />
+    <ClInclude Include="Objects\MeteoriteObject.h" />
     <ClInclude Include="Objects\PlayerObject.h" />
     <ClInclude Include="Objects\SkyBoxObject.h" />
     <ClInclude Include="Objects\TerrainObject.h" />
@@ -277,6 +278,7 @@
     <ClCompile Include="Objects\ItemMud.cpp" />
     <ClCompile Include="Objects\ItemObject.cpp" />
     <ClCompile Include="Objects\ItemStone.cpp" />
+    <ClCompile Include="Objects\MeteoriteObject.cpp" />
     <ClCompile Include="Objects\PlayerObject.cpp" />
     <ClCompile Include="Objects\SkyBoxObject.cpp" />
     <ClCompile Include="Objects\TerrainObject.cpp" />

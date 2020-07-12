@@ -8,12 +8,10 @@ protected:
 public:
 	ModelShader();
 	virtual ~ModelShader();
-
-	virtual void BuildObjects(CreateManager* pCreateManager, float size, const char *pszFileName, const char* filename = NULL);
-	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL);
+	void BuildObjects(CreateManager* pCreateManager, void* pInformation);
 	virtual void Update(float fTimeElapsed){}
 	virtual void FixedUpdate(float fTimeElapsed) {}
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position) {}
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition) {}
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 };
@@ -75,7 +73,7 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition);
 };
 
 class MudShader : public ModelShader
@@ -86,7 +84,7 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition);
 };
 
 class StoneShader : public ModelShader
@@ -97,6 +95,6 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3Position);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition);
 };
 

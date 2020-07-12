@@ -34,7 +34,7 @@ CPlayer::CPlayer() : CGameObject()
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
 
-	m_pPlayerUpdatedContext = NULL;
+	m_pUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
 }
 
@@ -238,34 +238,10 @@ void CPlayer::Rotate(float x, float y, float z)
 bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 {
 	//충돌 처리
-	if (!target->GetKinematicState())
-	{
-		//타깃의 충돌에 대한 운동처리
-		//target->Move(XMFLOAT3(0, 0, 0), true);  //방향으로 속력 추가 적용, 시간변수 사용할 것
-		/*
-
-	bfVX = ((2.f*aMass) / (aMass + bMass))* aVX
-		+ ((bMass - aMass) / (aMass + bMass))*bVX;
-
-	bfVY = ((2.f*aMass) / (aMass + bMass))* aVY
-		+ ((bMass - aMass) / (aMass + bMass))*bVY;
-
-	bfVZ = ((2.f*aMass) / (aMass + bMass))* aVZ
-		+ ((bMass - aMass) / (aMass + bMass))*bVZ;
-		*/
-
-		//fVx = ((2.f* m_fMass) / (m_fMass + target->m_fMass)) * m_xmf3Velocity.z
-		//	+ ((target->m_fMass - m_fMass) / (m_fMass + target->m_fMass)) * target->m_xmf3Velocity.z;
-	}
 	float fVx, fVy, fVz;
 
-	switch (target->GetModelType())   //충돌처리로 씬내에 무언가를 삭제 or 생성하려면 return true 할 것
+	if (target->m_fMass)
 	{
-	case ModelType::CheckPoint:
-		++m_uCheckpointCount;
-		break;
-	case ModelType::Fence:
-		//힘 전송
 		fVx = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.x
 			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.x;
 
@@ -279,6 +255,15 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 
 		UpdateDistance(fTimeElapsed, target);
 		m_fForce = 0;
+	}
+
+	switch (target->GetModelType())   //충돌처리로 씬내에 무언가를 삭제 or 생성하려면 return true 할 것
+	{
+	case ModelType::CheckPoint:
+		++m_uCheckpointCount;
+		break;
+	case ModelType::Fence:
+		//힘 전송
 		//Move(XMFLOAT3(fVx,fVy,fVz),true);
 		return true;
 	case ModelType::Player:
@@ -306,20 +291,6 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		m_fTimeCount = 0.5f;
 		break;
 	case ModelType::Item_Stone:
-		fVx = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.x
-			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.x;
-
-		fVy = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.y
-			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.y;
-
-		fVz = ((m_fMass - target->m_fMass) / (m_fMass + target->m_fMass))* m_xmf3Velocity.z
-			+ ((2.f*target->m_fMass) / (m_fMass + target->m_fMass))*target->m_xmf3Velocity.z;
-
-		SetVelocity(XMFLOAT3(fVx, fVy, fVz));
-		SetPosition(XMFLOAT3(m_xmf4x4PrevWorld._41, m_xmf4x4PrevWorld._42, m_xmf4x4PrevWorld._43));
-
-		UpdateDistance(fTimeElapsed, target);
-		m_fForce = 0;
 		break;
 	default:
 		break;
@@ -403,7 +374,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, UNIT_PER_METER * fTimeElapsed, false); //10은 유닛당 10cm 이므로 10을 곱해야함
 	Move(xmf3Velocity, false); //속력만큼 벡터 이동
 
-	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
+	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
@@ -600,7 +571,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	CAnimationCallbackHandler *pAnimationCallbackHandler = new CSoundCallbackHandler();
 	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
 */
-//SetPlayerUpdatedContext(pContext);
+//SetUpdatedContext(pContext);
 //SetCameraUpdatedContext(pContext);
 
 	if (pAngrybotModel) delete pAngrybotModel;
@@ -668,7 +639,7 @@ CCamera *CDinoRunPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetTimeLag(0.10f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 30.0f, -60.0f));
 		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 2000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 1800.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		m_pCamera->SetLookAt(GetPosition());
@@ -681,9 +652,9 @@ CCamera *CDinoRunPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	return(m_pCamera);
 }
 
-void CDinoRunPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
+void CDinoRunPlayer::OnUpdateCallback(float fTimeElapsed)
 {
-	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)m_pPlayerUpdatedContext;
+	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)m_pUpdatedContext;
 	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
 	XMFLOAT3 xmf3PlayerPosition = GetPosition();
 	int z = (int)(xmf3PlayerPosition.z / xmf3Scale.z);
