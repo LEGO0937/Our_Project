@@ -61,6 +61,7 @@ public:
 
 	CHeightMapTerrain* GetTerrain() { return m_pTerrain; }
 
+	virtual void AddParticle(const MessageStruct& msg);
 private:
 	ID3D12Resource *m_pd3dcbShadow = NULL;
 	CB_GAME_INFO* m_pcbMappedShadow = NULL;

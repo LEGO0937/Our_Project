@@ -582,8 +582,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager, LOOP, DUST, -0.05f, 2.5f, this, XMFLOAT3(0.0f, 0, 18),
-		15, "Resources/Images/dust.dds", 0.5, 60);
+	m_pParticleSystem = new ParticleSystem(pCreateManager,"Dust", this, XMFLOAT3(0.0f, 0, 18));
 	//SetScale(XMFLOAT3(0.05f, 0.05f, 0.05f));
 
 }

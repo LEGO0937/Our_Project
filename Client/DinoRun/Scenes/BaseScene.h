@@ -2,7 +2,6 @@
 #include "../Common/Timer/Timer.h"
 #include "BaseObject.h"
 #include "../CShaders/FontShader/FontShader.h"
-//#include "EventHandler/EventHandler.h"
 
 //enum renderItem {
 //	opacity=0,terrain, transparency
@@ -105,6 +104,12 @@ public:
 
 	virtual string GetId() { return m_sPlayerId; }
 	virtual void SetId(const string& str) { m_sPlayerId = str; }
+
+	//--------------------EventHandler---
+	virtual void AddModelObject(const MessageStruct& msg) {}
+	virtual void DeleteModelObject(const MessageStruct& msg) {}
+	virtual void AddParticle(const MessageStruct& msg) {}
+	
 protected:
 	string m_sPlayerId;
 	shared_ptr<CreateManager> m_pCreateManager = NULL;

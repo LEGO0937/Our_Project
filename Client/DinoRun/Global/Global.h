@@ -68,3 +68,5 @@ enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 #define MIN_ROTATE_RADIAN -0.26  //약 -15도
 
 #define ROTATE_ACCELERATING 0.086   //각 가속력 초당 5도   2초 15도
+
+

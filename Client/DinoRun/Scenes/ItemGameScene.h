@@ -1,5 +1,4 @@
 #pragma once
-#pragma once
 #include "BaseScene.h"
 //#include "../CShaders/BlurShader/BlurShader.h"
 
@@ -67,7 +66,9 @@ public:
 
 	CHeightMapTerrain* GetTerrain() { return m_pTerrain; }
 
-	vector<CObInstancingShader*> GetModelShaders() { return instancingModelShaders; }
+	virtual void AddModelObject(const MessageStruct& msg);
+	virtual void DeleteModelObject(const MessageStruct& msg);
+	virtual void AddParticle(const MessageStruct& msg);
 private:
 	ID3D12Resource *m_pd3dcbShadow = NULL;
 	CB_GAME_INFO* m_pcbMappedShadow = NULL;

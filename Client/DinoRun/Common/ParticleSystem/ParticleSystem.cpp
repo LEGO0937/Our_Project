@@ -2,16 +2,14 @@
 #include <time.h>
 
 
-ParticleSystem::ParticleSystem(CreateManager* pCreateManager, const char& cPattern, 
-	const char& cShape, const float& fGravity,	const float& fSize,	CGameObject* pTarget,
-	const XMFLOAT3& xmf3Position, const float& fVelocity,	string pTextureName, 
-	const float& fLife, const UINT& uMaxSize): m_cPattern(cPattern),m_cShape(cShape), m_fSize(fSize),
-	m_fParticleLife(fLife), m_fVelocity(fVelocity),m_fGravity(fGravity),m_uMaxSize(uMaxSize)
+ParticleSystem::ParticleSystem(CreateManager* pCreateManager, string name, CGameObject* pTarget,
+	const XMFLOAT3& xmf3Position)
 {
+	FindValue(name);
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	CTexture * texture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	texture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(pTextureName.c_str()), 0);
+	texture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(m_sTextureName.c_str()), 0);
 
 	CShader* pShader = new CShader();
 	pShader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
@@ -316,4 +314,63 @@ void ParticleSystem::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 	}
 	if (m_pMesh)
 		m_pMesh->Render(pd3dCommandList, 0, m_vParticles.size());
+}
+
+void ParticleSystem::FindValue(string name)
+{
+	if (name == "Spawn")
+	{
+		m_cPattern = LOOP;
+		m_cShape = RAND;
+		m_fSize = (1.5f);
+		m_fParticleLife = 2.0f;
+		m_fVelocity = (15.0f);
+		m_fGravity = 0.0f;
+		m_uMaxSize = 50;
+		m_sTextureName = "Resources/Images/T_Linepoint.dds";
+	}
+	else if (name == "HeatEffect")
+	{
+		m_cPattern = ONES;
+		m_cShape = BOOM;
+		m_fSize = (5.0f);
+		m_fParticleLife = 0.5f;
+		m_fVelocity = (0.0f);
+		m_fGravity = 0.0f;
+		m_uMaxSize = 1;
+		m_sTextureName = "Resources/Images/T_Damage1.dds";
+	}
+	else if (name == "BoxParticle")
+	{
+		m_cPattern = ONES;
+		m_cShape = CONE;
+		m_fSize = (1.0f);
+		m_fParticleLife = 3.0f;
+		m_fVelocity = (70.0f);
+		m_fGravity = 3.0f;
+		m_uMaxSize = 120;
+		m_sTextureName = "Resources/Images/T_Itemboxeat.dds";
+	}
+	else if (name == "MeatParticle")
+	{
+		m_cPattern = ONES;
+		m_cShape = CONE;
+		m_fSize = (1.0f);
+		m_fParticleLife = 3.0f;
+		m_fVelocity = (70.0f);
+		m_fGravity = 3.0f;
+		m_uMaxSize = 120;
+		m_sTextureName = "Resources/Images/T_Meateat_P.dds";
+	}
+	else if (name == "Dust")
+	{
+		m_cPattern = LOOP;
+		m_cShape = DUST;
+		m_fSize = (2.5f);
+		m_fParticleLife = 0.5f;
+		m_fVelocity = (15.0f);
+		m_fGravity = -0.05f;
+		m_uMaxSize = 60;
+		m_sTextureName = "Resources/Images/dust.dds";
+	}
 }

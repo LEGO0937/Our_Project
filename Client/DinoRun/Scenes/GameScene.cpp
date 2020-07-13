@@ -21,7 +21,7 @@
 
 
 #include "../Common/Camera/Camera.h"
-
+#include "EventHandler/EventHandler.h"
 
 
 GameScene::GameScene() :BaseScene()
@@ -269,12 +269,9 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	motionBlurShader = new MotionBlurShader(pCreateManager.get());
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/T_Linepoint.dds", 2, 50));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/T_Linepoint.dds", 2, 50));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/T_Linepoint.dds", 2, 50));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 	BuildLights();
 
 	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
@@ -637,7 +634,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
 			m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 		}
-
+		MessageStruct message;
 		for (CObjectsShader* shader : UpdatedShaders)
 		{
 			for (auto p = begin(shader->getList()); p < end(shader->getList());)
@@ -649,15 +646,19 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 					{
 						if ((*p)->GetModelType() == Fence || (*p)->GetModelType() == Player)
 						{
-							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
-								0, "Resources/Images/T_Damage1.dds", 0.5, 1));
+							message.shaderName = "HeatEffect";
+							message.departMat = m_pPlayer->m_xmf4x4World;
+							message.msgName = "Add_Particle";
+							EventHandler::GetInstance()->CallBack(message);
 							m_pSoundManager->Play("Heat", 0.2f);
 							p++;
 						}
 						else if ((*p)->GetModelType() == Item_Meat)
 						{
-							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
-								70, "Resources/Images/T_Meateat_P.dds", 3, 120));
+							message.shaderName = "MeatParticle";
+							message.departMat = (*p)->m_xmf4x4World;
+							message.msgName = "Add_Particle";
+							EventHandler::GetInstance()->CallBack(message);
 							m_pSoundManager->Play("MeatEat", 0.5f);
 							p++;
 						}
@@ -875,4 +876,10 @@ void GameScene::setCamera(CCamera* camera)
 void GameScene::ResetShadowBuffer(CreateManager* pCreateManager)
 {
 	m_pTerrain->resetShadowTexture(pCreateManager);
+}
+
+void GameScene::AddParticle(const MessageStruct& msg)
+{
+	XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
+	particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName, NULL, pos));
 }

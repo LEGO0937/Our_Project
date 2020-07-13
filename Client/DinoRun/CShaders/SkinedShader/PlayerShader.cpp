@@ -44,7 +44,7 @@ void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, con
 		//pPlayerObject->SetPosition(XMFLOAT3(800.0f, 73.6, 920));
 		//pPlayerObject->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 		//pPlayerObject->OnPrepareRender();
-
+		pPlayerObject->SetId(m_iCurSerealNum++);
 		//애니메이션 적용을 find_if를 통해서 아이디와 맞는 오브젝트 찾고 적용하도록 하자.
 		m_vSkinedObjectList.emplace_back(pPlayerObject);
 	}

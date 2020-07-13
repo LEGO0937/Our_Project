@@ -11,16 +11,20 @@ void EventHandler::Update()
 {
 	while (messageQueue.size())
 	{
-		MessageStruct mes = *messageQueue.begin();
-		vector<string> vStrings = split(mes.name, "_");
+		MessageStruct msg = *messageQueue.begin();
 		////메시지 내용에 따른 처리구간
-		if (vStrings[0] == "ADD")
+		if (msg.msgName == "Add_Model")
 		{
-			mes.shader->addObject(mes.createMgr, mes.departMat, mes.arriveMat);
+			m_pCurScene->AddModelObject(msg);
+			//mes.shader->addObject(mes.createMgr, mes.departMat, mes.arriveMat);
 		}
-		else if (vStrings[0] == "DELETE")
+		else if (msg.msgName == "Delete_Model")
 		{
-		
+			m_pCurScene->DeleteModelObject(msg);
+		}
+		else if (msg.msgName == "Add_Particle")
+		{
+			m_pCurScene->AddParticle(msg);
 		}
 		messageQueue.pop_front();  //메시지 삭제
 	}

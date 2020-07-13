@@ -64,6 +64,8 @@ private:
 	list<Particle> m_vParticles;
 	float m_fParticleLife = 0;
 
+	string m_sTextureName = "";
+
 	ID3D12Resource *m_pd3dUbParticles = NULL;
 
 	Particle *m_pReadBackMappedParticles = NULL;
@@ -80,10 +82,8 @@ private:
 	CB_Particle *particleCb;
 	
 public:
-	ParticleSystem(CreateManager* pCreateManager, const char& cPattern, const char& cShape, const float& fGravity, 
-		const float& fSize, CGameObject* pTarget, const XMFLOAT3& xmf3Position,
-		 const float& fVelocity,
-		string pTextureName, const float& fLife, const UINT& uMaxSize);
+	ParticleSystem(CreateManager* pCreateManager, string name, CGameObject* pTarget,
+		const XMFLOAT3& xmf3Position);
 	~ParticleSystem();
 	list<Particle> GetParticles() { return m_vParticles; }
 	bool AnimateObjects(float fTimeElapsed);
@@ -97,5 +97,7 @@ public:
 
 	void CreateParticles();
 	void SetEnable(bool enable) { m_bEnable = enable; }
+
+	void FindValue(string name);
 };
 

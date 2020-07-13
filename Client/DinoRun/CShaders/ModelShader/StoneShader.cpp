@@ -4,6 +4,7 @@
 
 StoneShader::StoneShader()
 {
+	shaderName = "StoneShader";
 }
 StoneShader::~StoneShader()
 {
@@ -35,6 +36,8 @@ void StoneShader::Load(CreateManager* pCreateManager, const char* filename, cons
 
 		//이곳에서 findFrame을 통해 각 오브젝트에 질량 및 키네마틱 값 추가할 것.
 		nReads = (UINT)::fread(&(pItemObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
+		pItemObject->SetId(m_iCurSerealNum++);
+
 		objectList.emplace_back(pItemObject);
 		if (pModel)
 		{
@@ -75,6 +78,7 @@ void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf
 	pItemObject->AddRef();
 
 	pItemObject->SetMatrix(xmf3DepartPosition);
+	pItemObject->SetId(m_iCurSerealNum++);
 
 	objectList.emplace_back(pItemObject);
 	if (pModel)

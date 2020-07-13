@@ -299,6 +299,17 @@ void CObInstancingShader::FixedUpdate(float fTimeElapsed)
 	}
 }
 
+void CObInstancingShader::DeleteObject(const int& iSerealNum)
+{
+	auto obj = find_if(objectList.begin(), objectList.end(), [&](CGameObject* a) {
+		return a->GetId() == iSerealNum; });
+	if (obj != objectList.end())
+	{
+		(*obj)->Release();
+		objectList.erase(obj);
+	}
+}
+
 void CObInstancingShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
 	*pCamera)
 {

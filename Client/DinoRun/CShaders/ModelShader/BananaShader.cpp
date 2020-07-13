@@ -4,6 +4,7 @@
 
 BananaShader::BananaShader()
 {
+	shaderName = "BananaShader";
 }
 BananaShader::~BananaShader()
 {
@@ -34,6 +35,7 @@ void BananaShader::Load(CreateManager* pCreateManager, const char* filename, con
 
 		//이곳에서 findFrame을 통해 각 오브젝트에 질량 및 키네마틱 값 추가할 것.
 		nReads = (UINT)::fread(&(pItemObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
+		pItemObject->SetId(m_iCurSerealNum++);
 		objectList.emplace_back(pItemObject);
 		if (pModel)
 		{
@@ -79,6 +81,7 @@ void BananaShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xm
 	pItemObject->AddRef();
 
 	pItemObject->SetMatrix(xmf3DepartPosition);
+	pItemObject->SetId(m_iCurSerealNum++);
 
 	objectList.emplace_back(pItemObject);
 	if (pModel)

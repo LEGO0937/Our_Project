@@ -6,6 +6,7 @@
 
 BillBoardShader::BillBoardShader()
 {
+	shaderName = "BillBoardShader";
 }
 BillBoardShader::~BillBoardShader()
 {
@@ -33,6 +34,7 @@ void BillBoardShader::Load(CreateManager* pCreateManager, const char* filename)
 		pBillBoardObject->AddRef();
 		nReads = (UINT)::fread(&(pBillBoardObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
 		pBillBoardObject->SetMesh(mesh);
+		pBillBoardObject->SetId(m_iCurSerealNum++);
 		objectList.emplace_back(pBillBoardObject);
 	}
 

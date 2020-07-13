@@ -27,6 +27,7 @@
 #define ITEM_TILE 0
 #define ITEM_UI 1   //아이템 틀안의 이미지의 쉐이더 리스트상에서의 인덱스
 
+string ItemShaderName[4] = { "Default","BananaShader","MudShader","StoneShader" };
 
 ItemGameScene::ItemGameScene() :BaseScene()
 {
@@ -297,12 +298,9 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	blurShader = new BlurShader(pCreateManager.get());
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/T_Linepoint.dds", 2, 50));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/T_Linepoint.dds", 2, 50));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), LOOP, RAND, 0.0f, 1.5f, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z),
-		15, "Resources/Images/T_Linepoint.dds", 2, 50));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(),"Spawn", NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 
 	BuildLights();
 
@@ -389,12 +387,10 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 
 
 				//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
-				
-				message.createMgr = m_pCreateManager.get();
-				message.shader = instancingModelShaders[m_eCurrentItem];
+				message.shaderName = ItemShaderName[m_eCurrentItem];
 				message.departMat = matrix;
 				message.arriveMat = matrix;
-				message.name = "ADD_Banana";
+				message.msgName = "Add_Model";
 				EventHandler::GetInstance()->CallBack(message);
 				break;
 			case IconMeat:
@@ -694,6 +690,8 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 			m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
 		}
 
+		MessageStruct message;
+
 		for (CObjectsShader* shader : UpdatedShaders)
 		{
 			for (auto p = begin(shader->getList()); p < end(shader->getList());)
@@ -707,8 +705,11 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 						{
 							//서버연동 때는 이곳에서 생성하지않고 서버에게 생성하겠다는 신호만을 보낼것임
 							//다음 프레임의 업뎃에서 그 신호를 서버로부터  받아서 그 때 생성하도록 하겠음.
-							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, BOOM, 0.0f, 5, NULL, m_pPlayer->GetPosition(),
-								0, "Resources/Images/T_Damage1.dds", 0.5, 1));
+							message.shaderName = "HeatEffect";
+							message.departMat = m_pPlayer->m_xmf4x4World;
+							message.msgName = "Add_Particle";
+							EventHandler::GetInstance()->CallBack(message);
+
 							m_pSoundManager->Play("Heat", 0.2f);
 							p++;
 						}
@@ -726,16 +727,25 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							// 이 곳에서도 서버연동시 바로 안만들고 신호부터 보낼것임.
 							// 비활성화 시키는것 또한 신호를 보낼것임.
 							(*p)->SetEnableState(false);
-							particleSystems.emplace_back(new ParticleSystem(pCreateManager, ONES, CONE, 3.0f, 1.0f, NULL, (*p)->GetPosition(),
-								70, "Resources/Images/T_Itemboxeat.dds", 3, 120));
+							
+							message.shaderName = "BoxParticle";
+							message.departMat = (*p)->m_xmf4x4World;
+							message.msgName = "Add_Particle";
+							EventHandler::GetInstance()->CallBack(message);
 							m_pSoundManager->Play("ItemBox", 0.2f);
+
 						}
 						else
 						{
 							// 오브젝트 삭제를 하는 구간, 서버에 셰이더의 종류 및 오브젝트의 번호를 전송한다.
 							// 삭제 또한 업데이트함수에서 실시.
-							(*p)->Release();
-							p = shader->getList().erase(p);
+							
+							message.objectNumber = (*p)->GetId();
+							message.shaderName = shader->GetName();
+							message.msgName = "Delete_Model";
+							EventHandler::GetInstance()->CallBack(message);
+
+							p++;
 						}
 					}
 					else
@@ -943,4 +953,25 @@ void ItemGameScene::setCamera(CCamera* camera)
 void ItemGameScene::ResetShadowBuffer(CreateManager* pCreateManager)
 {
 	m_pTerrain->resetShadowTexture(pCreateManager);
+}
+
+void ItemGameScene::AddModelObject(const MessageStruct& msg)
+{
+	auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a){
+		return a->GetName() == msg.shaderName; });
+	if (shader != instancingModelShaders.end())
+		(*shader)->addObject(m_pCreateManager.get(), msg.departMat, msg.arriveMat);
+}
+void ItemGameScene::DeleteModelObject(const MessageStruct& msg)
+{
+	auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
+		return a->GetName() == msg.shaderName; });
+	if (shader != instancingModelShaders.end())
+		(*shader)->DeleteObject(msg.objectNumber);
+}
+
+void ItemGameScene::AddParticle(const MessageStruct& msg)
+{
+	XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
+	particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName , NULL, pos));
 }

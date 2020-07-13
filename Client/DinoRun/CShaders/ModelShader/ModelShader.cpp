@@ -27,6 +27,7 @@ void ModelShader::Load(CreateManager* pCreateManager, const char* filename, cons
 		pModelObject = pModel->m_pModelRootObject;
 		pModelObject->AddRef();
 		nReads = (UINT)::fread(&(pModelObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
+		pModelObject->SetId(m_iCurSerealNum++);
 		objectList.emplace_back(pModelObject);
 		if (pModel)
 		{
