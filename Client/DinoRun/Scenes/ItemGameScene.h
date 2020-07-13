@@ -67,6 +67,7 @@ public:
 
 	CHeightMapTerrain* GetTerrain() { return m_pTerrain; }
 
+	vector<CObInstancingShader*> GetModelShaders() { return instancingModelShaders; }
 private:
 	ID3D12Resource *m_pd3dcbShadow = NULL;
 	CB_GAME_INFO* m_pcbMappedShadow = NULL;
@@ -76,14 +77,14 @@ private:
 
 	list<CObjectsShader*> UpdatedShaders;  //물리적용이 되는 셰이더를 담음
 
-	vector<CObInstancingShader*> instacingBillBoardShaders;
-	vector<CObInstancingShader*> instacingModelShaders;
+	vector<CObInstancingShader*> instancingBillBoardShaders;
+	vector<CObInstancingShader*> instancingModelShaders;
 
-	vector<CUiShader*> instacingNumberUiShaders;
-	vector<CUiShader*> instacingImageUiShaders;
+	vector<CUiShader*> instancingNumberUiShaders;
+	vector<CUiShader*> instancingImageUiShaders;
 	CUiShader* m_pEffectShader = NULL;
 
-	vector<CSkinedObInstancingShader*> instacingAnimatedModelShaders;
+	vector<CSkinedObInstancingShader*> instancingAnimatedModelShaders;
 
 	CObInstancingShader* m_pCheckPointShader;
 

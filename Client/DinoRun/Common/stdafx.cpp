@@ -1383,3 +1383,22 @@ void CreatePsoVelocityTerrain(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_p
 	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
 		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
+
+
+vector<string> split(string target, string delimiter) {
+	
+	vector<string> result;
+	
+	int position = target.find(delimiter);
+
+	while (position != -1) {
+		string str1 = target.substr(0, position);
+		result.push_back(str1);
+		target = target.substr(position + 1);
+		position = target.find(delimiter);
+	}
+	result.push_back(target);
+	
+	return result;
+	
+}

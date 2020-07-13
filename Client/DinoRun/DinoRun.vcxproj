@@ -95,7 +95,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\김영완\Desktop\dinorun물리\DinoRun\Resources\fmod\inc;C:\Users\김영완\Desktop\dino\DinoRun\DinoRun\Resources\fmod\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\김영완\Desktop\dinorun물리\DinoRun\Common\EventHandler;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Common;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Meshes;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Resources\fmod\inc;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Objects;C:\Users\김영완\Desktop\dino\DinoRun\DinoRun\Resources\fmod\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -113,7 +113,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\김영완\Desktop\dinorun물리\DinoRun\Resources\fmod\inc;C:\Users\김영완\Desktop\dino\DinoRun\DinoRun\Resources\fmod\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\김영완\Desktop\dinorun물리\DinoRun\Common\EventHandler;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Common;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Meshes;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Resources\fmod\inc;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Objects;C:\Users\김영완\Desktop\dino\DinoRun\DinoRun\Resources\fmod\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -133,7 +133,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\김영완\Desktop\dinorun물리\DinoRun\Resources\fmod\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\김영완\Desktop\dinorun물리\DinoRun\Common\EventHandler;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Common;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Meshes;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Resources\fmod\inc;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Objects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -155,7 +155,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\김영완\Desktop\dinorun물리\DinoRun\Resources\fmod\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\김영완\Desktop\dinorun물리\DinoRun\Common\EventHandler;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Common;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Meshes;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Resources\fmod\inc;C:\Users\김영완\Desktop\dinorun물리\DinoRun\Objects;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -170,6 +170,7 @@
     <ClInclude Include="Common\Animation\Animation.h" />
     <ClInclude Include="Common\Camera\Camera.h" />
     <ClInclude Include="Common\d3dx12.h" />
+    <ClInclude Include="Common\EventHandler\EventHandler.h" />
     <ClInclude Include="Common\Font\Font.h" />
     <ClInclude Include="Common\FrameWork\CGameFramework.h" />
     <ClInclude Include="Common\FrameWork\CreateManager.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="Common\ParticleSystem\ParticleSystem.h" />
     <ClInclude Include="Common\Resource.h" />
     <ClInclude Include="Common\RigidBody\RigidBody.h" />
+    <ClInclude Include="Common\SingleTon\Singleton.h" />
     <ClInclude Include="Common\stdafx.h" />
     <ClInclude Include="Common\targetver.h" />
     <ClInclude Include="Common\TextureLoad\DDSTextureLoader12.h" />
@@ -208,7 +210,6 @@
     <ClInclude Include="Objects\CheckPointObject.h" />
     <ClInclude Include="Objects\FenceObject.h" />
     <ClInclude Include="Objects\ItemObject.h" />
-    <ClInclude Include="Objects\MeteoriteObject.h" />
     <ClInclude Include="Objects\PlayerObject.h" />
     <ClInclude Include="Objects\SkyBoxObject.h" />
     <ClInclude Include="Objects\TerrainObject.h" />
@@ -223,6 +224,7 @@
   <ItemGroup>
     <ClCompile Include="Common\Animation\Animation.cpp" />
     <ClCompile Include="Common\Camera\Camera.cpp" />
+    <ClCompile Include="Common\EventHandler\EventHandler.cpp" />
     <ClCompile Include="Common\Font\Font.cpp" />
     <ClCompile Include="Common\FrameWork\CGameFramework.cpp" />
     <ClCompile Include="Common\FrameWork\CreateManager.cpp" />
@@ -232,6 +234,7 @@
     <ClCompile Include="Common\FrameWork\SoundManager.cpp" />
     <ClCompile Include="Common\ParticleSystem\ParticleSystem.cpp" />
     <ClCompile Include="Common\RigidBody\RigidBody.cpp" />
+    <ClCompile Include="Common\SingleTon\Singleton.cpp" />
     <ClCompile Include="Common\stdafx.cpp" />
     <ClCompile Include="Common\TextureLoad\DDSTextureLoader12.cpp" />
     <ClCompile Include="Common\Timer\Timer.cpp" />
@@ -275,10 +278,10 @@
     <ClCompile Include="Objects\FenceObject.cpp" />
     <ClCompile Include="Objects\ItemBanana.cpp" />
     <ClCompile Include="Objects\ItemMeat.cpp" />
+    <ClCompile Include="Objects\ItemMeteorite.cpp" />
     <ClCompile Include="Objects\ItemMud.cpp" />
     <ClCompile Include="Objects\ItemObject.cpp" />
     <ClCompile Include="Objects\ItemStone.cpp" />
-    <ClCompile Include="Objects\MeteoriteObject.cpp" />
     <ClCompile Include="Objects\PlayerObject.cpp" />
     <ClCompile Include="Objects\SkyBoxObject.cpp" />
     <ClCompile Include="Objects\TerrainObject.cpp" />

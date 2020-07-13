@@ -1,6 +1,6 @@
 #include "ModelShader.h"
 #include "../../Common//FrameWork/CreateManager.h"
-#include "../../Objects/CheckPointObject.h"
+#include "CheckPointObject.h"
 
 BlockShader::BlockShader()
 {

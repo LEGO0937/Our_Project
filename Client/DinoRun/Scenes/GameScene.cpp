@@ -42,15 +42,15 @@ void GameScene::ReleaseUploadBuffers()
 	if (m_pCheckPointShader)
 		m_pCheckPointShader->ReleaseUploadBuffers();
 
-	for (CObInstancingShader* shader : instacingBillBoardShaders)
+	for (CObInstancingShader* shader : instancingBillBoardShaders)
 		if (shader) shader->ReleaseUploadBuffers();
-	for (CObInstancingShader* shader : instacingModelShaders)
+	for (CObInstancingShader* shader : instancingModelShaders)
 		if (shader) shader->ReleaseUploadBuffers();
-	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
+	for (CSkinedObInstancingShader* shader : instancingAnimatedModelShaders)
 		if (shader) shader->ReleaseUploadBuffers();
-	for (CUiShader* shader : instacingNumberUiShaders)
+	for (CUiShader* shader : instancingNumberUiShaders)
 		if (shader) { shader->ReleaseUploadBuffers(); }
-	for(CUiShader* shader : instacingImageUiShaders)
+	for(CUiShader* shader : instancingImageUiShaders)
 		if (shader) { shader->ReleaseUploadBuffers(); }
 
 	if (m_pMinimapShader)
@@ -87,15 +87,15 @@ void GameScene::ReleaseObjects()
 	for (CObjectsShader* shader : UpdatedShaders)
 		if (shader) { shader->Release(); }
 
-	for (CObInstancingShader* shader : instacingBillBoardShaders)
+	for (CObInstancingShader* shader : instancingBillBoardShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
-	for (CObInstancingShader* shader : instacingModelShaders)
+	for (CObInstancingShader* shader : instancingModelShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
-	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
+	for (CSkinedObInstancingShader* shader : instancingAnimatedModelShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
-	for (CUiShader* shader : instacingNumberUiShaders)
+	for (CUiShader* shader : instancingNumberUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
-	for (CUiShader* shader : instacingImageUiShaders)
+	for (CUiShader* shader : instancingImageUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 	if (m_pMinimapCamera)
@@ -133,11 +133,11 @@ void GameScene::ReleaseObjects()
 		m_pGuageShader->Release();
 	}
 	UpdatedShaders.clear();
-	instacingNumberUiShaders.clear();
-	instacingImageUiShaders.clear();
-	instacingBillBoardShaders.clear();
-	instacingModelShaders.clear();
-	instacingAnimatedModelShaders.clear();
+	instancingNumberUiShaders.clear();
+	instancingImageUiShaders.clear();
+	instancingBillBoardShaders.clear();
+	instancingModelShaders.clear();
+	instancingAnimatedModelShaders.clear();
 }
 void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
@@ -170,7 +170,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.f_uvY.emplace_back(0.0f);
 	uiShader = new ImageShader;
 	uiShader->BuildObjects(pCreateManager.get(), &view_info);
-	instacingImageUiShaders.emplace_back(uiShader);
+	instancingImageUiShaders.emplace_back(uiShader);
 	view_info.positions.clear();
 	view_info.f_uvY.clear();
 	
@@ -190,32 +190,32 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.dataFileName = "Resources/ObjectData/BillBoardData";
 	model_info.size = 50;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instacingBillBoardShaders.emplace_back(shader);
+	instancingBillBoardShaders.emplace_back(shader);
 	
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Tree.bin";
 	model_info.dataFileName = "Resources/ObjectData/TreeData";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instacingModelShaders.emplace_back(shader); 
+	instancingModelShaders.emplace_back(shader); 
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Stone.bin";
 	model_info.dataFileName = "Resources/ObjectData/StoneData";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instacingModelShaders.emplace_back(shader);
+	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Bush.bin";
 	model_info.dataFileName = "Resources/ObjectData/WeedData";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instacingModelShaders.emplace_back(shader);
+	instancingModelShaders.emplace_back(shader);
 
 	shader = new FenceShader;
 	model_info.modelName = "Resources/Models/M_Block.bin";
 	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
 	model_info.useBillBoard = false;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instacingModelShaders.emplace_back(shader);
+	instancingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
@@ -229,7 +229,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.modelName = "Resources/Models/M_Meat.bin";
 	model_info.dataFileName = "Resources/ObjectData/MeatData";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instacingModelShaders.emplace_back(shader);
+	instancingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
@@ -240,15 +240,15 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	uiShader = new TimeCountShader;
 	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
-	instacingNumberUiShaders.emplace_back(uiShader);
+	instancingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new TrackCountShader;
 	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
-	instacingNumberUiShaders.emplace_back(uiShader);
+	instancingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new RankCountShader;
 	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
-	instacingNumberUiShaders.emplace_back(uiShader);
+	instancingNumberUiShaders.emplace_back(uiShader);
 	
 
 	
@@ -256,7 +256,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	//animatedShader = new PlayerShader;
 	//animatedShader->BuildObjects(pCreateManager.get(), "Resources/Models/Dino.bin", NULL);
-	//instacingAnimatedModelShaders.emplace_back(animatedShader);
+	//instancingAnimatedModelShaders.emplace_back(animatedShader);
 	//UpdatedShaders.emplace_back(animatedShader);
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds",NULL);
@@ -443,7 +443,7 @@ void GameScene::Render()
 	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MODEL_INSTANCING]);
-	for (CObInstancingShader* shader : instacingModelShaders)
+	for (CObInstancingShader* shader : instancingModelShaders)
 	{
 		if (shader)
 			shader->Render(m_pd3dCommandList, m_pCamera);
@@ -451,9 +451,9 @@ void GameScene::Render()
 	m_pCheckPointShader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_BILLBOARD]);
-	for (CObInstancingShader* shader : instacingBillBoardShaders)
+	for (CObInstancingShader* shader : instancingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
-	for (CObInstancingShader* shader : instacingModelShaders)
+	for (CObInstancingShader* shader : instancingModelShaders)
 	{
 		if (shader)
 			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
@@ -463,7 +463,7 @@ void GameScene::Render()
 	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SKIN_MESH_INSTANCING]);
-	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
+	for (CSkinedObInstancingShader* shader : instancingAnimatedModelShaders)
 		if (shader) {
 			shader->Render(m_pd3dCommandList, m_pCamera);
 		}
@@ -480,7 +480,7 @@ void GameScene::Render()
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_WIRE]);
 	m_pPlayer->BbxRender(m_pd3dCommandList, m_pCamera);
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_WIRE_INSTANCING]);
-	for (CObInstancingShader* shader : instacingModelShaders)
+	for (CObInstancingShader* shader : instancingModelShaders)
 		if (shader) shader->BbxRender(m_pd3dCommandList, m_pCamera);
 
 #endif
@@ -494,13 +494,13 @@ void GameScene::RenderShadow()
 	m_pPlayer->Render(m_pd3dCommandList, m_pShadowCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_MODEL_INSTANCING]);
-	for (CObInstancingShader* shader : instacingModelShaders)
+	for (CObInstancingShader* shader : instancingModelShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
-	for (CObInstancingShader* shader : instacingBillBoardShaders)
+	for (CObInstancingShader* shader : instancingBillBoardShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
-	for (CObInstancingShader* shader : instacingModelShaders)
+	for (CObInstancingShader* shader : instancingModelShaders)
 	{
 		if (shader)
 			shader->BillBoardRender(m_pd3dCommandList, m_pShadowCamera);
@@ -514,13 +514,13 @@ void GameScene::RenderVelocity()
 	//m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 	//
 	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_MODEL_INSTANCING]);
-	//for (CObInstancingShader* shader : instacingModelShaders)
+	//for (CObInstancingShader* shader : instancingModelShaders)
 	//	if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 	//
 	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_BILLBOARD]);
-	//for (CObInstancingShader* shader : instacingBillBoardShaders)
+	//for (CObInstancingShader* shader : instancingBillBoardShaders)
 	//	if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
-	//for (CObInstancingShader* shader : instacingModelShaders)
+	//for (CObInstancingShader* shader : instancingModelShaders)
 	//{
 	//	if (shader)
 	//		shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
@@ -550,7 +550,7 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 	}
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
-	for (CUiShader* shader : instacingImageUiShaders)
+	for (CUiShader* shader : instancingImageUiShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_GAUGE]);
@@ -558,7 +558,7 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 		m_pGuageShader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_NUMBER]);
-	for (CUiShader* shader : instacingNumberUiShaders)
+	for (CUiShader* shader : instancingNumberUiShaders)
 	{
 		if (shader)
 			shader->Render(m_pd3dCommandList, m_pCamera);
@@ -581,7 +581,7 @@ void GameScene::AnimateObjects(float fTimeElapsed)
 	if (m_pPlayer)
 		m_pPlayer->Animate(fTimeElapsed);
 
-	for (CSkinedObInstancingShader* shader : instacingAnimatedModelShaders)
+	for (CSkinedObInstancingShader* shader : instancingAnimatedModelShaders)
 		if (shader) { shader->AnimateObjects(fTimeElapsed); }
 }
 
@@ -689,7 +689,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		if (m_pGuageShader)
 			m_pGuageShader->Update(fTimeElapsed, m_pPlayer);
 
-		for (CUiShader* shader : instacingNumberUiShaders)
+		for (CUiShader* shader : instancingNumberUiShaders)
 			shader->Update(fTimeElapsed, m_pPlayer);
 
 		XMFLOAT3 playerPosition = m_pPlayer->GetPosition();

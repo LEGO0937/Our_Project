@@ -1,6 +1,6 @@
 #include "ModelShader.h"
 #include "../../Common//FrameWork/CreateManager.h"
-#include "../../Objects/FenceObject.h"
+#include "FenceObject.h"
 FenceShader::FenceShader()
 {
 }

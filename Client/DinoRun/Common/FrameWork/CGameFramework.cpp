@@ -1,16 +1,17 @@
 #include "../stdafx.h"
 #include "CGameFramework.h"
-#include "../../Objects/TerrainObject.h"
-
+#include "TerrainObject.h"
+#include "EventHandler/EventHandler.h"
 ID3D12PipelineState** CGameFramework::m_ppd3dPipelineStates = NULL;
 
 CGameFramework::CGameFramework()
 {
-
+	EventHandler::GetInstance()->Update();
 }
 
 CGameFramework::~CGameFramework()
 {
+	EventHandler::GetInstance()->destroy();
 }
 
 bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
@@ -132,6 +133,7 @@ void CGameFramework::BuildObjects()
 	if (m_pPlayer)
 		m_pPlayer->ReleaseUploadBuffers();
 
+	EventHandler::GetInstance()->SetCurScene(m_pScene);
 	m_GameTimer.Reset();
 }
 
@@ -237,6 +239,8 @@ void CGameFramework::ReleaseObjects()
 		m_pScene->ReleaseShaderVariables();
 		m_pScene.reset();
 		m_pScene = NULL;
+
+		EventHandler::GetInstance()->ResetCurScene();
 	}
 	if (m_pPlayer)
 	{
@@ -343,6 +347,8 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		m_pPlayer->ReleaseUploadBuffers();
 
 	m_PrevState = type;
+
+	EventHandler::GetInstance()->SetCurScene(m_pScene);
 }
 
 

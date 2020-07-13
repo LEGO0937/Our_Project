@@ -1,6 +1,6 @@
 #pragma once
 #include "../../CShaders/Shader.h"
-#include "../../Meshes/BillBoardMesh.h"
+#include "BillBoardMesh.h"
 #include "../../Common/FrameWork/CreateManager.h"
 
 #include "../stdafx.h"

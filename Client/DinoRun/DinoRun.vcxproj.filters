@@ -241,8 +241,14 @@
     <Filter Include="CShaders\MotionBlurShader">
       <UniqueIdentifier>{b2719671-4b0e-448b-9c48-0f0e4b2ced61}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\MeteoriteObject">
+    <Filter Include="Objects\ItemObject\05ItemMeteorite">
       <UniqueIdentifier>{3ce986f4-eaa5-403b-93e5-08275f475eb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\EventHandler">
+      <UniqueIdentifier>{f7c961f5-eaa4-4149-ba2c-370a5a4297b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\SingleTon">
+      <UniqueIdentifier>{811f28b5-88b3-4e67-ac9b-745a1adf7a53}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -399,8 +405,11 @@
     <ClInclude Include="CShaders\MotionBlurShader\MotionBlurShader.h">
       <Filter>CShaders\MotionBlurShader</Filter>
     </ClInclude>
-    <ClInclude Include="Objects\MeteoriteObject.h">
-      <Filter>Objects\MeteoriteObject</Filter>
+    <ClInclude Include="Common\EventHandler\EventHandler.h">
+      <Filter>Common\EventHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\SingleTon\Singleton.h">
+      <Filter>Common\SingleTon</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -605,8 +614,14 @@
     <ClCompile Include="CShaders\MotionBlurShader\MotionBlurShader.cpp">
       <Filter>CShaders\MotionBlurShader</Filter>
     </ClCompile>
-    <ClCompile Include="Objects\MeteoriteObject.cpp">
-      <Filter>Objects\MeteoriteObject</Filter>
+    <ClCompile Include="Objects\ItemMeteorite.cpp">
+      <Filter>Objects\ItemObject\05ItemMeteorite</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\EventHandler\EventHandler.cpp">
+      <Filter>Common\EventHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\SingleTon\Singleton.cpp">
+      <Filter>Common\SingleTon</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

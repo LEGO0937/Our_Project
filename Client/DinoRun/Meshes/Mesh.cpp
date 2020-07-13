@@ -4,7 +4,7 @@
 
 #include "../Common/stdafx.h"
 #include "Mesh.h"
-#include "../Objects/BaseObject.h"
+#include "BaseObject.h"
 
 CMesh::CMesh(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {

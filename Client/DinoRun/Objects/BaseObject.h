@@ -213,7 +213,7 @@ protected:
 	bool							isKinematic = false; //충돌 체크시 물리효과를 적용할 것인가 y or n 
 	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n false이면 update,render X
 
-	string						m_id = "Default";
+	int								m_iSerealNum = 0;
 
 	ModelType						m_ModelType = ModelType::Default;   //Layer와 유사
 
@@ -228,8 +228,8 @@ protected:
 
 	LPVOID						m_pUpdatedContext = NULL;
 public:
-	string GetId() { return m_id; }
-	void SetId(string id) { m_id = id; }
+	int GetId() { return m_iSerealNum; }
+	void SetId(const int& id) { m_iSerealNum = id; }
 	CGameObject* GetChild() { return m_pChild; }
 
 	void SetSkinedState(bool bIsSkined) { isSkined = bIsSkined; }

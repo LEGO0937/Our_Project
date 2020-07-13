@@ -1,8 +1,8 @@
 #include "BillBoardShader.h"
 #include "../../Common/FrameWork/CreateManager.h"
-#include "../../Objects/TerrainObject.h"
-#include "../../Objects/BillBoardObject.h"
-#include "../../Meshes/BillBoardMesh.h"
+#include "TerrainObject.h"
+#include "BillBoardObject.h"
+#include "BillBoardMesh.h"
 
 BillBoardShader::BillBoardShader()
 {

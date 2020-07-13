@@ -1,7 +1,8 @@
 #pragma once
 #include "../Common/Timer/Timer.h"
-#include "../Objects/BaseObject.h"
+#include "BaseObject.h"
 #include "../CShaders/FontShader/FontShader.h"
+//#include "EventHandler/EventHandler.h"
 
 //enum renderItem {
 //	opacity=0,terrain, transparency

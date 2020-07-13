@@ -1,8 +1,8 @@
 #include "MinimapShader.h"
 #include "../../Common/FrameWork/CreateManager.h"
-#include "../../Objects/TerrainObject.h"
-#include "../../Objects/BillBoardObject.h"
-#include "../../Meshes/LiePlaneMesh.h"
+#include "TerrainObject.h"
+#include "BillBoardObject.h"
+#include "LiePlaneMesh.h"
 
 MinimapShader::MinimapShader()
 {

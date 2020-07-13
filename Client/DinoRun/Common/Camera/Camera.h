@@ -1,6 +1,6 @@
 #pragma once
 #include "../stdafx.h"
-#include "../../Objects/PlayerObject.h"
+#include "PlayerObject.h"
 
 //카메라의 종류(모드: Mode)를 나타내는 상수를 다음과 같이 선언한다. 
 #define FIRST_PERSON_CAMERA 0x01

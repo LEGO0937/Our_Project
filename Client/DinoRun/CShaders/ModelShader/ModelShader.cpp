@@ -1,7 +1,7 @@
 #include "ModelShader.h"
 #include "../../Common//FrameWork/CreateManager.h"
-#include "../../Objects/TerrainObject.h"
-#include "../../Meshes/BillBoardMesh.h"
+#include "TerrainObject.h"
+#include "BillBoardMesh.h"
 
 ModelShader::ModelShader()
 {
