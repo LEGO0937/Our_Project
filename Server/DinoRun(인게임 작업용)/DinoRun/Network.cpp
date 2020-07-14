@@ -3,10 +3,11 @@
 
 #pragma warning(disable : 4996)
 
-#ifdef _WITH_SERVER_
 
 //volatile bool g_LoginFinished;
 //const char* g_serverIP = nullptr;
+
+
 
 Network::Network()
 {
@@ -431,5 +432,3 @@ void Network::err_display(const char* msg)
 	printf("[%s] %s", msg, (char*)lpMsgBuf);
 	LocalFree(lpMsgBuf);
 }
-
-#endif
