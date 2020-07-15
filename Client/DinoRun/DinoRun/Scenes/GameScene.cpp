@@ -285,16 +285,19 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	blurShader = new BlurShader(pCreateManager.get());
 	motionBlurShader = new MotionBlurShader(pCreateManager.get());
 
+	m_pCreateManager->RenderLoading();
+
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 	BuildLights();
-
-	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 	m_pCreateManager->RenderLoading();
+	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	
 	CreateShaderVariables(pCreateManager.get());
 	m_pSoundManager->Play("InGame_BGM", 0.2f);
+
 
 }
 
@@ -364,16 +367,16 @@ void GameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM w
 			if (m_pPlayer) m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1),
 				deltaTime);
 		case VK_LEFT:
-			if (m_pPlayer) m_pPlayer->KeyDownLeft();
+			
 			break;
 		case VK_RIGHT:
-			if (m_pPlayer) m_pPlayer->KeyDownRight();
+			
 			break;
 		case VK_UP:
-			if (m_pPlayer)	m_pPlayer->KeyDownUp();
+			
 			break;
 		case VK_DOWN:
-			if (m_pPlayer)	m_pPlayer->KeyDownDown();
+			
 			break;
 		case VK_SHIFT:
 			if (m_pPlayer) 
@@ -525,9 +528,9 @@ void GameScene::RenderVelocity()
 {
 	BaseScene::Render();
 
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_SKIN_MESH]);
-	//m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-	//
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_SKIN_MESH]);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	
 	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_MODEL_INSTANCING]);
 	//for (CObInstancingShader* shader : instancingModelShaders)
 	//	if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
@@ -540,6 +543,11 @@ void GameScene::RenderVelocity()
 	//	if (shader)
 	//		shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
 	//}
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_TERRAIN]);
+	//if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
+	//
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_CUBEMAP]);
+	//if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
 }
 
 void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D12Resource> velocityMap)
@@ -550,9 +558,9 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 	if (length > 30)
 	{
 		int idx = length - 30;
-		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
-		//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
-		//motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
+		//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
+		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
+		motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
 
 
 		
@@ -785,7 +793,7 @@ void GameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandL
 void GameScene::UpdateShadow()
 {
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
-	float rad = 1000;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
+	float rad = 500;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
 
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
 	lightDir = XMVector3Normalize(lightDir);

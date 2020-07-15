@@ -346,8 +346,8 @@ void ParticleSystem::FindValue(string name)
 		m_cShape = CONE;
 		m_fSize = (1.0f);
 		m_fParticleLife = 3.0f;
-		m_fVelocity = (70.0f);
-		m_fGravity = 3.0f;
+		m_fVelocity = (85.0f);
+		m_fGravity = 4.0f;
 		m_uMaxSize = 120;
 		m_sTextureName = "Resources/Images/T_Itemboxeat.dds";
 	}
@@ -357,8 +357,8 @@ void ParticleSystem::FindValue(string name)
 		m_cShape = CONE;
 		m_fSize = (1.0f);
 		m_fParticleLife = 3.0f;
-		m_fVelocity = (70.0f);
-		m_fGravity = 3.0f;
+		m_fVelocity = (85.0f);
+		m_fGravity = 4.0f;
 		m_uMaxSize = 120;
 		m_sTextureName = "Resources/Images/T_Meateat_P.dds";
 	}

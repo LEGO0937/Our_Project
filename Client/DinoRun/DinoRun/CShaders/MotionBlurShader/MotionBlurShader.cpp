@@ -118,7 +118,15 @@ void MotionBlurShader::Dispatch(ID3D12GraphicsCommandList* pCommandList,
 	ChangeResourceState(pCommandList, input, D3D12_RESOURCE_STATE_COPY_SOURCE,
 		D3D12_RESOURCE_STATE_COPY_DEST);
 
+	///*삭제*/ChangeResourceState(pCommandList, mBlurMap2.Get(), D3D12_RESOURCE_STATE_COPY_DEST,
+	//	D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+
 	pCommandList->CopyResource(input, mBlurMap0.Get());
+	///*삭제*/pCommandList->CopyResource(input, mBlurMap2.Get());
+	///*삭제*/ChangeResourceState(pCommandList, mBlurMap2.Get(), D3D12_RESOURCE_STATE_COPY_SOURCE,
+	//	D3D12_RESOURCE_STATE_COPY_DEST);
+
 
 	ChangeResourceState(pCommandList, mBlurMap0.Get(), D3D12_RESOURCE_STATE_COPY_SOURCE,
 		D3D12_RESOURCE_STATE_UNORDERED_ACCESS);

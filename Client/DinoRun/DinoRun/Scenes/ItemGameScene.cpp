@@ -12,6 +12,7 @@
 #include "../CShaders/ModelShader/ModelShader.h"
 #include "../CShaders/SkinedShader/SkinedShader.h"
 #include "../CShaders/BlurShader/BlurShader.h"
+#include "../CShaders/MotionBlurShader/MotionBlurShader.h"
 #include "../CShaders/MinimapShader/MinimapShader.h"
 
 #include "ParticleSystem/ParticleSystem.h"
@@ -329,7 +330,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CreateShaderVariables(pCreateManager.get());
 	m_pCreateManager->RenderLoading();
 	m_pSoundManager->Play("InGame_BGM", 0.2f);
-
+	m_pCreateManager->RenderLoading();
 }
 
 void ItemGameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -443,16 +444,16 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			EventHandler::GetInstance()->CallBack(message);
 			break;
 		case VK_LEFT:
-			if (m_pPlayer) m_pPlayer->KeyDownLeft();
+			
 			break;
 		case VK_RIGHT:
-			if (m_pPlayer) m_pPlayer->KeyDownRight();
+			
 			break;
 		case VK_UP:
-			if (m_pPlayer)	m_pPlayer->KeyDownUp();
+			
 			break;
 		case VK_DOWN:
-			if (m_pPlayer)	m_pPlayer->KeyDownDown();
+			
 			break;
 		case VK_SHIFT:
 			if (m_pPlayer)
@@ -610,10 +611,12 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<I
 	static float deltaUvX = 0.0f;
 	XMFLOAT3 vel = m_pPlayer->GetVelocity();
 	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
-	if (length > 35)
+	if (length > 30)
 	{
-		int idx = length - 35;
-		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/5);
+		int idx = length - 30;
+		//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
+		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
+		motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
 		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
 		m_pEffectShader->getUvXs()[0] = deltaUvX;
@@ -872,7 +875,7 @@ void ItemGameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsComm
 void ItemGameScene::UpdateShadow()
 {
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
-	float rad = 1000;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
+	float rad = 500;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
 
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
 	lightDir = XMVector3Normalize(lightDir);

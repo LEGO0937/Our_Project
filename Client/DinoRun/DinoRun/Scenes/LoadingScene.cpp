@@ -42,7 +42,7 @@ void LoadingScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	UI_INFO Ui_info;
 
 	//---- 아이템 틀
-	Ui_info.textureName = "Resources/Images/T_BlurEffect.dds";
+	Ui_info.textureName = "Resources/Images/T_Loading.dds";
 	Ui_info.meshSize = XMFLOAT2(1.0f, 1.0f);
 	Ui_info.positions.emplace_back(XMFLOAT3(0.0f, 0.0f, 0.1f));
 	Ui_info.maxUv = XMFLOAT2(0.125f, 1.0f);

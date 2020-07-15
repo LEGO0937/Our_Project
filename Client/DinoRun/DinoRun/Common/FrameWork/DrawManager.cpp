@@ -87,7 +87,7 @@ void DrawManager::RenderLight(shared_ptr<BaseScene> pScene, float fTimeElapsed)
 	m_pd3dCommandList->ClearDepthStencilView(m_dsvDepthStencilBufferCPUHandle,
 		D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, NULL);
 
-	m_pd3dCommandList->ClearRenderTargetView(m_pRtvSwapChainBackBufferCPUHandles[m_nSwapChainBufferIndex], Colors::Gray, 0, NULL);
+	m_pd3dCommandList->ClearRenderTargetView(m_pRtvSwapChainBackBufferCPUHandles[m_nSwapChainBufferIndex], Colors::Black, 0, NULL);
 	m_pd3dCommandList->OMSetRenderTargets(1, &m_pRtvSwapChainBackBufferCPUHandles[m_nSwapChainBufferIndex],
 		TRUE, &m_dsvDepthStencilBufferCPUHandle);
 
