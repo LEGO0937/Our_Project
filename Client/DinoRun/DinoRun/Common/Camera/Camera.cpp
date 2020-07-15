@@ -373,7 +373,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			XMFLOAT3 vel = m_pPlayer->GetVelocity();
 			float length = (vel.x * vel.x + vel.z * vel.z);
 			if (length > 900)
-				m_xmf3Offset = XMFLOAT3(0.0f, 25.0f, -70.0f);
+				m_xmf3Offset = XMFLOAT3(0.0f, 25.0f, -80.0f);
 			else
 				m_xmf3Offset = XMFLOAT3(0.0f, 30.0f, -60.0f);
 

@@ -467,7 +467,7 @@ void CreatePsoVelocitySkinedInstancing(ID3D12Device *pd3dDevice, ID3D12RootSigna
 void CreatePsoVelocityTextedInstancing(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 void CreatePsoVelocityBillBoardInstancing(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 void CreatePsoVelocityTerrain(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
-
+void CreatePsoVelocityCubeMap(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);
 
 //WireFrame pipelines
 void CreatePsoWire(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx);

@@ -1384,7 +1384,43 @@ void CreatePsoVelocityTerrain(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_p
 		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
 }
 
-
+void CreatePsoVelocityCubeMap(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraphicsRootSignature, ID3D12PipelineState** m_ppd3dPipelineStates, int idx)
+{
+	ID3DBlob *pd3dVertexShaderBlob = NULL, *pd3dPixelShaderBlob = NULL;
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
+	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
+	//d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Shaders.hlsl", "VSCube", "vs_5_1",
+	//	&pd3dVertexShaderBlob);
+	//d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Shaders.hlsl", "PSCube", "ps_5_1",
+	//	&pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "VSVelocitySkyBox", "vs_5_1",
+		&pd3dVertexShaderBlob);
+	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "PSVelocityMap", "ps_5_1",
+		&pd3dPixelShaderBlob);
+	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
+	d3dPipelineStateDesc.RasterizerState.CullMode = D3D12_CULL_MODE_NONE;
+	d3dPipelineStateDesc.BlendState = CreateBlendState();
+	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
+	d3dPipelineStateDesc.DepthStencilState.DepthEnable = FALSE;
+	//d3dPipelineStateDesc.InputLayout = CreateTextureInputLayout();
+	d3dPipelineStateDesc.InputLayout = CreateCubeInputLayout();
+	d3dPipelineStateDesc.SampleMask = UINT_MAX;
+	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	d3dPipelineStateDesc.NumRenderTargets = 1;
+	d3dPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	d3dPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	d3dPipelineStateDesc.SampleDesc.Count = 1;
+	d3dPipelineStateDesc.Flags = D3D12_PIPELINE_STATE_FLAG_NONE;
+	HRESULT T = pd3dDevice->CreateGraphicsPipelineState(&d3dPipelineStateDesc,
+		__uuidof(ID3D12PipelineState), (void **)&m_ppd3dPipelineStates[idx]);
+	if (pd3dVertexShaderBlob)
+		pd3dVertexShaderBlob->Release();
+	if (pd3dPixelShaderBlob)
+		pd3dPixelShaderBlob->Release();
+	if (d3dPipelineStateDesc.InputLayout.pInputElementDescs) delete[]
+		d3dPipelineStateDesc.InputLayout.pInputElementDescs;
+}
 vector<string> split(string target, string delimiter) {
 	
 	vector<string> result;

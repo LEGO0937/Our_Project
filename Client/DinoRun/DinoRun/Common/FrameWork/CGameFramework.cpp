@@ -428,7 +428,7 @@ void CGameFramework::CreatePSOs()
 	CreatePsoVelocityBillBoardInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_BILLBOARD);
 	CreatePsoVelocityTerrain(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_TERRAIN);
 	CreatePsoVelocitySkinedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_SKINED_INSTANCING);
-
+	//CreatePsoVelocityCubeMap(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_CUBEMAP);
 	//Wire Pipelines
 	CreatePsoWire(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE);
 	CreatePsoWireInstance(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE_INSTANCING);

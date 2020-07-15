@@ -528,9 +528,9 @@ void GameScene::RenderVelocity()
 {
 	BaseScene::Render();
 
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_SKIN_MESH]);
-	//m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
-	//
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_SKIN_MESH]);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
+	
 	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_MODEL_INSTANCING]);
 	//for (CObInstancingShader* shader : instancingModelShaders)
 	//	if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
@@ -543,6 +543,11 @@ void GameScene::RenderVelocity()
 	//	if (shader)
 	//		shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
 	//}
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_TERRAIN]);
+	//if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
+	//
+	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_CUBEMAP]);
+	//if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
 }
 
 void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D12Resource> velocityMap)
@@ -553,9 +558,9 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 	if (length > 30)
 	{
 		int idx = length - 30;
-		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
-		//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
-		//motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
+		//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
+		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
+		motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
 
 
 		

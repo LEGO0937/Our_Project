@@ -12,6 +12,7 @@
 #include "../CShaders/ModelShader/ModelShader.h"
 #include "../CShaders/SkinedShader/SkinedShader.h"
 #include "../CShaders/BlurShader/BlurShader.h"
+#include "../CShaders/MotionBlurShader/MotionBlurShader.h"
 #include "../CShaders/MinimapShader/MinimapShader.h"
 
 #include "ParticleSystem/ParticleSystem.h"
@@ -610,10 +611,12 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<I
 	static float deltaUvX = 0.0f;
 	XMFLOAT3 vel = m_pPlayer->GetVelocity();
 	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
-	if (length > 35)
+	if (length > 30)
 	{
-		int idx = length - 35;
-		blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/5);
+		int idx = length - 30;
+		//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
+		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
+		motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
 		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
 		m_pEffectShader->getUvXs()[0] = deltaUvX;
