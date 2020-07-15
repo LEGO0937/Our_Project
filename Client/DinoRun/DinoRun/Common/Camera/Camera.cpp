@@ -361,7 +361,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		//	}
 		//}
 		//--------------------------------
-		
+		float c = 1.5f, k = 25;
 		{
 			//k = 0.04  ,  c = 0.2
 			//f= - cv -k*x   -cv -kx아닌가?..
@@ -426,9 +426,9 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			//XMMATRIX xmvViewInverse = XMMatrixInverse(&det2, XMLoadFloat4x4(&viewM));  //view의 역행렬
 
 
-			float forceX = (-2 * xmf3ResultVel.x) + (-30 * xmf3ResultVec.x);
-			float forceY = (-2 * xmf3ResultVel.y) + (-30 * xmf3ResultVec.y);
-			float forceZ = (-2 * xmf3ResultVel.z) + (-30 * xmf3ResultVec.z);
+			float forceX = (-c * xmf3ResultVel.x) + (-k * xmf3ResultVec.x);
+			float forceY = (-c * xmf3ResultVel.y) + (-k * xmf3ResultVec.y);
+			float forceZ = (-c * xmf3ResultVel.z) + (-k * xmf3ResultVec.z);
 
 			XMFLOAT4 xmf4Force = XMFLOAT4(forceX, forceY, forceZ,0);
 			XMFLOAT3 accelerationForce;
