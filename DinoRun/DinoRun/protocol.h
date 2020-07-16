@@ -8,7 +8,7 @@ using namespace std;
 constexpr int MAX_USER = 6;
 constexpr int MAX_ROUND = 3;
 
-constexpr int MAX_ROUND_TIME = 60;
+constexpr int MAX_ROUND_TIME = 0;
 constexpr int MAX_ITEM_NAME_LENGTH = 16;
 constexpr int MAX_CHATTING_LENGTH = 100;
 constexpr int COOLTIME = 3;
@@ -23,10 +23,9 @@ struct clientsInfo
 };
 
 enum ROLE { RUNNER, BOMBER };
-enum ITEM { NORMALHAMMER = 0, GOLD_HAMMER, GOLD_TIMER, EMPTY };
+enum ITEM { MUD, ROCK, BANANA, EMPTY };
 
 enum PLAYER_NUM { P1, P2, P3, P4, P5, P6 };						// 몇번 플레이어 인지 
-enum PLAYER_STATE { NONESTATE, ICE, BREAK };							// 플레이어 상태
 enum STATE_TYPE { Init, Run, Over };
 
 constexpr int SC_ACCESS_COMPLETE = 1;
@@ -85,6 +84,28 @@ constexpr int CS_GET_ITEM = 24;
 //<< InGame 패킷 종류 >>
 
 //[클라->서버]
+struct CS_PACKET_ID_POS
+{
+	char size;
+	char type;
+	unsigned char playerID;
+	
+	float xPos;
+	float yPos;
+	float zPos;
+
+	//캐릭터의 진행 방향
+	float xLook;
+	float yLook;
+	float zLook;
+	float xUp;
+	float yUp;
+	float zUp;
+	float xRight;
+	float yRight;
+	float zRight;
+};
+
 struct CS_PACKET_RIGHT_KEY
 {
 	char size;

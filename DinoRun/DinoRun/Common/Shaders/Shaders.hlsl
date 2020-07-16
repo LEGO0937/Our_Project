@@ -254,10 +254,8 @@ struct VS_SKYBOX_OUTPUT
 
 float CalcShadowFactor(float4 shadowPosH)
 {
-	// Complete projection by doing division by w.
 	shadowPosH.xyz /= shadowPosH.w;
 
-	// Depth in NDC space.
 	float depth = shadowPosH.z;
 
 	uint width, height, numMips;

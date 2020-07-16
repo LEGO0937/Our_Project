@@ -72,9 +72,16 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		m_xmf3Forces = XMFLOAT3(0, 0, 0);
 #ifdef _WITH_LEFT_HAND_COORDINATES
 		if (dwDirection & DIR_FORWARD)
+		{
+			KeyDownUp();
 			m_fForce += fDistance;
+		}
 		if (dwDirection & DIR_BACKWARD)
+		{
+			KeyDownDown();
 			m_fForce -= fDistance;
+		}
+
 #else
 		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, +fDistance);
@@ -82,6 +89,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 #ifdef _WITH_LEFT_HAND_COORDINATES
 		if (dwDirection & DIR_RIGHT)
 		{
+			KeyDownRight();
 			if (!isShift)
 			{
 				if (length < 30)
@@ -95,6 +103,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, +fDistance);
 		else if (dwDirection & DIR_LEFT)
 		{
+			KeyDownLeft();
 			if (!isShift)
 			{
 				if (length < 30)
@@ -106,7 +115,28 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 				m_fWheelDegree -= 50 * fDeltaTime;
 		}
 		else
-			m_fWheelDegree = 0;
+		{
+			if (m_fWheelDegree > 0)
+			{
+				if (!isShift)
+					m_fWheelDegree -= 30 * fDeltaTime;
+				else
+					m_fWheelDegree -= 50 * fDeltaTime;
+				if (m_fWheelDegree < 0)
+					m_fWheelDegree = 0;
+			}
+			else if (m_fWheelDegree < 0)
+			{
+				if (!isShift)
+					m_fWheelDegree += 30 * fDeltaTime;
+				else
+					m_fWheelDegree += 50 * fDeltaTime;
+
+				if (m_fWheelDegree  > 0.f)
+					m_fWheelDegree = 0;
+			}
+		}
+			
 		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
 #else
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
@@ -391,7 +421,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 
 	if (isWalking)
 	{
-		if (::IsEqual(Vector3::Length(m_xmf3Velocity), 0.0f, 0.005f))   //속력이 0에 근사할 경우
+		if (::IsEqual(Vector3::Length(m_xmf3Velocity), 0.0f, 0.003f))   //속력이 0에 근사할 경우
 		{
 			returnIdle();
 		}
@@ -514,7 +544,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	SetChild(pAngrybotModel->m_pModelRootObject->GetChild(), true);
 	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 14, pAngrybotModel);
 	//위의 매개변수들 중 1은 애니메이션 트랙의 갯수 현재는 idle 뿐이니 1임 늘어날 수록 숫자 높일것.
-	m_fMass = 70;
+	m_fMass = 90;
 
 	m_fMaxForce = 2000;
 
@@ -555,7 +585,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	m_pSkinnedAnimationController->SetCallbackFuncKeys(RUN_RIGHT_RETURN, 1);
 	
 	m_pSkinnedAnimationController->SetTrackEnable(IDLE, true);
-
+	//m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
 
 	/*
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 3);

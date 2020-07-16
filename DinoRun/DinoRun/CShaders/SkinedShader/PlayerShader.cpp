@@ -29,16 +29,20 @@ void PlayerShader::BuildObjects(CreateManager* pCreateManager, void* pInformatio
 	CreateShaderVariables(pCreateManager);
 }
 
+
+
 void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	CPlayer *pPlayerObject = NULL;
 	int nLength = 1;
 
-	// 서버로부터 nLenght에 플레이어 수를 받음.
-	// 여기서 한번에 아이디를 넘겨준다 아이디를 제외한 다른 유저들 아이디 걔 유저들에 대한 아이디랑 
-	// 포지션 받아온다 갯수만큼 만들고 있는데
-	// 
+	//서버로부터 nLenght에 플레이어 수를 받음.
+	// 자기 아이디랑 위치값 받아오겠다는 패킷 명령어 그걸 보내면
+	// 여기서 다시 리시브해서 그 패킷에 들어있는 거는 상대방 아이디 & 포지션
+	// 그 다음 배열로 이름, 포지션
 	
+	
+
 	for (int i = 0; i < nLength; ++i)
 	{
 		pPlayerObject = new CDinoRunPlayer(pCreateManager, instancingModelName);
@@ -51,6 +55,9 @@ void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, con
 		//애니메이션 적용을 find_if를 통해서 아이디와 맞는 오브젝트 찾고 적용하도록 하자.
 		m_vSkinedObjectList.emplace_back(pPlayerObject);
 	}
+
+	// 위의 작업으로 아이디, 초기위치 배분하고 다시 서버로 샌드
+	// 여기가 룸씬 이후 로딩중 과정
 }
 
 void PlayerShader::Update(float fTimeElapsed)

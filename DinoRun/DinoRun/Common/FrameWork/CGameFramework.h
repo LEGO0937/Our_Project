@@ -5,18 +5,12 @@
 #include "../../Scenes/BaseScene.h"
 #include "CreateManager.h"
 #include "DrawManager.h"
-
-// 상태메세지
-enum GAMESTATE { ID_INPUT, LOBBY, INGAME, PAUSE, OPTION, CONNECT, LOGIN, LOADING };
-
-
-
 class CGameFramework
 {
+
 private: 
 	string m_sPlayerID = "";
-	int myId = 1;
-
+	static char m_HostID;
 public:
 	CGameFramework();
 	~CGameFramework();
@@ -52,9 +46,6 @@ private: // 변수
 	shared_ptr<BaseScene> m_pLoadingScene;
 
 
-	void ProcessPacket(char* ptr);
-
-
 	bool m_running{ true };
 	
 	POINT m_ptOldCursorPos;
@@ -67,11 +58,5 @@ private: // 변수
 
 	int m_nPipelineStates = 0;
 	static ID3D12PipelineState **m_ppd3dPipelineStates;
-
-public:
-
-#ifdef _WITH_SERVER_
-	static char GetHostID() { return m_HostID; }
-#endif
 };
 

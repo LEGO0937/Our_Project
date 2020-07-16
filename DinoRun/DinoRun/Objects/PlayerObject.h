@@ -50,8 +50,16 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
+	//주인공 아이디
+	char			m_pPlayerID;
+
 	//할 것임.
 	UINT						m_uCheckpointCount = 0;
+
+public:
+	void SetPlayerID(char id) { m_pPlayerID = id; }
+	char GetPlayerID() { return m_pPlayerID; }
+
 public:
 	CPlayer();
 	virtual ~CPlayer();

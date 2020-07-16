@@ -1,26 +1,20 @@
 #include "../stdafx.h"
-#include "../Common/FrameWork/CGameFramework.h"
+#include "CGameFramework.h"
 #include "TerrainObject.h"
 #include "EventHandler/EventHandler.h"
 ID3D12PipelineState** CGameFramework::m_ppd3dPipelineStates = NULL;
 
-
-#ifdef _WITH_SERVER_
-char CGameFramework::m_HostID = -1;
-#endif
-
-bool g_IsRoundEnd = false;
-
-
-
 CGameFramework::CGameFramework()
 {
 	EventHandler::GetInstance()->Update();
+	NetWorkManager::GetInstance()->Initialize();
+	NetWorkManager::GetInstance()->GetConnectState();
 }
 
 CGameFramework::~CGameFramework()
 {
 	EventHandler::GetInstance()->destroy();
+	NetWorkManager::GetInstance()->destroy();
 }
 
 bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
@@ -43,8 +37,8 @@ bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
 
 	m_pCamera->GenerateViewMatrix(XMFLOAT3(0, 0, 0), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
 	m_pCamera->CreateShaderVariables(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetCommandList().Get());
-
-
+	
+	
 	return(true);
 }
 void CGameFramework::Release()
@@ -87,17 +81,17 @@ void CGameFramework::FrameAdvance()
 	// processinput과 플레이어 animate의 순서를 뒤바꾸면 플레이어가 움직일 시 흔들림 발생 왜?
 	m_pScene->FixedUpdate(m_pCreateManager.get(), fTimeElapsed);
 	m_pScene->AnimateObjects(fTimeElapsed); //바뀐 행렬값으로 애니메이션 수행
-
+	
 	m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();
 	m_pCreateManager->GetDrawMgr()->ResetCommandAllocator();
 	m_pCreateManager->ResetCommandList();
 	m_pCreateManager->SetComputeRootSignature();
-
-	m_CurState = m_pScene->Update(m_pCreateManager.get(), fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
+	
+	m_CurState = m_pScene->Update(m_pCreateManager.get(),fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
 	m_pCreateManager->ExecuteCommandList();
 	//m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();
 	//fixed에서 충돌처리도 하게하여 오브젝트도 생성하게 하고 update에서 releaseUploadBuffer하는건 어떨까
-	if (m_pScene)
+	if(m_pScene)
 		m_pDrawManager->Render(m_pScene, fTimeElapsed);
 
 	if (m_CurState != m_PrevState)
@@ -107,15 +101,13 @@ void CGameFramework::FrameAdvance()
 	}
 }
 
-
-
 void CGameFramework::BuildObjects()
 {
 	//m_pLoadingScene = shared_ptr<CLoadingScene>(new CLoadingScene());
 	//m_pLoadingScene->Initialize(m_pCreateMgr, m_pNetwork);
 	//m_pLoadingScene->ReleaseUploadBuffers();
 	//m_pDrawMgr->SetLoadingScene(m_pLoadingScene);
-
+	
 	BuildPipelineState();
 
 	//m_pCreateMgr->GetDrawMgr()->WaitForGpuComplete();
@@ -124,7 +116,7 @@ void CGameFramework::BuildObjects()
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
 	m_pFontManager->Initialize(m_pCreateManager.get());
 	//-----------
-	// 인게임 작업용
+	
 	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
 	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
@@ -136,37 +128,37 @@ void CGameFramework::BuildObjects()
 
 	m_pCreateManager->SetLoadingScene(m_pLoadingScene);
 
-	m_pScene = shared_ptr<ItemGameScene>(new ItemGameScene());
+	m_pScene = shared_ptr<ItemGameScene>(new ItemGameScene);
 	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
-	m_pScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
+	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
 	m_pScene->BuildObjects(m_pCreateManager);
-
-	CDinoRunPlayer* pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_Dino.bin");
+	m_pScene->SetId(m_sPlayerID);
+	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_Dino.bin");
 	pPlayer->SetMaxForce(MIN_FORCE);
 	m_pPlayer = pPlayer;
 
 	m_pScene->setPlayer(m_pPlayer);
 	m_pScene->setCamera(m_pPlayer->GetCamera());
-
+	
 	//--------
-	// 일반 로비씬 부터
-	/*m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
-	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
-	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
-	m_pLoadingScene->BuildObjects(m_pCreateManager);
-	m_pLoadingScene->SetFontShader(m_pFontManager->getFontShader());
-	m_pLoadingScene->setCamera(m_pCamera);
-	m_pCreateManager->ExecuteCommandList();
-	m_pCreateManager->ResetCommandList();
+	
+	//m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
+	//m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
+	//m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
+	//m_pLoadingScene->BuildObjects(m_pCreateManager);
+	//m_pLoadingScene->SetFontShader(m_pFontManager->getFontShader());
+	//m_pLoadingScene->setCamera(m_pCamera);
+	//m_pCreateManager->ExecuteCommandList();
+	//m_pCreateManager->ResetCommandList();
 
-	m_pCreateManager->SetLoadingScene(m_pLoadingScene);
-	m_pScene = shared_ptr<StartScene>(new StartScene());
-	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
-	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateManager);
-	m_pScene->SetFontShader(m_pFontManager->getFontShader());
-	m_pScene->setCamera(m_pCamera);*/
-
+	//m_pCreateManager->SetLoadingScene(m_pLoadingScene);
+	//m_pScene = shared_ptr<StartScene>(new StartScene());
+	//m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
+	//m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
+	//m_pScene->BuildObjects(m_pCreateManager);
+	//m_pScene->SetFontShader(m_pFontManager->getFontShader());
+	//m_pScene->setCamera(m_pCamera);
+	
 	//-----------------------
 
 	m_pCreateManager->ExecuteCommandList();
@@ -181,6 +173,7 @@ void CGameFramework::BuildObjects()
 		m_pPlayer->ReleaseUploadBuffers();
 
 	EventHandler::GetInstance()->SetCurScene(m_pScene);
+	NetWorkManager::GetInstance()->SetCurScene(m_pScene);
 	m_GameTimer.Reset();
 }
 
@@ -212,16 +205,16 @@ void CGameFramework::CalculateFrameStats()
 		{
 			windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x) + L"   y:" + to_wstring(p.y);
 		}
-
-		/*+ L"  x:" +
-		to_wstring(m_pPlayer->m_xmf4x4World._41)
-		+ L"  y:" + to_wstring(m_pPlayer->m_xmf4x4World._42)
-		+ L"  z:" + to_wstring(m_pPlayer->m_xmf4x4World._43)
-		+ L"  terrain x:  " + to_wstring((m_pScene->GetTerrain())->GetNormal(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._43).x)
-		+ L"  terrain y:  " + to_wstring((m_pScene->GetTerrain())->GetNormal(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._43).y)
-		+ L"  terrain z:  " + to_wstring((m_pScene->GetTerrain())->GetNormal(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._43).z);
-	*/
-	/*L"   mspf: " + mspfStr*/
+			
+			/*+ L"  x:" +
+			to_wstring(m_pPlayer->m_xmf4x4World._41)
+			+ L"  y:" + to_wstring(m_pPlayer->m_xmf4x4World._42)
+			+ L"  z:" + to_wstring(m_pPlayer->m_xmf4x4World._43)
+			+ L"  terrain x:  " + to_wstring((m_pScene->GetTerrain())->GetNormal(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._43).x)
+			+ L"  terrain y:  " + to_wstring((m_pScene->GetTerrain())->GetNormal(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._43).y)
+			+ L"  terrain z:  " + to_wstring((m_pScene->GetTerrain())->GetNormal(m_pPlayer->m_xmf4x4World._41, m_pPlayer->m_xmf4x4World._43).z);
+		*/
+		/*L"   mspf: " + mspfStr*/
 
 		SetWindowText(m_hWnd, windowText.c_str());
 		// Reset for next average.
@@ -288,6 +281,7 @@ void CGameFramework::ReleaseObjects()
 		m_pScene = NULL;
 
 		EventHandler::GetInstance()->ResetCurScene();
+		NetWorkManager::GetInstance()->ResetCurScene();
 	}
 
 	if (m_pPlayer)
@@ -301,12 +295,12 @@ void CGameFramework::ReleaseObjects()
 void CGameFramework::ChangeSceneByType(SceneType type)
 {
 	m_pCreateManager->ResetCommandList();
-
-
+	
+	
 	if (m_PrevState == Start_Scene)
 	{
 		//씬전환 시 이전 상태가 스타트인 경우 닉네임을 멤버에 저장해야함.
-		m_sPlayerID = m_pScene->GetId();
+		m_sPlayerID = m_pScene->GetId(); 
 	}
 	ReleaseObjects();
 
@@ -321,7 +315,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	case Start_Scene:
 		if (m_PrevState == SceneType::Lobby_Scene)
 		{
-			m_sPlayerID = "Abcd";
+			m_sPlayerID = "";
 			m_pScene = shared_ptr<StartScene>(new StartScene());
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
@@ -377,7 +371,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{
 		m_pScene->SetId(m_sPlayerID);
-		CDinoRunPlayer* pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_Dino.bin");
+		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_Dino.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
 
@@ -397,13 +391,14 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	m_PrevState = type;
 
 	EventHandler::GetInstance()->SetCurScene(m_pScene);
+	EventHandler::GetInstance()->SetCurScene(m_pScene);
 }
 
 
 void CGameFramework::BuildPipelineState()
 {
-	m_nPipelineStates = 29;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+	m_nPipelineStates = 30;
+	m_ppd3dPipelineStates = new ID3D12PipelineState*[m_nPipelineStates];
 	for (int i = 0; i < m_nPipelineStates; ++i)
 	{
 		m_ppd3dPipelineStates[i] = NULL;
@@ -432,14 +427,14 @@ void CGameFramework::CreatePSOs()
 	CreatePsoShadowBillBoardInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_BILLBOARD);
 	CreatePsoShadowTerrain(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_TERRAIN);
 	CreatePsoShadowSkinedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKINED_INSTANCING);
-
+	
 	//Velocity Pipelines
 	CreatePsoVelocitySkinMesh(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_SKIN_MESH);//수정
 	CreatePsoVelocityTextedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_MODEL_INSTANCING);
 	CreatePsoVelocityBillBoardInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_BILLBOARD);
 	CreatePsoVelocityTerrain(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_TERRAIN);
 	CreatePsoVelocitySkinedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_SKINED_INSTANCING);
-
+	CreatePsoVelocityCubeMap(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_CUBEMAP);
 	//Wire Pipelines
 	CreatePsoWire(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE);
 	CreatePsoWireInstance(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE_INSTANCING);
@@ -452,6 +447,8 @@ void CGameFramework::CreatePSOs()
 
 	CreatePsoParticleCs(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE_CALC);
 }
+
+
 
 // 프로세스 패킷 수정 필요 
 void CGameFramework::ProcessPacket(char* packet)
@@ -821,11 +818,11 @@ void CGameFramework::ProcessPacket(char* packet)
 
 
 		//m_pPlayer->Add_Inventory(sItem,itemType);
-	break;
+		break;
 
 	}
 
-	
+
 
 	case SC_USE_ITEM:
 	{
@@ -878,7 +875,5 @@ void CGameFramework::ProcessPacket(char* packet)
 		//cout << "Go Lobby" << endl;
 		break;
 	}
+	}
 }
-
-
-

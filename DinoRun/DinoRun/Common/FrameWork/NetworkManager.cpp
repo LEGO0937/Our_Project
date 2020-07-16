@@ -78,6 +78,7 @@ void NetWorkManager::ConnectToServer(HWND hWnd)
 		}
 	}
 
+	
 	WSAAsyncSelect(sock, hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 
 	send_wsabuf.buf = send_buffer;
@@ -116,12 +117,12 @@ void NetWorkManager::ReadPacket()
 		{// 완성할 수 있을 때
 			memcpy(packet_buffer + saved_packet_size, ptr, required);
 
-			if (m_pGameClient)
+			if (m_pCurScene)
 			{
-				m_pGameClient->ProcessPacket(packet_buffer);
+				m_pCurScene->ProcessPacket(packet_buffer);
 			}
 			// 각 Scene의 ProcessPacket으로 처리를 넘김
-			//ProcessPacket(packet_buffer);
+			// ProcessPacket(packet_buffer);
 			ptr += required;
 			iobyte -= required;
 			in_packet_size = 0;
@@ -135,7 +136,6 @@ void NetWorkManager::ReadPacket()
 		}
 	}
 }
-
 
 
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
@@ -299,6 +299,7 @@ void NetWorkManager::SendAnimationState(char animNum)
 	SendPacket();
 }
 
+
 void NetWorkManager::SendChattingText(char id, const _TCHAR* text)
 {
 	pText = reinterpret_cast<CS_PACKET_CHATTING*>(send_buffer);
@@ -313,6 +314,9 @@ void NetWorkManager::SendChattingText(char id, const _TCHAR* text)
 
 	SendPacket(pText->size);
 }
+
+
+
 void NetWorkManager::SendNickName(char id, _TCHAR* name)
 {
 	pNickName = reinterpret_cast<CS_PACKET_NICKNAME*>(send_buffer);
@@ -374,6 +378,8 @@ void NetWorkManager::SendPlayerCollision(unsigned char playerID)
 // 그르치?! 충돌때는 플레이어 자신의 처리만
 // 아이템 같은 경우에는 충돌을 했잖아 아이템충돌
 
+
+
 void NetWorkManager::SendGetItem(const string& itemIndex)
 {
 	pGetItem = reinterpret_cast<CS_PACKET_GET_ITEM*>(send_buffer);
@@ -388,6 +394,8 @@ void NetWorkManager::SendGetItem(const string& itemIndex)
 
 	SendPacket();
 }
+
+
 
 void NetWorkManager::SendUseItem(int useItem, int targetID)
 {

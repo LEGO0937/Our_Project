@@ -27,8 +27,10 @@ private:
 	char	packet_buffer[BUF_SIZE];
 	DWORD	in_packet_size = 0;
 	int		saved_packet_size = 0;
+	shared_ptr<BaseScene> m_pCurScene;
 public:
-	
+	void SetCurScene(shared_ptr<BaseScene> curScene) { m_pCurScene = curScene; }
+	void ResetCurScene() { m_pCurScene.reset(); }
 	//void SetRoomNum(const int& num) { m_iRoomNum = num; }
 	//void SetGameMode(const bool& mode) { m_bGameMode = mode; }
 	//void SetPlayerName(const string& name) { m_sPlayerName = name; }
@@ -54,6 +56,7 @@ private:
 	CS_PACKET_PLAYER_COLLISION* pPlayerCollision = NULL;
 	CS_PACKET_USE_ITEM* pItem = NULL;
 	CS_PACKET_GET_ITEM* pGetItem = NULL;
+
 
 
 
@@ -101,6 +104,7 @@ public:
 	void SendRightKey();
 	void SendLeftKey();
 
+	
 
 	void SendReady();
 	void SendNotReady();
@@ -119,6 +123,6 @@ public:
 public:
 	CS_PACKET_REQUEST_START* GetRS() { return pRequestStart; }
 	void SetNullRS() { pRequestStart = NULL; }
-	
+
 };
 
