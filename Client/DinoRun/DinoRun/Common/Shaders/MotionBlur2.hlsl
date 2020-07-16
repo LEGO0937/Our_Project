@@ -36,7 +36,7 @@ void MotionBlurCS(int3 groupThreadID : SV_GroupThreadID,
 	int3 dispatchThreadID : SV_DispatchThreadID)
 {
 
-	int Blur =20;
+	int Blur =15;
 
 	// 속도 맵에서 속도 벡터 및 Z 값을 얻을
 	float4 Velocity = velocityMap[dispatchThreadID.xy];

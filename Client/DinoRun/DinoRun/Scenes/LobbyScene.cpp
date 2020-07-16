@@ -519,3 +519,8 @@ void LobbyScene::setCamera(CCamera* camera)
 {
 	BaseScene::setCamera(camera);
 }
+
+void LobbyScene::ProcessPacket(char* packet)
+{
+
+}

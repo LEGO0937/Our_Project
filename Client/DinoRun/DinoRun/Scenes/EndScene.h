@@ -30,6 +30,7 @@ public:
 
 	void Render();
 
+	virtual void ProcessPacket(char* packet);
 private:
 	vector<CUiShader*> instacingUiShaders;
 	bool isClickedButton = false;

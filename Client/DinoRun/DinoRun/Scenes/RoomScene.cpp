@@ -280,3 +280,8 @@ void RoomScene::setCamera(CCamera* camera)
 {
 	BaseScene::setCamera(camera);
 }
+
+void RoomScene::ProcessPacket(char* packet)
+{
+
+}

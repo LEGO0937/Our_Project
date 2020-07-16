@@ -37,7 +37,7 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedAnimation(VS_SKINNED_INPUT input)
 		output.position = prevPos;
 	else
 		output.position = curPos;
-	output.position = curPos;
+	//output.position = curPos;
 	output.direction.xy = dir.xy;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
@@ -85,11 +85,11 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedInstancingAnimation(VS_SKINNED_INPUT inpu
 		output.position = prevPos;
 	else
 		output.position = curPos;
-	output.position = curPos;
+	//output.position = curPos;
 	output.direction.xy = dir.xy;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
-	//output.direction.y *= -1.0f;
+	output.direction.y *= -1.0f;
 
 	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;
@@ -152,11 +152,11 @@ CREATE_VEL_MAP_OUTPUT VSVelocityTextedInstancing(VS_TEXTED_INSTANCING_INPUT inpu
 		output.position = prevPos;
 	else
 		output.position = curPos;
-	output.position = curPos;
+	//output.position = curPos;
 	output.direction.xy = dir.xy ;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
-	//output.direction.y *= -1.0f;
+	output.direction.y *= -1.0f;
 
 	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;
@@ -221,10 +221,10 @@ void VelocityGS(point VS_TEXTED_INSTANCING_OUTPUT input[1], inout TriangleStream
 			output.position = prevPos;
 		else
 			output.position = curPos;
-		output.position = curPos;
+		//output.position = curPos;
 		output.direction.xy = dir.xy;
 
-		//output.direction.y *= -1.0f;
+		output.direction.y *= -1.0f;
 
 		output.direction.z = output.position.z;
 		output.direction.w = output.position.w;
@@ -272,7 +272,7 @@ CREATE_VEL_MAP_OUTPUT VSVelocityTer(VS_TEXT_INPUT input)
 	output.direction.xy = dir.xy ;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
-	//output.direction.y *= -1.0f;
+	output.direction.y *= -1.0f;
 
 	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;
@@ -322,7 +322,7 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkyBox(VS_SKYBOX_INPUT input)
 	output.direction.xy = dir.xy ;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
-	//output.direction.y *= -1.0f;
+	output.direction.y *= -1.0f;
 
 	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;

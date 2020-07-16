@@ -111,6 +111,9 @@ public:
 	virtual void AddParticle(const MessageStruct& msg) {}
 	virtual void DisEnableModel(const MessageStruct& msg) {}
 
+
+	//---------NetWork
+	virtual void ProcessPacket(char* packet) {}
 protected:
 	string m_sPlayerId;
 	shared_ptr<CreateManager> m_pCreateManager = NULL;

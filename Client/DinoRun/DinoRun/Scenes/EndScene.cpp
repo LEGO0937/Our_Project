@@ -138,3 +138,9 @@ void EndScene::ReleaseShaderVariables()
 {
 
 }
+
+
+void EndScene::ProcessPacket(char* packet)
+{
+
+}

@@ -63,6 +63,8 @@ public:
 
 	virtual void AddParticle(const MessageStruct& msg);
 	virtual void DisEnableModel(const MessageStruct& msg);
+
+	virtual void ProcessPacket(char* packet);
 private:
 	ID3D12Resource *m_pd3dcbShadow = NULL;
 	CB_GAME_INFO* m_pcbMappedShadow = NULL;

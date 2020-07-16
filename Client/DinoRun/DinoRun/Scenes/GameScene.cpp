@@ -531,22 +531,22 @@ void GameScene::RenderVelocity()
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_SKIN_MESH]);
 	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 	
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_MODEL_INSTANCING]);
-	//for (CObInstancingShader* shader : instancingModelShaders)
-	//	if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
-	//
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_BILLBOARD]);
-	//for (CObInstancingShader* shader : instancingBillBoardShaders)
-	//	if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
-	//for (CObInstancingShader* shader : instancingModelShaders)
-	//{
-	//	if (shader)
-	//		shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
-	//}
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_TERRAIN]);
-	//if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
-	//
-	//m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_CUBEMAP]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_MODEL_INSTANCING]);
+	for (CObInstancingShader* shader : instancingModelShaders)
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+	
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_BILLBOARD]);
+	for (CObInstancingShader* shader : instancingBillBoardShaders)
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+	for (CObInstancingShader* shader : instancingModelShaders)
+	{
+		if (shader)
+			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
+	}
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_TERRAIN]);
+	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
+	
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_VELOCITY_CUBEMAP]);
 	//if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
 }
 
@@ -922,4 +922,9 @@ void GameScene::DisEnableModel(const MessageStruct& msg)
 		return a->GetName() == msg.shaderName; });
 	if (shader != instancingModelShaders.end())
 		(*shader)->DisEnableObject(msg.objectNumber);
+}
+
+void GameScene::ProcessPacket(char* packet)
+{
+
 }

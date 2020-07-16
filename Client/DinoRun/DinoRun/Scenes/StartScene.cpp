@@ -279,3 +279,9 @@ void StartScene::setCamera(CCamera* camera)
 {
 	BaseScene::setCamera(camera);
 }
+
+
+void StartScene::ProcessPacket(char* packet)
+{
+
+}

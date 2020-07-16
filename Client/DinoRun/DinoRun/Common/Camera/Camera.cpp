@@ -106,6 +106,7 @@ void CCamera::GenerateViewMatrix()
 #else
 	m_xmf4x4View = Matrix4x4::LookAtRH(m_xmf3Position, m_xmf3LookAtWorld, m_xmf3Up);
 #endif
+	m_xmf4x4PrevView = m_xmf4x4View;
 }
 void CCamera::RegenerateViewMatrix()
 {

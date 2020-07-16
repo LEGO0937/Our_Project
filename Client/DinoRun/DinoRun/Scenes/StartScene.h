@@ -38,6 +38,8 @@ public:
 
 	virtual string GetId() { return gameTexts[0].text; }
 	virtual string GetPassWord() { return gameTexts[1].text; }
+
+	virtual void ProcessPacket(char* packet);
 private:
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CUiShader*> instacingUiShaders;
