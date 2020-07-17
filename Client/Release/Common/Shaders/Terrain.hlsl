@@ -12,7 +12,7 @@ VS_TEXT_OUTPUT VSTer(VS_TEXT_INPUT input)
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.normalW = mul(input.normal, (float3x3)gmtxWorld);
 	output.TexC = input.TexC;
-	output.TexC1 = input.TexC1*50.f;
+	output.TexC1 = input.TexC1;
 	return(output);
 }
 HS_CONSTANT_OUTPUT HSConstant(InputPatch<VS_TEXT_OUTPUT, 3> input, OutputPatch<HS_OUTPUT, 3> I, uint patchID : SV_PrimitiveID)

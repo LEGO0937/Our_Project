@@ -1,9 +1,10 @@
 #define MAX_VERTEX_INFLUENCES			4
-#define SKINNED_ANIMATION_BONES			21
+#define SKINNED_ANIMATION_BONES			10
 
 struct INSTANCEDGAMEOBJECTINFO
 {
 	matrix gmtxGameObject;
+	matrix gmtxPrevGameObject;
 };
 
 struct INSTANCEDGAMEUIINFO
@@ -16,13 +17,17 @@ struct INSTANCEDGAMEUIINFO
 struct INSTANCEDSKINEDOBJECTINFO
 {
 	float4x4 gpmtxInstancedBoneTransforms[SKINNED_ANIMATION_BONES];
+	float4x4 gpmtxInstancedPrevBoneTransforms[SKINNED_ANIMATION_BONES];
+	//이전 월드행렬을 저장하기 위해 하나 더 갖게 하고 싶지만 사이즈 초과
 };
+
 
 cbuffer cbCameraInfo : register(b0)
 {
 	matrix gmtxView : packoffset(c0);
 	matrix gmtxProjection : packoffset(c4);
-	float3 gvCameraPosition : packoffset(c8);
+	matrix gmtxPrevView : packoffset(c8);
+	float3 gvCameraPosition : packoffset(c12);
 };
 
 cbuffer cbShadowInfo : register(b3)
@@ -36,21 +41,30 @@ cbuffer cbShadowInfo : register(b3)
 cbuffer cbObjectInfo : register(b5)
 {
 	matrix	gmtxWorld : packoffset(c0);
+	matrix	gmtxPrevWorld : packoffset(c4);
 }
 cbuffer cbObjectInfo : register(b5)
 {
 	INSTANCEDSKINEDOBJECTINFO	gmtxWorlds : packoffset(c0);
 }
 
+cbuffer cbBillboardInfo : register(b6)
+{
+	float fBillBoardSize;
+};
+
 StructuredBuffer<INSTANCEDGAMEOBJECTINFO> gGameObjectInfos : register(t0);
 StructuredBuffer<INSTANCEDSKINEDOBJECTINFO> gSkinedGameObjectInfos : register(t0);
+
+StructuredBuffer<INSTANCEDGAMEOBJECTINFO> gPrevGameObjectInfos : register(t1);
+StructuredBuffer<INSTANCEDSKINEDOBJECTINFO> gPrevSkinedGameObjectInfos : register(t1);
 StructuredBuffer<INSTANCEDGAMEUIINFO> gGameUiInfos : register(t0);
 
-Texture2DArray gTexarray:register(t1);
-TextureCube gCubeTexture : register(t1);
-Texture2D gTexture : register(t1);
-Texture2D gDetailedTexture : register(t2);
-Texture2D gShadowMap : register(t3);
+Texture2DArray gTexarray:register(t2);
+TextureCube gCubeTexture : register(t2);
+Texture2D gTexture : register(t2);
+Texture2D gDetailedTexture : register(t3);
+Texture2D gShadowMap : register(t4);
 
 SamplerState gsamPointWrap  : register(s0);
 SamplerState gsamPointClamp  : register(s1);
@@ -62,6 +76,15 @@ SamplerComparisonState gsamShadow : register(s6);
 
 #include "Light.hlsl"
 
+//------------속도맵
+
+struct CREATE_VEL_MAP_OUTPUT
+{
+	float4 position : SV_POSITION;
+	float2 TexC: TEXCOORD0;
+	float4 direction: TEXCOORD1;
+};
+//-----------------------
 struct VS_LIGHTING_INPUT
 {
 	float3 position : POSITION;
@@ -85,6 +108,7 @@ cbuffer cbBoneOffsets : register(b7)
 cbuffer cbBoneTransforms : register(b8)
 {
 	float4x4 gpmtxBoneTransforms[SKINNED_ANIMATION_BONES];
+	float4x4 gpmtxPrevBoneTransforms[SKINNED_ANIMATION_BONES];
 };
 
 struct VS_SKINNED_INPUT
@@ -99,6 +123,7 @@ struct VS_SKINNED_INPUT
 struct VS_SKINNED_OUTPUT
 {
 	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
 	float3 normal : NORMAL;
 	float2 TexC : TEXCOORD;
 };
@@ -230,10 +255,8 @@ struct VS_SKYBOX_OUTPUT
 
 float CalcShadowFactor(float4 shadowPosH)
 {
-	// Complete projection by doing division by w.
 	shadowPosH.xyz /= shadowPosH.w;
 
-	// Depth in NDC space.
 	float depth = shadowPosH.z;
 
 	uint width, height, numMips;
