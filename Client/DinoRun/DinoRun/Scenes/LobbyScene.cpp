@@ -60,7 +60,7 @@ void LobbyScene::ReleaseObjects()
 void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	//m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
 	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
@@ -433,8 +433,8 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	if (sceneType != SceneType::Lobby_Scene)
 	{
 		//네트워크 클래스에 방의 모드 저장할 것
-		m_pNetWorkManager->SetRoomNum(m_iResultNum);
-		m_pNetWorkManager->SetGameMode(m_bMode);
+		NetWorkManager::GetInstance()->SetRoomNum(m_iResultNum);
+		NetWorkManager::GetInstance()->SetGameMode(m_bMode);
 		return sceneType;
 	}
 

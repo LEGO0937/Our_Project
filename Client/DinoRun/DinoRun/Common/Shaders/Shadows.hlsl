@@ -16,7 +16,7 @@ VS_SKINNED_OUTPUT VSShadowSkinnedAnimation(VS_SKINNED_INPUT input)
 
 		normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 	}
-
+	output.positionW = positionW;
 	output.position = mul(mul(float4(positionW, 1.0f), gmtxShadowView), gmtxShadowProjection);
 	output.normal = positionW;
 	output.TexC = input.TexC;
@@ -37,7 +37,7 @@ VS_SKINNED_OUTPUT VSShadowSkinnedInstancingAnimation(VS_SKINNED_INPUT input, uin
 
 		normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 	}
-
+	output.positionW = positionW;
 	output.position = mul(mul(float4(positionW, 1.0f), gmtxShadowView), gmtxShadowProjection);
 	output.normal = positionW;
 	output.TexC = input.TexC;

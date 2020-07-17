@@ -23,6 +23,7 @@
 #include "../Common/Camera/Camera.h"
 #include "EventHandler/EventHandler.h"
 
+#define PLAYER_SHADER instancingAnimatedModelShaders[0]
 
 GameScene::GameScene() :BaseScene()
 {
@@ -142,7 +143,7 @@ void GameScene::ReleaseObjects()
 void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	//m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
 	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
@@ -227,6 +228,45 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree2.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree2Data";
+	//model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree3.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree4.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree4Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	//--
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone1.bin";
+	model_info.dataFileName = "Resources/ObjectData/Stone1Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Grass.bin";
+	model_info.dataFileName = "Resources/ObjectData/Grass1Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone3.bin";
+	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	//model_info.useBillBoard = true;
 	shader = new FenceShader;
 	model_info.modelName = "Resources/Models/M_Block.bin";
 	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
@@ -677,7 +717,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 							message.shaderName = "HeatEffect";
 							message.departMat = m_pPlayer->m_xmf4x4World;
 							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 							m_pSoundManager->Play("Heat", 0.2f);
 							p++;
 						}
@@ -686,12 +726,12 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 							message.objectNumber = (*p)->GetId();
 							message.shaderName = shader->GetName();
 							message.msgName = "DisEnable_Model";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 
 							message.shaderName = "MeatParticle";
 							message.departMat = (*p)->m_xmf4x4World;
 							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 							m_pSoundManager->Play("MeatEat", 0.5f);
 							p++;
 						}
@@ -748,24 +788,72 @@ void GameScene::BuildLights()
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 
-	m_pLights->m_pLights[0].m_bEnable = true;
+	m_pLights->m_pLights[0].m_bEnable = 1;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[0].m_fFalloff = 0.0f;
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	m_pLights->m_pLights[1].m_bEnable = true;
-	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 50.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	m_pLights->m_pLights[0].m_fTheta = 0.0f; //cos(m_fTheta)
+	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.001f);;
+	m_pLights->m_pLights[0].m_fPhi = 0.0f; //cos(m_fPhi)
+	m_pLights->m_pLights[0].m_fRange = 0.0f;
+	m_pLights->m_pLights[0].padding = 0.0f;
+
+	m_pLights->m_pLights[1].m_bEnable = 0;
+	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights->m_pLights[1].m_fFalloff = 1.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[1].m_fRange = 20.0f;
+	m_pLights->m_pLights[1].padding = 0.0f;
+
+	m_pLights->m_pLights[2].m_bEnable = 0;
+	m_pLights->m_pLights[2].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
+	m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(650.0f, 80.0f, 1170.0f);
+	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[2].m_fFalloff = 1.0f;
+	m_pLights->m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[2].m_fRange = 20.0f;
+	m_pLights->m_pLights[2].padding = 0.0f;
+
+	//m_pLights->m_pLights[1].m_bEnable = true;
+	//m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
+	//m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	//m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.3f, 0.3f, 1.0f);
+	//m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
+	//m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(700.0f, 10.0f, 1150.0f);
+	//m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	//m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	//m_pLights->m_pLights[1].m_fFalloff = 1.0f;
+	//m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	//m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	
+	
+	
+	
+	//m_pLights->m_pLights[3].m_bEnable = true;
+	//m_pLights->m_pLights[3].m_nType = POINT_LIGHT;
+	//m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4f, 0.9f, 1.0f);
+	//m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	//m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
+	//m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(700.0f, 176.0f, 1150.0f);
+	//m_pLights->m_pLights[3].m_fRange = 50;
+	//m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.09f, 0.032f);
+
 	m_pLights->fogstart = 25;
 	m_pLights->fogrange = 30;
 

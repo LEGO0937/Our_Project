@@ -362,7 +362,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		//	}
 		//}
 		//--------------------------------
-		float c = 1.5f, k = 25;
+		float c = 1.5f, k = 34;
 		{
 			//k = 0.04  ,  c = 0.2
 			//f= - cv -k*x   -cv -kx¾Æ´Ñ°¡?..

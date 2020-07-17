@@ -14,7 +14,7 @@ void CreateManager::Initialize(HINSTANCE hInstance, HWND hWnd)
 	m_hWnd = hWnd;
 
 	m_pDrawManager = shared_ptr<DrawManager>(new DrawManager);
-	m_pNetWorkManager = shared_ptr<NetWorkManager>(new NetWorkManager);
+	//m_pNetWorkManager = shared_ptr<NetWorkManager>(new NetWorkManager);
 	m_pSoundManager = shared_ptr<SoundManager>(new SoundManager);
 	InitializeSound();
 

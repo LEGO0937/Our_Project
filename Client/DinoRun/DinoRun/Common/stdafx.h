@@ -39,6 +39,7 @@
 #include <fmod.hpp>
 using namespace FMOD;
 
+#include "../protocol.h"
 #include "../Common/TextureLoad/DDSTextureLoader12.h"
 #include "../Global/Global.h"
 using namespace DirectX;

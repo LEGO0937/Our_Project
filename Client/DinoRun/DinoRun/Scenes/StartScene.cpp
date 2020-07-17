@@ -47,7 +47,7 @@ void StartScene::ReleaseObjects()
 void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	//m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
 	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
@@ -133,7 +133,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				// 닉네임을 받았다면 네트워크 클래스에 닉네임 저장 후, Lobbyscene으로 이동.
 				//씬 전환 
 				//m_sPlayerId = 로그인 성공 시 서버로부터 닉네임 받음;
-				m_pNetWorkManager->SetPlayerName(m_sPlayerId);
+				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
 				sceneType = Lobby_Scene;
 			}
 		}

@@ -27,6 +27,7 @@
 
 #define ITEM_TILE 0
 #define ITEM_UI 1   //아이템 틀안의 이미지의 쉐이더 리스트상에서의 인덱스
+#define PLAYER_SHADER instancingAnimatedModelShaders[0]
 
 string ItemShaderName[5] = { "Default","BananaShader","MudShader","StoneShader","Meteorite" };
 
@@ -140,7 +141,7 @@ void ItemGameScene::ReleaseObjects()
 void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	//m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
 	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
@@ -252,6 +253,44 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree2.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree2Data";
+	//model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree3.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree4.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree4Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	//--
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone1.bin";
+	model_info.dataFileName = "Resources/ObjectData/Stone1Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Grass.bin";
+	model_info.dataFileName = "Resources/ObjectData/Grass1Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone3.bin";
+	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
 	shader = new ItemShader;
 	model_info.modelName = "Resources/Models/M_Itembox.bin";
 	model_info.dataFileName = "Resources/ObjectData/MeatData";
@@ -307,7 +346,8 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.dataFileName = NULL;
 	animatedShader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingAnimatedModelShaders.emplace_back(animatedShader);
-	//UpdatedShaders.emplace_back(animatedShader);
+	animatedShader->AddRef();
+	UpdatedShaders.emplace_back(animatedShader);
 	 
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds", NULL);
@@ -413,7 +453,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				message.departMat = matrix;
 				message.arriveMat = matrix;
 				message.msgName = "Add_Model";
-				EventHandler::GetInstance()->CallBack(message);
+				EventHandler::GetInstance()->RegisterEvent(message);
 				break;
 			case IconMeat:
 				m_pPlayer->SetMaxVelocityXZ(50);
@@ -441,7 +481,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			message.departMat = mat;
 			message.arriveMat = mat;
 			message.msgName = "Add_Model";
-			EventHandler::GetInstance()->CallBack(message);
+			EventHandler::GetInstance()->RegisterEvent(message);
 			break;
 		case VK_LEFT:
 			
@@ -677,6 +717,11 @@ void ItemGameScene::AnimateObjects(float fTimeElapsed)
 
 void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 {
+
+	//명령 send(플레이어 애니메이션 혹은 행렬 최신화)
+	//명령 recv
+	//ProcessPacket(패킷)
+	
 	//물리
 	if (isStart)
 	{
@@ -693,6 +738,11 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 
 SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
+	//----
+	//명령 send(오브젝트 생성,삭제 및 파티클 추가, 오브젝트 비활성화)
+	//명령 recv
+	//ProcessPacket(패킷)
+	//----
 	EventHandler::GetInstance()->Update();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE_CALC]);
@@ -763,7 +813,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							message.shaderName = "HeatEffect";
 							message.departMat = m_pPlayer->m_xmf4x4World;
 							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 
 							m_pSoundManager->Play("Heat", 0.2f);
 							p++;
@@ -784,13 +834,13 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							message.objectNumber = (*p)->GetId();
 							message.shaderName = shader->GetName();
 							message.msgName = "DisEnable_Model";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 							//(*p)->SetEnableState(false);
 							
 							message.shaderName = "BoxParticle";
 							message.departMat = (*p)->m_xmf4x4World;
 							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 							m_pSoundManager->Play("ItemBox", 0.2f);
 							p++;
 						}
@@ -802,7 +852,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							message.objectNumber = (*p)->GetId();
 							message.shaderName = shader->GetName();
 							message.msgName = "Delete_Model";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 
 							p++;
 						}
@@ -1047,4 +1097,93 @@ void ItemGameScene::DisEnableModel(const MessageStruct& msg)
 void ItemGameScene::ProcessPacket(char* packet)
 {
 
+
+	SC_PACKET_PLAYER_ANIMATION t;
+	//패킷의 switch문으로 행동 결정
+	// 플레이어 위치값 갱신
+	/*
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == t.id; });
+	if (obj != obList.end())
+		(*obj)->m_xmf4x4ToParent = 행렬
+	else
+	{
+		auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+			return a->GetId() == 0; });
+		if (findId != obList.end())
+		{
+			(*findId)->SetId(이름)
+			(*findId)->m_xmf4x4ToParent = 행렬
+			// 위치값 + 행렬
+		}
+
+	}
+	*/
+
+	// 플레이어 애니메이션
+	/*
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == t.id; });
+	if (obj != obList.end())
+	{
+		CPlayer* player = (CPlayer*)(*obj);
+		switch (t.animation)
+		{
+		case 'R':   //오른쪽 키 down
+			player->KeyDownRight();
+			break;
+		default:
+			break;
+		}
+	}
+	*/
+	//오브젝트 추가
+	//패킷으로부터 MessageStruct의 정보를 받아야함. 물론 오브젝트를 생성하는 플레이어가
+	//메시지 구조체 그대로 서버에 보내고 서버는 받은걸 그대로 타 플레이어에게 전해주면 좋을듯?
+
+
+	/*
+	MessageStruct를 이용하는 처리들은 이벤트 발생 시 클라에서 EventHandler의 callback함수로 해당 이벤트에
+	대한 정보를 서버로 send하고 서버는 그 이벤트정보를 갖고 있다가 각 클라가 씬객체의 Update 
+	최상단 부분에서 send로 이벤트정보를 요구할 때 넘겨주는건 어떨지? 
+	*/
+	/*
+	MessageStruct message;   메시지 구조체 만들고
+	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
+	message.departMat = 생성될 시 적용할 행령;
+	message.arriveMat = 생성될 시 적용할 행령과 일치;
+	message.msgName = "Add_Model";
+	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
+	*/
+	
+
+	//오브젝트 삭제
+	//얘 또한 추가처럼 메시지 구조체 정보 그대로만 받아올 수 있다면 쉬움
+	/*
+	MessageStruct message;   메시지 구조체 만들고
+	message.objectNumber = 오브젝트 id(int);
+	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
+	message.msgName = "DisEnable_Model";  명령어
+	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
+	*/
+
+	//파티클 생성
+	//얘 또한 추가처럼 메시지 구조체 정보 그대로만 받아올 수 있다면 쉬움
+	/*
+	message.shaderName = 파티클 이름;
+	message.departMat = 생성될 시 적용할 행령;
+	message.msgName = "Add_Particle";
+	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
+	
+
+	//오브젝트 비활성화
+	//위와 일치
+	/*
+	message.objectNumber = 오브젝트 id(int);
+	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
+	message.msgName = "DisEnable_Model";
+	EventHandler::GetInstance()->CallBack(message);클라 이벤트 핸들러에 등록  -끝-
+	*/
 }

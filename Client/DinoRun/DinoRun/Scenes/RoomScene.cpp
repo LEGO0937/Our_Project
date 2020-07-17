@@ -39,7 +39,7 @@ void RoomScene::ReleaseObjects()
 void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
+	//m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
 	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
@@ -247,7 +247,7 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			return SceneType::Room_Scene;
 	}
 	//네트워크 클래스에 저장되있는 방 모드 종류에 따라서 다른 게임씬전환
-	if (m_pNetWorkManager->GetGameMode())
+	if (NetWorkManager::GetInstance()->GetGameMode())
 		sceneType = SceneType::ItemGame_Scene;
 	else
 		sceneType = SceneType::Game_Scene;

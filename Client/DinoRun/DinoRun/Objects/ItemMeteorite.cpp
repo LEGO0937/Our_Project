@@ -28,7 +28,7 @@ bool ItemMeteorite::Update(float fTimeElapsed, CGameObject* target)
 
 		message.msgName = "Add_Particle";
 		message.shaderName = "StoneParticle";
-		EventHandler::GetInstance()->CallBack(message);
+		EventHandler::GetInstance()->RegisterEvent(message);
 
 		return true;
 	}

@@ -124,7 +124,7 @@ protected:
 	CGameObject *m_pBillBoardObject = NULL;   //인스턴싱drawing 빌보드 대상
 
 	LPVOID						m_pUpdatedContext = NULL; //다루는 오브젝트들의 업데이트에 사용될 요소 주로 Terrain 사용
-	int m_iCurSerealNum = 0; // 오브젝트가 추가될때마다 부여될 시리얼 번호. 생성될때마다 값은 증가한다.
+	int m_iCurSerealNum = 1; // 오브젝트가 추가될때마다 부여될 시리얼 번호. 생성될때마다 값은 증가한다.
 };
 
 class CObInstancingShader : public CObjectsShader

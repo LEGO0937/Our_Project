@@ -195,7 +195,7 @@ void CGameFramework::CalculateFrameStats()
 		if (m_pPlayer)
 		{
 			windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x) + L"   y:" + to_wstring(p.y)
-				+ L"pX: " + to_wstring(m_pPlayer->GetPosition().x) + L"  z:" + to_wstring(m_pPlayer->GetPosition().z);
+				+ L"pX: " + to_wstring(m_pPlayer->GetPosition().x)+ L" pY: " + to_wstring(m_pPlayer->GetPosition().y)  + L"  pZ:" + to_wstring(m_pPlayer->GetPosition().z);
 		}
 		else
 		{

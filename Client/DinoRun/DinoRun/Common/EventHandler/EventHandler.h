@@ -14,7 +14,8 @@ public:
 	EventHandler() {}
 	void SetCurScene(shared_ptr<BaseScene> curScene) { m_pCurScene = curScene; }
 	void ResetCurScene() { m_pCurScene.reset(); }
-	void CallBack(const MessageStruct& msg);
+	void SendEvent(const MessageStruct& msg);
+	void RegisterEvent(const MessageStruct& msg);
 
 	bool GetIsBuild() { return completeBuild; }
 	void SwitchIsBuild() { completeBuild = !completeBuild; }
