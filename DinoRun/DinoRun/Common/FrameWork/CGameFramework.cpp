@@ -119,7 +119,7 @@ void CGameFramework::BuildObjects()
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
 	m_pFontManager->Initialize(m_pCreateManager.get());
 	//-----------
-	/*
+	
 	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
 	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
@@ -131,20 +131,20 @@ void CGameFramework::BuildObjects()
 
 	m_pCreateManager->SetLoadingScene(m_pLoadingScene);
 
-	m_pScene = shared_ptr<GameScene>(new GameScene());
+	m_pScene = shared_ptr<ItemGameScene>(new ItemGameScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
 	m_pScene->BuildObjects(m_pCreateManager);
 	m_pScene->SetId(m_sPlayerID);
-	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_Dino.bin");
+	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
 	pPlayer->SetMaxForce(MIN_FORCE);
 	m_pPlayer = pPlayer;
 
 	m_pScene->setPlayer(m_pPlayer);
 	m_pScene->setCamera(m_pPlayer->GetCamera());
-	*/
-	//--------
 	
+	//--------
+	/*
 	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
 	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
@@ -161,7 +161,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pCreateManager);
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pScene->setCamera(m_pCamera);
-	
+	*/
 	//-----------------------
 
 	m_pCreateManager->ExecuteCommandList();

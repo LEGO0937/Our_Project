@@ -112,6 +112,8 @@ void ItemGameScene::ReleaseObjects()
 
 	if (blurShader)
 		blurShader->Release();
+	if (motionBlurShader)
+		motionBlurShader->Release();
 
 	if (m_pMinimapShader)
 	{
@@ -144,6 +146,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
+	NetWorkManager::GetInstance()->ConnectToServer();
 
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 
@@ -745,6 +748,48 @@ void ItemGameScene::AnimateObjects(float fTimeElapsed)
 
 void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 {
+	//자기 정보 보내기
+	/*
+	SC_PACKET_PLAYER_INFO packet; 
+	packet.checkPoints[0] = m_pPlayer->GetCheckPoint();
+	packet.playerNames[0] = m_sPlayerId;
+	packet.xmf4x4Parents[0] = m_pPlayer->m_xmf4x4ToParent;
+	packet.type = SC_MOVE_PLAYER;
+	//자기정보 send
+	//모든플레이어 정보 recv 변수 packet으로 받음
+	//recv로 받은 패킷을 통해 위치 초기화
+
+	for (int i = 0; i < NetWorkManager::GetInstance()->GetNumPlayer(); ++i)
+	{
+		if (packet.playerNames[i] == m_sPlayerId)
+			continue;
+
+		vector<CGameObject*> obList = PLAYER_SHADER->getList();
+		auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+			return a->GetName() == packet.playerNames[i]; });
+		if (obj != obList.end())
+		{
+			(*obj)->m_xmf4x4ToParent = packet.xmf4x4Parents[i];
+			((CPlayer*)(*obj))->SetCheckPoint(packet.checkPoints[i]);
+		}
+		else
+		{
+			auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+				return a->GetName() == "None"; });
+			if (findId != obList.end())
+			{
+				(*findId)->SetName(packet.playerNames[i]);
+				(*findId)->m_xmf4x4ToParent = packet.xmf4x4Parents[i];
+				((CPlayer*)(*findId))->SetCheckPoint(packet.checkPoints[i]);
+					// 위치값 + 행렬
+			}
+
+		}
+	}
+	*/
+	//서버가 recv, 자신까지 포함한 본인정보까지 받을것 이때 쓰는 패킷은 player_info 패킷
+	//
+
 
 	//명령 send(플레이어 애니메이션 혹은 행렬 최신화)
 	//명령 recv

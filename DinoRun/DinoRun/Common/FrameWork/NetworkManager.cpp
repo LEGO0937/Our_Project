@@ -55,10 +55,11 @@ void NetWorkManager::Release()
 	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 }
 
-void NetWorkManager::ConnectToServer(HWND hWnd)
+void NetWorkManager::ConnectToServer()
 {
 	
 	// connect()
+	m_ServerIP = "127.0.0.1";
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;

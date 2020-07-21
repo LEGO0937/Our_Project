@@ -238,8 +238,10 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	//clear로 m_vUsers초기화 후 send,recv로 현재 방안에 있는 유저의 정보를 받아와서 최신화한다.
 	//send때 자신의 방번호와 닉네임을 보내고 서버에서는 이 닉네임을 제외한 다른 유저들의 정보를
 	//넘긴다.
-	for (int i = 0; i < 4; ++i)
+	for (int i = 0; i < m_vUsers.size(); ++i)
 	{
+		if (m_vUsers[i].m_sName == m_sPlayerId)
+			continue;
 		if (i < m_vUsers.size())
 		{
 			gameTexts[i + 1].text = m_vUsers[i].m_sName;  //첫번째는 본인이름이 들어가니 두번째란부터 입력
@@ -267,6 +269,7 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			return SceneType::Room_Scene;
 	}
 	//네트워크 클래스에 저장되있는 방 모드 종류에 따라서 다른 게임씬전환
+	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());
 	if (NetWorkManager::GetInstance()->GetGameMode())
 		sceneType = SceneType::ItemGame_Scene;
 	else

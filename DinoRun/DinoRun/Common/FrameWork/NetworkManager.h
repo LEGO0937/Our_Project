@@ -37,13 +37,14 @@ public:
 	void SetRoomNum(const int& num) { m_iRoomNum = num; }
 	void SetGameMode(const bool& mode) { m_bGameMode = mode; }
 	void SetPlayerName(const string& name) { m_sPlayerName = name; }
+	void SetNumPlayer(const int& num) { m_iNumPlayer = num; }
 
 	void SetHwnd(const HWND& hwnd) { m_hWnd = hwnd; }
 
 	int GetRoomNum() { return m_iRoomNum; }
 	bool GetGameMode() { return m_bGameMode; }
 	string GetPlayerName() { return m_sPlayerName; }
-
+	int GetNumPlayer() { return m_iNumPlayer; }
 private:
 	CS_PACKET_UP_KEY* pUp = NULL;
 	CS_PACKET_DOWN_KEY* pDown = NULL;
@@ -63,6 +64,7 @@ private:
 	CS_PACKET_GET_ITEM* pGetItem = NULL;
 
 	HWND m_hWnd{ NULL };
+	int m_iNumPlayer = 0;
 private:
 	//ReadPacket에서 받은 패킷들을 CGameFramework에 전달하기 위한 포인터
 	CGameFramework* m_pGameClient{ nullptr };
@@ -89,7 +91,7 @@ public:
 	SOCKET getSock();
 	void Initialize();
 	void Release();
-	void ConnectToServer(HWND hWnd);
+	void ConnectToServer();
 
 	//Network클래스도 CGameFramework에 접근가능하게 하기위해 내부 포인터를 갖고있게 함.
 	void SetGameFrameworkPtr(HWND hWnd, CGameFramework* client);
