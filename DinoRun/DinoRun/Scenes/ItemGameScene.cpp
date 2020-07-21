@@ -25,10 +25,9 @@
 
 #include <time.h>
 
-char ItemGameScene::m_HostID = -1;
-
 #define ITEM_TILE 0
 #define ITEM_UI 1   //아이템 틀안의 이미지의 쉐이더 리스트상에서의 인덱스
+#define PLAYER_SHADER instancingAnimatedModelShaders[0]
 
 string ItemShaderName[5] = { "Default","BananaShader","MudShader","StoneShader","Meteorite" };
 
@@ -38,7 +37,7 @@ ItemGameScene::ItemGameScene() :BaseScene()
 }
 ItemGameScene::~ItemGameScene()
 {
-	m_pSoundManager->Stop("InGame_BGM");
+	SoundManager::GetInstance()->Stop("InGame_BGM");
 }
 void ItemGameScene::ReleaseUploadBuffers()
 {
@@ -142,8 +141,6 @@ void ItemGameScene::ReleaseObjects()
 void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
-	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
@@ -174,7 +171,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.f_uvY.emplace_back(0);
 	m_pEffectShader = new ImageShader;
 	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
-
+#ifdef isDebug
 	bShader = new BillBoardShader;
 	model_info.modelName = "Resources/Images/B_Tree.dds";
 	model_info.dataFileName = "Resources/ObjectData/BillBoardData";
@@ -182,6 +179,20 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	bShader->BuildObjects(pCreateManager.get(),&model_info);
 	instancingBillBoardShaders.emplace_back(bShader);
 
+	shader = new BillBoardShader;
+	model_info.modelName = "Resources/Images/B_Stone.dds";
+	model_info.dataFileName = "Resources/ObjectData/BillBoardStoneData";
+	model_info.size = 50;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingBillBoardShaders.emplace_back(shader);
+
+	shader = new BillBoardShader;
+	model_info.modelName = "Resources/Images/B_Bush.dds";
+	model_info.dataFileName = "Resources/ObjectData/BillBoardBushData";
+	model_info.size = 50;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingBillBoardShaders.emplace_back(shader);
+#endif
 	shader = new FenceShader;
 	model_info.modelName = "Resources/Models/M_Block.bin";
 	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
@@ -219,26 +230,29 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new MeteoriteShader;
-	model_info.modelName = "Resources/Models/M_Stone.bin";
+	model_info.modelName = "Resources/Models/M_Meteorite.bin";
 	model_info.dataFileName = NULL;
-	model_info.useBillBoard = true;
+	model_info.useBillBoard = false;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
 	shader = new MoundShader;
-	model_info.modelName = "Resources/Models/M_Stone.bin";
+	model_info.modelName = "Resources/Models/M_RockRIP.bin";
 	model_info.dataFileName = NULL;
-	model_info.useBillBoard = true;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
+
 	m_pCreateManager->RenderLoading();
+
+#ifdef isDebug
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Tree.bin";
 	model_info.dataFileName = "Resources/ObjectData/TreeData";
+	model_info.useBillBoard = true;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 
@@ -253,6 +267,45 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.dataFileName = "Resources/ObjectData/WeedData";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree2.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree2Data";
+	//model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree3.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree4.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree4Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	//--
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone1.bin";
+	model_info.dataFileName = "Resources/ObjectData/Stone1Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Grass.bin";
+	model_info.dataFileName = "Resources/ObjectData/Grass1Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone3.bin";
+	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+#endif
 
 	shader = new ItemShader;
 	model_info.modelName = "Resources/Models/M_Itembox.bin";
@@ -281,6 +334,10 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader->BuildObjects(pCreateManager.get(), NULL);
 	instancingNumberUiShaders.emplace_back(uiShader);
 
+	uiShader = new VelocityCountShader;
+	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	instancingNumberUiShaders.emplace_back(uiShader);
+
 	UI_INFO ItemUi_info;
 
 	//---- 아이템 틀
@@ -305,11 +362,12 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instancingImageUiShaders.emplace_back(uiShader);
 
 	animatedShader = new PlayerShader;
-	model_info.modelName = "Resources/Models/Dino.bin";
+	model_info.modelName = "Resources/Models/M_DinoTest.bin";
 	model_info.dataFileName = NULL;
 	animatedShader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingAnimatedModelShaders.emplace_back(animatedShader);
-	//UpdatedShaders.emplace_back(animatedShader);
+	animatedShader->AddRef();
+	UpdatedShaders.emplace_back(animatedShader);
 	 
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds", NULL);
@@ -319,6 +377,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pIconShader->BuildObjects(pCreateManager.get(), &name);
 
 	blurShader = new BlurShader(pCreateManager.get());
+	motionBlurShader = new MotionBlurShader(pCreateManager.get());
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(),"Spawn", NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
@@ -331,7 +390,8 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	CreateShaderVariables(pCreateManager.get());
 	m_pCreateManager->RenderLoading();
-	m_pSoundManager->Play("InGame_BGM", 0.2f);
+
+	SoundManager::GetInstance()->Play("InGame_BGM", 0.2f);
 	m_pCreateManager->RenderLoading();
 }
 
@@ -415,18 +475,24 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				message.departMat = matrix;
 				message.arriveMat = matrix;
 				message.msgName = "Add_Model";
-				EventHandler::GetInstance()->CallBack(message);
+				EventHandler::GetInstance()->RegisterEvent(message);
 				break;
 			case IconMeat:
 				m_pPlayer->SetMaxVelocityXZ(50);
 				m_fBoostTimer = 10;
 				isBoost = true;
 				break;
-			case IconMugen:
-				m_fMugenTimer = 10;
-				isMugen = true;
+			case IconMeteorite:
+				int checkCount = (m_pPlayer->GetCheckPoint() + 1) % 181;
+				message.shaderName = "MeteoriteShader";
+				CGameObject* checkPoint = m_pCheckPointShader->getList()[checkCount];
+				XMFLOAT4X4 mat = checkPoint->m_xmf4x4World;
+				mat._42 += 500;
+				message.departMat = mat;
+				message.arriveMat = mat;
+				message.msgName = "Add_Model";
+				EventHandler::GetInstance()->RegisterEvent(message);
 				break;
-			
 			}
 			m_eCurrentItem = IconDefault;
 			instancingImageUiShaders[ITEM_UI]->getUvXs()[0] = 0.125f * m_eCurrentItem;
@@ -439,11 +505,11 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		case VK_F4:
 			message.shaderName = "MeteoriteShader";
 			XMFLOAT4X4 mat = m_pPlayer->m_xmf4x4World;
-			mat._42 += 100;
+			mat._42 += 500;
 			message.departMat = mat;
 			message.arriveMat = mat;
 			message.msgName = "Add_Model";
-			EventHandler::GetInstance()->CallBack(message);
+			EventHandler::GetInstance()->RegisterEvent(message);
 			break;
 		case VK_LEFT:
 			
@@ -666,7 +732,6 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<I
 		m_pIconShader->Render(m_pd3dCommandList, m_pMinimapCamera);
 	
 }
-// 애니메이션 받는곳
 void ItemGameScene::AnimateObjects(float fTimeElapsed)
 {
 	//말 그대로 애니메이션 update
@@ -680,33 +745,12 @@ void ItemGameScene::AnimateObjects(float fTimeElapsed)
 
 void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 {
+
+	//명령 send(플레이어 애니메이션 혹은 행렬 최신화)
+	//명령 recv
+	//ProcessPacket(패킷)
+	
 	//물리
-
-	//send 포지션 요구
-	SC_PACKET_PLAYER_ANIMATION t;
-	// 플레이어 위치값 갱신
-	/*
-	vector<CGameObject*> obList = instancingAnimatedModelShaders[0]->getList();
-	auto shader = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-		return a->GetId() == t.id; });
-	if (shader != obList.end())
-		(*shader)->m_xmf4x4ToParent = 행렬
-	else
-	{
-		auto findIdr = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-			return a->GetId() == 0; });
-		if (findIdr != obList.end())
-		{
-			(*findIdr)->SetId(이름)
-			(*findIdr)->m_xmf4x4ToParent = 행렬
-			
-		}
-		// 위치값 + 행렬
-	}
-	*/
-	// 이벤트 핸들러에서 맞는 쉐이더 넣어주는것 
-	//recv 포지션 정보 입수 - 한명의 정보
-
 	if (isStart)
 	{
 		m_pPlayer->FixedUpdate(fTimeElapsed);
@@ -716,12 +760,17 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 			shader->FixedUpdate(fTimeElapsed);  //물리 적용할 것
 		}
 	}
-
+	
 }
 
 
 SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
+	//----
+	//명령 send(오브젝트 생성,삭제 및 파티클 추가, 오브젝트 비활성화)
+	//명령 recv
+	//ProcessPacket(패킷)
+	//----
 	EventHandler::GetInstance()->Update();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE_CALC]);
@@ -747,12 +796,25 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		{
 			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 		}
-		if (isMugen)
+		else
 		{
-			m_fMugenTimer -= fTimeElapsed;
-			if (m_fMugenTimer < 0)
-				isMugen = false;
+			int rank = 1;
+			vector<CGameObject*> list = PLAYER_SHADER->getList();
+			for (CGameObject* obj : list)
+			{
+				CPlayer* player = (CPlayer*)obj;
+				if (m_pPlayer->GetCheckPoint() < player->GetCheckPoint())
+					rank++;
+			}
+			m_pPlayer->SetRank(rank);
 		}
+
+		//if (isMugen)
+		//{
+		//	m_fMugenTimer -= fTimeElapsed;
+		//	if (m_fMugenTimer < 0)
+		//		isMugen = false;
+		//}
 		if (isBoost)
 		{
 			m_fBoostTimer -= fTimeElapsed;
@@ -783,6 +845,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 				//플레이어 충돌처리할 곳
 				if (m_pPlayer->IsCollide(*p))
 				{
+
 					if (m_pPlayer->Update(fTimeElapsed, *p))  //true반환 시 충돌된 오브젝트는 리스트에서 삭제
 					{
 						if ((*p)->GetModelType() == Fence || (*p)->GetModelType() == Player || (*p)->GetModelType() == Item_Stone)
@@ -792,9 +855,8 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							message.shaderName = "HeatEffect";
 							message.departMat = m_pPlayer->m_xmf4x4World;
 							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->CallBack(message);
-
-							m_pSoundManager->Play("Heat", 0.2f);
+							EventHandler::GetInstance()->RegisterEvent(message);
+							SoundManager::GetInstance()->Play("Heat", 0.2f);
 							p++;
 						}
 						else if ((*p)->GetModelType() == Item_Box)
@@ -804,23 +866,22 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							auto randomSeed = std::chrono::duration_cast<std::chrono::microseconds>(duration).count();
 
 							std::mt19937 mtRand(randomSeed);
-							std::uniform_int_distribution<int> randType(IconBanana, IconMugen);
+							std::uniform_int_distribution<int> randType(IconBanana, IconMeteorite);
 							m_eCurrentItem = ItemIcon_type(randType(mtRand));
 							instancingImageUiShaders[ITEM_UI]->getUvXs()[0] = 0.125f * m_eCurrentItem;
 
 							// 이 곳에서도 서버연동시 바로 안만들고 신호부터 보낼것임.
 							// 비활성화 시키는것 또한 신호를 보낼것임.
-							message.objectNumber = (*p)->GetId();
+							message.objectName = (*p)->GetName();
 							message.shaderName = shader->GetName();
 							message.msgName = "DisEnable_Model";
-							EventHandler::GetInstance()->CallBack(message);
-							//(*p)->SetEnableState(false);
-							
+							EventHandler::GetInstance()->RegisterEvent(message);
+						
 							message.shaderName = "BoxParticle";
 							message.departMat = (*p)->m_xmf4x4World;
 							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->CallBack(message);
-							m_pSoundManager->Play("ItemBox", 0.2f);
+							EventHandler::GetInstance()->RegisterEvent(message);
+							SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 							p++;
 						}
 						else
@@ -828,10 +889,10 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							// 오브젝트 삭제를 하는 구간, 서버에 셰이더의 종류 및 오브젝트의 번호를 전송한다.
 							// 삭제 또한 업데이트함수에서 실시.
 							
-							message.objectNumber = (*p)->GetId();
+							message.objectName = (*p)->GetName();
 							message.shaderName = shader->GetName();
 							message.msgName = "Delete_Model";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 
 							p++;
 						}
@@ -886,18 +947,62 @@ void ItemGameScene::BuildLights()
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	m_pLights->m_pLights[1].m_bEnable = true;
-	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 50.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	
+	m_pLights->m_pLights[1].m_bEnable = 1;
+	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights->m_pLights[1].m_fFalloff = 1.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[1].m_fRange = 20.0f;
+	m_pLights->m_pLights[1].padding = 0.0f;
+
+	m_pLights->m_pLights[2].m_bEnable = 1;
+	m_pLights->m_pLights[2].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
+	m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[2].m_fFalloff = 1.0f;
+	m_pLights->m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[2].m_fRange = 20.0f;
+	m_pLights->m_pLights[2].padding = 0.0f;
+
+	m_pLights->m_pLights[3].m_bEnable = 1;
+	m_pLights->m_pLights[3].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
+	m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[3].m_fFalloff = 1.0f;
+	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[3].m_fRange = 20.0f;
+	m_pLights->m_pLights[3].padding = 0.0f;
+
+	m_pLights->m_pLights[4].m_bEnable = 1;
+	m_pLights->m_pLights[4].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[4].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
+	m_pLights->m_pLights[4].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	m_pLights->m_pLights[4].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[4].m_fFalloff = 1.0f;
+	m_pLights->m_pLights[4].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[4].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[4].m_fRange = 20.0f;
+	m_pLights->m_pLights[4].padding = 0.0f;
 	m_pLights->fogstart = 25;
 	m_pLights->fogrange = 30;
 
@@ -909,7 +1014,7 @@ void ItemGameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsComm
 	m_pMinimapCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pMinimapCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	m_pMinimapCamera->GenerateOrthoProjectionMatrix(1000, 1000, 10, 1000.0f);
-	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT - 180, 250, 180, 0.0f, 1.0f);
+	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT - 400, 250, 180, 0.0f, 1.0f);
 	m_pMinimapCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
 	m_pMinimapCamera->GenerateViewMatrix(m_pMinimapCamera->GetPosition(), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
@@ -1043,177 +1148,125 @@ void ItemGameScene::ResetShadowBuffer(CreateManager* pCreateManager)
 	m_pTerrain->resetShadowTexture(pCreateManager);
 }
 
-void ItemGameScene::AddModelObject(const MessageStruct& msg)
+void ItemGameScene::ProcessEvent(const MessageStruct& msg)
 {
-	auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a){
-		return a->GetName() == msg.shaderName; });
-	if (shader != instancingModelShaders.end())
-		(*shader)->addObject(m_pCreateManager.get(), msg.departMat, msg.arriveMat);
+	if (msg.msgName == "Add_Model")
+	{
+		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
+			return a->GetName() == msg.shaderName; });
+		if (shader != instancingModelShaders.end())
+			(*shader)->addObject(m_pCreateManager.get(), msg.departMat, msg.arriveMat);
+	}
+	else if (msg.msgName == "Delete_Model")
+	{
+		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
+			return a->GetName() == msg.shaderName; });
+		if (shader != instancingModelShaders.end())
+			(*shader)->DeleteObject(msg.objectName);
+	}
+	else if (msg.msgName == "Add_Particle")
+	{
+		XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
+		particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName, NULL, pos));
+	}
+	else if (msg.msgName == "DisEnable_Model")
+	{
+		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
+			return a->GetName() == msg.shaderName; });
+		if (shader != instancingModelShaders.end())
+			(*shader)->DisEnableObject(msg.objectName);
+	}
 }
-void ItemGameScene::DeleteModelObject(const MessageStruct& msg)
-{
-	auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
-		return a->GetName() == msg.shaderName; });
-	if (shader != instancingModelShaders.end())
-		(*shader)->DeleteObject(msg.objectNumber);
-}
-
-void ItemGameScene::AddParticle(const MessageStruct& msg)
-{
-	XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
-	particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName , NULL, pos));
-}
-
-void ItemGameScene::DisEnableModel(const MessageStruct& msg)
-{
-	auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
-		return a->GetName() == msg.shaderName; });
-	if (shader != instancingModelShaders.end())
-		(*shader)->DisEnableObject(msg.objectNumber);
-}
-
-
 void ItemGameScene::ProcessPacket(char* packet)
 {
-	switch (packet[1])
+
+
+	SC_PACKET_PLAYER_ANIMATION t;
+	//패킷의 switch문으로 행동 결정
+	// 플레이어 위치값 갱신
+	/*
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetName() == t.Name; });
+	if (obj != obList.end())
+		(*obj)->m_xmf4x4ToParent = 행렬
+	else
 	{
-	case SC_PUT_PLAYER:
-	{
-		SC_PACKET_PUT_PLAYER* pPP = reinterpret_cast<SC_PACKET_PUT_PLAYER*>(packet);
-		// 앞으로 Put Player는 라운드 시작 시 캐릭터들의 시작 위치를 받는 패킷으로 사용
+		auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+			return a->GetName() == "None"; });
+		if (findId != obList.end())
+		{
+			(*findId)->SetId(이름)
+			(*findId)->m_xmf4x4ToParent = 행렬
+			// 위치값 + 행렬
+		}
 
-
-
-		
-
-		// 초기 플레이어 위치
-		m_pPlayer->SetPosition(pos);
-	
-
-		//모든 아이템 보유 초기화
-		/*m_pPlayer->SetIsRock(false);
-		m_pPlayer->SetIsBanana(false);
-		m_pPlayer->SetIsMud(false);*/
-
-		//auto iter = m_pScene->getShaderManager()->getShaderMap().find("OtherPlayer");
-		//if (iter != m_pScene->getShaderManager()->getShaderMap().end())
-		//{
-		//	for (auto enemy : m_mapClients)
-		//	{
-		//		if (enemy.second.id == m_pPlayer->GetPlayerID())   continue;
-
-		//		(*iter).second->m_ppObjects[enemy.second.id]->SetPosition(pos);
-		//		(*iter).second->m_ppObjects[enemy.second.id]->SetLookVector(XMFLOAT3(0.0f, 0.0f, 1.0f));
-		//		(*iter).second->m_ppObjects[enemy.second.id]->SetRightVector(XMFLOAT3(1.0f, 0.0f, 0.0f));
-		//		(*iter).second->m_ppObjects[enemy.second.id]->SetUpVector(XMFLOAT3(0.0f, 1.0f, 0.0f));
-		//		(*iter).second->m_ppObjects[enemy.second.id]->SetScale(10, 10, 10);
-		//		//모든 아이템 보유 초기화
-		//		(*iter).second->m_ppObjects[enemy.second.id]->SetIsRock(false);
-		//		(*iter).second->m_ppObjects[enemy.second.id]->SetIsBanana(false);
-		//		(*iter).second->m_ppObjects[enemy.second.id]->SetIsMud(false);
-		//	}
-		//}
-		break;
 	}
-	case SC_MOVE_PLAYER:
+	*/
+
+	// 플레이어 애니메이션
+	/*
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetName() == t.Name; });
+	if (obj != obList.end())
 	{
-		SC_PACKET_MOVE_PLAYER* pMP = reinterpret_cast<SC_PACKET_MOVE_PLAYER*>(packet);
-		//m_timer.Stop();
-		//m_LatencyTime = m_timer.GetTotalTime();
-		//cout << "지연시간 : "<< m_LatencyTime << endl;
-		// 지연시간 초기화
-		//m_LatencyTime = 0.f;
-
-		if (pMP->id == m_pPlayer->GetPlayerID())
+		CPlayer* player = (CPlayer*)(*obj);
+		switch (t.animation)
 		{
-			XMFLOAT3 pos = XMFLOAT3(pMP->xPos, pMP->yPos, pMP->zPos);
-			XMFLOAT3 look = XMFLOAT3(pMP->xLook, pMP->yLook, pMP->zLook);
-			XMFLOAT3 up = XMFLOAT3(pMP->xUp, pMP->yUp, pMP->zUp);
-			XMFLOAT3 right = XMFLOAT3(pMP->xRight, pMP->yRight, pMP->zRight);
-
-			//g_IsStop = true;
-			//cout << "서버 위치 : " << pos.x << ", " << pos.y << ", " << pos.z << endl;
-			//cout << "클라 위치 : " << m_pPlayer->GetPosition().x << ", " << m_pPlayer->GetPosition().y << ", " << m_pPlayer->GetPosition().z << endl;
-
-	
-
-			
-			//m_pPlayer->SetCollision(false);
-		}
-
-		else if (pMP->id < MAX_USER)
-		{
-			char id = pMP->id;
-
-			XMFLOAT3 pos = XMFLOAT3(pMP->xPos, pMP->yPos, pMP->zPos);
-			XMFLOAT3 look = XMFLOAT3(pMP->xLook, pMP->yLook, pMP->zLook);
-			XMFLOAT3 up = XMFLOAT3(pMP->xUp, pMP->yUp, pMP->zUp);
-			XMFLOAT3 right = XMFLOAT3(pMP->xRight, pMP->yRight, pMP->zRight);
-
-			auto iter = m_->getShaderManager()->getShaderMap().find("OtherPlayer");
-			if (iter != m_pScene->getShaderManager()->getShaderMap().end())
-			{
-				//char id = pMP->id;
-
-				XMFLOAT3 pos = XMFLOAT3(pMP->xPos, pMP->yPos, pMP->zPos);
-				XMFLOAT3 look = XMFLOAT3(pMP->xLook, pMP->yLook, pMP->zLook);
-				XMFLOAT3 up = XMFLOAT3(pMP->xUp, pMP->yUp, pMP->zUp);
-				XMFLOAT3 right = XMFLOAT3(pMP->xRight, pMP->yRight, pMP->zRight);
-
-				auto iter = m_pScene->getShaderManager()->getShaderMap().find("OtherPlayer");
-				if (iter != m_pScene->getShaderManager()->getShaderMap().end())
-				{
-					char enemyID = m_mapClients[pMP->id].id;
-
-					(*iter).second->m_ppObjects[enemyID]->SetPosition(pos);
-					(*iter).second->m_ppObjects[enemyID]->SetLookVector(look);
-					(*iter).second->m_ppObjects[enemyID]->SetRightVector(right);
-					(*iter).second->m_ppObjects[enemyID]->SetUpVector(up);
-					(*iter).second->m_ppObjects[enemyID]->SetScale(10, 10, 10);
-					(*iter).second->m_ppObjects[enemyID]->SetVelocityFromServer(pMP->fVelocity);
-				}
-			}
-		}
-		break;
-	}
-
-
-	case SC_USE_ITEM:
-	{
-		SC_PACKET_USE_ITEM* pUI = reinterpret_cast<SC_PACKET_USE_ITEM*>(packet);
-
-		switch (pUI->usedItem)
-		{
-		case ITEM::BANANA:
-		{
-			
+		case 'R':   //오른쪽 키 down
+			player->KeyDownRight();
 			break;
-		}
-		case ITEM::MUD:
-		{
-		
-
-
-			break;
-		}
-		case ITEM::ROCK:
-		{
-			
-
-
-			break;
-		}
-		case ITEM::EMPTY:
-		{
-			break;
-		}
 		default:
-			//cout << "미정의 아이템\n";
 			break;
 		}
-
-		break;
 	}
+	*/
+	//오브젝트 추가
+	//패킷으로부터 MessageStruct의 정보를 받아야함. 물론 오브젝트를 생성하는 플레이어가
+	//메시지 구조체 그대로 서버에 보내고 서버는 받은걸 그대로 타 플레이어에게 전해주면 좋을듯?
 
-	}
+
+	/*
+	MessageStruct를 이용하는 처리들은 이벤트 발생 시 클라에서 EventHandler의 callback함수로 해당 이벤트에
+	대한 정보를 서버로 send하고 서버는 그 이벤트정보를 갖고 있다가 각 클라가 씬객체의 Update 
+	최상단 부분에서 send로 이벤트정보를 요구할 때 넘겨주는건 어떨지? 
+	*/
+	/*
+	MessageStruct message;   메시지 구조체 만들고
+	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
+	message.departMat = 생성될 시 적용할 행령;
+	message.arriveMat = 생성될 시 적용할 행령과 일치;
+	message.msgName = "Add_Model";
+	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
+	*/
+	
+
+	//오브젝트 삭제
+	//얘 또한 추가처럼 메시지 구조체 정보 그대로만 받아올 수 있다면 쉬움
+	/*
+	MessageStruct message;   메시지 구조체 만들고
+	message.objectName = 오브젝트 id(string);
+	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
+	message.msgName = "DisEnable_Model";  명령어
+	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
+	*/
+
+	//파티클 생성
+	//얘 또한 추가처럼 메시지 구조체 정보 그대로만 받아올 수 있다면 쉬움
+	/*
+	message.shaderName = 파티클 이름;
+	message.departMat = 생성될 시 적용할 행령;
+	message.msgName = "Add_Particle";
+	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
+	
+
+	//오브젝트 비활성화
+	//위와 일치
+	/*
+	message.objectName = 오브젝트 id(string);
+	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
+	message.msgName = "DisEnable_Model";
+	EventHandler::GetInstance()->CallBack(message);클라 이벤트 핸들러에 등록  -끝-
+	*/
 }

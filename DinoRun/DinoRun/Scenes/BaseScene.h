@@ -15,30 +15,32 @@ class SoundManager;
 
 struct LIGHT
 {
-	XMFLOAT4 m_xmf4Ambient;
-	XMFLOAT4 m_xmf4Diffuse;
-	XMFLOAT4 m_xmf4Specular;
-	XMFLOAT3 m_xmf3Position;
-	float m_fFalloff;
+	XMFLOAT4 m_xmf4Ambient = XMFLOAT4(0.0f,0.0f,0.0f,1.0f);
+	XMFLOAT4 m_xmf4Diffuse = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT4 m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	XMFLOAT3 m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	float m_fFalloff = 0.0f;
 
-	XMFLOAT3 m_xmf3Direction;
-	float m_fTheta; //cos(m_fTheta)
+	XMFLOAT3 m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	float m_fTheta = 0.0f; //cos(m_fTheta)
 
-	XMFLOAT3 m_xmf3Attenuation;
-	float m_fPhi; //cos(m_fPhi)
+	XMFLOAT3 m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.001f);;
+	float m_fPhi = 0.0f; //cos(m_fPhi)
 
-	bool m_bEnable;
-	int m_nType;
-	float m_fRange;
-	float padding;
+	int m_nType = 1;
+	float m_fRange = 0.0f;
+	float padding = 0.0f;
+	int m_bEnable = 0;
 };
 
 struct LIGHTS
 {
 	LIGHT m_pLights[MAX_LIGHTS];
-	XMFLOAT4 m_xmf4GlobalAmbient;
-	float fogstart;
-	float fogrange;
+	XMFLOAT4 m_xmf4GlobalAmbient = XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	float fogstart = 0.1f;
+	float fogrange = 0.0f;
+	float padding0 = 0.0f;
+	float padding1 = 0.0f;
 };
 
 struct CB_GAME_INFO
@@ -106,18 +108,13 @@ public:
 	virtual void SetId(const string& str) { m_sPlayerId = str; }
 
 	//--------------------EventHandler---
-	virtual void AddModelObject(const MessageStruct& msg) {}
-	virtual void DeleteModelObject(const MessageStruct& msg) {}
-	virtual void AddParticle(const MessageStruct& msg) {}
-	virtual void DisEnableModel(const MessageStruct& msg) {}
-
-
+	virtual void ProcessEvent(const MessageStruct& msg) {}
 	//---------NetWork
 	virtual void ProcessPacket(char* packet) {}
 protected:
 	string m_sPlayerId;
 	shared_ptr<CreateManager> m_pCreateManager = NULL;
-	shared_ptr<NetWorkManager> m_pNetWorkManager= NULL;
+	//shared_ptr<NetWorkManager> m_pNetWorkManager= NULL;
 	shared_ptr<SoundManager> m_pSoundManager = NULL;
 	SceneType sceneType;
 

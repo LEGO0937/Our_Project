@@ -23,6 +23,7 @@
 #include "../Common/Camera/Camera.h"
 #include "EventHandler/EventHandler.h"
 
+#define PLAYER_SHADER instancingAnimatedModelShaders[0]
 
 GameScene::GameScene() :BaseScene()
 {
@@ -30,7 +31,7 @@ GameScene::GameScene() :BaseScene()
 }
 GameScene::~GameScene()
 {
-	m_pSoundManager->Stop("InGame_BGM");
+	SoundManager::GetInstance()->Stop("InGame_BGM");
 }
 void GameScene::ReleaseUploadBuffers()
 {
@@ -142,8 +143,6 @@ void GameScene::ReleaseObjects()
 void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
-	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 	m_pCreateManager->RenderLoading();
@@ -187,6 +186,26 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
 
 
+	shader = new MeteoriteShader;
+	model_info.modelName = "Resources/Models/M_Meteorite.bin";
+	model_info.dataFileName = NULL;
+	model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+
+	shader = new MoundShader;
+	model_info.modelName = "Resources/Models/M_RockRIP.bin";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+	m_pCreateManager->RenderLoading();
+
+	model_info.useBillBoard = true;
+
+#ifdef isDebug
 	shader = new BillBoardShader;
 	model_info.modelName = "Resources/Images/B_Tree.dds";
 	model_info.dataFileName = "Resources/ObjectData/BillBoardData";
@@ -207,8 +226,9 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.size = 50;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingBillBoardShaders.emplace_back(shader);
-
+#endif
 	m_pCreateManager->RenderLoading();
+#ifdef isDebug
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Tree.bin";
 	model_info.dataFileName = "Resources/ObjectData/TreeData";
@@ -227,6 +247,46 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree2.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree2Data";
+	//model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree3.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Tree4.bin";
+	model_info.dataFileName = "Resources/ObjectData/Tree4Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	//--
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone1.bin";
+	model_info.dataFileName = "Resources/ObjectData/Stone1Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Grass.bin";
+	model_info.dataFileName = "Resources/ObjectData/Grass1Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	//
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Stone3.bin";
+	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+#endif
+	//
+	//model_info.useBillBoard = true;
 	shader = new FenceShader;
 	model_info.modelName = "Resources/Models/M_Block.bin";
 	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
@@ -267,14 +327,23 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
 	instancingNumberUiShaders.emplace_back(uiShader);
 	
+	uiShader = new VelocityCountShader;
+	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	instancingNumberUiShaders.emplace_back(uiShader);
 
-	
+	uiShader = new DashBoardShader;
+	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	instancingNumberUiShaders.emplace_back(uiShader);
 	
 
-	//animatedShader = new PlayerShader;
-	//animatedShader->BuildObjects(pCreateManager.get(), "Resources/Models/Dino.bin", NULL);
-	//instancingAnimatedModelShaders.emplace_back(animatedShader);
-	//UpdatedShaders.emplace_back(animatedShader);
+	animatedShader = new PlayerShader;
+	model_info.modelName = "Resources/Models/M_DinoTest.bin";
+	model_info.dataFileName = NULL;
+	animatedShader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingAnimatedModelShaders.emplace_back(animatedShader);
+	animatedShader->AddRef();
+	UpdatedShaders.emplace_back(animatedShader);
+	
 	m_pMinimapShader = new MinimapShader();
 	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds",NULL);
 
@@ -285,7 +354,6 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	blurShader = new BlurShader(pCreateManager.get());
 	motionBlurShader = new MotionBlurShader(pCreateManager.get());
 
-	m_pCreateManager->RenderLoading();
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
@@ -296,7 +364,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 	
 	CreateShaderVariables(pCreateManager.get());
-	m_pSoundManager->Play("InGame_BGM", 0.2f);
+	SoundManager::GetInstance()->Play("InGame_BGM", 0.2f);
 
 
 }
@@ -398,8 +466,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 	if (::GetKeyboardState(pKeyBuffer))
 	{
 		// 찜
-		if (pKeyBuffer[VK_UP] & 0xF0)
-			dwDirection |= DIR_FORWARD;
+		if (pKeyBuffer[VK_UP] & 0xF0) dwDirection |= DIR_FORWARD;
 		if (pKeyBuffer[VK_DOWN] & 0xF0) dwDirection |= DIR_BACKWARD;
 		if (pKeyBuffer[VK_LEFT] & 0xF0) dwDirection |= DIR_LEFT;
 		if (pKeyBuffer[VK_RIGHT] & 0xF0) dwDirection |= DIR_RIGHT;
@@ -440,8 +507,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		}
 		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
 		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 (50/초)로 가정한다.*/
-		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f,deltaTime,
-			true);
+		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f,deltaTime,true);
 
 	}
 	else
@@ -651,6 +717,18 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		{
 			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 		}
+		else
+		{
+			int rank = 1;
+			vector<CGameObject*> list = PLAYER_SHADER->getSkiendList();
+			for (CGameObject* obj : list)
+			{
+				CPlayer* player = (CPlayer*)obj;
+				if (m_pPlayer->GetCheckPoint() < player->GetCheckPoint())
+					rank++;
+			}
+			m_pPlayer->SetRank(rank);
+		}
 
 		//충돌을 위한 update
 		if (sceneType != SceneType::Game_Scene)
@@ -677,22 +755,24 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 							message.shaderName = "HeatEffect";
 							message.departMat = m_pPlayer->m_xmf4x4World;
 							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->CallBack(message);
-							m_pSoundManager->Play("Heat", 0.2f);
+							EventHandler::GetInstance()->RegisterEvent(message);
+						
+							SoundManager::GetInstance()->Play("Heat", 0.2f);
 							p++;
 						}
 						else if ((*p)->GetModelType() == Item_Meat)
 						{
-							message.objectNumber = (*p)->GetId();
+							message.objectName = (*p)->GetName();
 							message.shaderName = shader->GetName();
 							message.msgName = "DisEnable_Model";
-							EventHandler::GetInstance()->CallBack(message);
+							EventHandler::GetInstance()->RegisterEvent(message);
 
 							message.shaderName = "MeatParticle";
 							message.departMat = (*p)->m_xmf4x4World;
 							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->CallBack(message);
-							m_pSoundManager->Play("MeatEat", 0.5f);
+							EventHandler::GetInstance()->RegisterEvent(message);
+							SoundManager::GetInstance()->Play("MeatEat", 0.5f);
+							
 							p++;
 						}
 						else
@@ -748,24 +828,99 @@ void GameScene::BuildLights()
 	::ZeroMemory(m_pLights, sizeof(LIGHTS));
 	m_pLights->m_xmf4GlobalAmbient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 
-	m_pLights->m_pLights[0].m_bEnable = true;
+	m_pLights->m_pLights[0].m_bEnable = 1;
 	m_pLights->m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
+	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	m_pLights->m_pLights[0].m_fFalloff = 0.0f;
 	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	m_pLights->m_pLights[1].m_bEnable = true;
-	m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights->m_pLights[1].m_fRange = 50.0f;
-	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.7f, 0.7f, 0.7f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	m_pLights->m_pLights[0].m_fTheta = 0.0f; //cos(m_fTheta)
+	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.001f);;
+	m_pLights->m_pLights[0].m_fPhi = 0.0f; //cos(m_fPhi)
+	m_pLights->m_pLights[0].m_fRange = 0.0f;
+	m_pLights->m_pLights[0].padding = 0.0f;
+
+	m_pLights->m_pLights[1].m_bEnable = 1;
+	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
 	m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
 	m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights->m_pLights[1].m_fFalloff = 1.0f;
 	m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[1].m_fRange = 20.0f;
+	m_pLights->m_pLights[1].padding = 0.0f;
+
+	m_pLights->m_pLights[2].m_bEnable = 1;
+	m_pLights->m_pLights[2].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
+	m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(650.0f, 80.0f, 1170.0f);
+	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[2].m_fFalloff = 1.0f;
+	m_pLights->m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[2].m_fRange = 20.0f;
+	m_pLights->m_pLights[2].padding = 0.0f;
+
+	m_pLights->m_pLights[3].m_bEnable = 1;
+	m_pLights->m_pLights[3].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
+	m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(650.0f, 80.0f, 1170.0f);
+	m_pLights->m_pLights[3].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[3].m_fFalloff = 1.0f;
+	m_pLights->m_pLights[3].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[3].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[3].m_fRange = 20.0f;
+	m_pLights->m_pLights[3].padding = 0.0f;
+
+	m_pLights->m_pLights[4].m_bEnable = 1;
+	m_pLights->m_pLights[4].m_nType = POINT_LIGHT;
+	m_pLights->m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
+	m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[4].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
+	m_pLights->m_pLights[4].m_xmf3Position = XMFLOAT3(650.0f, 80.0f, 1170.0f);
+	m_pLights->m_pLights[4].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	m_pLights->m_pLights[4].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	m_pLights->m_pLights[4].m_fFalloff = 1.0f;
+	m_pLights->m_pLights[4].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	m_pLights->m_pLights[4].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights->m_pLights[4].m_fRange = 20.0f;
+	m_pLights->m_pLights[4].padding = 0.0f;
+	//m_pLights->m_pLights[1].m_bEnable = true;
+	//m_pLights->m_pLights[1].m_nType = SPOT_LIGHT;
+	//m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	//m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.8f, 0.3f, 0.3f, 1.0f);
+	//m_pLights->m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
+	//m_pLights->m_pLights[1].m_xmf3Position = XMFLOAT3(700.0f, 10.0f, 1150.0f);
+	//m_pLights->m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	//m_pLights->m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	//m_pLights->m_pLights[1].m_fFalloff = 1.0f;
+	//m_pLights->m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	//m_pLights->m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	
+	
+	
+	
+	//m_pLights->m_pLights[3].m_bEnable = true;
+	//m_pLights->m_pLights[3].m_nType = POINT_LIGHT;
+	//m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.4f, 0.4f, 0.9f, 1.0f);
+	//m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	//m_pLights->m_pLights[3].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
+	//m_pLights->m_pLights[3].m_xmf3Position = XMFLOAT3(700.0f, 176.0f, 1150.0f);
+	//m_pLights->m_pLights[3].m_fRange = 50;
+	//m_pLights->m_pLights[3].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.09f, 0.032f);
+
 	m_pLights->fogstart = 25;
 	m_pLights->fogrange = 30;
 
@@ -777,7 +932,7 @@ void GameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandL
 	m_pMinimapCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pMinimapCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	m_pMinimapCamera->GenerateOrthoProjectionMatrix(1000, 1000, 10, 300.0f);
-	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT - 180, 250, 180, 0.0f, 1.0f);
+	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT - 400, 250, 180, 0.0f, 1.0f);
 	m_pMinimapCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
 	m_pMinimapCamera->GenerateViewMatrix(m_pMinimapCamera->GetPosition(), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
@@ -911,19 +1066,22 @@ void GameScene::ResetShadowBuffer(CreateManager* pCreateManager)
 	m_pTerrain->resetShadowTexture(pCreateManager);
 }
 
-void GameScene::AddParticle(const MessageStruct& msg)
+void GameScene::ProcessEvent(const MessageStruct& msg)
 {
-	XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
-	particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName, NULL, pos));
+	
+	if (msg.msgName == "Add_Particle")
+	{
+		XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
+		particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName, NULL, pos));
+	}
+	else if (msg.msgName == "DisEnable_Model")
+	{
+		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
+			return a->GetName() == msg.shaderName; });
+		if (shader != instancingModelShaders.end())
+			(*shader)->DisEnableObject(msg.objectName);
+	}
 }
-void GameScene::DisEnableModel(const MessageStruct& msg)
-{
-	auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
-		return a->GetName() == msg.shaderName; });
-	if (shader != instancingModelShaders.end())
-		(*shader)->DisEnableObject(msg.objectNumber);
-}
-
 void GameScene::ProcessPacket(char* packet)
 {
 

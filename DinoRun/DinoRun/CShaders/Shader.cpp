@@ -299,20 +299,20 @@ void CObInstancingShader::FixedUpdate(float fTimeElapsed)
 	}
 }
 
-void CObInstancingShader::DeleteObject(const int& iSerealNum)
+void CObInstancingShader::DeleteObject(const string& iSerealNum)
 {
 	auto obj = find_if(objectList.begin(), objectList.end(), [&](CGameObject* a) {
-		return a->GetId() == iSerealNum; });
+		return a->GetName() == iSerealNum; });
 	if (obj != objectList.end())
 	{
 		(*obj)->Release();
 		objectList.erase(obj);
 	}
 }
-void CObInstancingShader::DisEnableObject(const int& iSerealNum)
+void CObInstancingShader::DisEnableObject(const string& iSerealNum)
 {
 	auto obj = find_if(objectList.begin(), objectList.end(), [&](CGameObject* a) {
-		return a->GetId() == iSerealNum; });
+		return a->GetName() == iSerealNum; });
 	if (obj != objectList.end())
 	{
 		(*obj)->SetEnableState(false);
@@ -427,7 +427,7 @@ void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 	drawingCount = 0;
 	if (m_vSkinedObjectList.size())
 	{
-		for (CPlayer* ob : m_vSkinedObjectList)
+		for (CGameObject* ob : m_vSkinedObjectList)
 		{
 			ob->UpdateTransform(NULL);
 			if (ob->GetEnableState() && ob->IsVisible_Ins(pCamera))

@@ -12,13 +12,16 @@
 
 #define ID 0
 #define PASSWORD 1
+
+#define BUTTON_SHADER instacingUiShaders[1]
+
 StartScene::StartScene():BaseScene()
 {
 	sceneType = SceneType::Start_Scene;
 }
 StartScene::~StartScene()
 {
-	m_pSoundManager->Stop("Start_BGM");
+	SoundManager::GetInstance()->Stop("Start_BGM");
 }
 void StartScene::ReleaseUploadBuffers()
 {
@@ -47,12 +50,12 @@ void StartScene::ReleaseObjects()
 void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
-	m_pSoundManager = pCreateManager->GetSoundMgr();
+
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
-	m_pSoundManager->Play("Start_BGM", 0.2f);
+	SoundManager::GetInstance()->Play("Start_BGM", 0.2f);
+
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
@@ -100,7 +103,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_LBUTTONDOWN:
 		if (point.x > 0.16f && point.x < 0.46f && point.y > -0.62f && point.y < -0.38f) //로그인 버튼 충돌체크
 		{
-			instacingUiShaders[1]->getUvXs()[0] = 0.5f;
+			BUTTON_SHADER->getUvXs()[0] = 0.5f;
 			isClickedLogin = true;
 		}
 		else if (point.x > -0.48f && point.x < 0.13f && point.y > -0.31f && point.y < -0.2f) //ID TEXT 충돌체크
@@ -133,7 +136,8 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				// 닉네임을 받았다면 네트워크 클래스에 닉네임 저장 후, Lobbyscene으로 이동.
 				//씬 전환 
 				//m_sPlayerId = 로그인 성공 시 서버로부터 닉네임 받음;
-				m_pNetWorkManager->SetPlayerName(m_sPlayerId);
+				m_sPlayerId = gameTexts[ID].text;
+				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
 				sceneType = Lobby_Scene;
 			}
 		}
@@ -142,7 +146,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (isClickedLogin)
 			{
 				isClickedLogin = false;
-				instacingUiShaders[1]->getUvXs()[0] = 0.0f;
+				BUTTON_SHADER->getUvXs()[0] = 0.0f;
 			}
 		}
 		::ReleaseCapture();

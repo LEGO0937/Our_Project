@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../stdafx.h"
 #include "SingleTon/Singleton.h"
 #include "../../Scenes/BaseScene.h"
@@ -17,7 +18,8 @@ class NetWorkManager : public Singleton<NetWorkManager>
 private:
 	int m_iRoomNum;
 	bool m_bGameMode;
-	//string m_sPlayerName;
+	string m_sPlayerName;
+	
 	SOCKET	sock;
 	int		myId;
 	WSABUF	send_wsabuf;
@@ -31,13 +33,16 @@ private:
 public:
 	void SetCurScene(shared_ptr<BaseScene> curScene) { m_pCurScene = curScene; }
 	void ResetCurScene() { m_pCurScene.reset(); }
-	//void SetRoomNum(const int& num) { m_iRoomNum = num; }
-	//void SetGameMode(const bool& mode) { m_bGameMode = mode; }
-	//void SetPlayerName(const string& name) { m_sPlayerName = name; }
+	
+	void SetRoomNum(const int& num) { m_iRoomNum = num; }
+	void SetGameMode(const bool& mode) { m_bGameMode = mode; }
+	void SetPlayerName(const string& name) { m_sPlayerName = name; }
 
-	//int GetRoomNum() { return m_iRoomNum; }
-	//bool GetGameMode() { return m_bGameMode; }
-	//string GetPlayerName() { return m_sPlayerName; }
+	void SetHwnd(const HWND& hwnd) { m_hWnd = hwnd; }
+
+	int GetRoomNum() { return m_iRoomNum; }
+	bool GetGameMode() { return m_bGameMode; }
+	string GetPlayerName() { return m_sPlayerName; }
 
 private:
 	CS_PACKET_UP_KEY* pUp = NULL;
@@ -57,9 +62,7 @@ private:
 	CS_PACKET_USE_ITEM* pItem = NULL;
 	CS_PACKET_GET_ITEM* pGetItem = NULL;
 
-
-
-
+	HWND m_hWnd{ NULL };
 private:
 	//ReadPacket에서 받은 패킷들을 CGameFramework에 전달하기 위한 포인터
 	CGameFramework* m_pGameClient{ nullptr };
@@ -80,11 +83,12 @@ public:
 	CONNECT_STATE m_ConnectState;
 
 public:
-	NetWorkManager() {}
+	NetWorkManager();
 	~NetWorkManager();
 public:
 	SOCKET getSock();
 	void Initialize();
+	void Release();
 	void ConnectToServer(HWND hWnd);
 
 	//Network클래스도 CGameFramework에 접근가능하게 하기위해 내부 포인터를 갖고있게 함.
@@ -104,7 +108,7 @@ public:
 	void SendRightKey();
 	void SendLeftKey();
 
-	
+
 
 	void SendReady();
 	void SendNotReady();

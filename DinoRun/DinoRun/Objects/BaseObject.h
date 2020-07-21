@@ -214,6 +214,7 @@ protected:
 	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n false이면 update,render X
 
 	int								m_iSerealNum = 0;
+	string							m_sObjectName = "None";
 
 	ModelType						m_ModelType = ModelType::Default;   //Layer와 유사
 
@@ -230,6 +231,10 @@ protected:
 public:
 	int GetId() { return m_iSerealNum; }
 	void SetId(const int& id) { m_iSerealNum = id; }
+
+	string GetName() { return m_sObjectName; }
+	void SetName(const string& id) { m_sObjectName = id; }
+
 	CGameObject* GetChild() { return m_pChild; }
 
 	void SetSkinedState(bool bIsSkined) { isSkined = bIsSkined; }
@@ -269,7 +274,6 @@ public:
 
 	ParticleSystem* m_pParticleSystem = NULL;
 public:
-	string serealKey = "";
 
 	void SetMesh(CMesh *pMesh);
 	CMesh* GetMesh() { return m_pMesh; }

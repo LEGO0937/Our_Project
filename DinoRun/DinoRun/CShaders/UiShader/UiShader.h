@@ -67,6 +67,34 @@ public:
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
 };
 
+class VelocityCountShader : public CUiShader
+{
+private:
+
+public:
+	VelocityCountShader();
+	virtual ~VelocityCountShader();
+
+	virtual void AnimateObjects(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+};
+
+class DashBoardShader : public CUiShader
+{
+private:
+
+public:
+	DashBoardShader();
+	virtual ~DashBoardShader();
+
+	virtual void AnimateObjects(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+};
+
 
 class BackGroundShader : public CUiShader
 {

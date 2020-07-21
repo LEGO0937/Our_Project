@@ -37,6 +37,7 @@ void BlockShader::Load(CreateManager* pCreateManager, const char* filename, cons
 		//이곳에서 findFrame을 통해 각 오브젝트에 질량 및 키네마틱 값 추가할 것.
 		nReads = (UINT)::fread(&(pBlockObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
 		pBlockObject->UpdateTransform(NULL);
+		pBlockObject->SetName(shaderName + to_string(m_iCurSerealNum));
 		pBlockObject->SetId(m_iCurSerealNum++);
 		objectList.emplace_back(pBlockObject);
 		if (pModel)

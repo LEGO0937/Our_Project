@@ -55,14 +55,14 @@
 #define METER_PER_UNIT 0.1
 #define UNIT_PER_METER 10
 #define UNIT_PER_KILOMETER 10000
+#define KILOMETER_PER_METER 0.001
 
 //CheckPoint max  ,   2 track
 #define CHECKPOINT_GOAL 363
 
 enum SceneType { Default_Scene = 0, Start_Scene, Lobby_Scene, Room_Scene, Game_Scene,ItemGame_Scene, End_Scene };
 enum ModelType { Default = 0, CheckPoint, Player, Fence, Item_Box, Item_Banana, 
-	Item_Meat, Item_Mud, Item_Stone,Item_Mugen,Item_Meteorite
-};
+	Item_Meat, Item_Mud, Item_Stone, Item_Meteorite,Item_Mound};
 enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 
 #define MAX_ROTATE_RADIAN 0.26   //약 15도
@@ -71,3 +71,4 @@ enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 #define ROTATE_ACCELERATING 0.086   //각 가속력 초당 5도   2초 15도
 
 
+//#define isDebug

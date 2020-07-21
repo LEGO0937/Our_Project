@@ -1,6 +1,5 @@
+
 #include "NetworkManager.h"
-#include "../protocol.h"
-#include <WinSock2.h>
 #include "../Common/FrameWork/CGameFramework.h"
 
 
@@ -17,7 +16,7 @@ NetWorkManager::NetWorkManager()
 	in_packet_size = 0;
 	saved_packet_size = 0;
 
-	Initialize();
+	//Initialize();
 }
 
 NetWorkManager::~NetWorkManager()
@@ -29,6 +28,7 @@ NetWorkManager::~NetWorkManager()
 
 void NetWorkManager::Initialize()
 {
+	
 	m_ConnectState = CONNECT_STATE::NONE;
 
 	WSADATA wsa;
@@ -38,7 +38,7 @@ void NetWorkManager::Initialize()
 		PostQuitMessage(0);
 	}
 
-	// socket()
+	//socket
 	sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
 	if (sock == INVALID_SOCKET)
 	{
@@ -47,12 +47,17 @@ void NetWorkManager::Initialize()
 		err_quit("socket()");
 		return;
 	}
+	
 }
 
-
+void NetWorkManager::Release()
+{
+	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
+}
 
 void NetWorkManager::ConnectToServer(HWND hWnd)
 {
+	
 	// connect()
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
@@ -78,8 +83,8 @@ void NetWorkManager::ConnectToServer(HWND hWnd)
 		}
 	}
 
-	
-	WSAAsyncSelect(sock, hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
+
+	//주석 WSAAsyncSelect(sock, hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 
 	send_wsabuf.buf = send_buffer;
 	send_wsabuf.len = BUF_SIZE;
@@ -87,6 +92,7 @@ void NetWorkManager::ConnectToServer(HWND hWnd)
 	recv_wsabuf.len = BUF_SIZE;
 
 	m_ConnectState = CONNECT_STATE::OK;
+	
 }
 
 
@@ -98,6 +104,7 @@ SOCKET NetWorkManager::getSock()
 
 void NetWorkManager::ReadPacket()
 {
+	
 	DWORD iobyte, ioflag = 0;
 
 	int retval = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
@@ -135,12 +142,14 @@ void NetWorkManager::ReadPacket()
 			iobyte = 0;
 		}
 	}
+	
 }
 
 
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
 void NetWorkManager::SendPacket(DWORD dataBytes)
 {
+	
 	DWORD iobyte = 0;
 
 	send_wsabuf.len = dataBytes;
@@ -152,10 +161,12 @@ void NetWorkManager::SendPacket(DWORD dataBytes)
 			err_display("WSASend()");
 		}
 	}
+	
 }
 
 void NetWorkManager::SendPacket()
 {
+	
 	DWORD iobyte = 0;
 
 	int retval = WSASend(sock, &send_wsabuf, 1, &iobyte, 0, NULL, NULL);
@@ -166,6 +177,7 @@ void NetWorkManager::SendPacket()
 			err_display("WSASend()");
 		}
 	}
+	
 }
 
 void NetWorkManager::SendUpKey()
@@ -415,6 +427,7 @@ void NetWorkManager::SendUseItem(int useItem, int targetID)
 // 소켓 함수 오류 출력 후 종료
 void NetWorkManager::err_quit(const char* msg)
 {
+	/*
 	LPVOID lpMsgBuf;
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -424,11 +437,13 @@ void NetWorkManager::err_quit(const char* msg)
 	MessageBox(NULL, (LPCTSTR)lpMsgBuf, (LPCWSTR)msg, MB_ICONERROR);
 	LocalFree(lpMsgBuf);
 	//exit(1);
+	*/
 }
 
 // 소켓 함수 오류 출력
 void NetWorkManager::err_display(const char* msg)
 {
+	/*
 	LPVOID lpMsgBuf;
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -437,4 +452,5 @@ void NetWorkManager::err_display(const char* msg)
 		(LPTSTR)&lpMsgBuf, 0, NULL);
 	printf("[%s] %s", msg, (char*)lpMsgBuf);
 	LocalFree(lpMsgBuf);
+	*/
 }

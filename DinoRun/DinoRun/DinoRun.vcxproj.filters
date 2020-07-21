@@ -256,6 +256,12 @@
     <Filter Include="Scenes\LoadingScene">
       <UniqueIdentifier>{2bb91eba-8902-4d37-9fec-16d8679b4ef7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CShaders\UiShader\09Velocity">
+      <UniqueIdentifier>{0d541bdf-5022-4184-a19c-2fd518b44458}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CShaders\UiShader\10DashBoard">
+      <UniqueIdentifier>{3f8eb5cb-979d-4e7e-acde-e97a591dc16b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -646,6 +652,12 @@
     </ClCompile>
     <ClCompile Include="Scenes\LoadingScene.cpp">
       <Filter>Scenes\LoadingScene</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\UiShader\VelocityCountShader.cpp">
+      <Filter>CShaders\UiShader\09Velocity</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\UiShader\DashBoardShader.cpp">
+      <Filter>CShaders\UiShader\10DashBoard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

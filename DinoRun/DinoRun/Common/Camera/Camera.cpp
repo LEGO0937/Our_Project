@@ -308,7 +308,7 @@ void CFirstPersonCamera::Rotate(float x, float y, float z)
 
 CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 {
-	m_fMass = 1.0f; //이전은 1이었음
+	m_fMass = 4.0f; //이전은 1이었음
 
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)
@@ -362,11 +362,15 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		//	}
 		//}
 		//--------------------------------
-		float c = 1.5f, k = 25;
+		float c = 1.0f, k = 25.0f;
 		{
 			//k = 0.04  ,  c = 0.2
 			//f= - cv -k*x   -cv -kx아닌가?..
 			//c^2 = 4mk  이전  c=1.5   k = -30
+			//c^3 > 4mk -> overdamping
+			//c^2 = 4mk -> critical damping
+			//c^2 < 4mk ->under damping
+			
 			//x,y,z에 대한 변위 각자 따로 구할 것.
 			
 			//작업구간 현재 구현중

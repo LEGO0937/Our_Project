@@ -61,9 +61,7 @@ public:
 
 	CHeightMapTerrain* GetTerrain() { return m_pTerrain; }
 
-	virtual void AddParticle(const MessageStruct& msg);
-	virtual void DisEnableModel(const MessageStruct& msg);
-
+	virtual void ProcessEvent(const MessageStruct& msg);
 	virtual void ProcessPacket(char* packet);
 private:
 	ID3D12Resource *m_pd3dcbShadow = NULL;

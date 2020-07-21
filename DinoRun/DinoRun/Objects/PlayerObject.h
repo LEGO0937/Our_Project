@@ -18,6 +18,9 @@ class CCamera;
 #define RUN_LEFT_RETURN 12
 #define RUN_RIGHT_RETURN 13
 
+#define SLIDING 14
+#define BIG_COLLISION 15
+
 #define ANIMATIONGAP RUN - IDLE
 
 #define cPlayer 0.29f     //Cdrag
@@ -50,16 +53,9 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
-	//주인공 아이디
-	char			m_pPlayerID;
-
 	//할 것임.
 	UINT						m_uCheckpointCount = 0;
-
-public:
-	void SetPlayerID(char id) { m_pPlayerID = id; }
-	char GetPlayerID() { return m_pPlayerID; }
-
+	UINT						m_uRank = 1;
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -71,6 +67,9 @@ public:
 
 	UINT GetCheckPoint() { return m_uCheckpointCount; }
 	void UpCheckPoint() { m_uCheckpointCount++; }
+
+	UINT GetRank() { return m_uRank; }
+	void SetRank(const UINT& rank) { m_uRank = rank; }
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetMaxVelocityXZ(float fMaxVelocity) { m_fMaxVelocityXZ = fMaxVelocity; }
@@ -120,6 +119,8 @@ public:
 	virtual void KeyUpUp() {};
 	virtual void KeyUpDown() {};
 	virtual void returnIdle() {};
+	virtual void OnSliding() {}
+	virtual void OnCollisionAni() {}
 
 	void setShift(bool value) {isShift = value;}
 
@@ -161,5 +162,7 @@ public:
 	virtual void KeyUpUp();
 	virtual void KeyUpDown();
 	virtual void returnIdle();
+	virtual void OnSliding();
+	virtual void OnCollisionAni();
 };
 

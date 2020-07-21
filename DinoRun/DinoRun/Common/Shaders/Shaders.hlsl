@@ -123,6 +123,7 @@ struct VS_SKINNED_INPUT
 struct VS_SKINNED_OUTPUT
 {
 	float4 position : SV_POSITION;
+	float3 positionW : POSITION;
 	float3 normal : NORMAL;
 	float2 TexC : TEXCOORD;
 };

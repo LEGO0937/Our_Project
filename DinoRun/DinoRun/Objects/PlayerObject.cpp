@@ -61,7 +61,7 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bUpdateVelocity)
 {
-	if (isStun)
+	if (isStun || m_xmf3Velocity.y != 0)
 		return;
 
 	if (dwDirection)
@@ -75,11 +75,15 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		{
 			KeyDownUp();
 			m_fForce += fDistance;
+			if (!SoundManager::GetInstance()->Playing("Running"))
+				SoundManager::GetInstance()->Play("Running");
 		}
 		if (dwDirection & DIR_BACKWARD)
 		{
 			KeyDownDown();
 			m_fForce -= fDistance;
+			if (!SoundManager::GetInstance()->Playing("Running"))
+				SoundManager::GetInstance()->Play("Running");
 		}
 
 #else
@@ -114,28 +118,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			else
 				m_fWheelDegree -= 50 * fDeltaTime;
 		}
-		else
-		{
-			if (m_fWheelDegree > 0)
-			{
-				if (!isShift)
-					m_fWheelDegree -= 30 * fDeltaTime;
-				else
-					m_fWheelDegree -= 50 * fDeltaTime;
-				if (m_fWheelDegree < 0)
-					m_fWheelDegree = 0;
-			}
-			else if (m_fWheelDegree < 0)
-			{
-				if (!isShift)
-					m_fWheelDegree += 30 * fDeltaTime;
-				else
-					m_fWheelDegree += 50 * fDeltaTime;
 
-				if (m_fWheelDegree  > 0.f)
-					m_fWheelDegree = 0;
-			}
-		}
 			
 		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
 #else
@@ -232,6 +215,12 @@ void CPlayer::Rotate(float x, float y, float z)
 			}
 			else
 			{
+				if (!SoundManager::GetInstance()->Playing("Curve"))
+				{
+					if (SoundManager::GetInstance()->Playing("Running"))
+						SoundManager::GetInstance()->Stop("Running");
+					SoundManager::GetInstance()->Play("Curve");
+				}
 				//m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
 			}
 		}
@@ -309,18 +298,28 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		//target->SetEnableState(false);  //서버 비활성화 신호 서버에 보내주고 쉐이더에서 처리할 것.
 		return true;
 	case ModelType::Item_Banana:
-		if (m_fWheelDegree > 0)
-			m_fWheelDegree = 30;
-		else if (m_fWheelDegree < 0)
-			m_fWheelDegree = -30;
-		isStun = true;
-		m_fTimeCount = 0.5f;
+		//if (m_fWheelDegree > 0)
+		//	m_fWheelDegree = 30;
+		//else if (m_fWheelDegree < 0)
+		//	m_fWheelDegree = -30;
+		OnSliding();
 		return true;		
 	case ModelType::Item_Mud:
 		isStun = true;
 		m_fTimeCount = 0.5f;
 		break;
 	case ModelType::Item_Stone:
+		break;
+	case ModelType::Item_Mound:
+		if (!target->GetKinematicState())
+		{
+			XMFLOAT3 dir = Vector3::Subtract(m_xmf3Position, target->GetPosition());
+			dir = Vector3::Normalize(dir);
+
+			SetVelocity(XMFLOAT3(20*dir.x, 5 , 20*dir.z));
+
+			OnCollisionAni();
+		}
 		break;
 	default:
 		break;
@@ -330,11 +329,38 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 
 void CPlayer::FixedUpdate(float fTimeElapsed)
 {
+	if (!isLeft && !isRight)
+	{
+		if (m_fWheelDegree > 0)
+		{
+			if (!isShift)
+				m_fWheelDegree -= 30 * fTimeElapsed;
+			else
+				m_fWheelDegree -= 50 * fTimeElapsed;
+			if (m_fWheelDegree < 0.0f)
+				m_fWheelDegree = 0.0f;
+		}
+		else if (m_fWheelDegree < 0)
+		{
+			if (!isShift)
+				m_fWheelDegree += 30 * fTimeElapsed;
+			else
+				m_fWheelDegree += 50 * fTimeElapsed;
+
+			if (m_fWheelDegree > 0.0f)
+				m_fWheelDegree = 0.0f;
+		}
+	}
+
 	if (isStun)
 	{
 		m_fTimeCount -= fTimeElapsed;
 		if (m_fTimeCount < 0)
+		{
 			isStun = false;
+			m_pSkinnedAnimationController->SetTrackEnable(SLIDING, false);
+			m_pSkinnedAnimationController->SetTrackEnable(BIG_COLLISION, false);
+		}
 	}
 
 	if (m_fWheelDegree != 0.0f)
@@ -359,7 +385,11 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		//Rotate는 degree값을 받고 회전변환을 시켜줌.
 		//XMConvertToRadians
 	}
-
+	else
+	{
+		if (SoundManager::GetInstance()->Playing("Curve"))
+			SoundManager::GetInstance()->Stop("Curve");
+	}
 	float drag;
 	if (isShift && m_fWheelDegree != 0)
 	{
@@ -542,7 +572,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, sModelName.c_str(), NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject->GetChild(), true);
-	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 14, pAngrybotModel);
+	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 16, pAngrybotModel);
 	//위의 매개변수들 중 1은 애니메이션 트랙의 갯수 현재는 idle 뿐이니 1임 늘어날 수록 숫자 높일것.
 	m_fMass = 90;
 
@@ -585,6 +615,11 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	m_pSkinnedAnimationController->SetCallbackFuncKeys(RUN_RIGHT_RETURN, 1);
 	
 	m_pSkinnedAnimationController->SetTrackEnable(IDLE, true);
+
+	m_pSkinnedAnimationController->SetTrackAnimationSet(SLIDING, SLIDING); //left_turn_start
+	m_pSkinnedAnimationController->SetTrackAnimationSet(BIG_COLLISION, BIG_COLLISION); //left_turn_start
+	//m_pSkinnedAnimationController->SetTrackEnable(BIG_COLLISION, true);
+
 	//m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
 
 	/*
@@ -1364,5 +1399,22 @@ void CDinoRunPlayer::returnIdle()
 		break;
 	}
 
+	if (SoundManager::GetInstance()->Playing("Running"))
+	{
+		SoundManager::GetInstance()->Stop("Running");
+	}
 	//m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE);
+}
+
+void CDinoRunPlayer::OnSliding()
+{
+	m_pSkinnedAnimationController->SetTrackEnable(SLIDING, true);
+	isStun = true;
+	m_fTimeCount = 1.0f;
+}
+void CDinoRunPlayer::OnCollisionAni()
+{
+	m_pSkinnedAnimationController->SetTrackEnable(BIG_COLLISION, true);
+	isStun = true;
+	m_fTimeCount = 1.0f;
 }

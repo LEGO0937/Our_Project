@@ -103,8 +103,8 @@ public:
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed) {}
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position) {}
-	virtual void DeleteObject(const int& iSerealNum) {}
-	virtual void DisEnableObject(const int& iSerealNum) {}
+	virtual void DeleteObject(const string& iSerealNum) {}
+	virtual void DisEnableObject(const string& iSerealNum) {}
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) = 0;
 
@@ -124,7 +124,7 @@ protected:
 	CGameObject *m_pBillBoardObject = NULL;   //인스턴싱drawing 빌보드 대상
 
 	LPVOID						m_pUpdatedContext = NULL; //다루는 오브젝트들의 업데이트에 사용될 요소 주로 Terrain 사용
-	int m_iCurSerealNum = 0; // 오브젝트가 추가될때마다 부여될 시리얼 번호. 생성될때마다 값은 증가한다.
+	int m_iCurSerealNum = 1; // 오브젝트가 추가될때마다 부여될 시리얼 번호. 생성될때마다 값은 증가한다.
 };
 
 class CObInstancingShader : public CObjectsShader
@@ -145,8 +145,8 @@ public:
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed);
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition) {}
-	virtual void DeleteObject(const int& iSerealNum);
-	virtual void DisEnableObject(const int& iSerealNum);
+	virtual void DeleteObject(const string& iSerealNum);
+	virtual void DisEnableObject(const string& iSerealNum);
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
@@ -195,11 +195,11 @@ public:
 
 	vector<CGameObject*>& getSkiendList()
 	{
-		return objectList;
+		return m_vSkinedObjectList;
 	}
 protected:
-	CPlayer *m_ppSkinedObjects = NULL;   //인스턴싱drawing 대상 SkinedObject로 바꿀 예정.
-	vector<CPlayer*> m_vSkinedObjectList;   // 인스턴싱될 오브젝트들
+	CGameObject* m_ppSkinedObjects = NULL;   //인스턴싱drawing 대상 SkinedObject로 바꿀 예정.
+	vector<CGameObject*> m_vSkinedObjectList;   // 인스턴싱될 오브젝트들
 	unordered_map<string, CB_SKINEOBJECT_INFO*> instancedObjectInfo;
 	unordered_map<string, CB_SKINEOBJECT_INFO*> instancedPrevObjectInfo;
 };
