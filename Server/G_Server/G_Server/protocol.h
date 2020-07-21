@@ -186,5 +186,15 @@ struct PLAYER
 	//byte PlayerState;  	// 플레이어 상태
 };
 
+struct SC_PACKET_PLAYER_INFO
+{
+	XMFLOAT4X4 xmf4x4Parents[6];
+	string playerNames[6];
+	int checkPoints[6];
+
+	char size;
+	char type;
+	char id;
+};
 
 //////////////////////////////////////////////////////
