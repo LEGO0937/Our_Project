@@ -37,6 +37,8 @@ Server::~Server()
 	}
 }
 
+
+
 bool Server::InitServer()
 {
 	setlocale(LC_ALL, "korean");
@@ -71,7 +73,7 @@ bool Server::InitServer()
 
 	// 2. 소켓설정
 	// std의 bind가 호출되므로 소켓의 bind를 불러주기 위해 앞에 ::붙임
-	if (::bind(listenSocket, (struct sockaddr*) & serverAddr, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
+	if (::bind(listenSocket, (struct sockaddr*)&serverAddr, sizeof(SOCKADDR_IN)) == SOCKET_ERROR)
 	{
 		cout << "Error - Fail bind\n";
 		// 6. 소켓종료
@@ -93,6 +95,7 @@ bool Server::InitServer()
 	}
 	return true;
 }
+
 
 void Server::LoadSpawnInfo()
 {
@@ -119,6 +122,8 @@ void Server::LoadSpawnInfo()
 		}
 	}
 }
+
+
 
 void Server::LoadMapObjectInfo()
 {
@@ -263,9 +268,9 @@ void Server::RunServer()
 		//clients.emplace_back(tmpClient);
 		//printf_s("Create Client ID: %d, PrevSize: %d, xPos: %d, yPos: %d, zPos: %d, xDir: %d, yDir: %d, zDir: %d\n", i, clients[i].prev_size, clients[i].xPos, clients[i].yPos, clients[i].zPos, clients[i].xDir, clients[i].yDir, clients[i].zDir);
 	}
+	//heightMap = new CHeightMapImage("../../../Client/FreezeBomb/Resource/Textures/Terrain/Terrain.raw", 256, 256, XMFLOAT3(2.0f, 1.0f, 2.0f));
 
-
-	//2개의 스레드 활용
+	//스레드의 수가 2개!
 	for (int i = 0; i < MAX_WORKER_THREAD; ++i)
 		workerThreads.emplace_back(thread{ WorkerThread, (LPVOID)this });
 	thread accpetThread{ AcceptThread, (LPVOID)this };
@@ -287,6 +292,8 @@ void Server::InitGame()
 	readyCnt_l.lock();
 	readyCount = 0;
 	readyCnt_l.unlock();
+	
+	
 	for (int i = 0; i < MAX_USER; ++i)
 	{
 		clients[i].InitPlayer();
@@ -302,17 +309,15 @@ void Server::InitRound()
 
 	ResetTimer();
 
-	/*for (int i = 0; i < MAX_USER; ++i)
+
+
+	for (int i = 0; i < MAX_USER; ++i)
 	{
 		if (clients[i].in_use == false)
 			continue;
-		clients[i].clientCooltime_l.lock();
-		clients[i].clientCooltime = 0;
-		clients[i].clientCooltime_l.unlock();
-		clients[i].normalItem = ITEM::EMPTY;
-		clients[i].specialItem = ITEM::EMPTY;
-	}*/
-
+		
+		clients[i].Item = ITEM::EMPTY;
+	}
 }
 
 void Server::add_timer(int obj_id, EVENT_TYPE et, chrono::high_resolution_clock::time_point start_time)
@@ -340,7 +345,7 @@ void Server::AcceptThreadFunc()
 	while (1)
 	{
 		// clientSocket을 비동기식으로 만들기 위해서는 listenSocket이 비동기식이어야 한다.
-		clientSocket = accept(listenSocket, (struct sockaddr*) & clientAddr, &addrLen);
+		clientSocket = accept(listenSocket, (struct sockaddr*)&clientAddr, &addrLen);
 		if (clientSocket == INVALID_SOCKET)
 		{
 			cout << "Error - Accept Failure\n";
@@ -503,7 +508,7 @@ void Server::WorkerThreadFunc()
 		// 포인터의 포인터를 넘겨줘야
 		OVER_EX* over_ex;
 
-		int is_error = GetQueuedCompletionStatus(iocp, &io_byte, (PULONG_PTR)l_key/*&l_key*/, reinterpret_cast<LPWSAOVERLAPPED*>(&over_ex), INFINITE);
+		int is_error = GetQueuedCompletionStatus(iocp, &io_byte, &l_key, reinterpret_cast<LPWSAOVERLAPPED*>(&over_ex), INFINITE);
 
 		if (0 == is_error)
 		{
@@ -573,6 +578,7 @@ void Server::WorkerThreadFunc()
 		}
 		else if (EV_COUNT == over_ex->event_t)
 		{
+			roundTime_l.lock();
 			unsigned short time = --roundCurrTime;
 			roundTime_l.unlock();
 
@@ -654,23 +660,23 @@ void Server::WorkerThreadFunc()
 				add_timer(-1, EV_BOMBERTOUCHCOOLTIME, chrono::high_resolution_clock::now() + 1s);
 			}
 		}
-		else if (EV_clientCOOLTIME == over_ex->event_t)		//cooltime 계산
+		else if (EV_FREEZECOOLTIME == over_ex->event_t)		//cooltime 계산
 		{
-			clients[key].clientCooltime_l.lock();
-			clients[key].clientCooltime--;
+			clients[key].freezeCooltime_l.lock();
+			clients[key].freezeCooltime--;
 			//printf_s("쿨타임:%d\n", changeCoolTime);
 
-			if (clients[key].clientCooltime <= 0)
+			if (clients[key].freezeCooltime <= 0)
 			{
-				clients[key].clientCooltime = 0;
-				SendclientCooltime(key, clients[key].clientCooltime);
-				clients[key].clientCooltime_l.unlock();
+				clients[key].freezeCooltime = 0;
+				SendFreezeCooltime(key, clients[key].freezeCooltime);
+				clients[key].freezeCooltime_l.unlock();
 			}
 			else
 			{
-				SendclientCooltime(key, clients[key].clientCooltime);
-				clients[key].clientCooltime_l.unlock();
-				add_timer(key, EV_clientCOOLTIME, chrono::high_resolution_clock::now() + 1s);
+				SendFreezeCooltime(key, clients[key].freezeCooltime);
+				clients[key].freezeCooltime_l.unlock();
+				add_timer(key, EV_FREEZECOOLTIME, chrono::high_resolution_clock::now() + 1s);
 			}
 
 		}
@@ -843,7 +849,7 @@ void Server::ProcessPacket(char client, char* packet)
 
 		break;
 	}
-	case CS_CHOICE_CHARACTER:
+	/*case CS_CHOICE_CHARACTER:
 	{
 		CS_PACKET_CHOICE_CHARACTER* p = reinterpret_cast<CS_PACKET_CHOICE_CHARACTER*>(packet);
 		clients[client].matID = p->matID;
@@ -854,7 +860,7 @@ void Server::ProcessPacket(char client, char* packet)
 			SendChoiceCharacter(i, client, p->matID);
 		}
 		break;
-	}
+	}*/
 	case CS_READY:
 	{
 		// 클라가 엔터누르고 F5누를때마다 CS_READY 패킷이 날아온다면 ++readyCount는 clientCount보다 증가하게 되고 
@@ -946,7 +952,7 @@ void Server::ProcessPacket(char client, char* packet)
 			add_timer(-1, EV_COUNT, chrono::high_resolution_clock::now() + 1s);
 
 
-			printf_s("Round Start\n");
+			printf_s("Game Start\n");
 		}
 		else
 		{
@@ -1049,71 +1055,7 @@ void Server::ProcessPacket(char client, char* packet)
 
 		break;
 	}
-	case CS_BOMBER_TOUCH:
-	{
-		CS_PACKET_BOMBER_TOUCH* p = reinterpret_cast<CS_PACKET_BOMBER_TOUCH*>(packet);
-
-		bomberID_l.lock();
-		if (client != bomberID)
-		{
-			bomberID_l.unlock();
-			break;
-		}
-		else
-			bomberID_l.unlock();
-
-		coolTime_l.lock();
-		if (bomberTouchCooltime < 0 || bomberTouchCooltime > 0)
-		{//쿨타임이 아직 남아있으면 RoleChange를 하지 않는다.
-			//changeCoolTime = COOLTIME;
-			coolTime_l.unlock();
-			break;
-		}
-		else
-		{
-			coolTime_l.unlock();
-		}
-
-		//printf_s("CS_BOMBER_TOUCH");
-
-		float dist = sqrt(pow(clients[client].pos.x - clients[p->touchId].pos.x, 2) +
-			pow(clients[client].pos.y - clients[p->touchId].pos.y, 2) +
-			pow(clients[client].pos.z - clients[p->touchId].pos.z, 2));
-
-		if (dist > 50)
-			break;
-
-		bomberID_l.lock();
-		bomberID = (int)p->touchId;
-		cout << "술래 바뀜 bomberID : " << bomberID << endl;
-		bomberID_l.unlock();
-
-		coolTime_l.lock();
-		bomberTouchCooltime = COOLTIME;
-		if (bomberTouchCooltime == COOLTIME)
-		{
-			coolTime_l.unlock();
-			add_timer(client, EV_BOMBERTOUCHCOOLTIME, chrono::high_resolution_clock::now() + 1s);
-		}
-		else
-		{
-			coolTime_l.unlock();
-		}
-
-		bomberID_l.lock();
-		short tmp = bomberID;
-		bomberID_l.unlock();
-
-		for (int i = 0; i < MAX_USER; ++i)
-		{
-			if (true == clients[i].in_use)
-			{
-				SendChangeBomber(i, tmp, client);
-			}
-		}
-
-		break;
-	}
+	
 	case CS_ANIMATION_INFO:		//클라가 애니메이션이 변경되었을때 패킷을 서버에게 보내고.
 	{							//서버는 그 패킷을 받아서 다른 클라이언트에게 해당 애니메이션 정보를 보낸다.
 		CS_PACKET_ANIMATION* p = reinterpret_cast<CS_PACKET_ANIMATION*>(packet);
@@ -1142,81 +1084,12 @@ void Server::ProcessPacket(char client, char* packet)
 		float dist = 999.f;
 
 		token = strtok(p->itemIndex, " ");
-		//cout << p->itemIndex << "\n";
-		if (strcmp(token, "GoldTimer") == 0)
-		{
-			token = strtok(NULL, " ");
-			itemIdx = atoi(token);
-
-			dist = sqrt(pow(clients[client].pos.x - goldTimers[round][itemIdx].pos.x, 2) +
-				pow(clients[client].pos.y - goldTimers[round][itemIdx].pos.y, 2) +
-				pow(clients[client].pos.z - goldTimers[round][itemIdx].pos.z, 2));
-
-			// 거리 체크는 적당히 넓도록 그렇지 않으면 
-			// 클라는 아이템과 충돌해서 월드상에 아이템을 지우는데
-			// 인벤토리에는 아이템 등록이 안됨.
-			if (dist <= 50)
-			{
-				clients[client].specialItem = ITEM::GOLD_TIMER;
-				for (int i = 0; i < MAX_USER; ++i)
-				{
-					if (true == clients[i].in_use)
-						SendGetItem(i, client, tmps);
-				}
-			}
-
-			//cout << dist << "\n";
-		}
-		else if (strcmp(token, "GoldHammer") == 0)
-		{
-			token = strtok(NULL, " ");
-			itemIdx = atoi(token);
-
-			dist = sqrt(pow(clients[client].pos.x - goldHammers[round][itemIdx].pos.x, 2) +
-				pow(clients[client].pos.y - goldHammers[round][itemIdx].pos.y, 2) +
-				pow(clients[client].pos.z - goldHammers[round][itemIdx].pos.z, 2));
-
-			// 거리 체크는 적당히 넓도록 그렇지 않으면 
-			// 클라는 아이템과 충돌해서 월드상에 아이템을 지우는데
-			// 인벤토리에는 아이템 등록이 안됨.
-			if (dist <= 50)
-			{
-				clients[client].specialItem = ITEM::GOLD_HAMMER;
-				for (int i = 0; i < MAX_USER; ++i)
-				{
-					if (true == clients[i].in_use)
-						SendGetItem(i, client, tmps);
-				}
-			}
-
-			//cout << dist << "\n";
-		}
-		else
-		{
-			token = strtok(NULL, " ");
-			itemIdx = atoi(token);
-
-			dist = sqrt(pow(clients[client].pos.x - NormalHammers[round][itemIdx].pos.x, 2) +
-				pow(clients[client].pos.y - NormalHammers[round][itemIdx].pos.y, 2) +
-				pow(clients[client].pos.z - NormalHammers[round][itemIdx].pos.z, 2));
-
-			// 거리 체크는 적당히 넓도록 그렇지 않으면 
-			// 클라는 아이템과 충돌해서 월드상에 아이템을 지우는데
-			// 인벤토리에는 아이템 등록이 안됨.
-			if (dist <= 50)
-			{
-				clients[client].normalItem = ITEM::NORMALHAMMER;
-				for (int i = 0; i < MAX_USER; ++i)
-				{
-					if (true == clients[i].in_use)
-						SendGetItem(i, client, tmps);
-				}
-			}
-			//cout << dist << "\n";
-		}
-
+		
 		break;
 	}
+
+	
+
 	case CS_USEITEM:
 	{
 		CS_PACKET_USE_ITEM* p = reinterpret_cast<CS_PACKET_USE_ITEM*>(packet);
@@ -1224,159 +1097,110 @@ void Server::ProcessPacket(char client, char* packet)
 
 		switch (p->usedItem)
 		{
-		case NORMALHAMMER:
+		//case NORMALHAMMER:
+		//{
+		//			for (int i = 0; i < MAX_USER; ++i)
+		//			{
+		//				if (true == clients[i].in_use)
+		//				{
+		//					SendUseItem(i, client, ITEM::NORMALHAMMER, p->target);
+		//				}
+		//			}
+		//		}
+		//	}
+
+		//	break;
+		//}
+		//case GOLD_HAMMER:
+		//{
+		//	// 보안 상 체크
+		//	bomberID_l.lock();
+		//	if (client == bomberID)
+		//	{
+		//		bomberID_l.unlock();
+		//		break;
+		//	}
+		//	else
+		//		bomberID_l.unlock();
+
+		//	
+		//	
+
+		//	for (int i = 0; i < MAX_USER; ++i)
+		//	{
+		//		if (clients[i].isFreeze == true)
+		//		{
+		//			clients[i].isFreeze = false;
+		//			clients[i].freezeCooltime_l.lock();
+		//			clients[i].freezeCooltime = 10;
+		//			clients[i].freezeCooltime_l.unlock();
+		//			add_timer(i, EV_FREEZECOOLTIME, high_resolution_clock::now() + 1s);
+		//		}
+		//		if (clients[i].in_use == true)
+		//		{
+
+		//			//NormalHammer를 제외한 나머지 아이템은 TargetClient는 의미x
+		//			SendUseItem(i, client, ITEM::GOLD_HAMMER, 0);
+		//		}
+		//	}
+		//	break;
+		//}
+		//case GOLD_TIMER:
+		//{
+		//	// 보안 상 체크
+		//	bomberID_l.lock();
+		//	if (client != bomberID)
+		//	{
+		//		bomberID_l.unlock();
+		//		break;
+		//	}
+		//	else
+		//		bomberID_l.unlock();
+	
+		//	roundTime_l.lock();
+		//	unsigned short time = roundCurrTime += 60;
+		//	roundTime_l.unlock();
+
+
+		//	for (int i = 0; i < MAX_USER; ++i)
+		//	{
+		//		if (clients[i].in_use == true)
+		//		{
+		//			SendCompareTime(i, time);
+		//			SendUseItem(i, client, ITEM::GOLD_TIMER, 0);
+		//		}
+		//	}
+		//	break;
+		//}
+		case EMPTY:
 		{
-			dist = sqrt(pow(clients[client].pos.x - clients[p->target].pos.x, 2) +
-				pow(clients[client].pos.y - clients[p->target].pos.y, 2) +
-				pow(clients[client].pos.z - clients[p->target].pos.z, 2));
-
-			if (dist <= 50)
-			{
-				clients[p->target].clientCooltime_l.lock();
-				clients[p->target].clientCooltime = 10;
-				clients[p->target].clientCooltime_l.unlock();
-				add_timer(p->target, EV_clientCOOLTIME, high_resolution_clock::now() + 1s);
-
-				for (int i = 0; i < MAX_USER; ++i)
-				{
-					if (true == clients[i].in_use)
-					{
-						SendUseItem(i, client, ITEM::NORMALHAMMER, p->target);
-					}
-				}
-			}
-		}
-
-		break;
-		}
-
-	case EMPTY:
-	{
-		break;
-	}
-	default:
-		printf_s("미정의 패킷\n");
-		break;
-	}
-
-	break;
-	}
-	case CS_client:
-	{
-		// 1. 현재 client를 요청한 id클라가 도망자인지를 판단해야함.
-		// 2. 현재 모든 도망자가 client상태인지를 확인해야함.
-		// 3. 모든 도망자가 client가 아니고 해당 클라가 도망자가 맞다면 SC_client를 각 클라들에게 알려줌
-
-		bomberID_l.lock();
-		if (client == clientID)		//술래라면 얼음을 할 수 없다.
-		{
-			clientID_l.unlock();
 			break;
 		}
-		else
-			bomberID_l.unlock();
-		clients[client].clientCooltime_l.lock();
-		if (clients[client].clientCooltime > 0)
-		{
-			clients[client].clientCooltime_l.unlock();
+		default:
+			printf_s("미정의 패킷\n");
 			break;
 		}
-		else
-			clients[client].clientCooltime_l.unlock();
-
-		clientCnt_l.lock();
-		int clientCnt = clientCount - 2;
-		clientCnt_l.unlock();
-
-		if (clients[client].isclient == false)
-		{
-			clientCnt_l.lock();
-			//cout << "CS_client - clientCnt: " << clientCnt << "  플레이어 -" << (int)client << "\n";
-			if (clientCnt < clientCnt)	//최대 얼음할 수 있는 도망자 수를 넘으면 얼음을 하게 할 수 없다.
-			{
-				++clientCnt;
-				clientCnt_l.unlock();
-				clients[client].isclient = true;
-			}
-			else
-			{
-				clientCnt_l.unlock();
-				break;
-			}
-
-			for (int i = 0; i < MAX_USER; ++i)
-			{
-				if (false == clients[i].in_use)
-					continue;
-
-				Sendclient(i, client);
-			}
-		}
-		else
-		{
-			clientCnt_l.lock();
-			//cout << "CS_Release - clientCnt: " << clientCnt << "  플레이어 -" << (int)client << "\n";
-			if (clientCnt > 0)
-			{
-				--clientCnt;
-				clientCnt_l.unlock();
-				clients[client].isclient = false;
-				clients[client].clientCooltime_l.lock();
-				clients[client].clientCooltime = 10;
-				clients[client].clientCooltime_l.unlock();
-				add_timer(client, EV_clientCOOLTIME, high_resolution_clock::now() + 1s);
-			}
-			else
-			{
-				clientCnt_l.unlock();
-				break;
-			}
-
-			for (int i = 0; i < MAX_USER; ++i)
-			{
-				if (false == clients[i].in_use)
-					continue;
-				SendReleaseclient(i, client);
-			}
-		}
 
 		break;
 	}
+	
 
-	case CS_BOMB_EXPLOSION:
-	{
-		bomberID_l.lock();
-		short tmp = bomberID;
-		bomberID_l.unlock();
-		for (int i = 0; i < MAX_USER; ++i)
-		{
-			if (clients[i].in_use == false)
-				continue;
-
-			cout << "bomberID :  " << tmp << endl;
-			SendBombExplosion(i, tmp);
-		}
-
-		bomberID_l.lock();
-		bomberID = PickBomber();
-		bomberID_l.unlock();
-
-		break;
-	}
+	
 	default:
-		wcout << L"패킷 사이즈: " << (int)packet[0] << endl;
-		wcout << L"패킷 타입 : " << (int)packet[1] << endl;
+		cout << L"패킷 사이즈: " << (int)packet[0] << endl;
+		cout << L"패킷 타입 : " << (int)packet[1] << endl;
 		cout << "Client prev size : " << clients[client].prev_size << "\n";
 		for (int i = 2; i < (int)packet[0]; ++i)
-			wcout << packet[i];
-		wcout << L"\n";
-		wcout << L"정의되지 않은 패킷 도착 오류!!\n";
+			cout << packet[i];
+		cout << L"\n";
+		cout << L"정의되지 않은 패킷 도착 오류!!\n";
 		//미정의 패킷을 보낸 클라이언트의 접속만 끊는다.
 		//ClientDisconnect(client);
 		break;
-
 		//while (true);
+	}
 }
+
 
 
 void Server::SendFunc(char client, void* packet)
@@ -1399,8 +1223,8 @@ void Server::SendFunc(char client, void* packet)
 	}
 	else {
 		// 비동기식으로 돌아가지 않고 동기식으로 돌아갔다는 오류.
-		//cout << "Non Overlapped Send return.\n";
-		//while (true);
+		cout << "오버랜 샌드 리턴이 아니다\n"; 
+		while (true);
 	}
 }
 
@@ -1415,6 +1239,7 @@ void Server::SendAccessComplete(char client)
 	SendFunc(client, &packet);
 }
 
+
 void Server::SendAccessPlayer(char toClient, char fromClient)
 {
 	SC_PACKET_ACCESS_PLAYER packet;
@@ -1425,6 +1250,7 @@ void Server::SendAccessPlayer(char toClient, char fromClient)
 	SendFunc(toClient, &packet);
 }
 
+
 void Server::SendChangeHostID(char toClient, char hostID)
 {
 	SC_PACKET_CHANGE_HOST packet;
@@ -1434,6 +1260,7 @@ void Server::SendChangeHostID(char toClient, char hostID)
 
 	SendFunc(toClient, &packet);
 }
+
 
 void Server::SendClientLobbyIn(char toClient, char fromClient, char* name, const bool& isReady)
 {
@@ -1447,21 +1274,21 @@ void Server::SendClientLobbyIn(char toClient, char fromClient, char* name, const
 	SendFunc(toClient, &packet);
 }
 
-void Server::SendChosenCharacter(char toClient)
-{
-	SC_PACKET_CHOSEN_CHARACTER packet;
-	packet.size = sizeof(SC_PACKET_CHOSEN_CHARACTER);
-	packet.type = SC_CHOSEN_CHARACTER;
-	for (int i = 0; i < MAX_USER; ++i)
-	{
-		if (false == clients[i].in_use)
-			packet.matID[i] = -1;
-		else
-			packet.matID[i] = clients[i].matID;
-	}
-
-	SendFunc(toClient, &packet);
-}
+//void Server::SendChosenCharacter(char toClient)
+//{
+//	SC_PACKET_CHOSEN_CHARACTER packet;
+//	packet.size = sizeof(SC_PACKET_CHOSEN_CHARACTER);
+//	packet.type = SC_CHOSEN_CHARACTER;
+//	for (int i = 0; i < MAX_USER; ++i)
+//	{
+//		if (false == clients[i].in_use)
+//			packet.matID[i] = -1;
+//		else
+//			packet.matID[i] = clients[i].matID;
+//	}
+//
+//	SendFunc(toClient, &packet);
+//}
 
 void Server::SendClientLobbyOut(char toClient, char fromClient)
 {
@@ -1531,7 +1358,7 @@ void Server::SendPleaseReady(char client)
 
 
 //무브 플레이어 패킷이 현재는 움직임을 요청한 클라이언트에게만
-//전송하는 구조여서 이부분 바뀌어야 할듯 - 명진
+//전송하는 구조여서 이부분 바뀌어야 할듯
 
 //TO ,Object
 void Server::SendMovePlayer(char to, char client)
@@ -1624,6 +1451,7 @@ void Server::SendCompareTime(char client, unsigned short& time)
 	SendFunc(client, &packet);
 }
 
+
 void Server::SendPlayerAnimation(char toClient, char fromClient)
 {
 	SC_PACKET_PLAYER_ANIMATION packet;
@@ -1706,51 +1534,52 @@ void Server::SendUseItem(char toClient, char fromClient, char usedItem, char tar
 	SendFunc(toClient, &packet);
 }
 
-void Server::Sendclient(char toClient, char fromClient)
-{
-	SC_PACKET_client packet;
 
-	packet.size = sizeof(packet);
-	packet.type = SC_client;
-	packet.id = fromClient;
+//void Server::SendFreeze(char toClient, char fromClient)
+//{
+//	SC_PACKET_FREEZE packet;
+//
+//	packet.size = sizeof(packet);
+//	packet.type = SC_FREEZE;
+//	packet.id = fromClient;
+//
+//	SendFunc(toClient, &packet);
+//
+//}
 
-	SendFunc(toClient, &packet);
+//void Server::SendReleaseFreeze(char toClient, char fromClient)
+//{
+//	SC_PACKET_RELEASE_FREEZE packet;
+//
+//	packet.size = sizeof(packet);
+//	packet.type = SC_RELEASE_FREEZE;
+//	packet.id = fromClient;
+//
+//	SendFunc(toClient, &packet);
+//}
+//
+//void Server::SendBombExplosion(char toClient, char fromClient)
+//{
+//	SC_PACKET_BOMB_EXPLOSION packet;
+//
+//	packet.size = sizeof(packet);
+//	packet.type = SC_BOMB_EXPLOSION;
+//	packet.bomberId = fromClient;
+//
+//	SendFunc(toClient, &packet);
+//}
 
-}
-
-void Server::SendReleaseclient(char toClient, char fromClient)
-{
-	SC_PACKET_RELEASE_client packet;
-
-	packet.size = sizeof(packet);
-	packet.type = SC_RELEASE_client;
-	packet.id = fromClient;
-
-	SendFunc(toClient, &packet);
-}
-
-void Server::SendBombExplosion(char toClient, char fromClient)
-{
-	SC_PACKET_BOMB_EXPLOSION packet;
-
-	packet.size = sizeof(packet);
-	packet.type = SC_BOMB_EXPLOSION;
-	packet.bomberId = fromClient;
-
-	SendFunc(toClient, &packet);
-}
-
-void Server::SendChoiceCharacter(char toClient, char fromClient, char matID)
-{
-	SC_PACKET_CHOICE_CHARACTER packet;
-
-	packet.size = sizeof(packet);
-	packet.type = SC_CHOICE_CHARACTER;
-	packet.matID = matID;
-	packet.id = fromClient;
-
-	SendFunc(toClient, &packet);
-}
+//void Server::SendChoiceCharacter(char toClient, char fromClient, char matID)
+//{
+//	SC_PACKET_CHOICE_CHARACTER packet;
+//
+//	packet.size = sizeof(packet);
+//	packet.type = SC_CHOICE_CHARACTER;
+//	packet.matID = matID;
+//	packet.id = fromClient;
+//
+//	SendFunc(toClient, &packet);
+//}
 
 void Server::SendGoLobby(char toClient)
 {
@@ -1762,12 +1591,12 @@ void Server::SendGoLobby(char toClient)
 	SendFunc(toClient, &packet);
 }
 
-//void Server::SendclientCooltime(char toClient, char cooltime)
+//void Server::SendFreezeCooltime(char toClient, char cooltime)
 //{
-//	SC_PACKET_client_COOLTIME packet;
+//	SC_PACKET_FREEZE_COOLTIME packet;
 //
-//	packet.size = sizeof(SC_PACKET_client_COOLTIME);
-//	packet.type = SC_client_COOLTIME;
+//	packet.size = sizeof(SC_PACKET_FREEZE_COOLTIME);
+//	packet.type = SC_FREEZE_COOLTIME;
 //	packet.cooltime = cooltime;
 //
 //	SendFunc(toClient, &packet);
@@ -2374,3 +2203,4 @@ void Server::err_display(const char* msg)
 
 	LocalFree(lpMsgBuf);
 }
+

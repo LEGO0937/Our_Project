@@ -82,6 +82,7 @@ struct MAPOBJECT
 {
 	string name;
 	XMFLOAT3 pos = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	
 };
 
 class SOCKETINFO
@@ -107,18 +108,17 @@ public:
 	//속도
 	float fVelocity;
 
-	XMFLOAT3 lastRightVector;F
+	XMFLOAT3 lastRightVector;
 	XMFLOAT3 lastLookVector;
 	XMFLOAT3 lastUpVector;
 
 
 	COLLISION_TYPE collision;
 	char score;
-	char normalItem;
-	char specialItem;
+	char Item;
 	char role;
 	char matID;
-	bool isItemed;			//아이템에 당한 상태인지 여부
+	bool isFreeze;			//얼음 상태인지 여부
 	bool isMoveRotate;		//애니메이션이 반복해서 동작하는 문제를 해결하기 위한 변수
 	char nickname[32];
 	//wchar_t nickname[12];
@@ -135,7 +135,7 @@ public:
 	// 부딪힌 오브젝트 위치
 	XMFLOAT3 lastCollPos;
 	// 부딪힌 플레이어 인덱스 -> 안써서 주석처리
-	// unsigned char lastCollPlayer;
+	//unsigned char lastCollPlayer;
 	// 부딪힌 플레이어 위치
 	XMFLOAT3 playerCollPos;
 
@@ -143,9 +143,7 @@ public:
 	SOCKETINFO() {
 		in_use = false;
 		score = 0;
-		normalItem = ITEM::EMPTY;
-		specialItem = ITEM::EMPTY;
-		role = ROLE::RUNNER;
+		Item = ITEM::EMPTY;
 		matID = -1;
 		isReady = false;
 		freezeCooltime = 0;
@@ -161,12 +159,11 @@ public:
 	void InitPlayer() {
 		// in_use는 여기서 초기화 x
 		matID = -1;
-		isItemed = false;
+		isFreeze = false;
 		isMoveRotate = false;
 		isReady = false;
 		score = 0;
-		normalItem = ITEM::EMPTY;
-		specialItem = ITEM::EMPTY;
+		Item = ITEM::EMPTY;
 	}
 };
 
@@ -177,7 +174,7 @@ private:
 	SOCKET listenSocket;
 	HANDLE iocp;
 	// vector로 했을 때 over_ex.messagebuffer에 값이 들어오질 않는다.
-	// 배열로 바꾸니 제대로 동작하는데...
+	// 배열로 바꾸니 제대로 동작함. 왜? 무슨 차이?
 	SOCKETINFO clients[MAX_USER];
 	vector<thread> workerThreads;
 	CHeightMapImage* heightMap;
@@ -185,6 +182,9 @@ private:
 	int clientCount;
 	int readyCount;
 	int hostId;
+	int bomberID;
+	short bomberTouchCooltime;
+	int freezeCnt;			//얼음 상태인 도망자 수  
 
 	int goldTimerCnt[MAX_ROUND];
 	int goldHammerCnt[MAX_ROUND];
@@ -196,6 +196,9 @@ private:
 
 	priority_queue <EVENT_ST> timer_queue;
 	mutex		timer_l;
+	mutex		roundTime_l;
+	mutex		coolTime_l;
+	mutex		freezeCnt_l;
 	mutex		readyCnt_l;
 	mutex		clientCnt_l;
 	mutex		bomberID_l;
@@ -250,7 +253,7 @@ public:
 	void SendChoiceCharacter(char toClient, char fromClient, char matID);
 	void SendChosenCharacter(char toClient);
 	void SendGoLobby(char toClient);
-	//void SendFreezeCooltime(char toClient, char cooltime);
+	void SendFreezeCooltime(char toClient, char cooltime);
 public:
 	void SetAnimationState(char client, char animationNum);
 	void SetVelocityZero(char client);

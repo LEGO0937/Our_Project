@@ -22,17 +22,11 @@ struct clientsInfo
 	char	name[32];
 };
 
-
-
-enum ROLE { RUNNER, BOMBER };
-enum ITEM { NORMALHAMMER = 0, GOLD_HAMMER, GOLD_TIMER, EMPTY }; // 플레이어 아이템(바나나, 고기 등등... 어떤 아이템이 있는지 알아야 될 것 같은디...ㅠ)
+enum ITEM { BANANA, MUD, ROCK,  EMPTY };
 
 enum PLAYER_NUM { P1, P2, P3, P4, P5, P6 };						// 몇번 플레이어 인지 
-enum PLAYER_STATE { NONESTATE, ICE, BREAK };							// 플레이어 상태(일반 질주, 부스터, 바나나, 풀렸을 때)
 enum STATE_TYPE { Init, Run, Over };
-enum MATERIAL { PINK, BROWN, WHITE, BLACK, BLUE, PANDA, ICEMAT };
 
-// 서버 클라 상태
 constexpr int SC_ACCESS_COMPLETE = 1;
 constexpr int SC_PUT_PLAYER = 2;
 constexpr int SC_MOVE_PLAYER = 3;
@@ -51,18 +45,14 @@ constexpr int SC_CLIENT_LOBBY_OUT = 15;
 constexpr int SC_CHATTING = 16;
 constexpr int SC_READY_STATE = 17;
 constexpr int SC_UNREADY_STATE = 18;
-constexpr int SC_FREEZE = 19;
-constexpr int SC_RELEASE_FREEZE = 20;
-constexpr int SC_BOMB_EXPLOSION = 21;
+
 constexpr int SC_CHANGE_HOST_ID = 22;
 constexpr int SC_GET_ITEM = 23;
-constexpr int SC_CHOICE_CHARACTER = 25;
-constexpr int SC_CHOSEN_CHARACTER = 26;
+//constexpr int SC_ROUND_SCORE = 24;
+//constexpr int SC_CHOICE_CHARACTER = 25;
+//constexpr int SC_CHOSEN_CHARACTER = 26;
 constexpr int SC_GO_LOBBY = 27;
-constexpr int SC_FREEZE_COOLTIME = 28;
 
-
-// 클라 서버 상태
 constexpr int CS_UP_KEY = 0;
 constexpr int CS_DOWN_KEY = 1;
 constexpr int CS_RIGHT_KEY = 2;
@@ -83,12 +73,8 @@ constexpr int CS_NOT_COLLISION = 16;
 constexpr int CS_PLAYER_COLLISION = 17;
 constexpr int CS_NOT_PLAYER_COLLISION = 18;
 constexpr int CS_USEITEM = 19;
-constexpr int CS_FREEZE = 20;
-constexpr int CS_RELEASE_FREEZE = 21;
-constexpr int CS_BOMB_EXPLOSION = 22;
-constexpr int CS_BOMBER_TOUCH = 23;
 constexpr int CS_GET_ITEM = 24;
-constexpr int CS_CHOICE_CHARACTER = 25;
+//constexpr int CS_CHOICE_CHARACTER = 25;
 
 
 
@@ -125,17 +111,7 @@ struct CS_PACKET_DOWN_KEY
 	char type;
 };
 
-struct CS_PACKET_FREEZE					//얼음변신 알림 패킷
-{
-	char size;
-	char type;
-};
 
-struct CS_PACKET_RELEASE_FREEZE		//얼음 해제 알림 패킷
-{
-	char size;
-	char type;
-};
 
 struct CS_PACKET_READY
 {
@@ -164,12 +140,7 @@ struct CS_PACKET_ANIMATION
 	//float animationTime;	//현재 애니메이션 시간
 };
 
-struct CS_PACKET_BOMBER_TOUCH
-{
-	char size;
-	char type;
-	char touchId;	// 터치한 플레이어 번호
-};
+
 
 struct CS_PACKET_RELEASE_KEY
 {
@@ -230,11 +201,7 @@ struct CS_PACKET_USE_ITEM
 	char usedItem;			// 사용되는 아이템 정보
 };
 
-struct CS_PACKET_BOMB_EXPLOSION
-{
-	char size;
-	char type;
-};
+
 
 struct CS_PACKET_CHOICE_CHARACTER
 {
@@ -267,20 +234,14 @@ struct SC_PACKET_INGAME_PACKET
 	//char wDir;
 	//
 	//char animNum;			// 애니메이션 번호
-	//char animTime;			// 애니메이션 시간 정보
-	//char playerState;		// 플레이어 상태
 
-	//char usedItem;			// 사용되는 아이템 정보
-	//char roundCount;		// 몇 라운드인지
-	//char timer;				// 서버 시간
-	//char isBoomed;			// 폭탄이 터졌는지
-
-	// parameter 생성자
-	/*SC_INGAME_PACKET(char _id, char _isBomber, char _xPos, char _yPos, char _zPos, char _xDir, char _yDir, char _zDir, char _wDir,
-		char _animNum, char _animTime, char _usedItem, char _playerState, char _roundCount, char _timer, char _isBoomed) :
-		id(_id), isBomber(_isBomber), xPos(_xPos), yPos(_yPos), zPos(_zPos), xDir(_xDir), yDir(_yDir), zDir(_zDir), wDir(_wDir),
-		animNum(_animNum), animTime(_animTime), usedItem(_usedItem), playerState(_playerState), roundCount(_roundCount), timer(_timer),
-		isBoomed(_isBoomed) {};*/
+	// 그건 서버에서 하니까
+	// 서버라는 하나의 큰 프로그램
+	// 6개의 클라이언트에서 정보를 쏴줄거란 말이지
+	// 이것들을 종합해가지고 쏴주는거야
+	// 한번에 진행되는게 아니라
+	// 각 클라의 외부적요소에 따라서 차이가 좀 있어서 -> 핑
+	// 한번에 처리한다기보다는 많은정보를 차례차례 처리한다.
 };
 
 //<< Ready Room 패킷 종류 >>
@@ -336,10 +297,6 @@ struct SC_PACKET_ROUND_START
 	char size;
 	char type;
 	char clientCount;
-	char bomberID;
-	char goldTimerCnt;
-	char goldHammerCnt;
-	char hammerCnt;
 	char round;
 	unsigned short startTime;
 };
@@ -490,34 +447,8 @@ struct SC_PACKET_NOT_COLLIDED
 	char id;
 };
 
-struct SC_PACKET_FREEZE
-{
-	char size;
-	char type;
-	char id;
-};
 
-struct SC_PACKET_RELEASE_FREEZE
-{
-	char size;
-	char type;
-	char id;
-};
 
-struct SC_PACKET_BOMB_EXPLOSION
-{
-	char size;
-	char type;
-	char bomberId;
-};
-
-struct SC_PACKET_ROLE_CHANGE
-{
-	char size;
-	char type;
-	char bomberId;
-	char runnerId;
-};
 
 struct SC_PACKET_CHOICE_CHARACTER
 {
@@ -534,10 +465,5 @@ struct SC_PACKET_CHOSEN_CHARACTER
 	char matID[MAX_USER];
 };
 
-struct SC_PACKET_FREEZE_COOLTIME
-{
-	char size;
-	char type;
-	char cooltime;
-};
+
 //////////////////////////////////////////////////////
