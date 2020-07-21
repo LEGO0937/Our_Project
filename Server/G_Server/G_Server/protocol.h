@@ -1,86 +1,67 @@
 #pragma once
-
-//#define SERVER_IP "172.30.1.1"
-#define SERVER_IP "192.168.200.130"
+//#include <iostream>
+//#include <windows.h>
+//#include <DirectXMath.h>
 
 using namespace std;
+//using namespace DirectX;
 
-constexpr int MAX_USER = 6;
-constexpr int MAX_ROUND = 3;
+//#define SERVER_IP "127.0.0.1"
+#define SERVER_IP "192.168.204.68"
+//#define SERVER_IP "119.195.232.145"
 
-constexpr int MAX_ROUND_TIME = 60;
-constexpr int MAX_ITEM_NAME_LENGTH = 16;
-constexpr int MAX_CHATTING_LENGTH = 100;
-constexpr int COOLTIME = 3;
-constexpr float VELOCITY = 0.7f;
-constexpr float ROTATE_RATE = 0.02f;
-
-struct clientsInfo
-{
-	char    id;
-	bool	isReady;
-	char	name[32];
-};
-
-enum ITEM { BANANA, MUD, ROCK,  EMPTY };
-
+enum ROLE { RUNNER, BOMBER };
+enum ITEM { NONEITEM = 0, HAMMER, GOLD_HAMMER, GOLD_TIMER, BOMB };
 enum PLAYER_NUM { P1, P2, P3, P4, P5, P6 };						// 몇번 플레이어 인지 
+enum PLAYER_STATE { NONESTATE, ICE, BREAK };							// 플레이어 상태
 enum STATE_TYPE { Init, Run, Over };
+enum MATERIAL { PINK, BROWN, WHITE, BLACK, BLUE, PANDA, ICEMAT };
 
 constexpr int SC_ACCESS_COMPLETE = 1;
 constexpr int SC_PUT_PLAYER = 2;
 constexpr int SC_MOVE_PLAYER = 3;
 constexpr int SC_REMOVE_PLAYER = 4;
 constexpr int SC_USE_ITEM = 5;
-constexpr int SC_ROLE_CHANGE = 6;
+constexpr int SC_ROLL_CHANGE = 6;
 constexpr int SC_ROUND_END = 7;
-constexpr int SC_ROUND_START = 8;
-constexpr int SC_PLEASE_READY = 9;
-constexpr int SC_ACCESS_PLAYER = 10;
-constexpr int SC_COMPARE_TIME = 11;
-constexpr int SC_STOP_RUN_ANIM = 12;
-constexpr int SC_ANIMATION_INFO = 13;
-constexpr int SC_CLIENT_LOBBY_IN = 14;
-constexpr int SC_CLIENT_LOBBY_OUT = 15;
-constexpr int SC_CHATTING = 16;
-constexpr int SC_READY_STATE = 17;
-constexpr int SC_UNREADY_STATE = 18;
-
-constexpr int SC_CHANGE_HOST_ID = 22;
-constexpr int SC_GET_ITEM = 23;
-//constexpr int SC_ROUND_SCORE = 24;
-//constexpr int SC_CHOICE_CHARACTER = 25;
-//constexpr int SC_CHOSEN_CHARACTER = 26;
-constexpr int SC_GO_LOBBY = 27;
 
 constexpr int CS_UP_KEY = 0;
 constexpr int CS_DOWN_KEY = 1;
 constexpr int CS_RIGHT_KEY = 2;
 constexpr int CS_LEFT_KEY = 3;
-constexpr int CS_UPLEFT_KEY = 4;
-constexpr int CS_UPRIGHT_KEY = 5;
-constexpr int CS_DOWNLEFT_KEY = 6;
-constexpr int CS_DOWNRIGHT_KEY = 7;
-constexpr int CS_READY = 8;
-constexpr int CS_UNREADY = 9;
-constexpr int CS_REQUEST_START = 10;
-constexpr int CS_RELEASE_KEY = 11;
-constexpr int CS_ANIMATION_INFO = 12;
-constexpr int CS_NICKNAME_INFO = 13;
-constexpr int CS_CHATTING = 14;
-constexpr int CS_OBJECT_COLLISION = 15;
-constexpr int CS_NOT_COLLISION = 16;
-constexpr int CS_PLAYER_COLLISION = 17;
-constexpr int CS_NOT_PLAYER_COLLISION = 18;
-constexpr int CS_USEITEM = 19;
-constexpr int CS_GET_ITEM = 24;
-//constexpr int CS_CHOICE_CHARACTER = 25;
-
-
 
 //[클라->서버]
 
+struct SC_PACKET_ACCESS_COMPLETE
+{
+	char size;
+	char type;
+	char myId;
+	char score;				// 플레이어 점수
+	char roundCount;		// 몇 라운드인지
+	char serverTime;				// 서버 시간
+};
 
+struct SC_PACKET_PUT_PLAYER
+{
+	char size;
+	char type;
+	char myId;
+	char score;		// 플레이어 점수
+	char matID;			//유저가 원하는 캐릭터는 재질정보가 필요하다.
+	char xPos;		// 오브젝트들 위치
+	char yPos;
+	char zPos;
+	char xLook;
+	char yLook;
+	char zLook;
+	char xUp;
+	char yUp;
+	char zUp;
+	char xRight;
+	char yRight;
+	char zRight;
+};
 
 //////////////////////////////////////////////////////
 
@@ -111,103 +92,11 @@ struct CS_PACKET_DOWN_KEY
 	char type;
 };
 
-
-
-struct CS_PACKET_READY
+struct CS_PACKET_BOMBER_TOUCH
 {
 	char size;
 	char type;
-};
-
-struct CS_PACKET_UNREADY
-{
-	char size;
-	char type;
-};
-
-struct CS_PACKET_REQUEST_START
-{
-	char size;
-	char type;
-};
-
-struct CS_PACKET_ANIMATION
-{
-	char size;
-	char type;
-	char animation;			//애니메이션 정보를 클라에서 받아오는 패킷
-	char padding;			//4바이트 정렬을 위한 
-	//float animationTime;	//현재 애니메이션 시간
-};
-
-
-
-struct CS_PACKET_RELEASE_KEY
-{
-	char size;
-	char type;
-};
-
-// 플레이어 닉네임 서버에 통보
-struct CS_PACKET_NICKNAME
-{
-	char size;
-	char type;
-	char id;
-	char padding;	//4바이트 정렬을위한 
-	char name[24];
-};
-
-struct CS_PACKET_CHATTING
-{
-	char size;
-	char type;
-	char id;
-	char padding;
-	char chatting[MAX_CHATTING_LENGTH];
-};
-
-struct CS_PACKET_OBJECT_COLLISION
-{
-	char size;
-	char type;
-	unsigned short objId;		//object개수는 66536을 넘지 않기 때문에 unsigned short로 변경
-};
-
-struct CS_PACKET_NOT_COLLISION
-{
-	char size;
-	char type;
-};
-struct CS_PACKET_PLAYER_COLLISION
-{
-	char size;
-	char type;
-	unsigned char playerID;
-};
-
-struct CS_PACKET_GET_ITEM
-{
-	char size;
-	char type;
-	char itemIndex[MAX_ITEM_NAME_LENGTH];
-};
-
-struct CS_PACKET_USE_ITEM
-{
-	char size;
-	char type;
-	char target;			// 사용대상이 존재할 때
-	char usedItem;			// 사용되는 아이템 정보
-};
-
-
-
-struct CS_PACKET_CHOICE_CHARACTER
-{
-	char size;
-	char type;
-	char matID;
+	char touchedId;	// 터치한 플레이어 번호
 };
 
 //////////////////////////////////////////////////////
@@ -234,164 +123,48 @@ struct SC_PACKET_INGAME_PACKET
 	//char wDir;
 	//
 	//char animNum;			// 애니메이션 번호
+	//char animTime;			// 애니메이션 시간 정보
+	//char playerState;		// 플레이어 상태
 
-	// 그건 서버에서 하니까
-	// 서버라는 하나의 큰 프로그램
-	// 6개의 클라이언트에서 정보를 쏴줄거란 말이지
-	// 이것들을 종합해가지고 쏴주는거야
-	// 한번에 진행되는게 아니라
-	// 각 클라의 외부적요소에 따라서 차이가 좀 있어서 -> 핑
-	// 한번에 처리한다기보다는 많은정보를 차례차례 처리한다.
-};
+	//char usedItem;			// 사용되는 아이템 정보
+	//char roundCount;		// 몇 라운드인지
+	//char timer;				// 서버 시간
+	//char isBoomed;			// 폭탄이 터졌는지
 
-//<< Ready Room 패킷 종류 >>
-struct SC_PACKET_ACCESS_COMPLETE
-{
-	char size;
-	char type;
-	char myId;
-	char hostId;
-	char score;				// 플레이어 점수
-	char roundCount;		// 몇 라운드인지
-	char serverTime;				// 서버 시간
-};
-
-struct SC_PACKET_ACCESS_PLAYER
-{
-	char size;
-	char type;
-	char id;
-};
-
-struct SC_PACKET_CHANGE_HOST
-{
-	char size;
-	char type;
-	char hostID;
-};
-//입장한 클라이언트의 정보
-struct SC_PACKET_LOBBY_IN
-{
-	char size;
-	char type;
-	char id;
-	clientsInfo client_state;
-};
-
-//퇴장한 클라이언트의 정보
-struct SC_PACKET_LOBBY_OUT
-{
-	char size;
-	char type;
-	char id;
-};
-
-struct SC_PACKET_PLEASE_READY
-{
-	char size;
-	char type;
-};
-
-struct SC_PACKET_ROUND_START
-{
-	char size;
-	char type;
-	char clientCount;
-	char round;
-	unsigned short startTime;
-};
-
-struct SC_PACKET_PUT_PLAYER
-{
-	//4바이트 정렬을 할 필요가 있다.
-	char size;
-	char type;
-	char posIdx[MAX_USER];
+	// parameter 생성자
+	/*SC_INGAME_PACKET(char _id, char _isBomber, char _xPos, char _yPos, char _zPos, char _xDir, char _yDir, char _zDir, char _wDir,
+		char _animNum, char _animTime, char _usedItem, char _playerState, char _roundCount, char _timer, char _isBoomed) :
+		id(_id), isBomber(_isBomber), xPos(_xPos), yPos(_yPos), zPos(_zPos), xDir(_xDir), yDir(_yDir), zDir(_zDir), wDir(_wDir),
+		animNum(_animNum), animTime(_animTime), usedItem(_usedItem), playerState(_playerState), roundCount(_roundCount), timer(_timer),
+		isBoomed(_isBoomed) {};*/
 };
 
 // 플레이어 이동 시
 struct SC_PACKET_MOVE_PLAYER
 {
-
 	char size;
 	char type;
 	char id;
-	char padding;		//4바이트 정렬
-
-	float xPos;
-	float yPos;
-	float zPos;
-
-	//캐릭터의 진행 방향
-	float xLook;
-	float yLook;
-	float zLook;
-	float xUp;
-	float yUp;
-	float zUp;
-	float xRight;
-	float yRight;
-	float zRight;
-
-	//속도
-	float fVelocity;
-
-	bool  isMoveRotate;
+	char xPos;
+	char yPos;
+	char zPos;
+	char xLook;
+	char yLook;
+	char zLook;
+	char xUp;
+	char yUp;
+	char zUp;
+	char xRight;
+	char yRight;
+	char zRight;
 };
 
-struct SC_PACKET_PLAYER_ANIMATION
-{
-	char size;
-	char type;
-	char id;
-	char animation;
-
-};
-
-struct SC_PACKET_STOP_RUN_ANIM
-{
-	char size;
-	char type;
-	char id;
-};
-//현재 Ready중인 플레이어의 정보를 담은 패킷
-struct SC_PACKET_READY_STATE
-{
-	char size;
-	char type;
-	char id;
-};
-
-struct SC_PACKET_UNREADY_STATE
-{
-	char size;
-	char type;
-	char id;
-};
-
-struct SC_PACKET_CHATTING
-{
-	char size;
-	char type;
-	char id;
-	char padding;
-	char message[MAX_CHATTING_LENGTH];
-};
 // 플레이어가 아이템 사용 시
-struct SC_PACKET_GET_ITEM
-{
-	char size;
-	char type;
-	char id;
-	char itemIndex[MAX_ITEM_NAME_LENGTH];
-};
-
 struct SC_PACKET_USE_ITEM
 {
 	char size;
 	char type;
 	char id;
-	char target;
 	char usedItem;			// 사용되는 아이템 정보
 };
 
@@ -401,7 +174,15 @@ struct SC_PACKET_COMPARE_TIME
 {
 	char size;
 	char type;
-	unsigned short serverTime;				// 서버 시간
+	char serverTime;				// 서버 시간
+};
+
+struct SC_PACKET_ROLL_CHANGE
+{
+	char size;
+	char type;
+	char bomberId;
+	char normalId;
 };
 
 struct SC_PACKET_REMOVE_PLAYER
@@ -409,60 +190,23 @@ struct SC_PACKET_REMOVE_PLAYER
 	char size;
 	char type;
 	char id;
-	char hostId;
 };
 
 struct SC_PACKET_ROUND_END
 {
 	char size;
 	char type;
-	bool isWinner;
-	char score[MAX_USER];
-};
-//
-//struct SC_PACKET_ROUND_SCORE
-//{
-//	char size;
-//	char type;
-//	char score[MAX_USER];
-//};
-
-struct SC_PACKET_GO_LOBBY
-{
-	char size;
-	char type;
 };
 
-struct SC_PACKET_COLLIDED
+struct PLAYER
 {
-	char size;
-	char type;
-	char id;
-};
-
-struct SC_PACKET_NOT_COLLIDED
-{
-	char size;
-	char type;
-	char id;
-};
-
-
-
-
-struct SC_PACKET_CHOICE_CHARACTER
-{
-	char size;
-	char type;
-	char id;
-	char matID;
-};
-
-struct SC_PACKET_CHOSEN_CHARACTER
-{
-	char size;
-	char type;
-	char matID[MAX_USER];
+	//bool isBomber;        	 // 플레이어들의 역할
+	//XMFLOAT3 Pos; 	             // 플레이어 위치
+	//XMFLOAT4 Dir;      	// 방향(쿼터니언)
+	//byte AnimationNum;    	// 애니메이션 번호
+	//float AnimationTime; 	// 애니메이션 시간 정보
+	//byte UsedItem;      	// 사용되는 아이템 정보
+	//byte PlayerState;  	// 플레이어 상태
 };
 
 

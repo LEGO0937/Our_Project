@@ -33,8 +33,8 @@
     <ClCompile Include="GameTimer.cpp">
       <Filter>소스 파일\Timer</Filter>
     </ClCompile>
-    <ClCompile Include="TerrainMesh.cpp">
-      <Filter>소스 파일\Terrain</Filter>
+    <ClCompile Include="main.cpp">
+      <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -58,9 +58,6 @@
     </ClInclude>
     <ClInclude Include="GameTimer.h">
       <Filter>소스 파일\Timer</Filter>
-    </ClInclude>
-    <ClInclude Include="TerrainMesh.h">
-      <Filter>소스 파일\Terrain</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

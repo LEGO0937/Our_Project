@@ -139,11 +139,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="GameTimer.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Server.cpp" />
     <ClCompile Include="Terrain.cpp" />
-    <ClCompile Include="TerrainMesh.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DirectX.h">
@@ -155,9 +153,6 @@
     <ClInclude Include="protocol.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Terrain.h" />
-    <ClInclude Include="TerrainMesh.h">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClInclude>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
