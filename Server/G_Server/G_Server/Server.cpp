@@ -4,17 +4,25 @@
 Server::Server()
 {
 	//clients.reserve(MAX_USER);
+	
+	clientCount = 0;
+
 	workerThreads.reserve(MAX_WORKER_THREAD);
 }
 
 
 Server::~Server()
-{
+{	
+	
 	//clients.clear();
 }
 
 bool Server::InitServer()
 {
+	setlocale(LC_ALL, "korean");
+
+	clientCount = 0;
+	hostId = -1;
 	// Winsock Start - windock.dll 로드
 	WSADATA WSAData;
 	if (WSAStartup(MAKEWORD(2, 2), &WSAData) != 0)
@@ -70,12 +78,10 @@ void Server::RunServer()
 	{
 		//SOCKETINFO tmpClient;
 		clients[i].prev_size = 0;
-		clients[i].xPos = PLAYER_INIT_X_POS;
-		clients[i].yPos = PLAYER_INIT_Y_POS;
-		clients[i].zPos = PLAYER_INIT_Z_POS;
-		clients[i].xDir = PLAYER_INIT_X_DIR;
-		clients[i].yDir = PLAYER_INIT_Y_DIR;
-		clients[i].zDir = PLAYER_INIT_Z_DIR;
+		//clients[i].xmf4x4Parents
+		//행렬값 나중에 넣기
+		
+		//이부분에 클라한테 초기위치 요청하는 명령 보내고
 		//clients.emplace_back(tmpClient);
 		//printf("Create Client ID: %d, PrevSize: %d, xPos: %d, yPos: %d, zPos: %d, xDir: %d, yDir: %d, zDir: %d\n", i, clients[i].prev_size, clients[i].xPos, clients[i].yPos, clients[i].zPos, clients[i].xDir, clients[i].yDir, clients[i].zDir);
 	}
@@ -129,8 +135,31 @@ void Server::AcceptThreadFunc()
 			continue;
 		}
 
+		bool isStarted = false;
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (false == clients[i].in_use)
+				continue;
+			if (GS_INGAME == clients[i].gameState)
+			{
+				isStarted = true;
+				break;
+			}
+		}
+		if (true == isStarted)
+		{
+			cout << "Players aleady Start!\n";
+			continue;
+		}
+
 		///////////////////////////////////// 클라이언트 초기화 정보 수정 위치 /////////////////////////////////////
 		clients[new_id].socket = clientSocket;
+		if (-1 == hostId)
+		{
+			hostId = new_id;
+			printf("현재 방장은 %d입니다.\n", hostId);
+		}
+		SetClient_Initialize(new_id);
 		///////////////////////////////////// 클라이언트 초기화 정보 수정 위치 /////////////////////////////////////
 		ZeroMemory(&clients[new_id].over_ex.over, sizeof(clients[new_id].over_ex.over));
 
@@ -276,11 +305,13 @@ void Server::WorkerThreadFunc()
 void Server::ProcessPacket(char client, char* packet)
 {
 	CS_PACKET_UP_KEY* p = reinterpret_cast<CS_PACKET_UP_KEY*>(packet);
-	int x = clients[client].xPos;
+	/*int x = clients[client].xPos;
 	int y = clients[client].yPos;
-	int z = clients[client].zPos;
+	int z = clients[client].zPos;*/
 
 	// 0번은 사이즈, 1번이 패킷타입
+	// packet[0] packet[1] 
+
 	switch (p->type)
 	{
 	case CS_UP_KEY:
@@ -295,14 +326,27 @@ void Server::ProcessPacket(char client, char* packet)
 	case CS_RIGHT_KEY:
 		printf("Press RIGHT Key ID: %d\n", client);
 		break;
+	case CS_PLAYER_INFO:
+		printf("Player Info Success: %d\n", client);
+		// 각 클라에게 위치 인덱스 전송
+		/*for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (false == clients[i].in_use)
+				continue;
+
+			SendPutPlayer(i);
+		}*/
+		break;
 	default:
 		wcout << L"정의되지 않은 패킷 도착 오류!!\n";
 		while (true);
 	}
-	clients[client].xPos = x;
+	/*clients[client].xPos = x;
 	clients[client].yPos = y;
-	clients[client].zPos = z;
+	clients[client].zPos = z;*/
 }
+
+
 
 void Server::SendFunc(char client, void* packet)
 {
@@ -329,6 +373,12 @@ void Server::SendFunc(char client, void* packet)
 	}
 }
 
+void Server::SetClient_Initialize(char client)
+{
+	clients[client].collision = CL_NONE;
+}
+
+
 void Server::SendAcessComplete(char client)
 {
 	SC_PACKET_ACCESS_COMPLETE packet;
@@ -339,17 +389,57 @@ void Server::SendAcessComplete(char client)
 	SendFunc(client, &packet);
 }
 
+void Server::SendPlayerInfo(char toClient, char fromClient)
+{
+	SC_PACKET_PLAYER_INFO packet;
+	packet.id = fromClient;
+	packet.size = sizeof(packet);
+	packet.type = SC_PLAYER_INFO;
+
+	SendFunc(toClient, &packet);
+}
+
+// 플레이어 인포로 사용 
 void Server::SendPutPlayer(char toClient, char fromClient)
 {
 	SC_PACKET_PUT_PLAYER packet;
-	packet.myId = fromClient;
+	//packet.myId = fromClient;
 	packet.size = sizeof(packet);
 	packet.type = SC_PUT_PLAYER;
-	packet.xPos = clients[fromClient].xPos;
-	packet.yPos = clients[fromClient].yPos;
-	packet.zPos = clients[fromClient].zPos;
+	//packet.xPos = clients[fromClient].xPos;
+	//packet.yPos = clients[fromClient].yPos;
+	//packet.zPos = clients[fromClient].zPos;
 
 	SendFunc(toClient, &packet);
+}
+
+void Server::SendGetItem(char toClient, char fromClient, string& itemIndex)
+{
+
+	SC_PACKET_GET_ITEM packet;
+
+	packet.id = fromClient;
+	packet.size = sizeof(SC_PACKET_GET_ITEM);
+	packet.type = SC_GET_ITEM;
+	ZeroMemory(packet.itemIndex, MAX_ITEM_NAME_LENGTH);
+	strncpy(packet.itemIndex, itemIndex.c_str(), itemIndex.length());
+	SendFunc(toClient, &packet);
+}
+void Server::SendUseItem(char toClient, char fromClient, char usedItem)
+{
+	SC_PACKET_USE_ITEM packet;
+
+	packet.id = fromClient;
+	packet.usedItem = usedItem;
+	packet.size = sizeof(packet);
+	packet.type = SC_USE_ITEM;
+
+	SendFunc(toClient, &packet);
+}
+
+void Server::SetAnimationState(char client, char animationNum)
+{
+	clients[client].animation = animationNum;
 }
 
 void Server::SendRemovePlayer(char toClient, char fromClient)
@@ -376,6 +466,8 @@ void Server::ClientDisconnect(char client)
 	clients[client].in_use = false;
 	printf("%d 클라이언트 접속 종료\n", (int)client);
 }
+
+
 
 void Server::err_quit(const char* msg)
 {

@@ -1,23 +1,41 @@
 #pragma once
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-#include "MyInclude.h"
+//#include "MyInclude.h"
 #include "protocol.h"
 
 #define SERVER_IP "127.0.0.1"
 #pragma comment(lib, "Ws2_32.lib")
 constexpr int MAX_BUFFER = 1024;
-constexpr int MAX_USER = 6;
+//constexpr int MAX_USER = 6;
 constexpr int SERVER_PORT = 9000;
 
-constexpr float PLAYER_INIT_X_POS = 0;
-constexpr float PLAYER_INIT_Y_POS = 0;
-constexpr float PLAYER_INIT_Z_POS = 0;
 
-constexpr float PLAYER_INIT_X_DIR = 0;
-constexpr float PLAYER_INIT_Y_DIR = 0;
-constexpr float PLAYER_INIT_Z_DIR = 0;
 
 constexpr int MAX_WORKER_THREAD = 3;
+
+enum EVENT_TYPE
+{
+	EV_RECV,
+	EV_SEND,
+	EV_COUNT,
+	EV_BOMBERTOUCHCOOLTIME,
+	EV_FREEZECOOLTIME,
+	EV_GO_NEXTROUND,
+	EV_GO_LOBBY
+};
+enum COLLISION_TYPE		//어느 객체와 충돌했는지 
+{
+	CL_NONE,
+	CL_SURROUNDING,	//주변
+	CL_PLAYER		//플레이어
+};
+
+enum GAME_STATE			//로비 상태인지 인게임 중인지 
+{
+	GS_ID_INPUT,
+	GS_LOBBY,
+	GS_INGAME
+};
 
 // Overlapped구조체 확장
 struct OVER_EX {
@@ -40,24 +58,29 @@ public:
 	// 조립불가한 메모리를 다음번에 조립하기 위한 임시저장소
 	char packet_buffer[MAX_BUFFER];
 	int prev_size;
-	char xPos, yPos, zPos;
-	char xDir, yDir, zDir;
-	char score;
-	char normalItem;
-	char specialItem;
-	char role;
+	XMFLOAT4X4 xmf4x4Parents[6] = {};
+	char rank; //등수
+	char item;
+	char animation;
+	
+	COLLISION_TYPE collision;
+	bool isReady;
+	GAME_STATE gameState;
 public:
 	SOCKETINFO() {
 		in_use = false;
-		score = 0;
-		normalItem = ITEM::NONEITEM;
-		specialItem = ITEM::NONEITEM;
-		role = ROLE::RUNNER;
+		rank = 0;
+		item = ITEM::EMPTY;
 		ZeroMemory(&over_ex.messageBuffer, sizeof(over_ex.messageBuffer));
 		ZeroMemory(&packet_buffer, sizeof(packet_buffer));
 		over_ex.dataBuffer.len = MAX_BUFFER;
 		over_ex.dataBuffer.buf = over_ex.messageBuffer;
 		over_ex.is_recv = true;
+	}
+	void InitPlayer(){
+		rank = 0;
+		isReady = false;
+		item = ITEM::EMPTY;
 	}
 };
 
@@ -71,6 +94,9 @@ private:
 	// 배열로 바꾸니 제대로 동작함. 왜? 무슨 차이?
 	SOCKETINFO clients[MAX_USER];
 	vector<thread> workerThreads;
+	int clientCount;
+	int readyCount;
+	int hostId;
 public:
 	Server();
 	~Server();
@@ -88,6 +114,13 @@ public:
 	void SendAcessComplete(char client);
 	void SendPutPlayer(char toClient, char fromClient);
 	void SendRemovePlayer(char toClient, char fromClient);
+	void SendPlayerInfo(char toClietn, char fromClient);
+	void SendGetItem(char toClient, char fromClient, string& itemidx);
+	void SendUseItem(char toClient, char fromClient, char useItem);
+public:
+	void SetAnimationState(char client, char animationNum);
+	void SetClient_Initialize(char client);
+
 public:
 	bool InitServer();
 	void RunServer();
