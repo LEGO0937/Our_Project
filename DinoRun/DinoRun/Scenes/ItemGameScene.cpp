@@ -146,7 +146,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
-	NetWorkManager::GetInstance()->ConnectToServer();
+	//NetWorkManager::GetInstance()->ConnectToServer();
 
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 
@@ -341,6 +341,10 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
 	instancingNumberUiShaders.emplace_back(uiShader);
 
+	uiShader = new DashBoardShader;
+	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	instancingNumberUiShaders.emplace_back(uiShader);
+
 	UI_INFO ItemUi_info;
 
 	//---- 아이템 틀
@@ -433,16 +437,16 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		switch (wParam)
 		{
 		case VK_LEFT:
-			if (m_pPlayer)  m_pPlayer->KeyUpLeft();
+			//if (m_pPlayer)  m_pPlayer->KeyUpLeft();
 			break;
 		case VK_RIGHT:
-			if (m_pPlayer)	m_pPlayer->KeyUpRight();
+			//if (m_pPlayer)	m_pPlayer->KeyUpRight();
 			break;
 		case VK_UP:
-			if (m_pPlayer)	m_pPlayer->KeyUpUp();
+			//if (m_pPlayer)	m_pPlayer->KeyUpUp();
 			break;
 		case VK_DOWN:
-			if (m_pPlayer)	m_pPlayer->KeyUpDown();
+			//if (m_pPlayer)	m_pPlayer->KeyUpDown();
 			break;
 		case VK_ESCAPE:
 			::PostQuitMessage(0);
@@ -515,16 +519,17 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			EventHandler::GetInstance()->RegisterEvent(message);
 			break;
 		case VK_LEFT:
-			
+			//if (m_pPlayer)	m_pPlayer->KeyDownLeft();
 			break;
 		case VK_RIGHT:
-			
+			//if (m_pPlayer)	m_pPlayer->KeyDownRight();
+			break;
 			break;
 		case VK_UP:
-			
+			//if (m_pPlayer)	m_pPlayer->KeyDownUp();
 			break;
 		case VK_DOWN:
-			
+			//if (m_pPlayer)	m_pPlayer->KeyDownDown();
 			break;
 		case VK_SHIFT:
 			if (m_pPlayer)
@@ -540,7 +545,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 	static UCHAR pKeyBuffer[256];
-	DWORD dwDirection = 0;
+	dwDirection = 0;
 	/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/
 	뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
 	if (::GetKeyboardState(pKeyBuffer))
@@ -555,45 +560,26 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 		if (pKeyBuffer[VK_NEXT] & 0xF0) dwDirection |= DIR_DOWN;
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
-	/*마우스를 캡쳐했으면 마우스가 얼마만큼 이동하였는 가를 계산한다. 마우스 왼쪽 또는 오른쪽 버튼이 눌러질 때의
-	메시지(WM_LBUTTONDOWN, WM_RBUTTONDOWN)를 처리할 때 마우스를 캡쳐하였다. 그러므로 마우스가 캡쳐된
-	것은 마우스 버튼이 눌려진 상태를 의미한다. 마우스 버튼이 눌려진 상태에서 마우스를 좌우 또는 상하로 움직이면 플
-	레이어를 x-축 또는 y-축으로 회전한다.*/
+	
 	if (::GetCapture() == hwnd)
 	{
-		/*
-		//마우스 커서를 화면에서 없앤다(보이지 않게 한다).
-		::SetCursor(NULL);
-		//현재 마우스 커서의 위치를 가져온다.
-		::GetCursorPos(&ptCursorPos);
-		//마우스 버튼이 눌린 상태에서 마우스가 움직인 양을 구한다.
-		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-		//마우스 커서의 위치를 마우스가 눌려졌던 위치로 설정한다.
-		//m_ptOldCursorPos = ptCursorPos;
-		::SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		*/
 	}
 	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
 	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
-		if (cxDelta || cyDelta)
+		
+		if (dwDirection)
 		{
-			/*cxDelta는 y-축의 회전을 나타내고 cyDelta는 x-축의 회전을 나타낸다. 오른쪽 마우스 버튼이 눌려진 경우
-			cxDelta는 z-축의 회전을 나타낸다.*/
-			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
-				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-			else
-				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+			//m_pPlayer->Move(dwDirection, 20.0f, deltaTime, true);
+			//((CPlayer*)PLAYER_SHADER->getSkiendList()[0])->Move(dwDirection, 20.0f, deltaTime, true);
 		}
-		/*플레이어를 dwDirection 방향으로 이동한다(실제로는 속도 벡터를 변경한다).
-		이동 거리는 시간에 비례하도록 한다. 플레이어의 이동 속력은 ()로 가정한다.*/
-		if (dwDirection) m_pPlayer->Move(dwDirection, 20.0f, deltaTime,
-			true);
 
 	}
 	else
 		m_pPlayer->m_fForce = 0;
+
+	m_pPlayer->Move(dwDirection, 20.0f, deltaTime, true);
+	((CPlayer*)PLAYER_SHADER->getSkiendList()[0])->Move(dwDirection, 20.0f, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -754,7 +740,9 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 	packet.checkPoints[0] = m_pPlayer->GetCheckPoint();
 	packet.playerNames[0] = m_sPlayerId;
 	packet.xmf4x4Parents[0] = m_pPlayer->m_xmf4x4ToParent;
+	packet.keyState[0] = dwDirection;   //키입력정보, 이 정보로 타플레이어 애니메이션 적용
 	packet.type = SC_MOVE_PLAYER;
+
 	//자기정보 send
 	//모든플레이어 정보 recv 변수 packet으로 받음
 	//recv로 받은 패킷을 통해 위치 초기화
@@ -771,6 +759,7 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 		{
 			(*obj)->m_xmf4x4ToParent = packet.xmf4x4Parents[i];
 			((CPlayer*)(*obj))->SetCheckPoint(packet.checkPoints[i]);
+			((CPlayer*)(*obj))->Move(packet.keyState[i], 20.0f, fTimeElapsed, true);
 		}
 		else
 		{
@@ -781,6 +770,7 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 				(*findId)->SetName(packet.playerNames[i]);
 				(*findId)->m_xmf4x4ToParent = packet.xmf4x4Parents[i];
 				((CPlayer*)(*findId))->SetCheckPoint(packet.checkPoints[i]);
+				((CPlayer*)(*obj))->Move(packet.keyState[i], 20.0f, fTimeElapsed, true);
 					// 위치값 + 행렬
 			}
 

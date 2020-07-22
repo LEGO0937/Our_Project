@@ -70,6 +70,8 @@ public:
 	virtual void ProcessEvent(const MessageStruct& msg);
 	virtual void ProcessPacket(char* packet);
 private:
+	DWORD dwDirection;
+
 	ID3D12Resource *m_pd3dcbShadow = NULL;
 	CB_GAME_INFO* m_pcbMappedShadow = NULL;
 

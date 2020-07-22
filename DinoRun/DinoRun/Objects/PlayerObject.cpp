@@ -64,7 +64,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 	if (isStun || m_xmf3Velocity.y != 0)
 		return;
 
-	if (dwDirection)
+	//if (dwDirection)
 	{
 		XMFLOAT3 vel = GetVelocity();
 		float length = (vel.x * vel.x + vel.z * vel.z);
@@ -78,6 +78,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			if (!SoundManager::GetInstance()->Playing("Running"))
 				SoundManager::GetInstance()->Play("Running");
 		}
+		else
+		{
+			if (isUp)
+				KeyUpUp();
+		}
+
 		if (dwDirection & DIR_BACKWARD)
 		{
 			KeyDownDown();
@@ -85,7 +91,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			if (!SoundManager::GetInstance()->Playing("Running"))
 				SoundManager::GetInstance()->Play("Running");
 		}
-
+		else
+		{
+			if (isDown)
+				KeyUpDown();
+		}
 #else
 		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
 		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, +fDistance);
@@ -104,8 +114,13 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			else
 				m_fWheelDegree += 50 * fDeltaTime;
 		}
+		else
+		{
+			if (isRight)
+				KeyUpRight();
+		}
 		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, +fDistance);
-		else if (dwDirection & DIR_LEFT)
+		if (dwDirection & DIR_LEFT)
 		{
 			KeyDownLeft();
 			if (!isShift)
@@ -118,7 +133,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			else
 				m_fWheelDegree -= 50 * fDeltaTime;
 		}
-
+		else
+		{
+			if (isLeft)
+				KeyUpLeft();
+		}
 			
 		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
 #else

@@ -484,9 +484,10 @@ struct SC_PACKET_PLAYER_INFO
 	char size;
 	char type;
 	char id;
-	XMFLOAT4X4 Parents[6] = {};
+	XMFLOAT4X4 xmf4x4Parents[6] = {};
 	string playerNames[6] = {};
 	int checkPoints[6];
+	DWORD keyState[6];
 };
 
 //////////////////////////////////////////////////////

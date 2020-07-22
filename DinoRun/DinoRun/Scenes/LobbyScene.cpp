@@ -253,8 +253,16 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							//들어오라는 신호를 보낸다.
 							//연결 성공 시 네트워크 클래스에 m_vRooms[clickNum].m_iRoomNumber를 받아서 
 							//접속할 방의 번호 저장할것.
+
+							
+							
 							if (!m_vRooms[clickNum].m_bIsGaming && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
 							{
+								//순서
+							    //방번호를 갖고있는 패킷을 send
+							    //서버에서 패킷받고 여유자리있는지 확인하고 입장가능여부 send
+							    //recv로 들어오라는 신호를 받음
+
 								m_iResultNum = m_vRooms[clickNum].m_iRoomNumber;
 								m_bMode = m_vRooms[clickNum].m_bMode;
 								sceneType = SceneType::Room_Scene;
@@ -448,6 +456,11 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	}
 	룸정보 추가도 위와 동일한 방식으로 동작.
 	*/
+
+
+	//순서
+	//방목록 요구를 위한 send
+	//방목록을 담는 패킷 recv
 	if (m_vUsers.size())
 	{
 		for (int i = m_iUserPageNum * 8, n = 0; i < (m_iUserPageNum * 8) + 8; ++i, ++n)

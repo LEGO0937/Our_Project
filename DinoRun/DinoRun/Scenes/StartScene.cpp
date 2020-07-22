@@ -136,6 +136,12 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				// 닉네임을 받았다면 네트워크 클래스에 닉네임 저장 후, Lobbyscene으로 이동.
 				//씬 전환 
 				//m_sPlayerId = 로그인 성공 시 서버로부터 닉네임 받음;
+				
+				
+				//순서
+				//아이디와 비밀번호가 있는 패킷을 send
+				//recv로 로그인 성공인지 실패인지 확인.
+				//로그인 성공시에는 m_sPlayerId에 닉네임을 입력하고 로비씬으로 넘어감.
 				m_sPlayerId = gameTexts[ID].text;
 				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
 				sceneType = Lobby_Scene;
