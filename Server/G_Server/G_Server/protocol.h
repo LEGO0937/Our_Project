@@ -117,7 +117,7 @@ struct CS_PACKET_PLAYER_INFO
 	char type;
 	char id;
 	XMFLOAT4X4 xmf4x4Parents[6] = {};
-	string playerNames[6] = {};
+	//string playerNames[6] = {};
 	int checkPoints[6];
 	DWORD keyState[6];
 };
@@ -183,13 +183,6 @@ struct CS_PACKET_ANIMATION
 	char animation;			//애니메이션 정보를 클라에서 받아오는 패킷
 	char padding;			//4바이트 정렬을 위한 
 	//float animationTime;	//현재 애니메이션 시간
-};
-
-struct CS_PACKET_BOMBER_TOUCH
-{
-	char size;
-	char type;
-	char touchId;	// 터치한 플레이어 번호
 };
 
 struct CS_PACKET_RELEASE_KEY
@@ -294,8 +287,7 @@ struct SC_PACKET_ACCESS_COMPLETE
 	char type;
 	char myId;
 	char hostId;
-	char score;				// 플레이어 점수
-	char roundCount;		// 몇 라운드인지
+	char rank;				// 플레이어 등수
 	char serverTime;				// 서버 시간
 };
 
@@ -340,11 +332,6 @@ struct SC_PACKET_ROUND_START
 	char size;
 	char type;
 	char clientCount;
-	char bomberID;
-	char goldTimerCnt;
-	char goldHammerCnt;
-	char hammerCnt;
-	char round;
 	unsigned short startTime;
 };
 

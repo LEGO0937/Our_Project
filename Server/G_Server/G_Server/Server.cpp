@@ -174,7 +174,7 @@ void Server::AcceptThreadFunc()
 		// 기존 유저들에게 이후 접속한 유저들 출력
 		for (int i = 0; i < MAX_USER; ++i)
 			if (true == clients[i].in_use)
-				SendPutPlayer(i, new_id);
+				SendPlayerInfo(i, new_id);
 
 		// 처음 접속한 나에게 기존 유저들 출력
 		for (int i = 0; i < MAX_USER; ++i)
@@ -183,9 +183,12 @@ void Server::AcceptThreadFunc()
 				continue;
 			if (i == new_id)
 				continue;
-			SendPutPlayer(new_id, i);
+			SendPlayerInfo(new_id, i);
 		}
-
+		clientCnt_l.lock();
+		++clientCount;
+		printf("%d 클라이언트 접속 완료, 현재 클라이언트 수: %d\n", new_id, clientCount);
+		clientCnt_l.unlock();
 		RecvFunc(new_id);
 	}
 
@@ -252,7 +255,7 @@ void Server::WorkerThreadFunc()
 		}
 
 		char key = static_cast<char>(l_key);
-		if (true == over_ex->is_recv)
+		if (EV_RECV == over_ex->event_t)
 		{
 			// RECV 처리
 			wcout << "Packet from Client: " << (int)key << "\n";
@@ -294,17 +297,33 @@ void Server::WorkerThreadFunc()
 
 			RecvFunc(key);
 		}
-		else
+		else if(EV_SEND == over_ex->event_t)
 		{
 			// SEND 처리
 			delete over_ex;
+		}
+		else if (EV_GO_LOBBY == over_ex->event_t)
+		{
+			for (int i = 0; i < MAX_USER; ++i)
+			{
+				if (false == clients[i].in_use)
+					continue;
+				clients[i].gameState = GS_LOBBY;
+				SendGoLobby(i);
+			}
+		}
+		else
+		{
+			cout << "Unknown Event : " << over_ex->event_t << "\n";
+			delete over_ex;
+			//while (true);
 		}
 	}
 }
 
 void Server::ProcessPacket(char client, char* packet)
 {
-	CS_PACKET_UP_KEY* p = reinterpret_cast<CS_PACKET_UP_KEY*>(packet);
+	
 	/*int x = clients[client].xPos;
 	int y = clients[client].yPos;
 	int z = clients[client].zPos;*/
@@ -312,7 +331,9 @@ void Server::ProcessPacket(char client, char* packet)
 	// 0번은 사이즈, 1번이 패킷타입
 	// packet[0] packet[1] 
 
-	switch (p->type)
+	DWORD tmpDir;
+
+	switch (packet[1]) // 0번째는 패킷 사이즈 1번쨰는 패킷 타입
 	{
 	case CS_UP_KEY:
 		printf("Press UP Key ID: %d\n", client);
@@ -327,6 +348,7 @@ void Server::ProcessPacket(char client, char* packet)
 		printf("Press RIGHT Key ID: %d\n", client);
 		break;
 	case CS_PLAYER_INFO:
+	{
 		printf("Player Info Success: %d\n", client);
 		// 각 클라에게 위치 인덱스 전송
 		/*for (int i = 0; i < MAX_USER; ++i)
@@ -337,6 +359,46 @@ void Server::ProcessPacket(char client, char* packet)
 			SendPutPlayer(i);
 		}*/
 		break;
+	}
+	case CS_READY:
+	{
+		// 클라가 엔터누르고 F5누를때마다 CS_READY 패킷이 날아온다면 ++readyCount는 clientCount보다 증가하게 되고 
+		// 아래 CS_REQUEST_START안에 if(clientCount<= readyCount) 안으로 들어가지 않는 현상 발생
+		readyCnt_l.lock();
+		clientCnt_l.lock();
+		printf("전체 클라 수: %d\n", clientCount);
+		if (readyCount < clientCount - 1)
+			++readyCount;
+		printf("Ready한 클라 수: %d\n", readyCount);
+		clientCnt_l.unlock();
+		readyCnt_l.unlock();
+
+
+		clients[client].isReady = true;
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (clients[i].in_use == true)
+				SendReadyStatePacket(i, client);
+		}
+		break;
+	}
+	case CS_UNREADY:
+	{
+		readyCnt_l.lock();
+		if (readyCount > 0)
+			--readyCount;
+		printf("Ready한 클라 수: %d\n", readyCount);
+		readyCnt_l.unlock();
+
+		clients[client].isReady = false;
+
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (clients[i].in_use == true)
+				SendUnReadyStatePacket(i, client);
+		}
+		break;
+	}
 	default:
 		wcout << L"정의되지 않은 패킷 도착 오류!!\n";
 		while (true);
@@ -354,7 +416,8 @@ void Server::SendFunc(char client, void* packet)
 	OVER_EX* ov = new OVER_EX;
 	ov->dataBuffer.len = p[0];
 	ov->dataBuffer.buf = ov->messageBuffer;
-	ov->is_recv = false;
+	//ov->is_recv = false; // 이벤트 타입으로 수정ㅇㄴㄹㄴㅁ
+	ov->event_t = EV_SEND;
 	memcpy(ov->messageBuffer, p, p[0]);
 	ZeroMemory(&ov->over, sizeof(ov->over));
 	int error = WSASend(clients[client].socket, &ov->dataBuffer, 1, 0, 0, &ov->over, NULL);
@@ -363,7 +426,7 @@ void Server::SendFunc(char client, void* packet)
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
 			cout << "Error - IO pending Failure\n";
-			while (true);
+			//while (true);
 		}
 	}
 	else {
@@ -389,6 +452,39 @@ void Server::SendAcessComplete(char client)
 	SendFunc(client, &packet);
 }
 
+void Server::SendGoLobby(char toClient)
+{
+	SC_PACKET_GO_LOBBY packet;
+
+	packet.size = sizeof(packet);
+	packet.type = SC_GO_LOBBY;
+
+	SendFunc(toClient, &packet);
+}
+
+void Server::SendReadyStatePacket(char toClient, char fromClient)
+{
+	SC_PACKET_READY_STATE packet;
+
+	packet.id = fromClient;
+	packet.size = sizeof(packet);
+	packet.type = SC_READY_STATE;
+
+	SendFunc(toClient, &packet);
+}
+
+void Server::SendUnReadyStatePacket(char toClient, char fromClient)
+{
+	SC_PACKET_UNREADY_STATE packet;
+
+	packet.id = fromClient;
+	packet.size = sizeof(packet);
+	packet.type = SC_UNREADY_STATE;
+
+	SendFunc(toClient, &packet);
+}
+
+
 void Server::SendPlayerInfo(char toClient, char fromClient)
 {
 	SC_PACKET_PLAYER_INFO packet;
@@ -399,19 +495,19 @@ void Server::SendPlayerInfo(char toClient, char fromClient)
 	SendFunc(toClient, &packet);
 }
 
-// 플레이어 인포로 사용 
-void Server::SendPutPlayer(char toClient, char fromClient)
-{
-	SC_PACKET_PUT_PLAYER packet;
-	//packet.myId = fromClient;
-	packet.size = sizeof(packet);
-	packet.type = SC_PUT_PLAYER;
-	//packet.xPos = clients[fromClient].xPos;
-	//packet.yPos = clients[fromClient].yPos;
-	//packet.zPos = clients[fromClient].zPos;
-
-	SendFunc(toClient, &packet);
-}
+// 플레이어 인포로 사용...? 
+//void Server::SendPutPlayer(char toClient, char fromClient)
+//{
+//	SC_PACKET_PUT_PLAYER packet;
+//	//packet.myId = fromClient;
+//	packet.size = sizeof(packet);
+//	packet.type = SC_PUT_PLAYER;
+//	//packet.xPos = clients[fromClient].xPos;
+//	//packet.yPos = clients[fromClient].yPos;
+//	//packet.zPos = clients[fromClient].zPos;
+//
+//	SendFunc(toClient, &packet);
+//}
 
 void Server::SendGetItem(char toClient, char fromClient, string& itemIndex)
 {
@@ -422,9 +518,10 @@ void Server::SendGetItem(char toClient, char fromClient, string& itemIndex)
 	packet.size = sizeof(SC_PACKET_GET_ITEM);
 	packet.type = SC_GET_ITEM;
 	ZeroMemory(packet.itemIndex, MAX_ITEM_NAME_LENGTH);
-	strncpy(packet.itemIndex, itemIndex.c_str(), itemIndex.length());
+	strncpy_s(packet.itemIndex, itemIndex.c_str(), itemIndex.length());
 	SendFunc(toClient, &packet);
 }
+
 void Server::SendUseItem(char toClient, char fromClient, char usedItem)
 {
 	SC_PACKET_USE_ITEM packet;

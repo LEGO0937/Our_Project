@@ -18,15 +18,13 @@ enum EVENT_TYPE
 	EV_RECV,
 	EV_SEND,
 	EV_COUNT,
-	EV_BOMBERTOUCHCOOLTIME,
-	EV_FREEZECOOLTIME,
-	EV_GO_NEXTROUND,
 	EV_GO_LOBBY
 };
-enum COLLISION_TYPE		//어느 객체와 충돌했는지 
+
+enum COLLISION_TYPE		//어느 객체와 충돌했는지(혹시 몰라서 넣었다) 
 {
 	CL_NONE,
-	CL_SURROUNDING,	//주변
+	CL_ITEM,	//아이템
 	CL_PLAYER		//플레이어
 };
 
@@ -42,7 +40,7 @@ struct OVER_EX {
 	WSAOVERLAPPED	over;
 	WSABUF			dataBuffer;
 	char			messageBuffer[MAX_BUFFER];
-	bool			is_recv;
+	EVENT_TYPE		event_t;
 };
 
 class SOCKETINFO
@@ -62,7 +60,8 @@ public:
 	char rank; //등수
 	char item;
 	char animation;
-	
+	char nickname[32];
+
 	COLLISION_TYPE collision;
 	bool isReady;
 	GAME_STATE gameState;
@@ -71,11 +70,12 @@ public:
 		in_use = false;
 		rank = 0;
 		item = ITEM::EMPTY;
+		ZeroMemory(nickname, sizeof(wchar_t) * 12);
 		ZeroMemory(&over_ex.messageBuffer, sizeof(over_ex.messageBuffer));
 		ZeroMemory(&packet_buffer, sizeof(packet_buffer));
 		over_ex.dataBuffer.len = MAX_BUFFER;
 		over_ex.dataBuffer.buf = over_ex.messageBuffer;
-		over_ex.is_recv = true;
+		over_ex.event_t = EV_RECV;
 	}
 	void InitPlayer(){
 		rank = 0;
@@ -89,7 +89,8 @@ class Server
 private:
 	SOCKET listenSocket;
 	HANDLE iocp;
-	mutex myLock;
+	mutex clientCnt_l;
+	mutex readyCnt_l;
 	// vector로 했을 때 over_ex.messagebuffer에 값이 들어오질 않는다.
 	// 배열로 바꾸니 제대로 동작함. 왜? 무슨 차이?
 	SOCKETINFO clients[MAX_USER];
@@ -112,11 +113,15 @@ public:
 	void ClientDisconnect(char client);
 public:
 	void SendAcessComplete(char client);
-	void SendPutPlayer(char toClient, char fromClient);
+	void SendGoLobby(char toClient);
+	//void SendPutPlayer(char toClient, char fromClient);
+	void SendReadyStatePacket(char toClient, char fromClient);
+	void SendUnReadyStatePacket(char toClient, char fromClient);
 	void SendRemovePlayer(char toClient, char fromClient);
 	void SendPlayerInfo(char toClietn, char fromClient);
 	void SendGetItem(char toClient, char fromClient, string& itemidx);
 	void SendUseItem(char toClient, char fromClient, char useItem);
+
 public:
 	void SetAnimationState(char client, char animationNum);
 	void SetClient_Initialize(char client);
