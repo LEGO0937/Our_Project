@@ -4,8 +4,8 @@
 
 ItemMeteorite::ItemMeteorite(int nMeshes) :CGameObject(nMeshes)
 {
-	m_fMass = 0.1;
-	//isKinematic = true;
+	m_fMass = 400;
+	isKinematic = true;
 	m_ModelType = ModelType::Item_Meteorite;
 	m_fLifeCount = 2;
 	m_xmf3Gravity = XMFLOAT3(0.0f, -9.8f, 0.0f);
@@ -20,11 +20,14 @@ bool ItemMeteorite::Update(float fTimeElapsed, CGameObject* target)
 	//m_fLifeCount -= fTimeElapsed;
 	if (m_fLifeCount < 0)
 	{
+		CHeightMapTerrain* t = (CHeightMapTerrain*)m_pUpdatedContext;
 		MessageStruct message;
-		//message.msgName = "Add_Model";
-		//message.shaderName = "MoundShader";
+		message.msgName = "Add_Model";
+		message.shaderName = "MoundShader";
 		message.departMat = m_xmf4x4World;
+		message.departMat._42 = t->GetHeight(m_xmf4x4World._41, m_xmf4x4World._43);
 		//EventHandler::GetInstance()->CallBack(message);
+		EventHandler::GetInstance()->RegisterEvent(message);
 
 		message.msgName = "Add_Particle";
 		message.shaderName = "StoneParticle";

@@ -50,7 +50,19 @@ SoundManager::~SoundManager()
 	// Map ºñ¿ì±â
 	sounds.clear();
 }
-
+void SoundManager::Initialize()
+{
+	AddSound("Start_BGM", "Resources/Sounds/Start_BGM.mp3", true);
+	AddSound("InGame_BGM", "Resources/Sounds/InGame_BGM.mp3", true);
+	AddSound("Mouse_Up", "Resources/Sounds/Mouse_Up.mp3", false);
+	AddSound("Mouse_Down", "Resources/Sounds/Mouse_Down.mp3", false);
+	AddSound("Gole", "Resources/Sounds/Gole.mp3", false);
+	AddSound("Heat", "Resources/Sounds/Heat.mp3", false);
+	AddSound("MeatEat", "Resources/Sounds/MeatEat.mp3", false);
+	AddSound("ItemBox", "Resources/Sounds/ItemBox.mp3", false);
+	AddSound("Curve", "Resources/Sounds/Curve.mp3", false);
+	AddSound("Running", "Resources/Sounds/Running.mp3", true);
+}
 void SoundManager::AddSound(string name, string soundFile, bool loop)
 {
 	if (loop == true)

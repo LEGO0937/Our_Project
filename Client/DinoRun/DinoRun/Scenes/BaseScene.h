@@ -108,12 +108,7 @@ public:
 	virtual void SetId(const string& str) { m_sPlayerId = str; }
 
 	//--------------------EventHandler---
-	virtual void AddModelObject(const MessageStruct& msg) {}
-	virtual void DeleteModelObject(const MessageStruct& msg) {}
-	virtual void AddParticle(const MessageStruct& msg) {}
-	virtual void DisEnableModel(const MessageStruct& msg) {}
-
-
+	virtual void ProcessEvent(const MessageStruct& msg) {}
 	//---------NetWork
 	virtual void ProcessPacket(char* packet) {}
 protected:

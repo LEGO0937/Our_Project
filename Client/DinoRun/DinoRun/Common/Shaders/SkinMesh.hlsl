@@ -30,6 +30,22 @@ float4 PSSkinnedAnimation(VS_SKINNED_OUTPUT input) : SV_TARGET
 	diffuseAlbedo = diffuseAlbedo * 0.5 + (Lighting(input.positionW, normalW)*0.5);
 
 	return(diffuseAlbedo);
+
+	/*
+	
+	float4 ShadowPosH = mul(float4(input.positionW, 1.0f), invViewProj);
+	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+	shadowFactor[0] = CalcShadowFactor(ShadowPosH);
+
+	float4 baseAlbedo = gTexture.Sample(gsamLinearWrap, input.TexC);
+
+	clip(baseAlbedo.a - 0.1f);
+
+	float3 normalW = normalize(input.normal);
+	float4 color = saturate(0.5*(baseAlbedo) + sLighting(input.positionW, normalW, shadowFactor)*0.5);
+	
+	return color;
+	*/
 }
 
 //-----------

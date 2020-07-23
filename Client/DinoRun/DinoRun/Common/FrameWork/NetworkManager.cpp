@@ -1,7 +1,5 @@
 
 #include "NetworkManager.h"
-#include "../protocol.h"
-#include <WinSock2.h>
 #include "../Common/FrameWork/CGameFramework.h"
 
 
@@ -30,7 +28,7 @@ NetWorkManager::~NetWorkManager()
 
 void NetWorkManager::Initialize()
 {
-	/*
+	
 	m_ConnectState = CONNECT_STATE::NONE;
 
 	WSADATA wsa;
@@ -40,7 +38,7 @@ void NetWorkManager::Initialize()
 		PostQuitMessage(0);
 	}
 
-	// socket()
+	//socket
 	sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);
 	if (sock == INVALID_SOCKET)
 	{
@@ -49,15 +47,19 @@ void NetWorkManager::Initialize()
 		err_quit("socket()");
 		return;
 	}
-	*/
+	
 }
 
-
-
-void NetWorkManager::ConnectToServer(HWND hWnd)
+void NetWorkManager::Release()
 {
-	/*
+	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
+}
+
+void NetWorkManager::ConnectToServer()
+{
+	
 	// connect()
+	m_ServerIP = "127.0.0.1";
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
@@ -91,7 +93,7 @@ void NetWorkManager::ConnectToServer(HWND hWnd)
 	recv_wsabuf.len = BUF_SIZE;
 
 	m_ConnectState = CONNECT_STATE::OK;
-	*/
+	
 }
 
 
@@ -103,7 +105,7 @@ SOCKET NetWorkManager::getSock()
 
 void NetWorkManager::ReadPacket()
 {
-	/*
+	
 	DWORD iobyte, ioflag = 0;
 
 	int retval = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
@@ -141,17 +143,18 @@ void NetWorkManager::ReadPacket()
 			iobyte = 0;
 		}
 	}
-	*/
+	
 }
 
 
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
 void NetWorkManager::SendPacket(DWORD dataBytes)
 {
-	/*
+	
 	DWORD iobyte = 0;
 
 	send_wsabuf.len = dataBytes;
+	
 	int retval = WSASend(sock, &send_wsabuf, 1, &dataBytes, 0, NULL, NULL);
 	if (retval)
 	{
@@ -160,12 +163,12 @@ void NetWorkManager::SendPacket(DWORD dataBytes)
 			err_display("WSASend()");
 		}
 	}
-	*/
+	
 }
 
 void NetWorkManager::SendPacket()
 {
-	/*
+	
 	DWORD iobyte = 0;
 
 	int retval = WSASend(sock, &send_wsabuf, 1, &iobyte, 0, NULL, NULL);
@@ -176,7 +179,7 @@ void NetWorkManager::SendPacket()
 			err_display("WSASend()");
 		}
 	}
-	*/
+	
 }
 
 void NetWorkManager::SendUpKey()

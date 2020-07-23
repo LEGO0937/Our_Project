@@ -7,16 +7,22 @@ ID3D12PipelineState** CGameFramework::m_ppd3dPipelineStates = NULL;
 CGameFramework::CGameFramework()
 {
 	EventHandler::GetInstance()->Update();
+	SoundManager::GetInstance()->Initialize();
+	NetWorkManager::GetInstance()->Initialize();
 }
 
 CGameFramework::~CGameFramework()
 {
 	EventHandler::GetInstance()->destroy();
+	SoundManager::GetInstance()->destroy();
+	NetWorkManager::GetInstance()->Release();
+	NetWorkManager::GetInstance()->destroy();
 }
 
 bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
 	m_hWnd = hWnd;
+	NetWorkManager::GetInstance()->SetHwnd(hWnd);
 
 	m_pCreateManager = shared_ptr<CreateManager>(new CreateManager);
 
@@ -125,12 +131,12 @@ void CGameFramework::BuildObjects()
 
 	m_pCreateManager->SetLoadingScene(m_pLoadingScene);
 
-	m_pScene = shared_ptr<GameScene>(new GameScene());
+	m_pScene = shared_ptr<ItemGameScene>(new ItemGameScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
 	m_pScene->BuildObjects(m_pCreateManager);
 	m_pScene->SetId(m_sPlayerID);
-	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_Dino.bin");
+	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
 	pPlayer->SetMaxForce(MIN_FORCE);
 	m_pPlayer = pPlayer;
 
@@ -366,7 +372,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{
 		m_pScene->SetId(m_sPlayerID);
-		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_Dino.bin");
+		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
 

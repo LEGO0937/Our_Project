@@ -5,6 +5,10 @@ void EventHandler::SendEvent(const MessageStruct& msg)
 {
 	MessageStruct message = msg;
 	//서버에 message를 send
+
+	//서버는 받고 6개의 각 메시지큐에 msg를 채워줌
+	//그후 클라에서 이벤트 업데이트를 위해 update함수에서 이벤트 요구 send시
+	// 각 아이디에 맞는 큐를 넘겨주고 서버는 넘겨준 큐를 clear시킴.
 }
 
 void EventHandler::RegisterEvent(const MessageStruct& msg)
@@ -16,27 +20,18 @@ void EventHandler::RegisterEvent(const MessageStruct& msg)
 
 void EventHandler::Update()
 {
+	
+	/*
+	먼저 send로 쌓여있는 메시지 받아오기
+	recv로 받아와서 message Queue에 추가
+	그후 메시지 수만큼 업데이트
+	*/
 	while (messageQueue.size())
 	{
 		MessageStruct msg = *messageQueue.begin();
-		////메시지 내용에 따른 처리구간
-		if (msg.msgName == "Add_Model")
-		{
-			m_pCurScene->AddModelObject(msg);
-			//mes.shader->addObject(mes.createMgr, mes.departMat, mes.arriveMat);
-		}
-		else if (msg.msgName == "Delete_Model")
-		{
-			m_pCurScene->DeleteModelObject(msg);
-		}
-		else if (msg.msgName == "Add_Particle")
-		{
-			m_pCurScene->AddParticle(msg);
-		}
-		else if (msg.msgName == "DisEnable_Model")
-		{
-			m_pCurScene->DisEnableModel(msg);
-		}
+
+		m_pCurScene->ProcessEvent(msg);
+
 		messageQueue.pop_front();  //메시지 삭제
 	}
 }

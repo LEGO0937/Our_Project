@@ -15,8 +15,8 @@ void CreateManager::Initialize(HINSTANCE hInstance, HWND hWnd)
 
 	m_pDrawManager = shared_ptr<DrawManager>(new DrawManager);
 	//m_pNetWorkManager = shared_ptr<NetWorkManager>(new NetWorkManager);
-	m_pSoundManager = shared_ptr<SoundManager>(new SoundManager);
-	InitializeSound();
+	//m_pSoundManager = shared_ptr<SoundManager>(new SoundManager);
+	//InitializeSound();
 
 	CreateDirect3dDevice();
 	CreateCommandQueueAndList();
@@ -33,14 +33,16 @@ void CreateManager::Initialize(HINSTANCE hInstance, HWND hWnd)
 }
 void CreateManager::InitializeSound()
 {
-	m_pSoundManager->AddSound("Start_BGM", "Resources/Sounds/Start_BGM.mp3", true);
-	m_pSoundManager->AddSound("InGame_BGM", "Resources/Sounds/InGame_BGM.mp3", true);
-	m_pSoundManager->AddSound("Mouse_Up", "Resources/Sounds/Mouse_Up.mp3", false);
-	m_pSoundManager->AddSound("Mouse_Down", "Resources/Sounds/Mouse_Down.mp3", false);
-	m_pSoundManager->AddSound("Gole", "Resources/Sounds/Gole.mp3", false);
-	m_pSoundManager->AddSound("Heat", "Resources/Sounds/Heat.mp3", false);
-	m_pSoundManager->AddSound("MeatEat", "Resources/Sounds/MeatEat.mp3", false);
-	m_pSoundManager->AddSound("ItemBox", "Resources/Sounds/ItemBox.mp3", false);
+	//m_pSoundManager->AddSound("Start_BGM", "Resources/Sounds/Start_BGM.mp3", true);
+	//m_pSoundManager->AddSound("InGame_BGM", "Resources/Sounds/InGame_BGM.mp3", true);
+	//m_pSoundManager->AddSound("Mouse_Up", "Resources/Sounds/Mouse_Up.mp3", false);
+	//m_pSoundManager->AddSound("Mouse_Down", "Resources/Sounds/Mouse_Down.mp3", false);
+	//m_pSoundManager->AddSound("Gole", "Resources/Sounds/Gole.mp3", false);
+	//m_pSoundManager->AddSound("Heat", "Resources/Sounds/Heat.mp3", false);
+	//m_pSoundManager->AddSound("MeatEat", "Resources/Sounds/MeatEat.mp3", false);
+	//m_pSoundManager->AddSound("ItemBox", "Resources/Sounds/ItemBox.mp3", false);
+	//m_pSoundManager->AddSound("Curve", "Resources/Sounds/Curve.mp3", false);
+	//m_pSoundManager->AddSound("Running", "Resources/Sounds/Running.mp3", true);
 }
 void CreateManager::Release()
 {

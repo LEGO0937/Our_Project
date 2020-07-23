@@ -29,7 +29,8 @@ LobbyScene::~LobbyScene()
 	//로비씬을 나가는 부분 다시 로그인 창으로 돌아가기때문에
 	//이 곳에서 서버에게 자신의 닉네임을 알려주고 나감.
 	//서버는 닉네임을 받고 접속중인 유저 리스트에서 이 닉네임을 제거한다.
-	m_pSoundManager->Stop("Start_BGM");
+	//m_pSoundManager->Stop("Start_BGM");
+	SoundManager::GetInstance()->Stop("Start_BGM");
 }
 void LobbyScene::ReleaseUploadBuffers()
 {
@@ -60,12 +61,10 @@ void LobbyScene::ReleaseObjects()
 void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	//m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
-	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
-	m_pSoundManager->Play("Start_BGM", 0.2f);
+	SoundManager::GetInstance()->Play("Start_BGM", 0.2f);
 	CUiShader* uiShader;
 
 	uiShader = new BackGroundShader;
@@ -209,7 +208,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		m_pSoundManager->Play("Mouse_Down", 0.2f);
+		SoundManager::GetInstance()->Play("Mouse_Down", 0.2f);
 		if (point.x > -0.48f && point.x < -0.32f && point.y > -0.36f && point.y < -0.24f) //방목록 왼쪽화살표 충돌체크
 		{
 			instacingUiShaders[ARROW_BUTTON]->getUvXs()[ROOM_LEFT] = 0.5;
@@ -254,8 +253,16 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							//들어오라는 신호를 보낸다.
 							//연결 성공 시 네트워크 클래스에 m_vRooms[clickNum].m_iRoomNumber를 받아서 
 							//접속할 방의 번호 저장할것.
+
+							
+							
 							if (!m_vRooms[clickNum].m_bIsGaming && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
 							{
+								//순서
+							    //방번호를 갖고있는 패킷을 send
+							    //서버에서 패킷받고 여유자리있는지 확인하고 입장가능여부 send
+							    //recv로 들어오라는 신호를 받음
+
 								m_iResultNum = m_vRooms[clickNum].m_iRoomNumber;
 								m_bMode = m_vRooms[clickNum].m_bMode;
 								sceneType = SceneType::Room_Scene;
@@ -308,7 +315,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		::GetCursorPos(&m_ptOldCursorPos);
 		break;
 	case WM_LBUTTONUP:
-		m_pSoundManager->Play("Mouse_Up", 0.2f);
+		SoundManager::GetInstance()->Play("Mouse_Up", 0.2f);
 		if (point.x > -0.48f && point.x < -0.32f && point.y > -0.36f && point.y < -0.24f) //방목록 왼쪽화살표 충돌체크
 		{
 			if (isClickedLeftRoom)
@@ -442,12 +449,18 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	//m_iPageNum 
 	//m_vRooms.clear();
 	/*
-	for () 5~6초 지날때마다 갱신
+	for () 5~6초 지날때마다 갱신 첫 send로 유저의 수를 받아옴,  그 크기만큼 반복문으로 패킷을 받아서 처리
 	{
 		m_vRooms.emplace_back(Room(1, 1, 0));
 
 	}
+	룸정보 추가도 위와 동일한 방식으로 동작.
 	*/
+
+
+	//순서
+	//방목록 요구를 위한 send
+	//방목록을 담는 패킷 recv
 	if (m_vUsers.size())
 	{
 		for (int i = m_iUserPageNum * 8, n = 0; i < (m_iUserPageNum * 8) + 8; ++i, ++n)
@@ -522,5 +535,12 @@ void LobbyScene::setCamera(CCamera* camera)
 
 void LobbyScene::ProcessPacket(char* packet)
 {
+	/*
+	유저 명단에 대한 정보 추가
+	m_vUsers.emplace_back("das");  <<이름만 넣으면 됨.
 
+	룸정보 추가
+	m_vRooms.emlace_back(Room구조체);
+
+	*/
 }

@@ -32,7 +32,7 @@ void PlayerShader::BuildObjects(CreateManager* pCreateManager, void* pInformatio
 void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	CPlayer *pPlayerObject = NULL;
-	int nLength = 1;
+	int nLength = 3;
 
 	//서버로부터 nLenght에 플레이어 수를 받음.
 	
@@ -44,7 +44,10 @@ void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, con
 		//pPlayerObject->SetPosition(XMFLOAT3(800.0f, 73.6, 920));
 		//pPlayerObject->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 		//pPlayerObject->OnPrepareRender();
-		pPlayerObject->SetId(m_iCurSerealNum++);
+		//pPlayerObject->SetId(m_iCurSerealNum++);
+		pPlayerObject->UpCheckPoint();
+		pPlayerObject->UpCheckPoint();
+		pPlayerObject->UpCheckPoint();
 		//애니메이션 적용을 find_if를 통해서 아이디와 맞는 오브젝트 찾고 적용하도록 하자.
 		m_vSkinedObjectList.emplace_back(pPlayerObject);
 	}

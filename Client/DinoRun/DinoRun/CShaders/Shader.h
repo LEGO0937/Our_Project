@@ -103,8 +103,8 @@ public:
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed) {}
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position) {}
-	virtual void DeleteObject(const int& iSerealNum) {}
-	virtual void DisEnableObject(const int& iSerealNum) {}
+	virtual void DeleteObject(const string& iSerealNum) {}
+	virtual void DisEnableObject(const string& iSerealNum) {}
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) = 0;
 
@@ -145,8 +145,8 @@ public:
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed);
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition) {}
-	virtual void DeleteObject(const int& iSerealNum);
-	virtual void DisEnableObject(const int& iSerealNum);
+	virtual void DeleteObject(const string& iSerealNum);
+	virtual void DisEnableObject(const string& iSerealNum);
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
@@ -195,11 +195,11 @@ public:
 
 	vector<CGameObject*>& getSkiendList()
 	{
-		return objectList;
+		return m_vSkinedObjectList;
 	}
 protected:
-	CPlayer *m_ppSkinedObjects = NULL;   //인스턴싱drawing 대상 SkinedObject로 바꿀 예정.
-	vector<CPlayer*> m_vSkinedObjectList;   // 인스턴싱될 오브젝트들
+	CGameObject* m_ppSkinedObjects = NULL;   //인스턴싱drawing 대상 SkinedObject로 바꿀 예정.
+	vector<CGameObject*> m_vSkinedObjectList;   // 인스턴싱될 오브젝트들
 	unordered_map<string, CB_SKINEOBJECT_INFO*> instancedObjectInfo;
 	unordered_map<string, CB_SKINEOBJECT_INFO*> instancedPrevObjectInfo;
 };

@@ -8,3 +8,10 @@ public:
 	~PlaneMesh();
 };
 
+class UnderPlaneMesh : public CMesh
+{
+public:
+	UnderPlaneMesh();
+	UnderPlaneMesh(float fx, float fy, float fz, float minX, float maxX, float minY, float maxY);
+	~UnderPlaneMesh();
+};

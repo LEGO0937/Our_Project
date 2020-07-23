@@ -11,13 +11,15 @@
 
 #include "../Common/Camera/Camera.h"
 
+#define BUTTON_STATE_SHADER instacingUiShaders[1]
+
 RoomScene::RoomScene() :BaseScene()
 {
 	sceneType = SceneType::Room_Scene;
 }
 RoomScene::~RoomScene()
 {
-	m_pSoundManager->Stop("Start_BGM");
+	SoundManager::GetInstance()->Stop("Start_BGM");
 }
 void RoomScene::ReleaseUploadBuffers()
 {
@@ -39,12 +41,11 @@ void RoomScene::ReleaseObjects()
 void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
-	//m_pNetWorkManager = pCreateManager->GetNetWorkMgr();
-	m_pSoundManager = pCreateManager->GetSoundMgr();
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
-	m_pSoundManager->Play("Start_BGM", 0.2f);
+
+	SoundManager::GetInstance()->Play("Start_BGM", 0.2f);
 	CUiShader* uiShader;
 	//네트워크 클래스에 저장되어있는 방번호를 보내고 해당 방에서의 플레이어 정보를 받아온다.
 
@@ -53,11 +54,15 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//서버는 해당 번호의 방 정보에 유저를 추가한다.
 	//서버는 클라 자신의 정보를 제외한 나머지 유저들의 이름과 버튼 상태를 전송한다.-> User클래스 사용
 
+
+	//반드시 게임을 시작할 땐 나 자신과 최소 한명 이상의 타 플레이어가 있어야만 함.
+
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/T_Room.dds";
 	uiShader->BuildObjects(pCreateManager.get(), &name);
 	instacingUiShaders.emplace_back(uiShader);
 
+	//이 부분에서 먼저 타플레이어의 정보(이름,버튼상태)를 받아온다. 
 	m_vUsers.emplace_back(User("user1", true));
 	m_vUsers.emplace_back(User("user2", true));
 	m_vUsers.emplace_back(User("user3", true));
@@ -111,21 +116,21 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
-		m_pSoundManager->Play("Mouse_Down", 0.2f);
+		SoundManager::GetInstance()->Play("Mouse_Down", 0.2f);
 		if (point.x > -0.15f && point.x < 0.15f && point.y > -0.92f && point.y < -0.68f) //로그인 버튼 충돌체크
 		{
 			if (instacingUiShaders[1]->getUvXs()[0] == 0.0f)
 			{
-				instacingUiShaders[1]->getUvXs()[0] = 0.5f;
-				instacingUiShaders[1]->getUvXs()[1] = 0.0f;
+				BUTTON_STATE_SHADER->getUvXs()[0] = 0.5f;
+				BUTTON_STATE_SHADER->getUvXs()[1] = 0.0f;
 				//임시적인 씬이동을 위해 여기서 씬타입 전환
 				//sceneType = ItemGame_Scene;
-				//클릭마다 네트워크에 버튼상태 전송할것
+				//클릭마다 네트워크에 버튼상태 전송할것 send,recv
 			}
 			else
 			{
-				instacingUiShaders[1]->getUvXs()[0] = 0.0f;
-				instacingUiShaders[1]->getUvXs()[1] = 0.5f;
+				BUTTON_STATE_SHADER->getUvXs()[0] = 0.0f;
+				BUTTON_STATE_SHADER->getUvXs()[1] = 0.5f;
 			}
 			//*서버*
 			//버튼이 클릭 되는 구간
@@ -137,7 +142,7 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		//마우스 캡쳐를 하고 현재 마우스 위치를 가져온다. 
 		break;
 	case WM_LBUTTONUP:
-		m_pSoundManager->Play("Mouse_Up", 0.2f);
+		SoundManager::GetInstance()->Play("Mouse_Up", 0.2f);
 		::ReleaseCapture();
 		break;
 	case WM_RBUTTONUP:
@@ -230,23 +235,41 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	//m_vUsers.emplace_back(User("user2", true));
 	//m_vUsers.emplace_back(User("user3", true));
 	//m_vUsers.emplace_back(User("user4", true));
-	for (int i = 0; i < 4; ++i)
+	//clear로 m_vUsers초기화 후 send,recv로 현재 방안에 있는 유저의 정보를 받아와서 최신화한다.
+	//send때 자신의 방번호와 닉네임을 보내고 서버에서는 이 닉네임을 제외한 다른 유저들의 정보를
+	//넘긴다.
+	for (int i = 0; i < m_vUsers.size(); ++i)
 	{
+		if (m_vUsers[i].m_sName == m_sPlayerId)
+			continue;
 		if (i < m_vUsers.size())
 		{
-			gameTexts[i + 1].text = m_vUsers[i].m_sName;
+			gameTexts[i + 1].text = m_vUsers[i].m_sName;  //첫번째는 본인이름이 들어가니 두번째란부터 입력
 			instacingUiShaders[1]->getUvXs()[i + 2] = 0.5 * m_vUsers[i].m_bButtonState;
+		}
+		else
+		{
+			gameTexts[i + 1].text = "";
+			instacingUiShaders[1]->getUvXs()[i + 2] = 0.5;
 		}
 	}
 	for (CUiShader* shader : instacingUiShaders)
 		shader->Update(fTimeElapsed, NULL);
 
-	for (int i = 0; i < 5; ++i)
+	//아래 반복문은 삭제하고 send,Recv로 방번호를 주고 현 방안에 있는 유저들이 모두 레디했는지를
+	//확인한다. 다 됐을 시 네트워크매니저에 저장돼있는 게임모드로 씬전환.
+
+	//선택1. 서버에서 모든 유저의  상태를 갖고있을테니 거기서 유저수가 2이상이고 
+	//방에 있는 유저들이 모두 ready상태라면 클라에게 시작하라는 신호를 주는 방법
+	//선택2. 위의 ready상태 확인을 클라에서하는 방법
+
+	for (int i = 0; i < m_vUsers.size(); ++i) //이 부분은 user의 수가 최소 1이상일 경우에만 체크하도록 한다.
 	{
-		if (instacingUiShaders[1]->getUvXs()[i + 1] != 0.5f)
+		if (instacingUiShaders[1]->getUvXs()[i + 1] != 0.5f && m_vUsers[i].m_sName != "")
 			return SceneType::Room_Scene;
 	}
 	//네트워크 클래스에 저장되있는 방 모드 종류에 따라서 다른 게임씬전환
+	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());
 	if (NetWorkManager::GetInstance()->GetGameMode())
 		sceneType = SceneType::ItemGame_Scene;
 	else

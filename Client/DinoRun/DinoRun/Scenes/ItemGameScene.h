@@ -20,7 +20,7 @@ class SkyBoxObject;
 
 
 enum ItemIcon_type {
-	IconDefault = 0,IconBanana, IconMud, IconStone,IconMeat,IconMugen,
+	IconDefault = 0,IconBanana, IconMud, IconStone,IconMeat,IconMeteorite,
 };
 
 class ItemGameScene : public BaseScene
@@ -66,13 +66,12 @@ public:
 
 	CHeightMapTerrain* GetTerrain() { return m_pTerrain; }
 
-	virtual void AddModelObject(const MessageStruct& msg);
-	virtual void DeleteModelObject(const MessageStruct& msg);
-	virtual void AddParticle(const MessageStruct& msg);
-	virtual void DisEnableModel(const MessageStruct& msg);
 
+	virtual void ProcessEvent(const MessageStruct& msg);
 	virtual void ProcessPacket(char* packet);
 private:
+	DWORD dwDirection;
+
 	ID3D12Resource *m_pd3dcbShadow = NULL;
 	CB_GAME_INFO* m_pcbMappedShadow = NULL;
 
@@ -106,7 +105,6 @@ private:
 	float m_fBoostTimer = 0.0f;
 	float m_fMugenTimer = 0.0f;
 
-	bool isMugen = false;
 	bool isBoost = false;
 	bool isStart = false;
 };

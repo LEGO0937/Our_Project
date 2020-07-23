@@ -67,5 +67,5 @@ void RankCountShader::Update(float fTimeElapsed, void* pInformation)
 {
 	//vNum = 181
 	CPlayer* pPlayer = (CPlayer*)pInformation;
-	//uvX[0] = pPlayer->GetCheckPoint() / 181;
+	uvX[0] = pPlayer->GetRank();
 }

@@ -39,7 +39,6 @@
 #include <fmod.hpp>
 using namespace FMOD;
 
-#include "../protocol.h"
 #include "../Common/TextureLoad/DDSTextureLoader12.h"
 #include "../Global/Global.h"
 using namespace DirectX;
@@ -56,7 +55,8 @@ using namespace std;
 
 #pragma comment(lib, "winmm.lib")
 
-
+#pragma comment(lib, "wsock32.lib")
+#pragma comment(lib, "Ws2_32.lib")
 #define FRAME_BUFFER_WIDTH 1280
 #define FRAME_BUFFER_HEIGHT 700
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
@@ -84,7 +84,8 @@ struct MessageStruct
 {
 	string msgName;
 	string shaderName;
-	int objectNumber = 0;
+	string objectName = "None";
+	int integerValue;
 	XMFLOAT4X4 departMat;
 	XMFLOAT4X4 arriveMat;
 
@@ -93,9 +94,10 @@ struct MessageStruct
 	{
 		msgName = msg.msgName;
 		shaderName = msg.shaderName;
+		integerValue = msg.integerValue;
 		departMat = msg.departMat;
 		arriveMat = msg.arriveMat;
-		objectNumber = msg.objectNumber;
+		objectName = msg.objectName;
 	}
 };
 
@@ -118,7 +120,7 @@ namespace Vector3
 		XMStoreFloat3(&xmf3Result, xmvVector);
 		return(xmf3Result);
 	}
-	inline XMFLOAT3 ScalarProduct(XMFLOAT3& xmf3Vector, float fScalar, bool bNormalize =
+	inline XMFLOAT3 ScalarProduct(const XMFLOAT3& xmf3Vector, float fScalar, bool bNormalize =
 		true)
 	{
 		XMFLOAT3 xmf3Result;
@@ -218,11 +220,12 @@ namespace Vector3
 		XMVECTOR xmvAngle = XMVector3AngleBetweenNormals(xmvVector1, xmvVector2);
 		return(XMConvertToDegrees(acosf(XMVectorGetX(xmvAngle))));
 	}
+
 	inline float Angle(const XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
 	{
 		return(Angle(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
 	}
-	inline float Angle(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	inline float Angle(const XMFLOAT3& xmf3Vector1,const XMFLOAT3& xmf3Vector2)
 	{
 		return(Angle(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
 	}

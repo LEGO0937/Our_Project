@@ -2,7 +2,7 @@
 ItemStone::ItemStone(int nMeshes) :CGameObject(nMeshes)
 {
 	m_fMass = 10;
-	isKinematic = true;
+	isKinematic = false;
 	m_ModelType = ModelType::Item_Stone;
 	m_fLifeCount = 5;
 }

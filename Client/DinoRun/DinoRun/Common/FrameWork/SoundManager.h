@@ -1,6 +1,7 @@
 #pragma once
 #include "../stdafx.h"
-class SoundManager
+#include "SingleTon/Singleton.h"
+class SoundManager : public Singleton<SoundManager>
 {
 private:
 	System* system;		// Dx로 치면 Device에 해당한다.
@@ -16,6 +17,7 @@ private:
 public:
 	SoundManager();
 	~SoundManager();
+	void Initialize();
 
 	void AddSound(string name, string soundFile, bool loop = false);
 	void Play(string name, float volume = 1.0f);

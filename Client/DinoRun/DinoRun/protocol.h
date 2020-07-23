@@ -1,4 +1,5 @@
 #pragma once
+#include "../stdafx.h"
 
 //#define SERVER_IP "172.30.1.1"
 #define SERVER_IP "192.168.200.130"
@@ -478,5 +479,15 @@ struct SC_PACKET_NOT_COLLIDED
 	char id;
 };
 
+struct SC_PACKET_PLAYER_INFO
+{
+	char size;
+	char type;
+	char id;
+	XMFLOAT4X4 xmf4x4Parents[6] = {};
+	string playerNames[6] = {};
+	int checkPoints[6];
+	DWORD keyState[6];
+};
 
 //////////////////////////////////////////////////////

@@ -18,6 +18,9 @@ class CCamera;
 #define RUN_LEFT_RETURN 12
 #define RUN_RIGHT_RETURN 13
 
+#define SLIDING 14
+#define BIG_COLLISION 15
+
 #define ANIMATIONGAP RUN - IDLE
 
 #define cPlayer 0.29f     //Cdrag
@@ -52,6 +55,7 @@ protected:
 
 	//«“ ∞Õ¿”.
 	UINT						m_uCheckpointCount = 0;
+	UINT						m_uRank = 1;
 public:
 	CPlayer();
 	virtual ~CPlayer();
@@ -61,8 +65,12 @@ public:
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
 
+	UINT SetCheckPoint(UINT point) { return m_uCheckpointCount = point; }
 	UINT GetCheckPoint() { return m_uCheckpointCount; }
 	void UpCheckPoint() { m_uCheckpointCount++; }
+
+	UINT GetRank() { return m_uRank; }
+	void SetRank(const UINT& rank) { m_uRank = rank; }
 
 	void SetFriction(float fFriction) { m_fFriction = fFriction; }
 	void SetMaxVelocityXZ(float fMaxVelocity) { m_fMaxVelocityXZ = fMaxVelocity; }
@@ -112,6 +120,8 @@ public:
 	virtual void KeyUpUp() {};
 	virtual void KeyUpDown() {};
 	virtual void returnIdle() {};
+	virtual void OnSliding() {}
+	virtual void OnCollisionAni() {}
 
 	void setShift(bool value) {isShift = value;}
 
@@ -127,6 +137,7 @@ protected:
 	bool isStun = false;
 	
 	float m_fWheelDegree = 0.0f;
+	float m_frearWheelDegree = 0.0f;
 	float m_fTimeCount = 0.0f;
 };
 
@@ -153,5 +164,7 @@ public:
 	virtual void KeyUpUp();
 	virtual void KeyUpDown();
 	virtual void returnIdle();
+	virtual void OnSliding();
+	virtual void OnCollisionAni();
 };
 
