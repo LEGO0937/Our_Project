@@ -312,6 +312,11 @@ void CreateManager::CreateCommandQueueAndList()
 void CreateManager::CreateSwapChain()
 {
 	// Create Swap Chain
+	RECT rcClient;
+	::GetClientRect(m_hWnd, &rcClient);
+	m_nWndClientWidth = rcClient.right - rcClient.left;
+	m_nWndClientHeight = rcClient.bottom - rcClient.top;
+
 	DXGI_SWAP_CHAIN_DESC dxgiSwapChainDesc;
 	::ZeroMemory(&dxgiSwapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
 	dxgiSwapChainDesc.BufferCount = N_SWAPCHAINBUFFERS;

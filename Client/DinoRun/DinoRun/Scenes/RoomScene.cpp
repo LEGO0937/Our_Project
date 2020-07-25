@@ -64,9 +64,9 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	//이 부분에서 먼저 타플레이어의 정보(이름,버튼상태)를 받아온다. 
 	m_vUsers.emplace_back(User("user1", true));
-	m_vUsers.emplace_back(User("user2", true));
-	m_vUsers.emplace_back(User("user3", true));
-	m_vUsers.emplace_back(User("user4", true));
+	//m_vUsers.emplace_back(User("user2", true));
+	//m_vUsers.emplace_back(User("user3", true));
+	//m_vUsers.emplace_back(User("user4", true));
 
 	UI_INFO button_info;
 	button_info.textureName = "Resources/Images/T_Button.dds";
@@ -269,6 +269,8 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			return SceneType::Room_Scene;
 	}
 	//네트워크 클래스에 저장되있는 방 모드 종류에 따라서 다른 게임씬전환
+	if (m_vUsers.size() == 0)
+		return SceneType::Room_Scene;
 	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());
 	if (NetWorkManager::GetInstance()->GetGameMode())
 		sceneType = SceneType::ItemGame_Scene;

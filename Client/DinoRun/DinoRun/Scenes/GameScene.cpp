@@ -337,10 +337,6 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader = new VelocityCountShader;
 	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
 	instancingNumberUiShaders.emplace_back(uiShader);
-
-	uiShader = new DashBoardShader;
-	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
-	instancingNumberUiShaders.emplace_back(uiShader);
 	
 
 	animatedShader = new PlayerShader;
@@ -368,8 +364,14 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 	BuildLights();
 	m_pCreateManager->RenderLoading();
-	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	BuildSubCameras(pCreateManager);
 	
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.19f))); //플레이어 명단
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.25f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.31f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.37f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.43f)));
+
 	CreateShaderVariables(pCreateManager.get());
 	SoundManager::GetInstance()->Play("InGame_BGM", 0.2f);
 
@@ -636,6 +638,10 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 			shader->Render(m_pd3dCommandList, m_pCamera);
 	}
 
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	if (fontShader)
+		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
+
 
 	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList);
@@ -645,6 +651,8 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	if(m_pIconShader)
 		m_pIconShader->Render(m_pd3dCommandList, m_pMinimapCamera);
+
+
 
 }
 void GameScene::AnimateObjects(float fTimeElapsed)  
@@ -704,11 +712,36 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		{
 			int rank = 1;
 			vector<CGameObject*> list = PLAYER_SHADER->getSkiendList();
+			((CPlayer*)list[0])->SetCheckPoint(1);
+			((CPlayer*)list[0])->SetName("player3");
+			((CPlayer*)list[1])->SetCheckPoint(4);
+			((CPlayer*)list[1])->SetName("player1");
+			((CPlayer*)list[2])->SetCheckPoint(3);
+			((CPlayer*)list[2])->SetName("player2");
+
+			sort(list.begin(), list.end(), [](CGameObject* a, CGameObject* b) {
+				return ((CPlayer*)a)->GetCheckPoint() > ((CPlayer*)b)->GetCheckPoint(); });
+
+			int idx = 0;
 			for (CGameObject* obj : list)
 			{
 				CPlayer* player = (CPlayer*)obj;
 				if (m_pPlayer->GetCheckPoint() < player->GetCheckPoint())
+				{
+					gameTexts[idx++].text = player->GetName();
 					rank++;
+				}
+				else
+				{
+					gameTexts[idx++].text = m_sPlayerId;
+					for (int i = idx - 1; i < list.size(); ++i)
+					{
+						gameTexts[idx++].text = list[i]->GetName();
+					}
+					break;
+				}
+				if(list[list.size()-1]->GetName() == obj->GetName())
+					gameTexts[idx++].text = m_sPlayerId;
 			}
 			m_pPlayer->SetRank(rank);
 		}
@@ -778,9 +811,13 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		if (m_pCheckPointShader)
 		{
 			UINT currentCheckPoint = m_pPlayer->GetCheckPoint();
-			CGameObject* checkPoint = m_pCheckPointShader->getList()[currentCheckPoint % 181];
-			if (m_pPlayer->IsCollide(checkPoint))
+
+			if (m_pPlayer->IsCollide(m_pCheckPointShader->getList()[currentCheckPoint % 181]))
 				m_pPlayer->UpCheckPoint();
+			else if (currentCheckPoint > 1) {
+				if (m_pPlayer->IsCollide(m_pCheckPointShader->getList()[(currentCheckPoint - 2) % 181]))
+					m_pPlayer->DownCheckPoint();
+			}
 		}
 
 		if (m_pGuageShader)
@@ -825,7 +862,7 @@ void GameScene::BuildLights()
 	m_pLights->m_pLights[0].m_fRange = 0.0f;
 	m_pLights->m_pLights[0].padding = 0.0f;
 
-	m_pLights->m_pLights[1].m_bEnable = 1;
+	m_pLights->m_pLights[1].m_bEnable = 0;
 	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
@@ -841,19 +878,19 @@ void GameScene::BuildLights()
 
 	m_pLights->m_pLights[2].m_bEnable = 1;
 	m_pLights->m_pLights[2].m_nType = POINT_LIGHT;
-	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
-	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.5f, 1.0f);
+	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.5f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.6f);
-	m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(650.0f, 80.0f, 1170.0f);
+	m_pLights->m_pLights[2].m_xmf3Position = XMFLOAT3(1877.0f, 208.0f, 5800.0f);
 	m_pLights->m_pLights[2].m_xmf3Direction = XMFLOAT3(0.0f, 0.0f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
 	m_pLights->m_pLights[2].m_fFalloff = 1.0f;
 	m_pLights->m_pLights[2].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights->m_pLights[2].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
-	m_pLights->m_pLights[2].m_fRange = 20.0f;
+	m_pLights->m_pLights[2].m_fRange = 100.0f;
 	m_pLights->m_pLights[2].padding = 0.0f;
 
-	m_pLights->m_pLights[3].m_bEnable = 1;
+	m_pLights->m_pLights[3].m_bEnable = 0;
 	m_pLights->m_pLights[3].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
@@ -867,7 +904,7 @@ void GameScene::BuildLights()
 	m_pLights->m_pLights[3].m_fRange = 20.0f;
 	m_pLights->m_pLights[3].padding = 0.0f;
 
-	m_pLights->m_pLights[4].m_bEnable = 1;
+	m_pLights->m_pLights[4].m_bEnable = 0;
 	m_pLights->m_pLights[4].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
@@ -908,24 +945,36 @@ void GameScene::BuildLights()
 	m_pLights->fogrange = 30;
 
 }
-void GameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
-	*pd3dCommandList)
+void GameScene::BuildSubCameras(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pMinimapCamera = new CMinimapCamera;
 	m_pMinimapCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pMinimapCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	m_pMinimapCamera->GenerateOrthoProjectionMatrix(1000, 1000, 10, 300.0f);
-	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT - 400, 250, 180, 0.0f, 1.0f);
-	m_pMinimapCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	float minimapWidth = pCreateManager->GetWindowWidth() / 5;
+	float minimapHeight = pCreateManager->GetWindowHeight() / 4;
+	m_pMinimapCamera->SetViewport(pCreateManager->GetWindowWidth() - minimapWidth, pCreateManager->GetWindowHeight()/2 - (minimapHeight/2), minimapWidth, minimapHeight, 0.0f, 1.0f);
+	m_pMinimapCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
 
 	m_pMinimapCamera->GenerateViewMatrix(m_pMinimapCamera->GetPosition(), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
-	m_pMinimapCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pMinimapCamera->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	m_pShadowCamera = new CMinimapCamera;
 	m_pShadowCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pShadowCamera->SetLookAt(XMFLOAT3(0, 0, 0));
-	m_pShadowCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	m_pShadowCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	m_pShadowCamera->SetViewport(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight(), 0.0f, 1.0f);
+	m_pShadowCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
+}
+
+void GameScene::ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager)
+{
+	float minimapWidth = pCreateManager->GetWindowWidth() / 5;
+	float minimapHeight = pCreateManager->GetWindowHeight() / 4;
+	m_pMinimapCamera->SetViewport(pCreateManager->GetWindowWidth() - minimapWidth, pCreateManager->GetWindowHeight() / 2 - (minimapHeight / 2), minimapWidth, minimapHeight, 0.0f, 1.0f);
+	m_pMinimapCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
+
+	m_pShadowCamera->SetViewport(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight(), 0.0f, 1.0f);
+	m_pShadowCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
 }
 
 void GameScene::UpdateShadow()
@@ -1064,6 +1113,12 @@ void GameScene::ProcessEvent(const MessageStruct& msg)
 		if (shader != instancingModelShaders.end())
 			(*shader)->DisEnableObject(msg.objectName);
 	}
+}
+void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
+{
+	BaseScene::ReSize(pCreateManager);
+	ResetShadowBuffer(m_pCreateManager.get());
+	ReBuildSubCameras(pCreateManager);
 }
 void GameScene::ProcessPacket(char* packet)
 {

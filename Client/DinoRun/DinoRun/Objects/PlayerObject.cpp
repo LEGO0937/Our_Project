@@ -80,6 +80,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		}
 		else
 		{
+			if (m_fForce > 0)
+				m_fForce = 0;
 			if (isUp)
 				KeyUpUp();
 		}
@@ -93,6 +95,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		}
 		else
 		{
+			if (m_fForce < 0)
+				m_fForce = 0;
 			if (isDown)
 				KeyUpDown();
 		}
@@ -107,12 +111,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			if (!isShift)
 			{
 				if (length < 30)
-					m_fWheelDegree += 30 * fDeltaTime;
+					m_fWheelDegree += 15 * fDeltaTime;
 				else
-					m_fWheelDegree += 20 * fDeltaTime;
+					m_fWheelDegree += 10 * fDeltaTime;
 			}
 			else
-				m_fWheelDegree += 40 * fDeltaTime;
+				m_fWheelDegree += 30 * fDeltaTime;
 		}
 		else
 		{
@@ -126,12 +130,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			if (!isShift)
 			{
 				if (length < 30)
-					m_fWheelDegree -= 30 * fDeltaTime;
+					m_fWheelDegree -= 15 * fDeltaTime;
 				else
-					m_fWheelDegree -= 20 * fDeltaTime;
+					m_fWheelDegree -= 10 * fDeltaTime;
 			}
 			else
-				m_fWheelDegree -= 40 * fDeltaTime;
+				m_fWheelDegree -= 30 * fDeltaTime;
 		}
 		else
 		{
@@ -160,18 +164,18 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			}
 			else
 			{
-				if (m_fWheelDegree > 30)
-					m_fWheelDegree = 30;
-				else if (m_fWheelDegree < -30)
-					m_fWheelDegree = -30;
+				if (m_fWheelDegree > 10)
+					m_fWheelDegree = 10;
+				else if (m_fWheelDegree < -10)
+					m_fWheelDegree = -10;
 			}
 		}
 		else
 		{
-			if (m_fWheelDegree > 30)
-				m_fWheelDegree = 30;
-			else if (m_fWheelDegree < -30)
-				m_fWheelDegree = -30;
+			if (m_fWheelDegree > 20)
+				m_fWheelDegree = 20;
+			else if (m_fWheelDegree < -20)
+				m_fWheelDegree = -20;
 		}
 	}
 	if (m_fForce > m_fMaxForce)
@@ -231,7 +235,7 @@ void CPlayer::Rotate(float x, float y, float z)
 			if (!isShift)
 			{
 				if (Vector3::Length(m_xmf3Velocity) < 35)
-					m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
+				m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
 			}
 			else
 			{
@@ -388,8 +392,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	if (m_fWheelDegree != 0.0f && Vector3::Length(vel) > 0)   //바퀴에 조향각입력 & 시동걸린상태일때만 
 	{
 		float degree = m_fWheelDegree;  //현재 머리의 회전 각도
-		if (m_fForce < 0.0f)
-			degree *= -1;  //후진일 경우 회전 방향이 다르므로 -1을 곱함
+		
 		float w;
 		
 		if (Vector3::Length(m_xmf3Velocity) < 20.0f)
@@ -422,11 +425,12 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	//위에는 횡력 처리 아래는 직진 힘.
 	if (isShift && m_fWheelDegree != 0)
 	{
-		drag = 0.5f* 1.0f* AIR * 2.3 * 1.5f;   //0.3f= 마찰계수 AIR = 공기저항 , 2.2f = 정면 면적
+		drag = 0.5f* 1.0f* AIR * 3.8f;   //0.3f= 마찰계수 AIR = 공기저항 , 2.2f = 정면 면적
+		//드리프트시에는 저항을 받는 면적이 정면이 아닌 옆면이이때문에 면적이 더 큼.
 	}
 	else
 	{
-		drag = 0.5f* 0.7f* AIR *2.2f;
+		drag = 0.5f* 1.0f* AIR *2.2f;
 	}
 	float rR = drag * 29.7f;   // -> C_Rr
 	
@@ -459,15 +463,16 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 
 	XMFLOAT3 xmf3Frr = Vector3::ScalarProduct(m_xmf3Velocity, -rR, false); //회전 저항
 	XMFLOAT3 xmf3Ftraction;
-	//이 세 값의 단위는 N
-	//if (!isShift)
-		xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); //앞키로 얻은 힘을 통한 진행 힘 구하는 식
-	//else
+
+	xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); //앞키로 얻은 힘을 통한 진행 힘 구하는 식
+	if (isShift && m_fWheelDegree == 0)
+		xmf3Ftraction = Vector3::Add(xmf3Ftraction, Vector3::ScalarProduct(m_xmf3Look, -300.0f, false));
 	//	xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, -400.0f, false); //브레이크 시
 
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Frr);
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Fdrag);  //총합
-	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);//힘의 최종합을 구함
+	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);//힘의 최종합을 구함 > 이부분이 수정되어야 함.
+	//현재 앞으로 갔다가 뒤로가면 이힘이 계속해서 적용되어 방향이 바로 안바뀜
 	xmf3Ftraction.y -= 9.8f * m_fMass * 4;
 
 
@@ -846,7 +851,7 @@ void CDinoRunPlayer::KeyDownLeft()
 			if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_RIGHT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
 
 				SetTrackAnimationPosition(RUN_RIGHT_RETURN, 0);
 				SetTrackAnimationPosition(RUN_LEFT_TURN, 0);
@@ -857,7 +862,7 @@ void CDinoRunPlayer::KeyDownLeft()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[RUN_RIGHT_RETURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
 				SetTrackAnimationPosition(RUN_RIGHT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = RUN_RIGHT_RETURN;
 			}
@@ -882,7 +887,7 @@ void CDinoRunPlayer::KeyDownLeft()
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_RIGHT_RETURN].m_bEnable)
 			{
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
 				return;
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN].m_bEnable)
@@ -905,7 +910,7 @@ void CDinoRunPlayer::KeyDownLeft()
 			if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_RIGHT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
 				SetTrackAnimationPosition(IDLE_RIGHT_RETURN, 0);
 				SetTrackAnimationPosition(IDLE_LEFT_TURN, 0);
 				SetTrackAnimationPosition(IDLE_LEFT_TURNING, 0);
@@ -915,7 +920,7 @@ void CDinoRunPlayer::KeyDownLeft()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[IDLE_RIGHT_RETURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
 				SetTrackAnimationPosition(IDLE_RIGHT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = IDLE_RIGHT_RETURN;
 			}
@@ -940,7 +945,7 @@ void CDinoRunPlayer::KeyDownLeft()
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_RIGHT_RETURN].m_bEnable)
 			{
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
 				return;
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE].m_bEnable)
@@ -975,7 +980,7 @@ void CDinoRunPlayer::KeyDownRight()
 			if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_LEFT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
 				SetTrackAnimationPosition(RUN_LEFT_RETURN, 0);
 				SetTrackAnimationPosition(RUN_RIGHT_TURN, 0);
 				SetTrackAnimationPosition(RUN_RIGHT_TURNING, 0);
@@ -985,7 +990,7 @@ void CDinoRunPlayer::KeyDownRight()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[RUN_LEFT_RETURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
 				SetTrackAnimationPosition(RUN_LEFT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = RUN_LEFT_RETURN;
 			}
@@ -1010,7 +1015,7 @@ void CDinoRunPlayer::KeyDownRight()
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_LEFT_RETURN].m_bEnable)
 			{
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
 				return;
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN].m_bEnable)
@@ -1032,7 +1037,7 @@ void CDinoRunPlayer::KeyDownRight()
 			if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_LEFT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
 				SetTrackAnimationPosition(IDLE_LEFT_RETURN, 0);
 				SetTrackAnimationPosition(IDLE_RIGHT_TURN, 0);
 				SetTrackAnimationPosition(IDLE_RIGHT_TURNING, 0);
@@ -1042,7 +1047,7 @@ void CDinoRunPlayer::KeyDownRight()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[IDLE_LEFT_RETURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
 				SetTrackAnimationPosition(IDLE_LEFT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = IDLE_LEFT_RETURN;
 			}
@@ -1067,7 +1072,7 @@ void CDinoRunPlayer::KeyDownRight()
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_LEFT_RETURN].m_bEnable)
 			{
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
 				return;
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE].m_bEnable)
@@ -1114,11 +1119,11 @@ void CDinoRunPlayer::KeyDownUp()
 		break;
 	case RUN_LEFT_RETURN:
 		track = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[curTrack]->m_pCallbackFuncKeys[0].m_pCallbackData + ANIMATIONGAP;
-		m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, track);
+		m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, track);
 		break;
 	case RUN_RIGHT_RETURN:
 		track = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[curTrack]->m_pCallbackFuncKeys[0].m_pCallbackData + ANIMATIONGAP;
-		m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, track);
+		m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, track);
 		break;
 	}
 }
@@ -1152,11 +1157,11 @@ void CDinoRunPlayer::KeyDownDown()
 		break;
 	case RUN_LEFT_RETURN:
 		track = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[curTrack]->m_pCallbackFuncKeys[0].m_pCallbackData + ANIMATIONGAP;
-		m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, track);
+		m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, track);
 		break;
 	case RUN_RIGHT_RETURN:
 		track = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[curTrack]->m_pCallbackFuncKeys[0].m_pCallbackData + ANIMATIONGAP;
-		m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, track);
+		m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, track);
 		break;
 	}
 }
@@ -1178,7 +1183,7 @@ void CDinoRunPlayer::KeyUpLeft()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[RUN_LEFT_TURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
 				SetTrackAnimationPosition(RUN_LEFT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = RUN_LEFT_RETURN;
 			}
@@ -1192,7 +1197,7 @@ void CDinoRunPlayer::KeyUpLeft()
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_LEFT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, RUN_RIGHT_TURN);
 				//
 				SetTrackAnimationPosition(RUN_LEFT_RETURN, 0);
 				//
@@ -1208,14 +1213,14 @@ void CDinoRunPlayer::KeyUpLeft()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[RUN_LEFT_TURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, RUN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, RUN);
 				SetTrackAnimationPosition(RUN_LEFT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = RUN_LEFT_RETURN;
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_LEFT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, RUN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, RUN);
 				//
 				SetTrackAnimationPosition(RUN_LEFT_RETURN, 0);
 				//
@@ -1223,7 +1228,7 @@ void CDinoRunPlayer::KeyUpLeft()
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_RIGHT_RETURN].m_bEnable)
 			{
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, RUN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, RUN);
 				return;
 			}
 			else
@@ -1238,7 +1243,7 @@ void CDinoRunPlayer::KeyUpLeft()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[IDLE_LEFT_TURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
 				SetTrackAnimationPosition(IDLE_LEFT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = IDLE_LEFT_RETURN;
 			}
@@ -1252,7 +1257,7 @@ void CDinoRunPlayer::KeyUpLeft()
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_LEFT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE_RIGHT_TURN);
 				//
 				SetTrackAnimationPosition(IDLE_LEFT_RETURN, 0);
 				//
@@ -1269,14 +1274,14 @@ void CDinoRunPlayer::KeyUpLeft()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[IDLE_LEFT_TURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE);
 				SetTrackAnimationPosition(IDLE_LEFT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = IDLE_LEFT_RETURN;
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_LEFT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_LEFT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE);
 				//
 				SetTrackAnimationPosition(IDLE_LEFT_RETURN, 0);
 				//
@@ -1284,7 +1289,7 @@ void CDinoRunPlayer::KeyUpLeft()
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_RIGHT_RETURN].m_bEnable)
 			{
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE);
 				return;
 			}
 			else
@@ -1311,7 +1316,7 @@ void CDinoRunPlayer::KeyUpRight()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[RUN_RIGHT_TURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
 				SetTrackAnimationPosition(RUN_RIGHT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = RUN_RIGHT_RETURN;
 			}
@@ -1325,7 +1330,7 @@ void CDinoRunPlayer::KeyUpRight()
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_RIGHT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, RUN_LEFT_TURN);
 				//
 				SetTrackAnimationPosition(RUN_RIGHT_RETURN, 0);
 				//
@@ -1340,14 +1345,14 @@ void CDinoRunPlayer::KeyUpRight()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[RUN_RIGHT_TURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, RUN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, RUN);
 				SetTrackAnimationPosition(RUN_RIGHT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = RUN_RIGHT_RETURN;
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_RIGHT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.5f, RUN_RIGHT_RETURN, RUN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_RIGHT_RETURN, 0, 0.48f, RUN_RIGHT_RETURN, RUN);
 				//
 				SetTrackAnimationPosition(RUN_RIGHT_RETURN, 0);
 				//
@@ -1355,7 +1360,7 @@ void CDinoRunPlayer::KeyUpRight()
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[RUN_LEFT_RETURN].m_bEnable)
 			{
-				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.5f, RUN_LEFT_RETURN, RUN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(RUN_LEFT_RETURN, 0, 0.48f, RUN_LEFT_RETURN, RUN);
 				return;
 			}
 			else
@@ -1370,7 +1375,7 @@ void CDinoRunPlayer::KeyUpRight()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[IDLE_RIGHT_TURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
 				SetTrackAnimationPosition(IDLE_RIGHT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = IDLE_RIGHT_RETURN;
 			}
@@ -1384,7 +1389,7 @@ void CDinoRunPlayer::KeyUpRight()
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_RIGHT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE_LEFT_TURN);
 				//
 				SetTrackAnimationPosition(IDLE_RIGHT_RETURN, 0);
 				//
@@ -1399,14 +1404,14 @@ void CDinoRunPlayer::KeyUpRight()
 			{
 				length = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[IDLE_RIGHT_TURN]->m_fLength;
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE);
 				SetTrackAnimationPosition(IDLE_RIGHT_RETURN, length - positionTime);
 				m_pSkinnedAnimationController->m_CurrentTrack = IDLE_RIGHT_RETURN;
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_RIGHT_TURNING].m_bEnable)
 			{
 				m_pSkinnedAnimationController->SetTrackEnable(IDLE_RIGHT_RETURN, true);
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE);
 				//
 				SetTrackAnimationPosition(IDLE_RIGHT_RETURN, 0);
 				//
@@ -1414,7 +1419,7 @@ void CDinoRunPlayer::KeyUpRight()
 			}
 			else if (m_pSkinnedAnimationController->m_pAnimationTracks[IDLE_LEFT_RETURN].m_bEnable)
 			{
-				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE);
+				m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE);
 				return;
 			}
 			else
@@ -1456,10 +1461,10 @@ void CDinoRunPlayer::returnIdle()
 		//m_pSkinnedAnimationController->SetCallbackFuncKey(nextTrack, 0, 0.5f, nextTrack, nextTrack+2);
 		break;
 	case IDLE_LEFT_RETURN:
-		m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE);
+		m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.48f, IDLE_LEFT_RETURN, IDLE);
 		break;
 	case IDLE_RIGHT_RETURN:
-		m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.5f, IDLE_RIGHT_RETURN, IDLE);
+		m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_RETURN, 0, 0.48f, IDLE_RIGHT_RETURN, IDLE);
 		break;
 	}
 

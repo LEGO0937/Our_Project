@@ -154,7 +154,7 @@ float4 PSTer(VS_TEXT_OUTPUT input) : SV_TARGET
 	clip(baseAlbedo.a - 0.1f);
 
 	float3 normalW = normalize(input.normalW);
-	float4 color = saturate(0.5*(detailedAlbedo + baseAlbedo) + sLighting(input.positionW, normalW, shadowFactor)*0.5);
+	float4 color = saturate(0.4*(detailedAlbedo + baseAlbedo) + sLighting(input.positionW, normalW, shadowFactor)*0.6);
 	color.a = baseAlbedo.a;
 	return color;
 }

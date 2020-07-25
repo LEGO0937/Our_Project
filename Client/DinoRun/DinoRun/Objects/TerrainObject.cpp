@@ -42,7 +42,7 @@ CHeightMapTerrain::CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFil
 	pShader->CreateShadowResourceViews(pCreateManager, pShadowTexture, 10, true);
 
 	material = new CMaterial(3);
-	material->m_xmf4AmbientColor = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
+	material->m_xmf4AmbientColor = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
 	material->m_xmf4DiffuseColor = XMFLOAT4(0.5f, 0.7f, 0.5f, 1.0f);
 	
 	material->SetShader(pShader);

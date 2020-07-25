@@ -25,6 +25,8 @@ public:
 	GameScene();
 	~GameScene();
 
+	virtual void ReSize(shared_ptr<CreateManager> pCreateManager);
+
 	void ProcessInput(HWND hWnd, float deltaTime);
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 		lParam, float deltaTime);
@@ -32,8 +34,8 @@ public:
 		lParam, float deltaTime);
 
 	virtual void BuildLights();
-	void BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
-		*pd3dCommandList);
+	void BuildSubCameras(shared_ptr<CreateManager> pCreateManager);
+	void ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager);
 
 	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
 	virtual void ReleaseObjects();

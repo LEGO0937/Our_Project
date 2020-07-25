@@ -347,9 +347,6 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
 	instancingNumberUiShaders.emplace_back(uiShader);
 
-	uiShader = new DashBoardShader;
-	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
-	instancingNumberUiShaders.emplace_back(uiShader);
 
 	UI_INFO ItemUi_info;
 
@@ -399,7 +396,13 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	BuildLights();
 
-	BuildSubCameras(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	BuildSubCameras(pCreateManager);
+
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.19f))); //플레이어 명단
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.25f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.31f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.37f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.43f)));
 
 	CreateShaderVariables(pCreateManager.get());
 	m_pCreateManager->RenderLoading();
@@ -716,6 +719,10 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<I
 	for (CUiShader* shader : instancingImageUiShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	if (fontShader)
+		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
+
 
 	m_pMinimapCamera->SetViewportsAndScissorRects(m_pd3dCommandList);
 	m_pMinimapCamera->UpdateShaderVariables(m_pd3dCommandList);
@@ -840,12 +847,37 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		else
 		{
 			int rank = 1;
-			vector<CGameObject*> list = PLAYER_SHADER->getList();
+			vector<CGameObject*> list = PLAYER_SHADER->getSkiendList();
+			((CPlayer*)list[0])->SetCheckPoint(1);
+			((CPlayer*)list[0])->SetName("player3");
+			((CPlayer*)list[1])->SetCheckPoint(4);
+			((CPlayer*)list[1])->SetName("player1");
+			((CPlayer*)list[2])->SetCheckPoint(3);
+			((CPlayer*)list[2])->SetName("player2");
+
+			sort(list.begin(), list.end(), [](CGameObject* a, CGameObject* b) {
+				return ((CPlayer*)a)->GetCheckPoint() > ((CPlayer*)b)->GetCheckPoint(); });
+
+			int idx = 0;
 			for (CGameObject* obj : list)
 			{
 				CPlayer* player = (CPlayer*)obj;
 				if (m_pPlayer->GetCheckPoint() < player->GetCheckPoint())
+				{
+					gameTexts[idx++].text = player->GetName();
 					rank++;
+				}
+				else
+				{
+					gameTexts[idx++].text = m_sPlayerId;
+					for (int i = idx - 1; i < list.size(); ++i)
+					{
+						gameTexts[idx++].text = list[i]->GetName();
+					}
+					break;
+				}
+				if (list[list.size() - 1]->GetName() == obj->GetName())
+					gameTexts[idx++].text = m_sPlayerId;
 			}
 			m_pPlayer->SetRank(rank);
 		}
@@ -952,9 +984,13 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		if (m_pCheckPointShader)
 		{
 			UINT currentCheckPoint = m_pPlayer->GetCheckPoint();
-			CGameObject* checkPoint = m_pCheckPointShader->getList()[currentCheckPoint % 181];
-			if (m_pPlayer->IsCollide(checkPoint))
+
+			if (m_pPlayer->IsCollide(m_pCheckPointShader->getList()[currentCheckPoint % 181]))
 				m_pPlayer->UpCheckPoint();
+			else if (currentCheckPoint > 1) {
+				if (m_pPlayer->IsCollide(m_pCheckPointShader->getList()[(currentCheckPoint - 2) % 181]))
+					m_pPlayer->DownCheckPoint();
+			}
 		}
 
 		for (CUiShader* shader : instancingNumberUiShaders)
@@ -1003,7 +1039,7 @@ void ItemGameScene::BuildLights()
 	m_pLights->m_pLights[1].m_fRange = 20.0f;
 	m_pLights->m_pLights[1].padding = 0.0f;
 
-	m_pLights->m_pLights[2].m_bEnable = 1;
+	m_pLights->m_pLights[2].m_bEnable = 0;
 	m_pLights->m_pLights[2].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[2].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[2].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
@@ -1017,7 +1053,7 @@ void ItemGameScene::BuildLights()
 	m_pLights->m_pLights[2].m_fRange = 20.0f;
 	m_pLights->m_pLights[2].padding = 0.0f;
 
-	m_pLights->m_pLights[3].m_bEnable = 1;
+	m_pLights->m_pLights[3].m_bEnable = 0;
 	m_pLights->m_pLights[3].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[3].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[3].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
@@ -1031,7 +1067,7 @@ void ItemGameScene::BuildLights()
 	m_pLights->m_pLights[3].m_fRange = 20.0f;
 	m_pLights->m_pLights[3].padding = 0.0f;
 
-	m_pLights->m_pLights[4].m_bEnable = 1;
+	m_pLights->m_pLights[4].m_bEnable = 0;
 	m_pLights->m_pLights[4].m_nType = POINT_LIGHT;
 	m_pLights->m_pLights[4].m_xmf4Ambient = XMFLOAT4(0.6f, 0.1f, 0.1f, 1.0f);
 	m_pLights->m_pLights[4].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.2f, 0.2f, 1.0f);
@@ -1048,26 +1084,36 @@ void ItemGameScene::BuildLights()
 	m_pLights->fogrange = 30;
 
 }
-void ItemGameScene::BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
-	*pd3dCommandList)
+void ItemGameScene::BuildSubCameras(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pMinimapCamera = new CMinimapCamera;
 	m_pMinimapCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pMinimapCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	m_pMinimapCamera->GenerateOrthoProjectionMatrix(1000, 1000, 10, 1000.0f);
-	m_pMinimapCamera->SetViewport(FRAME_BUFFER_WIDTH - 250, FRAME_BUFFER_HEIGHT - 400, 250, 180, 0.0f, 1.0f);
-	m_pMinimapCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	float minimapWidth = pCreateManager->GetWindowWidth() / 5;
+	float minimapHeight = pCreateManager->GetWindowHeight() / 4;
+	m_pMinimapCamera->SetViewport(pCreateManager->GetWindowWidth() - minimapWidth, pCreateManager->GetWindowHeight() / 2 - (minimapHeight / 2), minimapWidth, minimapHeight, 0.0f, 1.0f);
+	m_pMinimapCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
 
 	m_pMinimapCamera->GenerateViewMatrix(m_pMinimapCamera->GetPosition(), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
-	m_pMinimapCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+	m_pMinimapCamera->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
 
 	m_pShadowCamera = new CMinimapCamera;
 	m_pShadowCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pShadowCamera->SetLookAt(XMFLOAT3(0, 0, 0));
-	m_pShadowCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-	m_pShadowCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+	m_pShadowCamera->SetViewport(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight(), 0.0f, 1.0f);
+	m_pShadowCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
 }
+void ItemGameScene:: ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager)
+{
+	float minimapWidth = pCreateManager->GetWindowWidth() / 5;
+	float minimapHeight = pCreateManager->GetWindowHeight() / 4;
+	m_pMinimapCamera->SetViewport(pCreateManager->GetWindowWidth() - minimapWidth, pCreateManager->GetWindowHeight() / 2 - (minimapHeight / 2), minimapWidth, minimapHeight, 0.0f, 1.0f);
+	m_pMinimapCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
 
+	m_pShadowCamera->SetViewport(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight(), 0.0f, 1.0f);
+	m_pShadowCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
+}
 void ItemGameScene::UpdateShadow()
 {
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
@@ -1218,6 +1264,14 @@ void ItemGameScene::ProcessEvent(const MessageStruct& msg)
 			(*shader)->DisEnableObject(msg.objectName);
 	}
 }
+
+void ItemGameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
+{
+	BaseScene::ReSize(pCreateManager);
+	ResetShadowBuffer(m_pCreateManager.get());
+	ReBuildSubCameras(pCreateManager);
+}
+
 void ItemGameScene::ProcessPacket(char* packet)
 {
 

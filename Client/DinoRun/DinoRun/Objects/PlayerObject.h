@@ -68,6 +68,7 @@ public:
 	UINT SetCheckPoint(UINT point) { return m_uCheckpointCount = point; }
 	UINT GetCheckPoint() { return m_uCheckpointCount; }
 	void UpCheckPoint() { m_uCheckpointCount++; }
+	void DownCheckPoint() { if(m_uCheckpointCount > 0 ) m_uCheckpointCount--; }
 
 	UINT GetRank() { return m_uRank; }
 	void SetRank(const UINT& rank) { m_uRank = rank; }

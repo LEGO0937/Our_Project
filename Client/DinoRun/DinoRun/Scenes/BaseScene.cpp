@@ -14,7 +14,12 @@ void BaseScene::ReleaseObjects()
 {
 	if (m_pLights) delete m_pLights;
 }
+void BaseScene::ReSize(shared_ptr<CreateManager> pCreateManager)
+{
+	m_nWndClientWidth = pCreateManager->GetWindowWidth();
+	m_nWndClientHeight = pCreateManager->GetWindowHeight();
 
+}
 void BaseScene::SetViewportsAndScissorRects()
 {
 	if (m_pCamera) m_pCamera->SetViewportsAndScissorRects(m_pd3dCommandList);

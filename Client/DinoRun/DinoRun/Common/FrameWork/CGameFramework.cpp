@@ -8,15 +8,15 @@ CGameFramework::CGameFramework()
 {
 	EventHandler::GetInstance()->Update();
 	SoundManager::GetInstance()->Initialize();
-	NetWorkManager::GetInstance()->Initialize();
+	//NetWorkManager::GetInstance()->Initialize();
 }
 
 CGameFramework::~CGameFramework()
 {
 	EventHandler::GetInstance()->destroy();
 	SoundManager::GetInstance()->destroy();
-	NetWorkManager::GetInstance()->Release();
-	NetWorkManager::GetInstance()->destroy();
+	//NetWorkManager::GetInstance()->Release();
+	//NetWorkManager::GetInstance()->destroy();
 }
 
 bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
@@ -237,18 +237,21 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 
 		m_pCamera->SetViewport(0, 0, LOWORD(lParam), HIWORD(lParam), 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, LOWORD(lParam), HIWORD(lParam));
+		//m_pCamera->ReGenerateProjectionMatrix(LOWORD(lParam) / HIWORD(lParam));
+
 
 		if (m_pScene)
 		{
-			m_pScene->ResetShadowBuffer(m_pCreateManager.get());
-			m_pScene->SetWindowSize(m_pCreateManager->GetWindowWidth(), m_pCreateManager->GetWindowHeight());
+			m_pScene->ReSize(m_pCreateManager);
+			
 		}
 		if (m_pPlayer)
 		{
 			CCamera* camera = m_pPlayer->GetCamera();
-			camera->GenerateProjectionMatrix(1.01f, 5000.0f, LOWORD(lParam) / HIWORD(lParam), 60.0f);
+			//camera->GenerateProjectionMatrix(1.01f, 5000.0f, LOWORD(lParam) / HIWORD(lParam), 60.0f);
 			camera->SetViewport(0, 0, LOWORD(lParam), HIWORD(lParam), 0.0f, 1.0f);
 			camera->SetScissorRect(0, 0, LOWORD(lParam), HIWORD(lParam));
+			camera->ReGenerateProjectionMatrix((float)LOWORD(lParam) / (float)HIWORD(lParam));
 		}
 		break;
 	}
@@ -372,6 +375,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{
 		m_pScene->SetId(m_sPlayerID);
+		m_pScene->SetFontShader(m_pFontManager->getFontShader());
 		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
