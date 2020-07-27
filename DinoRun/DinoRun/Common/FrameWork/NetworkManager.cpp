@@ -21,14 +21,15 @@ NetWorkManager::NetWorkManager()
 
 NetWorkManager::~NetWorkManager()
 {
-	m_pGameClient = nullptr;
+	//m_pGameClient = nullptr;
+	m_pCurScene = nullptr;
 }
 
 
 
 void NetWorkManager::Initialize()
 {
-	
+
 	m_ConnectState = CONNECT_STATE::NONE;
 
 	WSADATA wsa;
@@ -47,7 +48,7 @@ void NetWorkManager::Initialize()
 		err_quit("socket()");
 		return;
 	}
-	
+
 }
 
 void NetWorkManager::Release()
@@ -55,9 +56,9 @@ void NetWorkManager::Release()
 	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 }
 
-void NetWorkManager::ConnectToServer()
+void NetWorkManager::ConnectToServer(HWND hWnd)
 {
-	
+
 	// connect()
 	m_ServerIP = "127.0.0.1";
 	SOCKADDR_IN serveraddr;
@@ -85,7 +86,7 @@ void NetWorkManager::ConnectToServer()
 	}
 
 
-	//주석 WSAAsyncSelect(sock, hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
+	WSAAsyncSelect(sock, hWnd, WM_SOCKET, FD_CLOSE | FD_READ); // 작동하는거야
 
 	send_wsabuf.buf = send_buffer;
 	send_wsabuf.len = BUF_SIZE;
@@ -93,7 +94,7 @@ void NetWorkManager::ConnectToServer()
 	recv_wsabuf.len = BUF_SIZE;
 
 	m_ConnectState = CONNECT_STATE::OK;
-	
+
 }
 
 
@@ -105,7 +106,7 @@ SOCKET NetWorkManager::getSock()
 
 void NetWorkManager::ReadPacket()
 {
-	
+
 	DWORD iobyte, ioflag = 0;
 
 	int retval = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
@@ -143,18 +144,15 @@ void NetWorkManager::ReadPacket()
 			iobyte = 0;
 		}
 	}
-	
 }
 
 
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
 void NetWorkManager::SendPacket(DWORD dataBytes)
 {
-	
 	DWORD iobyte = 0;
 
 	send_wsabuf.len = dataBytes;
-	
 	int retval = WSASend(sock, &send_wsabuf, 1, &dataBytes, 0, NULL, NULL);
 	if (retval)
 	{
@@ -163,12 +161,10 @@ void NetWorkManager::SendPacket(DWORD dataBytes)
 			err_display("WSASend()");
 		}
 	}
-	
 }
 
 void NetWorkManager::SendPacket()
 {
-	
 	DWORD iobyte = 0;
 
 	int retval = WSASend(sock, &send_wsabuf, 1, &iobyte, 0, NULL, NULL);
@@ -179,7 +175,16 @@ void NetWorkManager::SendPacket()
 			err_display("WSASend()");
 		}
 	}
-	
+}
+
+void NetWorkManager::SendPlayerInfoPacket()
+{
+	pInfo = reinterpret_cast<CS_PACKET_PLAYER_INFO*>(send_buffer);
+	pInfo->size = sizeof(pInfo);
+	send_wsabuf.len = sizeof(pInfo);
+	pInfo->type = CS_PLAYER_INFO;
+
+	SendPacket();
 }
 
 void NetWorkManager::SendUpKey()
@@ -201,6 +206,7 @@ void NetWorkManager::SendUpRightKey()
 
 	SendPacket();
 }
+
 void NetWorkManager::SendUpLeftKey()
 {
 	pUp = reinterpret_cast<CS_PACKET_UP_KEY*>(send_buffer);
@@ -268,6 +274,7 @@ void NetWorkManager::SendReady()
 	pReady->size = sizeof(pReady);
 	send_wsabuf.len = sizeof(pReady);
 	pReady->type = CS_READY;
+
 	SendPacket();
 }
 
@@ -302,6 +309,7 @@ void NetWorkManager::SendReleaseKey()
 
 	SendPacket();
 }
+
 void NetWorkManager::SendAnimationState(char animNum)
 {
 	pAnimation = reinterpret_cast<CS_PACKET_ANIMATION*>(send_buffer);
@@ -346,13 +354,15 @@ void NetWorkManager::SendNickName(char id, _TCHAR* name)
 
 	SendPacket(pNickName->size);
 }
-void NetWorkManager::SetGameFrameworkPtr(HWND hWnd, CGameFramework* client)
+
+void NetWorkManager::SetGameFrameworkPtr(HWND hWnd, shared_ptr<BaseScene>client)
 {
 	if (client)
 	{
-		m_pGameClient = client;
+		m_pCurScene = client;
 	}
 }
+
 void NetWorkManager::SendSurroundingCollision(USHORT objID)
 {
 	pCollide = reinterpret_cast<CS_PACKET_OBJECT_COLLISION*>(send_buffer);
@@ -363,6 +373,7 @@ void NetWorkManager::SendSurroundingCollision(USHORT objID)
 
 	SendPacket();
 }
+
 
 void NetWorkManager::SendNotCollision()
 {
@@ -394,6 +405,7 @@ void NetWorkManager::SendPlayerCollision(unsigned char playerID)
 
 
 
+
 void NetWorkManager::SendGetItem(const string& itemIndex)
 {
 	pGetItem = reinterpret_cast<CS_PACKET_GET_ITEM*>(send_buffer);
@@ -410,7 +422,6 @@ void NetWorkManager::SendGetItem(const string& itemIndex)
 }
 
 
-
 void NetWorkManager::SendUseItem(int useItem, int targetID)
 {
 	pItem = reinterpret_cast<CS_PACKET_USE_ITEM*>(send_buffer);
@@ -423,13 +434,12 @@ void NetWorkManager::SendUseItem(int useItem, int targetID)
 	SendPacket();
 }
 // Use아이템으로 사용했다는 신호와 동시에 사라지게 하는거야
-// 
+
 
 
 // 소켓 함수 오류 출력 후 종료
 void NetWorkManager::err_quit(const char* msg)
 {
-	/*
 	LPVOID lpMsgBuf;
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -438,14 +448,12 @@ void NetWorkManager::err_quit(const char* msg)
 		(LPTSTR)&lpMsgBuf, 0, NULL);
 	MessageBox(NULL, (LPCTSTR)lpMsgBuf, (LPCWSTR)msg, MB_ICONERROR);
 	LocalFree(lpMsgBuf);
-	//exit(1);
-	*/
+	exit(1);
 }
 
 // 소켓 함수 오류 출력
 void NetWorkManager::err_display(const char* msg)
 {
-	/*
 	LPVOID lpMsgBuf;
 	FormatMessage(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
@@ -454,5 +462,5 @@ void NetWorkManager::err_display(const char* msg)
 		(LPTSTR)&lpMsgBuf, 0, NULL);
 	printf("[%s] %s", msg, (char*)lpMsgBuf);
 	LocalFree(lpMsgBuf);
-	*/
 }
+

@@ -10,6 +10,8 @@
 constexpr int SERVER_PORT = 9000;
 constexpr int BUF_SIZE = 1024;
 
+#define WM_SOCKET WM_USER + 1
+
 
 class CGameFramework;
 
@@ -19,7 +21,7 @@ private:
 	int m_iRoomNum;
 	bool m_bGameMode;
 	string m_sPlayerName;
-	
+
 	SOCKET	sock;
 	int		myId;
 	WSABUF	send_wsabuf;
@@ -29,11 +31,11 @@ private:
 	char	packet_buffer[BUF_SIZE];
 	DWORD	in_packet_size = 0;
 	int		saved_packet_size = 0;
-	shared_ptr<BaseScene> m_pCurScene;
+
 public:
 	void SetCurScene(shared_ptr<BaseScene> curScene) { m_pCurScene = curScene; }
 	void ResetCurScene() { m_pCurScene.reset(); }
-	
+
 	void SetRoomNum(const int& num) { m_iRoomNum = num; }
 	void SetGameMode(const bool& mode) { m_bGameMode = mode; }
 	void SetPlayerName(const string& name) { m_sPlayerName = name; }
@@ -62,12 +64,14 @@ private:
 	CS_PACKET_PLAYER_COLLISION* pPlayerCollision = NULL;
 	CS_PACKET_USE_ITEM* pItem = NULL;
 	CS_PACKET_GET_ITEM* pGetItem = NULL;
+	CS_PACKET_PLAYER_INFO* pInfo = NULL;
 
 	HWND m_hWnd{ NULL };
 	int m_iNumPlayer = 0;
 private:
 	//ReadPacket에서 받은 패킷들을 CGameFramework에 전달하기 위한 포인터
-	CGameFramework* m_pGameClient{ nullptr };
+	//이거 프레임워크에다 전달하지 말고 curscene에다 전달
+	shared_ptr<BaseScene> m_pCurScene;
 	const  char* m_ServerIP{ nullptr };
 
 public:
@@ -91,10 +95,10 @@ public:
 	SOCKET getSock();
 	void Initialize();
 	void Release();
-	void ConnectToServer();
+	void ConnectToServer(HWND hWnd);
 
-	//Network클래스도 CGameFramework에 접근가능하게 하기위해 내부 포인터를 갖고있게 함.
-	void SetGameFrameworkPtr(HWND hWnd, CGameFramework* client);
+	//Network클래스도 씬에접근하기 위해서에 접근가능하게 하기위해 내부 포인터를 갖고있게 함.
+	void SetGameFrameworkPtr(HWND hWnd, shared_ptr<BaseScene> client);
 
 	void ReadPacket();
 	void SendPacket();
@@ -116,6 +120,7 @@ public:
 	void SendNotReady();
 	void SendReqStart();
 	void SendReleaseKey();
+	void SendPlayerInfoPacket();
 	void SendAnimationState(char animNum);
 	void SendNickName(char id, _TCHAR* name);
 	void SendChattingText(char id, const _TCHAR* text);
