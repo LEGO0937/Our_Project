@@ -40,9 +40,6 @@
     <Filter Include="Common\TextureLoad">
       <UniqueIdentifier>{fb412dbc-b760-4b66-86ff-8d1e4f71a307}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scenes\BaseScene">
-      <UniqueIdentifier>{bc465297-5264-4fa2-a967-cb8931c9cb54}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scenes\GameScene">
       <UniqueIdentifier>{3371446c-f215-46d0-89ad-4501095998b8}</UniqueIdentifier>
     </Filter>
@@ -262,6 +259,12 @@
     <Filter Include="CShaders\UiShader\10DashBoard">
       <UniqueIdentifier>{3f8eb5cb-979d-4e7e-acde-e97a591dc16b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="CShaders\UiShader\10CountDown">
+      <UniqueIdentifier>{a0fe0277-402b-41e0-85a5-82b4be9b4f10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Objects\SkyBoxObject\BaseScene">
+      <UniqueIdentifier>{bc465297-5264-4fa2-a967-cb8931c9cb54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -292,7 +295,7 @@
       <Filter>Scenes\GameScene</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\BaseScene.h">
-      <Filter>Scenes\BaseScene</Filter>
+      <Filter>Objects\SkyBoxObject\BaseScene</Filter>
     </ClInclude>
     <ClInclude Include="Common\Camera\Camera.h">
       <Filter>Common\Camera</Filter>
@@ -444,7 +447,7 @@
       <Filter>Common\TextureLoad</Filter>
     </ClCompile>
     <ClCompile Include="Scenes\BaseScene.cpp">
-      <Filter>Scenes\BaseScene</Filter>
+      <Filter>Objects\SkyBoxObject\BaseScene</Filter>
     </ClCompile>
     <ClCompile Include="Common\Camera\Camera.cpp">
       <Filter>Common\Camera</Filter>
@@ -658,6 +661,9 @@
     </ClCompile>
     <ClCompile Include="CShaders\UiShader\DashBoardShader.cpp">
       <Filter>CShaders\UiShader\10DashBoard</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\UiShader\CountDownShader.cpp">
+      <Filter>CShaders\UiShader\10CountDown</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

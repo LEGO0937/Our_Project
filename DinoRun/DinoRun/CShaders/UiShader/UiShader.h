@@ -12,6 +12,10 @@ struct UI_INFO
 	XMFLOAT2 maxUv = XMFLOAT2(0, 0);
 };
 
+struct CountDown_Info
+{
+	float time;
+};
 class TimeCountShader : public CUiShader
 {
 private:
@@ -80,6 +84,22 @@ public:
 	virtual void Update(float fTimeElapsed, void* pInformation);
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
 };
+
+class CountDownShader : public CUiShader
+{
+private:
+	float m_fScaleValue = 2.0f;
+	float m_fFinishTime = 0.0f;
+public:
+	CountDownShader();
+	virtual ~CountDownShader();
+
+	virtual void AnimateObjects(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed) {}
+	virtual void Update(float fTimeElapsed, void* pInformation);
+	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+};
+
 
 class DashBoardShader : public CUiShader
 {

@@ -14,7 +14,7 @@
 #define RESOURCE_TEXTURE2DARRAY		0x03
 #define RESOURCE_TEXTURE_CUBE		0x04
 #define RESOURCE_BUFFER				0x05
-#define MAX_BON_NUM 10
+#define MAX_BONE_NUM 16
 
 class CShader;
 class CCamera;
@@ -31,8 +31,8 @@ struct CB_OBJECT_INFO
 
 struct CB_SKINEOBJECT_INFO
 {
-	XMFLOAT4X4 m_xmf4x4Worlds[MAX_BON_NUM];
-	XMFLOAT4X4 m_xmf4x4PrevWorlds[MAX_BON_NUM];
+	XMFLOAT4X4 m_xmf4x4Worlds[MAX_BONE_NUM];
+	XMFLOAT4X4 m_xmf4x4PrevWorlds[MAX_BONE_NUM];
 };
 
 struct CB_UI_INFO
@@ -185,7 +185,7 @@ class CGameObject
 {
 protected:
 	int								m_nReferences = 0;
-	float m_fMaxForce = 0; // 힘의 크기 이 이상 넘을 경우 이 값을 유지함 N단위
+	float m_fMaxForce = MAX_FORCE; // 힘의 크기 이 이상 넘을 경우 이 값을 유지함 N단위
 
 	float m_nScale = 1;
 

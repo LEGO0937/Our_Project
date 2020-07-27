@@ -173,6 +173,21 @@ void StartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 {
 	switch (nMessageID)
 	{
+	case WM_CHAR:
+		if (isalnum((TCHAR)wParam))
+		{
+			if (isClickedID)
+			{
+				if (gameTexts[ID].text.size() < 8)
+					gameTexts[ID].text.push_back((TCHAR)wParam);
+			}
+			else if (isClickedPassWord)
+			{
+				if (gameTexts[PASSWORD].text.size() < 8)
+					gameTexts[PASSWORD].text.push_back((TCHAR)wParam);
+			}
+		}
+		break;
 	case WM_KEYUP:
 		switch (wParam)
 		{
@@ -196,22 +211,10 @@ void StartScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 			break;
 
 		default:
-			if (isalnum((TCHAR)wParam))
-			{
-				if (isClickedID)
-				{
-					if (gameTexts[ID].text.size() < 8)
-						gameTexts[ID].text.push_back((TCHAR)wParam);
-				}
-				else if (isClickedPassWord)
-				{
-					if (gameTexts[PASSWORD].text.size() < 8)
-						gameTexts[PASSWORD].text.push_back((TCHAR)wParam);
-				}
-			}
 			break;
 		}
 		break;
+	
 	default:
 		break;
 	}

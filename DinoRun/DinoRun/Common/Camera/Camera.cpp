@@ -79,6 +79,13 @@ void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlane
 #else
 	m_xmf4x4Projection = Matrix4x4::PerspectiveFovRH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 #endif
+	m_fFarDistance = fFarPlaneDistance;
+	m_fNearDistance = fNearPlaneDistance;
+	m_fFovAngle = fFOVAngle;
+}
+void CCamera::ReGenerateProjectionMatrix(float fAspectRatio)
+{
+	GenerateProjectionMatrix(m_fNearDistance, m_fFarDistance, fAspectRatio, m_fFovAngle);
 }
 void CCamera::GenerateOrthoProjectionMatrix(float ViewWidth, float ViewHeight,
 	float fNear, float fFar)

@@ -154,6 +154,7 @@ void NetWorkManager::SendPacket(DWORD dataBytes)
 	DWORD iobyte = 0;
 
 	send_wsabuf.len = dataBytes;
+	
 	int retval = WSASend(sock, &send_wsabuf, 1, &dataBytes, 0, NULL, NULL);
 	if (retval)
 	{

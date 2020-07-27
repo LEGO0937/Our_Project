@@ -63,6 +63,10 @@ protected:
 
 	XMFLOAT3 m_xmf3Velocity;
 	float m_fMass;
+
+	float m_fFarDistance;
+	float m_fNearDistance;
+	float m_fFovAngle;
 public:
 	CCamera();
 	CCamera(CCamera *pCamera);
@@ -85,6 +89,7 @@ public:
 	//투영 변환 행렬을 생성한다. 
 	void GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float
 		fAspectRatio, float fFOVAngle);
+	void ReGenerateProjectionMatrix(float fAspectRatio);
 	void GenerateOrthoProjectionMatrix(float ViewWidth, float ViewHeight,
 		float fNear, float fFar);
 

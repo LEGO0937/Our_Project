@@ -60,6 +60,22 @@ void RankCountShader::BuildObjects(CreateManager* pCreateManager, void* pInforma
 	uvX.emplace_back(5);
 	uvY.emplace_back(0);
 
+	for (int i = 0; i <= NetWorkManager::GetInstance()->GetNumPlayer(); ++i)
+	{
+		pObject = new CGameObject;
+		pObject->SetPosition(-0.96f, 0.54f - 0.12*i, 0.0f);
+		pObject->AddRef();
+		objectList.emplace_back(pObject);
+		uvX.emplace_back(i+1);
+		uvY.emplace_back(0);
+	}
+	//pObject = new CGameObject;
+	//pObject->SetPosition(-0.96f, 0.42f, 0.0f);
+	//pObject->AddRef();
+	//objectList.emplace_back(pObject);
+	//uvX.emplace_back(8);
+	//uvY.emplace_back(0);
+
 	CreateShaderVariables(pCreateManager);
 }
 

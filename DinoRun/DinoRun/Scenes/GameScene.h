@@ -14,6 +14,7 @@ class BlurShader;
 class MotionBlurShader;
 class MinimapShader;
 class IconShader;
+class CountDownShader;
 
 class CHeightMapTerrain;
 class SkyBoxObject;
@@ -25,6 +26,8 @@ public:
 	GameScene();
 	~GameScene();
 
+	virtual void ReSize(shared_ptr<CreateManager> pCreateManager);
+
 	void ProcessInput(HWND hWnd, float deltaTime);
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 		lParam, float deltaTime);
@@ -32,8 +35,8 @@ public:
 		lParam, float deltaTime);
 
 	virtual void BuildLights();
-	void BuildSubCameras(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
-		*pd3dCommandList);
+	void BuildSubCameras(shared_ptr<CreateManager> pCreateManager);
+	void ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager);
 
 	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
 	virtual void ReleaseObjects();
@@ -80,11 +83,13 @@ private:
 	vector<CUiShader*> instancingNumberUiShaders;
 	vector<CUiShader*> instancingImageUiShaders;
 	CUiShader* m_pEffectShader = NULL;
+	CountDownShader* m_pCountDownShader = NULL;
 
 	vector<CSkinedObInstancingShader*> instancingAnimatedModelShaders;
 
-	CObInstancingShader* m_pCheckPointShader;
-	CUiShader* m_pGuageShader;
+	CObInstancingShader* m_pCheckPointShader = NULL;
+	CUiShader* m_pGuageShader = NULL;
+	
 
 	CCamera* m_pMinimapCamera = NULL;
 
@@ -96,4 +101,6 @@ private:
 	MinimapShader* m_pMinimapShader = NULL;
 	IconShader* m_pIconShader = NULL;
 	bool isStart = false;
+
+	float m_fCountDownTime = 0.0f;
 };

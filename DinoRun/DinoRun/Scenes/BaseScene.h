@@ -100,9 +100,7 @@ public:
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
 
-	void SetWindowSize(const int& width, const int& height) {
-		m_nWndClientWidth = width; m_nWndClientHeight = height;
-	}
+	virtual void ReSize(shared_ptr<CreateManager> pCreateManager);
 
 	virtual string GetId() { return m_sPlayerId; }
 	virtual void SetId(const string& str) { m_sPlayerId = str; }

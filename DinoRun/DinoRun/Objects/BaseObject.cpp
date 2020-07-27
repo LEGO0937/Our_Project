@@ -350,10 +350,13 @@ void CGameObject::SetMaterial(int nMaterial, CMaterial *pMaterial)
 
 void CGameObject::resetShadowTexture(CreateManager* pCreateManager)
 {
-	CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(), 0);
-	m_ppMaterials[0]->m_pShader->BackDescriptorHeapCount();
-	m_ppMaterials[0]->m_pShader->CreateShadowResourceViews(pCreateManager, pShadowTexture, 10, true);
+	if (m_ppMaterials[0])
+	{
+		CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+		pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(), 0);
+		m_ppMaterials[0]->m_pShader->BackDescriptorHeapCount();
+		m_ppMaterials[0]->m_pShader->CreateShadowResourceViews(pCreateManager, pShadowTexture, 10, true);
+	}
 }
 CSkinnedMesh *CGameObject::FindSkinnedMesh(char *pstrSkinnedMeshName)
 {
@@ -861,11 +864,11 @@ void CGameObject::LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObje
 			nReads = (UINT)::fread(&nMaterial, sizeof(int), 1, pInFile);
 			nReads = (UINT)::fread(&nTexture, sizeof(int), 1, pInFile);
 
-			pMaterial = new CMaterial(nTexture); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal						
+			pMaterial = new CMaterial(nTexture+1); //0:Albedo, 1:Specular, 2:Metallic, 3:Normal, 4:Emission, 5:DetailAlbedo, 6:DetailNormal						
 			if (nTexture > 0)
 			{
 				CShader* shader = new CShader();
-				shader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, nTexture);
+				shader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, nTexture+1);
 				//ReadStringFromFile(pInFile, pstrToken);
 				for (int j = 0; j < nTexture; ++j)
 				{
@@ -875,8 +878,16 @@ void CGameObject::LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObje
 					shader->CreateShaderResourceViews(pCreateManager, pTexture, 8 + j, true);
 					pMaterial->SetTexture(pTexture, j);
 				}
+				CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+				pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(), 0);
+				pCreateManager->GetShadowBuffer()->AddRef();
+				shader->CreateShadowResourceViews(pCreateManager, pShadowTexture, 10, true);
+				pMaterial->SetTexture(pShadowTexture, 1);
+
 				pMaterial->SetShader(shader);
 			}
+			
+
 
 			ReadStringFromFile(pInFile, pstrToken);
 

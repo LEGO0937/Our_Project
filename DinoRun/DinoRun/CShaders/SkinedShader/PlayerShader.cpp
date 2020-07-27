@@ -20,7 +20,7 @@ void PlayerShader::BuildObjects(CreateManager* pCreateManager, void* pInformatio
 	instancingModelName.insert(instancingModelName.find("."), "_ins");  //인스턴싱 전용 모델파일을 불러온다
 
 	CDinoRunPlayer *pModel = new CDinoRunPlayer(pCreateManager, info->modelName);
-	m_ppSkinedObjects = pModel;
+	m_ppObjects = pModel;
 	//m_ppSkinedObjects->AddRef();
 
 	if (info->modelName)
@@ -31,7 +31,7 @@ void PlayerShader::BuildObjects(CreateManager* pCreateManager, void* pInformatio
 
 void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
-	CPlayer *pPlayerObject = NULL;
+	CDinoRunPlayer *pPlayerObject = NULL;
 	int nLength = 3;
 
 	//서버로부터 nLenght에 플레이어 수를 받음.
@@ -45,11 +45,17 @@ void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, con
 		//pPlayerObject->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 		//pPlayerObject->OnPrepareRender();
 		//pPlayerObject->SetId(m_iCurSerealNum++);
-		pPlayerObject->UpCheckPoint();
-		pPlayerObject->UpCheckPoint();
-		pPlayerObject->UpCheckPoint();
+		//XMFLOAT3(700.0f, 76.0f, 1150.0f)
+		pPlayerObject->SetUpdatedContext(m_pUpdatedContext);
+
+		if (i == 0)
+			pPlayerObject->SetPosition(XMFLOAT3(650.0f, 70.7f, 1150.0f));
+		else if (i == 1)
+			pPlayerObject->SetPosition(XMFLOAT3(680.0f, 70.7f, 1150.0f));
+		else if (i == 2)
+			pPlayerObject->SetPosition(XMFLOAT3(710.0f, 70.7f, 1150.0f));
 		//애니메이션 적용을 find_if를 통해서 아이디와 맞는 오브젝트 찾고 적용하도록 하자.
-		m_vSkinedObjectList.emplace_back(pPlayerObject);
+		objectList.emplace_back(pPlayerObject);
 	}
 }
 

@@ -120,7 +120,7 @@ namespace Vector3
 		XMStoreFloat3(&xmf3Result, xmvVector);
 		return(xmf3Result);
 	}
-	inline XMFLOAT3 ScalarProduct(XMFLOAT3& xmf3Vector, float fScalar, bool bNormalize =
+	inline XMFLOAT3 ScalarProduct(const XMFLOAT3& xmf3Vector, float fScalar, bool bNormalize =
 		true)
 	{
 		XMFLOAT3 xmf3Result;
@@ -220,11 +220,12 @@ namespace Vector3
 		XMVECTOR xmvAngle = XMVector3AngleBetweenNormals(xmvVector1, xmvVector2);
 		return(XMConvertToDegrees(acosf(XMVectorGetX(xmvAngle))));
 	}
+
 	inline float Angle(const XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
 	{
 		return(Angle(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
 	}
-	inline float Angle(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	inline float Angle(const XMFLOAT3& xmf3Vector1,const XMFLOAT3& xmf3Vector2)
 	{
 		return(Angle(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2)));
 	}

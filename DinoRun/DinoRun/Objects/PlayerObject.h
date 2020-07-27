@@ -68,6 +68,7 @@ public:
 	UINT SetCheckPoint(UINT point) { return m_uCheckpointCount = point; }
 	UINT GetCheckPoint() { return m_uCheckpointCount; }
 	void UpCheckPoint() { m_uCheckpointCount++; }
+	void DownCheckPoint() { if(m_uCheckpointCount > 0 ) m_uCheckpointCount--; }
 
 	UINT GetRank() { return m_uRank; }
 	void SetRank(const UINT& rank) { m_uRank = rank; }
@@ -92,6 +93,7 @@ public:
 	void Move(DWORD nDirection, float fDistance, float fDeltaTime, bool bVelocity = false);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Rotate(float x, float y, float z);
+	void ProcessRotate(float fTimeElapsed);
 
 	void FixedUpdate(float fTimeElapsed); //¹°¸®
 	bool Update(float fTimeElapsed, CGameObject* target);
@@ -137,6 +139,7 @@ protected:
 	bool isStun = false;
 	
 	float m_fWheelDegree = 0.0f;
+	float m_frearWheelDegree = 0.0f;
 	float m_fTimeCount = 0.0f;
 };
 
