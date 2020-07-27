@@ -65,6 +65,8 @@ void ItemGameScene::ReleaseUploadBuffers()
 		m_pIconShader->ReleaseUploadBuffers();
 	if (m_pEffectShader)
 		m_pEffectShader->ReleaseUploadBuffers();
+	if (m_pCountDownShader)
+		m_pCountDownShader->ReleaseUploadBuffers();
 }
 void ItemGameScene::ReleaseObjects()
 {
@@ -133,6 +135,13 @@ void ItemGameScene::ReleaseObjects()
 		m_pEffectShader->ReleaseObjects();
 		m_pEffectShader->Release();
 	}
+	if (m_pCountDownShader)
+	{
+		m_pCountDownShader->ReleaseShaderVariables();
+		m_pCountDownShader->ReleaseObjects();
+		m_pCountDownShader->Release();
+	}
+
 	UpdatedShaders.clear();
 	instancingNumberUiShaders.clear();
 	instancingImageUiShaders.clear();
@@ -143,6 +152,7 @@ void ItemGameScene::ReleaseObjects()
 void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
+	m_fCountDownTime = 4.0f;  //임시로 클라에서 시간재기로함 서버 연동후 서버가 계산후 보내줄것.
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
@@ -174,6 +184,9 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.f_uvY.emplace_back(0);
 	m_pEffectShader = new ImageShader;
 	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
+
+	m_pCountDownShader = new CountDownShader;
+	m_pCountDownShader->BuildObjects(pCreateManager.get(), NULL);
 #ifdef isDebug
 	bShader = new BillBoardShader;
 	model_info.modelName = "Resources/Images/B_Tree.dds";
@@ -480,12 +493,23 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			case IconMud:
 				XMFLOAT4X4 matrix = m_pPlayer->m_xmf4x4ToParent;
 				XMFLOAT3 pos = m_pPlayer->GetLook();
-				pos = Vector3::ScalarProduct(pos, 20, false);
+				pos = Vector3::ScalarProduct(pos, 40, false);
+				
 				matrix._41 -= pos.x;
-				matrix._42 -= 7+pos.y;
 				matrix._43 -= pos.z;
+				matrix._42 = m_pTerrain->GetHeight(matrix._41, 256 * TerrainScaleZ - matrix._43)+1.0f;
+				XMFLOAT3 up = m_pTerrain->GetNormal(matrix._41, matrix._43);
+				
 
-
+				matrix._21 = up.x;
+				matrix._22 = up.y;
+				matrix._23 = up.z;
+				XMFLOAT3 look = Vector3::CrossProduct(m_pPlayer->GetRight(), up, true);
+				
+				matrix._31 = look.x;
+				matrix._32 = look.y;
+				matrix._33 = look.z;
+				
 				//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
 				message.shaderName = ItemShaderName[m_eCurrentItem];
 				message.departMat = matrix;
@@ -587,8 +611,8 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 	else
 		m_pPlayer->m_fForce = 0;
 
-	m_pPlayer->Move(dwDirection, 20.0f, deltaTime, true);
-	((CPlayer*)PLAYER_SHADER->getSkiendList()[0])->Move(dwDirection, 20.0f, deltaTime, true);
+	m_pPlayer->Move(dwDirection, 30.0f, deltaTime, true);
+//	((CPlayer*)PLAYER_SHADER->getSkiendList()[0])->Move(dwDirection, 20.0f, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -718,6 +742,8 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<I
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	for (CUiShader* shader : instancingImageUiShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
+	if (m_pCountDownShader)
+		m_pCountDownShader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
 	if (fontShader)
@@ -808,12 +834,26 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 			shader->FixedUpdate(fTimeElapsed);  //물리 적용할 것
 		}
 	}
-	
+	if (m_fCountDownTime > 0.0f)
+	{
+		m_fCountDownTime -= fTimeElapsed;
+	}
+	else
+		m_fCountDownTime = 0.0f;
+	m_pCountDownShader->Update(fTimeElapsed,&m_fCountDownTime);
+
 }
 
 
 SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
+
+	if (sceneType != SceneType::ItemGame_Scene)
+	{
+		//서버와 연결 끊기, 엔드씬에서 룸씬으로 넘어가고 다시 시작하면 연결해야함
+		return sceneType;
+	}
+
 	//----
 	//명령 send(오브젝트 생성,삭제 및 파티클 추가, 오브젝트 비활성화)
 	//명령 recv
@@ -842,12 +882,13 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 	{
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
+			SoundManager::GetInstance()->AllStop();
 			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 		}
 		else
 		{
 			int rank = 1;
-			vector<CGameObject*> list = PLAYER_SHADER->getSkiendList();
+			vector<CGameObject*> list = PLAYER_SHADER->getList();
 			((CPlayer*)list[0])->SetCheckPoint(1);
 			((CPlayer*)list[0])->SetName("player3");
 			((CPlayer*)list[1])->SetCheckPoint(4);
@@ -913,26 +954,14 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 
 		for (CObjectsShader* shader : UpdatedShaders)
 		{
-			for (auto p = begin(shader->getList()); p < end(shader->getList());)
+			for (auto p = begin(shader->getList()); p < end(shader->getList()); ++p)
 			{
 				//플레이어 충돌처리할 곳
 				if (m_pPlayer->IsCollide(*p))
 				{
-
 					if (m_pPlayer->Update(fTimeElapsed, *p))  //true반환 시 충돌된 오브젝트는 리스트에서 삭제
 					{
-						if ((*p)->GetModelType() == Fence || (*p)->GetModelType() == Player || (*p)->GetModelType() == Item_Stone)
-						{
-							//서버연동 때는 이곳에서 생성하지않고 서버에게 생성하겠다는 신호만을 보낼것임
-							//다음 프레임의 업뎃에서 그 신호를 서버로부터  받아서 그 때 생성하도록 하겠음.
-							message.shaderName = "HeatEffect";
-							message.departMat = m_pPlayer->m_xmf4x4World;
-							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->RegisterEvent(message);
-							SoundManager::GetInstance()->Play("Heat", 0.2f);
-							p++;
-						}
-						else if ((*p)->GetModelType() == Item_Box)
+						if ((*p)->GetModelType() == Item_Box)
 						{
 							auto time = std::chrono::system_clock::now();
 							auto duration = time.time_since_epoch();
@@ -945,37 +974,12 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 
 							// 이 곳에서도 서버연동시 바로 안만들고 신호부터 보낼것임.
 							// 비활성화 시키는것 또한 신호를 보낼것임.
-							message.objectName = (*p)->GetName();
-							message.shaderName = shader->GetName();
-							message.msgName = "DisEnable_Model";
-							EventHandler::GetInstance()->RegisterEvent(message);
-						
-							message.shaderName = "BoxParticle";
-							message.departMat = (*p)->m_xmf4x4World;
-							message.msgName = "Add_Particle";
-							EventHandler::GetInstance()->RegisterEvent(message);
-							SoundManager::GetInstance()->Play("ItemBox", 0.2f);
-							p++;
-						}
-						else
-						{
-							// 오브젝트 삭제를 하는 구간, 서버에 셰이더의 종류 및 오브젝트의 번호를 전송한다.
-							// 삭제 또한 업데이트함수에서 실시.
 							
-							message.objectName = (*p)->GetName();
-							message.shaderName = shader->GetName();
-							message.msgName = "Delete_Model";
-							EventHandler::GetInstance()->RegisterEvent(message);
-
-							p++;
 						}
 					}
-					else
-						p++;
+					
 					//타겟 오브젝트 타입 구해오고 경우에 맞게 처리하도록 작성할 것
 				}
-				else
-					p++;
 			}
 			shader->Update(fTimeElapsed);  //물리 적용할 것
 		}
@@ -1364,4 +1368,10 @@ void ItemGameScene::ProcessPacket(char* packet)
 	message.msgName = "DisEnable_Model";
 	EventHandler::GetInstance()->CallBack(message);클라 이벤트 핸들러에 등록  -끝-
 	*/
+
+
+
+	//끝났음을 알림
+	//사운드 종료, 네트워크매니저에 패배 신호 주고 승리자는 이 패킷을 안받음.
+
 }

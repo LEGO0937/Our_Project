@@ -100,6 +100,7 @@ void CGameFramework::FrameAdvance()
 	if (m_CurState != m_PrevState)
 	{
 		ChangeSceneByType(m_CurState);
+		m_GameTimer.Tick();
 		//¾À ±³È¯ ºÎºÐ.
 	}
 }

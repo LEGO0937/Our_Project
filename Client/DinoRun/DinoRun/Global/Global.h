@@ -45,7 +45,7 @@
 #define PSO_VELOCITY_CUBEMAP 29
 
 //Max,Min Force amount
-#define MAX_FORCE 2500
+#define MAX_FORCE 3200
 #define MIDDLE_FORCE 1300
 #define MIN_FORCE 600
 #define MIN_VELOCITY 15.0f

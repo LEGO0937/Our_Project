@@ -262,6 +262,7 @@
     <ClCompile Include="CShaders\SkyBoxShader\SkyBoxShader.cpp" />
     <ClCompile Include="CShaders\TerrainShader\TerrainShader.cpp" />
     <ClCompile Include="CShaders\UiShader\BackGroundShader.cpp" />
+    <ClCompile Include="CShaders\UiShader\CountDownShader.cpp" />
     <ClCompile Include="CShaders\UiShader\DashBoardShader.cpp" />
     <ClCompile Include="CShaders\UiShader\GaugeShader.cpp" />
     <ClCompile Include="CShaders\UiShader\IconShader.cpp" />

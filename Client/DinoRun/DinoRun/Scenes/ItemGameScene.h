@@ -14,6 +14,7 @@ class BlurShader;
 class MotionBlurShader;
 class MinimapShader;
 class IconShader;
+class CountDownShader;
 
 class CHeightMapTerrain;
 class SkyBoxObject;
@@ -88,10 +89,11 @@ private:
 	vector<CUiShader*> instancingNumberUiShaders;
 	vector<CUiShader*> instancingImageUiShaders;
 	CUiShader* m_pEffectShader = NULL;
+	CountDownShader* m_pCountDownShader = NULL;
 
 	vector<CSkinedObInstancingShader*> instancingAnimatedModelShaders;
 
-	CObInstancingShader* m_pCheckPointShader;
+	CObInstancingShader* m_pCheckPointShader = NULL;
 
 	CCamera* m_pMinimapCamera = NULL;
 
@@ -109,4 +111,6 @@ private:
 
 	bool isBoost = false;
 	bool isStart = false;
+
+	float m_fCountDownTime = 0.0f;
 };

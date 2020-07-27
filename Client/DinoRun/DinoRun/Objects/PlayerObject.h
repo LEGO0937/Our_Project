@@ -93,6 +93,7 @@ public:
 	void Move(DWORD nDirection, float fDistance, float fDeltaTime, bool bVelocity = false);
 	virtual void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Rotate(float x, float y, float z);
+	void ProcessRotate(float fTimeElapsed);
 
 	void FixedUpdate(float fTimeElapsed); //¹°¸®
 	bool Update(float fTimeElapsed, CGameObject* target);
