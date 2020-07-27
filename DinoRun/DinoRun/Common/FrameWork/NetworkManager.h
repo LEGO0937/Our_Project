@@ -95,12 +95,13 @@ public:
 	SOCKET getSock();
 	void Initialize();
 	void Release();
-	void ConnectToServer(HWND hWnd);
+	void ConnectToServer();
 
 	//Network클래스도 씬에접근하기 위해서에 접근가능하게 하기위해 내부 포인터를 갖고있게 함.
 	void SetGameFrameworkPtr(HWND hWnd, shared_ptr<BaseScene> client);
 
 	void ReadPacket();
+	void ReadPacket(float fTimeElapsed);
 	void SendPacket();
 	void SendPacket(DWORD dataBytes);
 

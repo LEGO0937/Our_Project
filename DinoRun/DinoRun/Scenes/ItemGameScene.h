@@ -71,7 +71,10 @@ public:
 
 
 	virtual void ProcessEvent(const MessageStruct& msg);
-	virtual void ProcessPacket(char* packet);
+	virtual void ProcessPacket(char* packet, float fTimeElapsed);
+
+	void updatePlayerInfo(char* packet, float fTimeElapsed);
+	void updateEventInfo(char* packet, float fTimeElapsed);
 private:
 	DWORD dwDirection;
 

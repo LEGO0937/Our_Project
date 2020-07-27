@@ -2,7 +2,6 @@
 //
 #include "DinoRun.h"
 #define MAX_LOADSTRING 100
-#define WM_SOCKET WM_USER + 1
 
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
 WCHAR szTitle[MAX_LOADSTRING];                  // 제목 표시줄 텍스트입니다.
@@ -121,26 +120,10 @@ LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
-	case WM_MOVE:
-		break;
 	case WM_SOCKET:
-		if (WSAGETSELECTERROR(lParam))
-		{
-			//Network::GetInstance()->DeleteInstance();
-			closesocket((SOCKET)wParam);
-			PostQuitMessage(0);
-		}
-		switch (WSAGETSELECTEVENT(lParam))
-		{
-		case FD_READ:
-			NetWorkManager::GetInstance()->ReadPacket();
-			break;
-		case FD_CLOSE:
-			closesocket((SOCKET)wParam);
-			//Network::GetInstance()->DeleteInstance();
-			PostQuitMessage(0);
-			break;
-		}
+		frameWork.OnProcessingPacket(hwnd, msg, wParam, lParam);
+		break;
+	case WM_MOVE:
 		break;
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);

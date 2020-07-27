@@ -4,8 +4,6 @@
 //#define SERVER_IP "172.30.1.1"
 #define SERVER_IP "192.168.200.130"
 
-using namespace std;
-
 constexpr int MAX_USER = 6;
 constexpr int MAX_ROUND = 3;
 
@@ -115,10 +113,10 @@ struct CS_PACKET_PLAYER_INFO
 	char size;
 	char type;
 	char id;
-	XMFLOAT4X4 xmf4x4Parents[6] = {};
-	string playerNames[6] = {};
-	int checkPoints[6];
-	DWORD keyState[6];
+	int checkPoints;
+	DWORD keyState;
+	XMFLOAT4X4 xmf4x4Parents;
+	string playerNames;
 };
 
 struct CS_PACKET_RIGHT_KEY
@@ -502,3 +500,19 @@ struct SC_PACKET_PLAYER_INFO
 
 
 //////////////////////////////////////////////////////
+struct MessageStruct
+{
+	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
+	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
+	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
+	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
+
+	MessageStruct() {}
+	MessageStruct(const MessageStruct& msg)
+	{
+		msgName = msg.msgName;
+		shaderName = msg.shaderName;
+		departMat = msg.departMat;
+		objectSerialNum = msg.objectSerialNum;
+	}
+};

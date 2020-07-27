@@ -41,6 +41,7 @@ using namespace FMOD;
 
 #include "../Common/TextureLoad/DDSTextureLoader12.h"
 #include "../Global/Global.h"
+
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
@@ -57,6 +58,10 @@ using namespace std;
 
 #pragma comment(lib, "wsock32.lib")
 #pragma comment(lib, "Ws2_32.lib")
+
+
+#include "../protocol.h"
+
 #define FRAME_BUFFER_WIDTH 1280
 #define FRAME_BUFFER_HEIGHT 700
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
@@ -80,22 +85,6 @@ typedef struct Point2D
 	float y;
 }Point2D;
 
-struct MessageStruct
-{
-	char msgName;
-	char shaderName;
-	string objectName = "None";
-	XMFLOAT4X4 departMat;
-
-	MessageStruct() {}
-	MessageStruct(const MessageStruct& msg)
-	{
-		msgName = msg.msgName;
-		shaderName = msg.shaderName;
-		departMat = msg.departMat;
-		objectName = msg.objectName;
-	}
-};
 
 extern ID3D12Resource *CreateBufferResource(ID3D12Device *pd3dDevice,
 	ID3D12GraphicsCommandList *pd3dCommandList, void *pData, UINT nBytes, D3D12_HEAP_TYPE

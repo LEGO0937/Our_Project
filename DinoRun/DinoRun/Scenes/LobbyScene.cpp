@@ -287,7 +287,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 						{
 							if (!m_vRooms[clickNum + 2].m_bIsGaming && m_vRooms[clickNum + 2].m_iUserNumber < m_vRooms[clickNum + 2].m_iMaxUserNumber)
 							{
-								m_iResultNum = m_vRooms[clickNum + 2].m_iRoomNumber;
+								m_iResultNum = m_vRooms[clickNum + 2].m_iRoomNumber;  //¹æ¹øÈ£
 								m_bMode = m_vRooms[clickNum + 2].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}

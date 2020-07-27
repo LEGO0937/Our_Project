@@ -7,13 +7,13 @@ class CObjectsShader;
 
 struct Room
 {
-	int m_iRoomNumber;
-	int m_iUserNumber;
+	char m_iRoomNumber;
+	char m_iUserNumber;
 	bool m_bIsGaming;
 	bool m_bMode;
-	int m_iMaxUserNumber = 5;
+	char m_iMaxUserNumber = 5;
 	
-	Room(int roomNum,int userNum, bool isGameing, bool mode):m_iRoomNumber(roomNum), 
+	Room(char roomNum,char userNum, bool isGameing, bool mode):m_iRoomNumber(roomNum), 
 		m_iUserNumber(userNum), m_bIsGaming(isGameing),m_bMode(mode)  //isGameing 0: 대기중, 1: 게임중
 	{}
 };
@@ -60,8 +60,8 @@ private:
 	bool isClicked = false;
 	float m_fClickedTime = 0.f;
 
-	int m_iRoomPageNum = 0;
-	int m_iUserPageNum = 0;
+	char m_iRoomPageNum = 0;
+	char m_iUserPageNum = 0;
 	bool m_bMode = 0.0f;
 	int m_iResultNum = 0; 
 	vector<Room> m_vRooms;

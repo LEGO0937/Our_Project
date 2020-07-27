@@ -1,6 +1,5 @@
 #include "EventHandler.h"
 
-
 void EventHandler::SendEvent(const MessageStruct& msg)
 {
 	MessageStruct message = msg;

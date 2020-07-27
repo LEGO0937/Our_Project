@@ -4,6 +4,7 @@
 #include "../../Scenes/BaseScene.h"
 #include "../../CShaders/Shader.h"
 
+
 class EventHandler : public Singleton<EventHandler>
 {
 private:

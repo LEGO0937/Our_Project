@@ -103,8 +103,8 @@ public:
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed);
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position) {}
-	virtual void DeleteObject(const string& iSerealNum) {}
-	virtual void DisEnableObject(const string& iSerealNum) {}
+	virtual void DeleteObject(const int& iSerealNum) {}
+	virtual void DisEnableObject(const int& iSerealNum) {}
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) = 0;
 
@@ -144,8 +144,8 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition) {}
-	virtual void DeleteObject(const string& iSerealNum);
-	virtual void DisEnableObject(const string& iSerealNum);
+	virtual void DeleteObject(const int& iSerealNum);
+	virtual void DisEnableObject(const int& iSerealNum);
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);

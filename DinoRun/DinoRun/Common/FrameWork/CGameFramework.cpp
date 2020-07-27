@@ -120,7 +120,7 @@ void CGameFramework::BuildObjects()
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
 	m_pFontManager->Initialize(m_pCreateManager.get());
 	//-----------
-	
+	/*
 	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
 	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
@@ -143,9 +143,9 @@ void CGameFramework::BuildObjects()
 
 	m_pScene->setPlayer(m_pPlayer);
 	m_pScene->setCamera(m_pPlayer->GetCamera());
-	
+	*/
 	//--------
-	/*
+	
 	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
 	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
@@ -162,9 +162,9 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pCreateManager);
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pScene->setCamera(m_pCamera);
-	*/
+	
 	//-----------------------
-
+	
 	m_pCreateManager->ExecuteCommandList();
 
 	if (m_pScene)
@@ -225,7 +225,33 @@ void CGameFramework::CalculateFrameStats()
 		timeElapsed += 1.0f;
 	}
 }
-
+LRESULT CALLBACK CGameFramework::OnProcessingPacket(HWND hWnd, UINT nMessageID,
+	WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_SOCKET:
+		if (WSAGETSELECTERROR(lParam))
+		{
+			//Network::GetInstance()->DeleteInstance();
+			closesocket((SOCKET)wParam);
+			PostQuitMessage(0);
+		}
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_READ:
+			NetWorkManager::GetInstance()->ReadPacket(m_GameTimer.DeltaTime());
+			break;
+		case FD_CLOSE:
+			closesocket((SOCKET)wParam);
+			//Network::GetInstance()->DeleteInstance();
+			PostQuitMessage(0);
+			break;
+		}
+		break;
+	}
+	return(0);
+}
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)

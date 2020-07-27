@@ -1142,7 +1142,7 @@ void GameScene::ProcessEvent(const MessageStruct& msg)
 		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
 			return a->GetName() == msg.shaderName; });
 		if (shader != instancingModelShaders.end())
-			(*shader)->DisEnableObject(msg.objectName);
+			(*shader)->DisEnableObject(msg.objectSerialNum);
 	}
 }
 void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
@@ -1151,7 +1151,35 @@ void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
 	ResetShadowBuffer(m_pCreateManager.get());
 	ReBuildSubCameras(pCreateManager);
 }
-void GameScene::ProcessPacket(char* packet)
+void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
 	
+}
+void GameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_PLAYER_INFO* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_INFO*>(packet);
+
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetName() == playerInfo->playerNames; });
+	if (obj != obList.end())
+	{
+		(*obj)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents;
+		((CPlayer*)(*obj))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);
+	}
+	else
+	{
+		auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+			return a->GetName() == "None"; });
+		if (findId != obList.end())
+		{
+			(*findId)->SetName(playerInfo->playerNames);
+			(*findId)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents;
+			((CPlayer*)(*obj))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);
+		}
+	}
+}
+void GameScene::updateEventInfo(char* packet, float fTimeElapsed)
+{
+
 }

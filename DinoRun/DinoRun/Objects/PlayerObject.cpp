@@ -334,7 +334,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		return true;
 	case ModelType::Item_Box:
 		//¾ÆÀÌÅÛ ½Àµæ
-		message.objectName = target->GetName();
+		message.objectSerialNum = target->GetId();
 		message.shaderName = _ITEM_SHADER;
 		message.msgName = _DISENABLE_OBJECT;
 		EventHandler::GetInstance()->RegisterEvent(message);
@@ -350,7 +350,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		if (m_fMaxVelocityXZ > MAX_VELOCITY)
 			m_fMaxVelocityXZ = MAX_VELOCITY;
 
-		message.objectName = target->GetName();
+		message.objectSerialNum = target->GetId();
 		message.shaderName = _MEAT_SHADER;
 		message.msgName = _DISENABLE_OBJECT;
 		EventHandler::GetInstance()->RegisterEvent(message);
@@ -368,7 +368,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		//else if (m_fWheelDegree < 0)
 		//	m_fWheelDegree = -30;
 		OnSliding();
-		message.objectName = target->GetName();
+		message.objectSerialNum = target->GetId();
 		message.shaderName = _BANANA_SHADER;
 		message.msgName = _DELETE_OBJECT;
 		EventHandler::GetInstance()->RegisterEvent(message);

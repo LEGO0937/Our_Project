@@ -24,6 +24,8 @@ public:
 
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID,
 		WPARAM wParam, LPARAM lParam);
+	LRESULT CALLBACK OnProcessingPacket(HWND hWnd, UINT nMessageID,
+		WPARAM wParam, LPARAM lParam);
 
 	bool IsRunning() { return m_running; }
 
@@ -48,8 +50,8 @@ private: // 변수
 	bool m_running{ true };
 	
 	POINT m_ptOldCursorPos;
-	SceneType m_CurState = ItemGame_Scene;
-	SceneType m_PrevState = ItemGame_Scene;
+	SceneType m_CurState = Start_Scene;
+	SceneType m_PrevState = Start_Scene;
 
 	CGameTimer m_GameTimer; //게임 프레임워크에서 사용할 타이머이다.
 	CPlayer* m_pPlayer = NULL;

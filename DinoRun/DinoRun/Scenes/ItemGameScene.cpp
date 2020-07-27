@@ -627,7 +627,7 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 		m_pPlayer->m_fForce = 0;
 
 	m_pPlayer->Move(dwDirection, 20.0f, deltaTime, true);
-//	((CPlayer*)PLAYER_SHADER->getSkiendList()[0])->Move(dwDirection, 20.0f, deltaTime, true);
+	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 20.0f, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -1291,7 +1291,7 @@ void ItemGameScene::ProcessEvent(const MessageStruct& msg)
 		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
 			return a->GetName() == msg.shaderName; });
 		if (shader != instancingModelShaders.end())
-			(*shader)->DeleteObject(msg.objectName);
+			(*shader)->DeleteObject(msg.objectSerialNum);
 	}
 	else if (msg.msgName == _ADD_PARTICLE)
 	{
@@ -1303,7 +1303,7 @@ void ItemGameScene::ProcessEvent(const MessageStruct& msg)
 		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
 			return a->GetName() == msg.shaderName; });
 		if (shader != instancingModelShaders.end())
-			(*shader)->DisEnableObject(msg.objectName);
+			(*shader)->DisEnableObject(msg.objectSerialNum);
 	}
 }
 
@@ -1314,11 +1314,22 @@ void ItemGameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
 	ReBuildSubCameras(pCreateManager);
 }
 
-void ItemGameScene::ProcessPacket(char* packet)
+void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
-
-
 	SC_PACKET_PLAYER_ANIMATION t;
+
+	switch (packet[1])
+	{
+	case SC_PLAYER_INFO:
+		updatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
+		break;
+	case SC_GET_ITEM:
+		updateEventInfo(packet, fTimeElapsed); //이벤트처리
+		break;
+	default:
+		break;
+	}
+
 	//패킷의 switch문으로 행동 결정
 	// 플레이어 위치값 갱신
 	/*
@@ -1359,57 +1370,43 @@ void ItemGameScene::ProcessPacket(char* packet)
 		}
 	}
 	*/
-	//오브젝트 추가
-	//패킷으로부터 MessageStruct의 정보를 받아야함. 물론 오브젝트를 생성하는 플레이어가
-	//메시지 구조체 그대로 서버에 보내고 서버는 받은걸 그대로 타 플레이어에게 전해주면 좋을듯?
 
-
-	/*
-	MessageStruct를 이용하는 처리들은 이벤트 발생 시 클라에서 EventHandler의 callback함수로 해당 이벤트에
-	대한 정보를 서버로 send하고 서버는 그 이벤트정보를 갖고 있다가 각 클라가 씬객체의 Update 
-	최상단 부분에서 send로 이벤트정보를 요구할 때 넘겨주는건 어떨지? 
-	*/
-	/*
-	MessageStruct message;   메시지 구조체 만들고
-	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
-	message.departMat = 생성될 시 적용할 행령;
-	message.arriveMat = 생성될 시 적용할 행령과 일치;
-	message.msgName = "Add_Model";
-	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
-	*/
-	
-
-	//오브젝트 삭제
-	//얘 또한 추가처럼 메시지 구조체 정보 그대로만 받아올 수 있다면 쉬움
-	/*
-	MessageStruct message;   메시지 구조체 만들고
-	message.objectName = 오브젝트 id(string);
-	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
-	message.msgName = "DisEnable_Model";  명령어
-	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
-	*/
-
-	//파티클 생성
-	//얘 또한 추가처럼 메시지 구조체 정보 그대로만 받아올 수 있다면 쉬움
-	/*
-	message.shaderName = 파티클 이름;
-	message.departMat = 생성될 시 적용할 행령;
-	message.msgName = "Add_Particle";
-	EventHandler::GetInstance()->CallBack(message); 클라 이벤트 핸들러에 등록  -끝-
-	
-
-	//오브젝트 비활성화
-	//위와 일치
-	/*
-	message.objectName = 오브젝트 id(string);
-	message.shaderName = 오브젝트를 그리는 담당 셰이더 이름;
-	message.msgName = "DisEnable_Model";
-	EventHandler::GetInstance()->CallBack(message);클라 이벤트 핸들러에 등록  -끝-
-	*/
 
 
 
 	//끝났음을 알림
 	//사운드 종료, 네트워크매니저에 패배 신호 주고 승리자는 이 패킷을 안받음.
 
+}
+
+void ItemGameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_PLAYER_INFO* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_INFO*>(packet);
+
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetName() == playerInfo->playerNames; });
+	if (obj != obList.end())
+	{
+		(*obj)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents;
+		((CPlayer*)(*obj))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);
+	}
+	else
+	{
+		auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+			return a->GetName() == "None"; });
+		if (findId != obList.end())
+		{
+			(*findId)->SetName(playerInfo->playerNames); // 없을경우 이름지정
+			(*findId)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents; //변환행렬 처리
+			((CPlayer*)(*obj))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);  //애니메이션처리
+		}
+	}
+}
+void ItemGameScene::updateEventInfo(char* packet, float fTimeElapsed)
+{
+	MessageStruct* playerInfo = reinterpret_cast<MessageStruct*>(packet);
+	MessageStruct msg = *playerInfo;
+
+	ProcessEvent(msg);
 }

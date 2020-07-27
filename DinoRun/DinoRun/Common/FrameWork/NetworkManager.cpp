@@ -56,7 +56,7 @@ void NetWorkManager::Release()
 	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 }
 
-void NetWorkManager::ConnectToServer(HWND hWnd)
+void NetWorkManager::ConnectToServer()
 {
 
 	// connect()
@@ -86,7 +86,7 @@ void NetWorkManager::ConnectToServer(HWND hWnd)
 	}
 
 
-	WSAAsyncSelect(sock, hWnd, WM_SOCKET, FD_CLOSE | FD_READ); // 작동하는거야
+	WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ); // 작동하는거야
 
 	send_wsabuf.buf = send_buffer;
 	send_wsabuf.len = BUF_SIZE;
@@ -128,7 +128,7 @@ void NetWorkManager::ReadPacket()
 
 			if (m_pCurScene)
 			{
-				m_pCurScene->ProcessPacket(packet_buffer);
+				m_pCurScene->ProcessPacket(packet_buffer,0);
 			}
 			// 각 Scene의 ProcessPacket으로 처리를 넘김
 			// ProcessPacket(packet_buffer);
@@ -145,7 +145,47 @@ void NetWorkManager::ReadPacket()
 		}
 	}
 }
+void NetWorkManager::ReadPacket(float fTimeElapsed)
+{
 
+	DWORD iobyte, ioflag = 0;
+
+	int retval = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
+	if (retval)
+		err_display("WSARecv()");
+
+	BYTE* ptr = reinterpret_cast<BYTE*>(recv_buffer);
+
+	while (0 != iobyte)
+	{
+		if (0 == in_packet_size)
+			in_packet_size = ptr[0];
+
+		int required = in_packet_size - saved_packet_size;
+
+		if (iobyte + saved_packet_size >= in_packet_size)
+		{// 완성할 수 있을 때
+			memcpy(packet_buffer + saved_packet_size, ptr, required);
+
+			if (m_pCurScene)
+			{
+				m_pCurScene->ProcessPacket(packet_buffer, fTimeElapsed);
+			}
+			// 각 Scene의 ProcessPacket으로 처리를 넘김
+			// ProcessPacket(packet_buffer);
+			ptr += required;
+			iobyte -= required;
+			in_packet_size = 0;
+			saved_packet_size = 0;
+		}
+		else
+		{// 완성 못 할 때
+			memcpy(packet_buffer + saved_packet_size, ptr, iobyte);
+			saved_packet_size += iobyte;
+			iobyte = 0;
+		}
+	}
+}
 
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
 void NetWorkManager::SendPacket(DWORD dataBytes)
