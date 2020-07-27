@@ -122,6 +122,25 @@ LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_MOVE:
 		break;
+	case WM_SOCKET:
+		if (WSAGETSELECTERROR(lParam))
+		{
+			//Network::GetInstance()->DeleteInstance();
+			closesocket((SOCKET)wParam);
+			PostQuitMessage(0);
+		}
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_READ:
+			NetWorkManager::GetInstance()->ReadPacket();
+			break;
+		case FD_CLOSE:
+			closesocket((SOCKET)wParam);
+			//Network::GetInstance()->DeleteInstance();
+			PostQuitMessage(0);
+			break;
+		}
+		break;
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
