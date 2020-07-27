@@ -4,7 +4,7 @@
 
 MeatShader::MeatShader()
 {
-	shaderName = "MeatShader";
+	shaderName = _MEAT_SHADER;
 }
 MeatShader::~MeatShader()
 {

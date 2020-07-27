@@ -22,15 +22,15 @@ bool ItemMeteorite::Update(float fTimeElapsed, CGameObject* target)
 	{
 		CHeightMapTerrain* t = (CHeightMapTerrain*)m_pUpdatedContext;
 		MessageStruct message;
-		message.msgName = "Add_Model";
-		message.shaderName = "MoundShader";
+		message.msgName = _ADD_OBJECT;
+		message.shaderName = _MOUND_SHADER;
 		message.departMat = m_xmf4x4World;
 		message.departMat._42 = t->GetHeight(m_xmf4x4World._41, m_xmf4x4World._43);
 		//EventHandler::GetInstance()->CallBack(message);
 		EventHandler::GetInstance()->RegisterEvent(message);
 
-		message.msgName = "Add_Particle";
-		message.shaderName = "StoneParticle";
+		message.msgName = _ADD_PARTICLE;
+		message.shaderName = STONE_PARTICLE;
 		EventHandler::GetInstance()->RegisterEvent(message);
 
 		return true;

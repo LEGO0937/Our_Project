@@ -2,7 +2,7 @@
 #include <time.h>
 
 
-ParticleSystem::ParticleSystem(CreateManager* pCreateManager, string name, CGameObject* pTarget,
+ParticleSystem::ParticleSystem(CreateManager* pCreateManager, char name, CGameObject* pTarget,
 	const XMFLOAT3& xmf3Position)
 {
 	FindValue(name);
@@ -316,9 +316,9 @@ void ParticleSystem::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 		m_pMesh->Render(pd3dCommandList, 0, m_vParticles.size());
 }
 
-void ParticleSystem::FindValue(string name)
+void ParticleSystem::FindValue(char name)
 {
-	if (name == "Spawn")
+	if (name == SPAWN)
 	{
 		m_cPattern = LOOP;
 		m_cShape = RAND;
@@ -329,7 +329,7 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 50;
 		m_sTextureName = "Resources/Images/T_Linepoint.dds";
 	}
-	else if (name == "HeatEffect")
+	else if (name == HEAT_EFFECT)
 	{
 		m_cPattern = ONES;
 		m_cShape = BOOM;
@@ -340,7 +340,7 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 1;
 		m_sTextureName = "Resources/Images/T_Damage1.dds";
 	}
-	else if (name == "BoxParticle")
+	else if (name == BOX_PARTICLE)
 	{
 		m_cPattern = ONES;
 		m_cShape = CONE;
@@ -351,7 +351,7 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 120;
 		m_sTextureName = "Resources/Images/T_Itemboxeat.dds";
 	}
-	else if (name == "MeatParticle")
+	else if (name == MEAT_PARTICLE)
 	{
 		m_cPattern = ONES;
 		m_cShape = CONE;
@@ -362,7 +362,7 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 120;
 		m_sTextureName = "Resources/Images/T_Meateat_P.dds";
 	}
-	else if (name == "Dust")
+	else if (name == DUST_PARTICLE)
 	{
 		m_cPattern = LOOP;
 		m_cShape = DUST;
@@ -373,7 +373,7 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 60;
 		m_sTextureName = "Resources/Images/dust.dds";
 	}
-	else if (name == "StoneParticle")
+	else if (name == STONE_PARTICLE)
 	{
 		m_cPattern = ONES;
 		m_cShape = CONE;

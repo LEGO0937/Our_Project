@@ -4,7 +4,7 @@
 
 DashBoardShader::DashBoardShader()
 {
-	shaderName = "DashBoardShader";
+
 }
 DashBoardShader::~DashBoardShader()
 {

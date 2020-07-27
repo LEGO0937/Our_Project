@@ -3,7 +3,7 @@
 
 TreeShader::TreeShader()
 {
-	shaderName = "TreeShader";
+	shaderName = _TREE_SHADER;
 }
 TreeShader::~TreeShader()
 {

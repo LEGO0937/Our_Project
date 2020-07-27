@@ -72,3 +72,38 @@ enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 
 
 //#define isDebug
+
+
+//shaderName
+#define _MODEL_SHADER 0
+#define _BILLBOARD_SHADER 1
+#define _TREE_SHADER 2
+#define _BLOCK_SHADER 3
+#define _FENCE_SHADER 4
+#define _ITEM_SHADER 5
+#define _MEAT_SHADER 6
+#define _BANANA_SHADER 7
+#define _METEORITE_SHADER 8
+#define _MOUND_SHADER 9
+#define _MUD_SHADER 10
+#define _STONE_SHADER 11
+#define _SKINED_SHADER 12
+#define _PLAYER_SHADER 13
+
+#define _OBJECTS_SHADER 99
+
+//------EVENT HANDLER INSTRUCTION
+
+#define _ADD_OBJECT 0
+#define _DELETE_OBJECT 1
+#define _ADD_PARTICLE 2
+#define _DISENABLE_OBJECT 3
+
+
+//-----particle pattern
+#define SPAWN 0
+#define HEAT_EFFECT 1
+#define BOX_PARTICLE 2
+#define MEAT_PARTICLE 3
+#define DUST_PARTICLE 4
+#define STONE_PARTICLE 5 

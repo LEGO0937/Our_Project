@@ -385,9 +385,9 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 	BuildLights();
 	m_pCreateManager->RenderLoading();
 	BuildSubCameras(pCreateManager);
@@ -1132,12 +1132,12 @@ void GameScene::ResetShadowBuffer(CreateManager* pCreateManager)
 void GameScene::ProcessEvent(const MessageStruct& msg)
 {
 	
-	if (msg.msgName == "Add_Particle")
+	if (msg.msgName == _ADD_PARTICLE)
 	{
 		XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
 		particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName, NULL, pos));
 	}
-	else if (msg.msgName == "DisEnable_Model")
+	else if (msg.msgName == _DISENABLE_OBJECT)
 	{
 		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
 			return a->GetName() == msg.shaderName; });

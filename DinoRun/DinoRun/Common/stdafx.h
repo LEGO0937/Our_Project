@@ -82,21 +82,17 @@ typedef struct Point2D
 
 struct MessageStruct
 {
-	string msgName;
-	string shaderName;
+	char msgName;
+	char shaderName;
 	string objectName = "None";
-	int integerValue;
 	XMFLOAT4X4 departMat;
-	XMFLOAT4X4 arriveMat;
 
 	MessageStruct() {}
 	MessageStruct(const MessageStruct& msg)
 	{
 		msgName = msg.msgName;
 		shaderName = msg.shaderName;
-		integerValue = msg.integerValue;
 		departMat = msg.departMat;
-		arriveMat = msg.arriveMat;
 		objectName = msg.objectName;
 	}
 };

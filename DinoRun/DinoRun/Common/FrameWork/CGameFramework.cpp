@@ -138,7 +138,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pCreateManager);
 	m_pScene->SetId(m_sPlayerID);
 	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
-	pPlayer->SetMaxForce(MIN_FORCE);
+	pPlayer->SetMaxForce(MAX_FORCE);
 	m_pPlayer = pPlayer;
 
 	m_pScene->setPlayer(m_pPlayer);
@@ -381,11 +381,11 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
+		if (type == SceneType::ItemGame_Scene)
+			m_pPlayer->SetMaxVelocityXZ(25);
 
 		m_pScene->setPlayer(m_pPlayer);
 		m_pScene->setCamera(m_pPlayer->GetCamera());
-
-
 	}
 
 	m_pCreateManager->ExecuteCommandList();

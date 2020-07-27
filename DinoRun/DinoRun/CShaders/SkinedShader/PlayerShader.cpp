@@ -4,6 +4,7 @@
 
 PlayerShader::PlayerShader()
 {
+	shaderName = _PLAYER_SHADER;
 }
 PlayerShader::~PlayerShader()
 {

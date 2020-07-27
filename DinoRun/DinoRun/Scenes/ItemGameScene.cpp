@@ -25,11 +25,11 @@
 
 #include <time.h>
 
-#define ITEM_TILE 0
-#define ITEM_UI 1   //아이템 틀안의 이미지의 쉐이더 리스트상에서의 인덱스
+#define ITEM_TILE 1
+#define ITEM_UI 2   //아이템 틀안의 이미지의 쉐이더 리스트상에서의 인덱스
 #define PLAYER_SHADER instancingAnimatedModelShaders[0]
 
-string ItemShaderName[5] = { "Default","BananaShader","MudShader","StoneShader","Meteorite" };
+char ItemShaderName[5] = { 0,_BANANA_SHADER,_MUD_SHADER,_STONE_SHADER,_METEORITE_SHADER };
 
 ItemGameScene::ItemGameScene() :BaseScene()
 {
@@ -417,9 +417,9 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	motionBlurShader = new MotionBlurShader(pCreateManager.get());
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(),"Spawn", NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(),SPAWN, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 
 	BuildLights();
 
@@ -527,8 +527,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
 				message.shaderName = ItemShaderName[m_eCurrentItem];
 				message.departMat = matrix;
-				message.arriveMat = matrix;
-				message.msgName = "Add_Model";
+				message.msgName = _ADD_OBJECT;
 				EventHandler::GetInstance()->RegisterEvent(message);
 				break;
 			case IconMeat:
@@ -538,13 +537,12 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				break;
 			case IconMeteorite:
 				int checkCount = (m_pPlayer->GetCheckPoint() + 9) % 181;
-				message.shaderName = "MeteoriteShader";
+				message.shaderName = _METEORITE_SHADER;
 				CGameObject* checkPoint = m_pCheckPointShader->getList()[checkCount];
 				XMFLOAT4X4 mat = checkPoint->m_xmf4x4World;
 				mat._42 += 500;
 				message.departMat = mat;
-				message.arriveMat = mat;
-				message.msgName = "Add_Model";
+				message.msgName = _ADD_OBJECT;
 				EventHandler::GetInstance()->RegisterEvent(message);
 				break;
 			}
@@ -557,12 +555,11 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				deltaTime);
 			break;
 		case VK_F4:
-			message.shaderName = "MeteoriteShader";
+			message.shaderName = _METEORITE_SHADER;
 			XMFLOAT4X4 mat = m_pPlayer->m_xmf4x4World;
 			mat._42 += 500;
 			message.departMat = mat;
-			message.arriveMat = mat;
-			message.msgName = "Add_Model";
+			message.msgName = _ADD_OBJECT;
 			EventHandler::GetInstance()->RegisterEvent(message);
 			break;
 		case VK_LEFT:
@@ -1282,26 +1279,26 @@ void ItemGameScene::ResetShadowBuffer(CreateManager* pCreateManager)
 
 void ItemGameScene::ProcessEvent(const MessageStruct& msg)
 {
-	if (msg.msgName == "Add_Model")
+	if (msg.msgName == _ADD_OBJECT)
 	{
 		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
 			return a->GetName() == msg.shaderName; });
 		if (shader != instancingModelShaders.end())
-			(*shader)->addObject(m_pCreateManager.get(), msg.departMat, msg.arriveMat);
+			(*shader)->addObject(m_pCreateManager.get(), msg.departMat);
 	}
-	else if (msg.msgName == "Delete_Model")
+	else if (msg.msgName == _DELETE_OBJECT)
 	{
 		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
 			return a->GetName() == msg.shaderName; });
 		if (shader != instancingModelShaders.end())
 			(*shader)->DeleteObject(msg.objectName);
 	}
-	else if (msg.msgName == "Add_Particle")
+	else if (msg.msgName == _ADD_PARTICLE)
 	{
 		XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
 		particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName, NULL, pos));
 	}
-	else if (msg.msgName == "DisEnable_Model")
+	else if (msg.msgName == _DISENABLE_OBJECT)
 	{
 		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
 			return a->GetName() == msg.shaderName; });

@@ -13,7 +13,6 @@
 #define DUST 3
 
 
-
 struct CB_Particle
 {
 	XMFLOAT3 xmf3Position;
@@ -82,7 +81,7 @@ private:
 	CB_Particle *particleCb;
 	
 public:
-	ParticleSystem(CreateManager* pCreateManager, string name, CGameObject* pTarget,
+	ParticleSystem(CreateManager* pCreateManager, char name, CGameObject* pTarget,
 		const XMFLOAT3& xmf3Position);
 	~ParticleSystem();
 	list<Particle> GetParticles() { return m_vParticles; }
@@ -98,6 +97,6 @@ public:
 	void CreateParticles();
 	void SetEnable(bool enable) { m_bEnable = enable; }
 
-	void FindValue(string name);
+	void FindValue(char name);
 };
 

@@ -5,6 +5,7 @@
 
 ModelShader::ModelShader()
 {
+	shaderName = _MODEL_SHADER;
 }
 ModelShader::~ModelShader()
 {

@@ -298,9 +298,9 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 	{
 		if (Vector3::Length(m_xmf3Velocity) > 20)
 		{
-			message.shaderName = "HeatEffect";
+			message.shaderName = HEAT_EFFECT;
 			message.departMat = m_xmf4x4World;
-			message.msgName = "Add_Particle";
+			message.msgName = _ADD_PARTICLE;
 			EventHandler::GetInstance()->RegisterEvent(message);
 			OnCollisionAni();
 		}
@@ -335,13 +335,13 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 	case ModelType::Item_Box:
 		//아이템 습득
 		message.objectName = target->GetName();
-		message.shaderName = "ItemShader";
-		message.msgName = "DisEnable_Model";
+		message.shaderName = _ITEM_SHADER;
+		message.msgName = _DISENABLE_OBJECT;
 		EventHandler::GetInstance()->RegisterEvent(message);
 
-		message.shaderName = "BoxParticle";
+		message.shaderName = BOX_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
-		message.msgName = "Add_Particle";
+		message.msgName = _ADD_PARTICLE;
 		EventHandler::GetInstance()->RegisterEvent(message);
 		SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 		return true;
@@ -351,13 +351,13 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 			m_fMaxVelocityXZ = MAX_VELOCITY;
 
 		message.objectName = target->GetName();
-		message.shaderName = "MeatShader";
-		message.msgName = "DisEnable_Model";
+		message.shaderName = _MEAT_SHADER;
+		message.msgName = _DISENABLE_OBJECT;
 		EventHandler::GetInstance()->RegisterEvent(message);
 
-		message.shaderName = "MeatParticle";
+		message.shaderName = MEAT_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
-		message.msgName = "Add_Particle";
+		message.msgName = _ADD_PARTICLE;
 		EventHandler::GetInstance()->RegisterEvent(message);
 		SoundManager::GetInstance()->Play("MeatEat", 0.5f);
 		//target->SetEnableState(false);  //서버 비활성화 신호 서버에 보내주고 쉐이더에서 처리할 것.
@@ -369,8 +369,8 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		//	m_fWheelDegree = -30;
 		OnSliding();
 		message.objectName = target->GetName();
-		message.shaderName = "BananaShader";
-		message.msgName = "Delete_Model";
+		message.shaderName = _BANANA_SHADER;
+		message.msgName = _DELETE_OBJECT;
 		EventHandler::GetInstance()->RegisterEvent(message);
 		break;		
 	case ModelType::Item_Mud:
@@ -803,7 +803,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager,"Dust", this, XMFLOAT3(0.0f, 0, 18));
+	m_pParticleSystem = new ParticleSystem(pCreateManager,DUST_PARTICLE, this, XMFLOAT3(0.0f, 0, 18));
 	//SetScale(XMFLOAT3(0.05f, 0.05f, 0.05f));
 
 }
