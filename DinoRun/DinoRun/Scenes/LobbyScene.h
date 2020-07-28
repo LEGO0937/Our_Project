@@ -18,6 +18,12 @@ struct Room
 	{}
 };
 
+struct LobbyUser
+{
+	char m_id;
+	string m_sName;
+	LobbyUser(char id = 0, string name = ""):m_id(id),m_sName(name){}
+};
 class LobbyScene : public BaseScene
 {
 public:
@@ -47,7 +53,12 @@ public:
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
 
-	virtual void ProcessPacket(char* packet);
+	virtual void ProcessPacket(char* packet,float fTimeElapsed);
+
+	void UpdateAddUser(char* packet, float fTimeElapsed);
+	void UpdateDeleteUser(char* packet, float fTimeElapsed);
+	void UpdateAddRoom(char* packet, float fTimeElapsed);
+	void UpdateRoomInfo(char* packet, float fTimeElapsed);
 private:
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CUiShader*> instacingUiShaders;
@@ -65,5 +76,5 @@ private:
 	bool m_bMode = 0.0f;
 	int m_iResultNum = 0; 
 	vector<Room> m_vRooms;
-	vector<string> m_vUsers;
+	vector<LobbyUser> m_vUsers;
 };

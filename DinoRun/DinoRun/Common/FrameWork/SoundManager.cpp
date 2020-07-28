@@ -62,6 +62,8 @@ void SoundManager::Initialize()
 	AddSound("ItemBox", "Resources/Sounds/ItemBox.mp3", false);
 	AddSound("Curve", "Resources/Sounds/Curve.mp3", false);
 	AddSound("Running", "Resources/Sounds/Running.mp3", true);
+	AddSound("CountDown", "Resources/Sounds/123.mp3", false);
+	AddSound("CountDownZero", "Resources/Sounds/Go.mp3", false);
 }
 void SoundManager::AddSound(string name, string soundFile, bool loop)
 {

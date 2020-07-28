@@ -93,28 +93,28 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_vRooms.emplace_back(Room(9, 2, false,false));
 
 
-	m_vUsers.emplace_back("das");
-	m_vUsers.emplace_back("das1");
-	m_vUsers.emplace_back("das2");
-	m_vUsers.emplace_back("das3");
-	m_vUsers.emplace_back("das4");
-	m_vUsers.emplace_back("das5");
-	m_vUsers.emplace_back("das6");
-	m_vUsers.emplace_back("das7");
-	m_vUsers.emplace_back("das8");
-	m_vUsers.emplace_back("das9");
-	m_vUsers.emplace_back("das10");
-	m_vUsers.emplace_back("das11");
-	m_vUsers.emplace_back("das12");
-	m_vUsers.emplace_back("das13");
-	m_vUsers.emplace_back("das14");
-	m_vUsers.emplace_back("das15");
-	m_vUsers.emplace_back("das16");
-	m_vUsers.emplace_back("das17");
-	m_vUsers.emplace_back("das18");
-	m_vUsers.emplace_back("das19");
-	m_vUsers.emplace_back("das20");
-	m_vUsers.emplace_back("das21");
+	m_vUsers.emplace_back(LobbyUser(0,"das"));
+	m_vUsers.emplace_back(LobbyUser(1,"das1"));
+	m_vUsers.emplace_back(LobbyUser(2,"das2"));
+	m_vUsers.emplace_back(LobbyUser(3,"das3"));
+	m_vUsers.emplace_back(LobbyUser(4,"das4"));
+	m_vUsers.emplace_back(LobbyUser(5,"das5"));
+	m_vUsers.emplace_back(LobbyUser(6,"das6"));
+	m_vUsers.emplace_back(LobbyUser(7,"das7"));
+	m_vUsers.emplace_back(LobbyUser(8,"das8"));
+	m_vUsers.emplace_back(LobbyUser(9,"das9"));
+	m_vUsers.emplace_back(LobbyUser(10,"das10"));
+	m_vUsers.emplace_back(LobbyUser(11,"das11"));
+	m_vUsers.emplace_back(LobbyUser(12,"das12"));
+	m_vUsers.emplace_back(LobbyUser(13,"das13"));
+	m_vUsers.emplace_back(LobbyUser(14,"das14"));
+	m_vUsers.emplace_back(LobbyUser(15,"das15"));
+	m_vUsers.emplace_back(LobbyUser(16,"das16"));
+	m_vUsers.emplace_back(LobbyUser(17,"das17"));
+	m_vUsers.emplace_back(LobbyUser(18,"das18"));
+	m_vUsers.emplace_back(LobbyUser(19,"das19"));
+	m_vUsers.emplace_back(LobbyUser(20,"das20"));
+	m_vUsers.emplace_back(LobbyUser(21,"das21"));
 	//------------------UserList----------------------
 		
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.28f),XMFLOAT2(1.05f,1.05f)));  //유저 목록 8줄 0~7 idx
@@ -467,7 +467,7 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		{
 			if (i <= m_vUsers.size() - 1)
 			{
-				gameTexts[n].text = m_vUsers[i];
+				gameTexts[n].text = m_vUsers[i].m_sName;
 			}
 			else
 			{
@@ -533,7 +533,7 @@ void LobbyScene::setCamera(CCamera* camera)
 	BaseScene::setCamera(camera);
 }
 
-void LobbyScene::ProcessPacket(char* packet)
+void LobbyScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
 	/*
 	유저 명단에 대한 정보 추가
@@ -543,4 +543,52 @@ void LobbyScene::ProcessPacket(char* packet)
 	m_vRooms.emlace_back(Room구조체);
 
 	*/
+	switch (packet[1])
+	{
+	//case SC_READY_STATE:
+	//	UpdateReadyState(packet, fTimeElapsed);
+	//	break;
+	//case SC_UNREADY_STATE:
+	//	UpdateUnreadyState(packet, fTimeElapsed);
+	//	break;
+	case SC_CLIENT_LOBBY_IN:
+		UpdateAddUser(packet, fTimeElapsed);
+		break;
+	case SC_CLIENT_LOBBY_OUT:
+		UpdateDeleteUser(packet, fTimeElapsed);
+		break;
+	}
+}
+
+void LobbyScene::UpdateAddUser(char* packet, float fTimeElapsed)
+{
+	//패킷 구조체안에 현재 버튼이 어떤 상태인지도 보내줄 필요가 있음. 보류
+	SC_PACKET_LOBBY_IN* playerInfo = reinterpret_cast<SC_PACKET_LOBBY_IN*>(packet);
+	//m_vUsers
+	auto iter = find_if(m_vUsers.begin(), m_vUsers.end(), [&](const LobbyUser& a) {
+		return a.m_id == playerInfo->id; });
+	if (iter == m_vUsers.end())
+	{
+		LobbyUser user;
+		//ConvertCHARtoWCHAR(playerInfo->client_state.name);
+		user.m_sName = playerInfo->client_state.name;
+		user.m_id = playerInfo->id;
+		m_vUsers.emplace_back(user);
+	}
+}
+void LobbyScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_LOBBY_OUT* playerInfo = reinterpret_cast<SC_PACKET_LOBBY_OUT*>(packet);
+
+	m_vUsers.erase(remove_if(m_vUsers.begin(), m_vUsers.end(), [&](const LobbyUser& a) {
+		return a.m_id == playerInfo->id; }), m_vUsers.end());
+}
+
+void LobbyScene::UpdateAddRoom(char* packet, float fTimeElapsed)
+{
+
+}
+void LobbyScene::UpdateRoomInfo(char* packet, float fTimeElapsed)
+{
+
 }

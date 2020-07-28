@@ -11,7 +11,7 @@
 #define CONE 15
 #define BOOM 2
 #define DUST 3
-
+#define HEAT 4
 
 struct CB_Particle
 {

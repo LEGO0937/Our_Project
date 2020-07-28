@@ -217,13 +217,18 @@ void NetWorkManager::SendPacket()
 	}
 }
 
-void NetWorkManager::SendPlayerInfoPacket()
+void NetWorkManager::SendPlayerInfoPacket(const CS_PACKET_PLAYER_INFO& packet)
 {
 	pInfo = reinterpret_cast<CS_PACKET_PLAYER_INFO*>(send_buffer);
 	pInfo->size = sizeof(pInfo);
 	send_wsabuf.len = sizeof(pInfo);
 	pInfo->type = CS_PLAYER_INFO;
 
+	pInfo->checkPoints = packet.checkPoints;
+	pInfo->id = packet.id;
+	pInfo->keyState = packet.keyState;
+	pInfo->playerNames = packet.playerNames;
+	pInfo->xmf4x4Parents = packet.xmf4x4Parents;
 	SendPacket();
 }
 
@@ -475,7 +480,14 @@ void NetWorkManager::SendUseItem(int useItem, int targetID)
 }
 // Use아이템으로 사용했다는 신호와 동시에 사라지게 하는거야
 
-
+void NetWorkManager::SendEventPacket(const MessageStruct& msg)
+{
+	pEvent = reinterpret_cast<CS_PACKET_EVENT*>(send_buffer);
+	pEvent->msg = msg;
+	pEvent->size = sizeof(pItem);
+	send_wsabuf.len = sizeof(pItem);
+	pEvent->type = CS_GET_ITEM;
+}
 
 // 소켓 함수 오류 출력 후 종료
 void NetWorkManager::err_quit(const char* msg)

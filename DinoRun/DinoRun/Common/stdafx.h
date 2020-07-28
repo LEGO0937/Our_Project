@@ -59,9 +59,6 @@ using namespace std;
 #pragma comment(lib, "wsock32.lib")
 #pragma comment(lib, "Ws2_32.lib")
 
-
-#include "../protocol.h"
-
 #define FRAME_BUFFER_WIDTH 1280
 #define FRAME_BUFFER_HEIGHT 700
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
@@ -85,6 +82,22 @@ typedef struct Point2D
 	float y;
 }Point2D;
 
+struct MessageStruct
+{
+	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
+	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
+	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
+	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
+
+	MessageStruct() {}
+	MessageStruct(const MessageStruct& msg)
+	{
+		msgName = msg.msgName;
+		shaderName = msg.shaderName;
+		departMat = msg.departMat;
+		objectSerialNum = msg.objectSerialNum;
+	}
+};
 
 extern ID3D12Resource *CreateBufferResource(ID3D12Device *pd3dDevice,
 	ID3D12GraphicsCommandList *pd3dCommandList, void *pData, UINT nBytes, D3D12_HEAP_TYPE

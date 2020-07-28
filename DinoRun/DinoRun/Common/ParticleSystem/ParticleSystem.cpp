@@ -224,6 +224,40 @@ void ParticleSystem::CreateParticles()
 		m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
 		curNumParticle++;
 		break;
+	case HEAT:
+		if (curNumParticle + 30 < m_uMaxSize)
+		{
+			XMFLOAT3 vel = XMFLOAT3(m_fVelocity, 0.0f, 0.0f);
+			if (m_pTarget)
+			{
+				vel = Vector3::TransformCoord(vel, m_pTarget->m_xmf4x4World);
+				vel = Vector3::Normalize(vel);
+				vel = XMFLOAT3(vel.x*0.5f, vel.x, 0.0f);
+			}
+
+			XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			XMVECTOR up = XMLoadFloat3(&xmf3Up);
+
+			XMMATRIX mat = XMMatrixRotationAxis(up, XMConvertToRadians(24));
+			for (int i = 0; i < 15; ++i)
+			{
+				m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
+				vel = Vector3::TransformNormal(vel, mat);
+			}
+			curNumParticle += 15;
+
+			xmf3Up = XMFLOAT3(0.0f, 0.0f, 1.0f);
+			up = XMLoadFloat3(&xmf3Up);
+			mat = XMMatrixRotationAxis(up, XMConvertToRadians(24));
+			vel = XMFLOAT3(0.0f, m_fVelocity, 0.0f);
+			for (int i = 0; i < 15; ++i)
+			{
+				m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
+				vel = Vector3::TransformNormal(vel, mat);
+			}
+			curNumParticle += 15;
+		}
+		break;
 	default:
 		break;
 	}
@@ -332,13 +366,13 @@ void ParticleSystem::FindValue(char name)
 	else if (name == HEAT_EFFECT)
 	{
 		m_cPattern = ONES;
-		m_cShape = BOOM;
+		m_cShape = HEAT;
 		m_fSize = (5.0f);
-		m_fParticleLife = 0.5f;
-		m_fVelocity = (0.0f);
+		m_fParticleLife = 0.3f;
+		m_fVelocity = (50.0f);
 		m_fGravity = 0.0f;
-		m_uMaxSize = 1;
-		m_sTextureName = "Resources/Images/T_Damage1.dds";
+		m_uMaxSize = 31;
+		m_sTextureName = "Resources/Images/T_Damage2.dds";
 	}
 	else if (name == BOX_PARTICLE)
 	{

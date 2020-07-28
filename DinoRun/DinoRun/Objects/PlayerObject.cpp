@@ -77,7 +77,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		{
 			KeyDownUp(); 
 			if((dwDirection & DIR_RIGHT) || (dwDirection & DIR_LEFT))
-				m_fForce += fDistance/2.0f;
+				m_fForce += fDistance * 0.5f;
 			else
 				m_fForce += fDistance;
 			if (!SoundManager::GetInstance()->Playing("Running"))
@@ -94,7 +94,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		if (dwDirection & DIR_BACKWARD)
 		{
 			KeyDownDown();
-			m_fForce -= fDistance/2.0f;
+			m_fForce -= fDistance * 0.5f;
 			if (!SoundManager::GetInstance()->Playing("Running"))
 				SoundManager::GetInstance()->Play("Running");
 		}
@@ -301,7 +301,11 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 			message.shaderName = HEAT_EFFECT;
 			message.departMat = m_xmf4x4World;
 			message.msgName = _ADD_PARTICLE;
+#ifndef isConnectedToServer
 			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 			OnCollisionAni();
 		}
 
@@ -337,12 +341,19 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		message.objectSerialNum = target->GetId();
 		message.shaderName = _ITEM_SHADER;
 		message.msgName = _DISENABLE_OBJECT;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
-
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 		message.shaderName = BOX_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
 		message.msgName = _ADD_PARTICLE;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 		SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 		return true;
 	case ModelType::Item_Meat:
@@ -353,12 +364,20 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		message.objectSerialNum = target->GetId();
 		message.shaderName = _MEAT_SHADER;
 		message.msgName = _DISENABLE_OBJECT;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 
 		message.shaderName = MEAT_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
 		message.msgName = _ADD_PARTICLE;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 		SoundManager::GetInstance()->Play("MeatEat", 0.5f);
 		//target->SetEnableState(false);  //서버 비활성화 신호 서버에 보내주고 쉐이더에서 처리할 것.
 		return true;
@@ -371,7 +390,11 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		message.objectSerialNum = target->GetId();
 		message.shaderName = _BANANA_SHADER;
 		message.msgName = _DELETE_OBJECT;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 		break;		
 	case ModelType::Item_Mud:
 		fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);

@@ -294,7 +294,7 @@ void StartScene::setCamera(CCamera* camera)
 }
 
 
-void StartScene::ProcessPacket(char* packet)
+void StartScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
 
 }

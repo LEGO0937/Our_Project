@@ -8,8 +8,9 @@ struct User
 {
 	string m_sName;
 	bool m_bButtonState;
+	char m_id;
 
-	User(string name = "", bool state = 0) :m_sName(name), m_bButtonState(state) {}
+	User(string name = "", bool state = 0,char id = 0) :m_sName(name), m_bButtonState(state),m_id(id) {}
 };
 class RoomScene : public BaseScene
 {
@@ -40,7 +41,11 @@ public:
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
 
-	virtual void ProcessPacket(char* packet);
+	virtual void ProcessPacket(char* packet, float fTimeElapsed);
+	void UpdateUnreadyState(char* packet, float fTimeElapsed);
+	void UpdateReadyState(char* packet, float fTimeElapsed);
+	void UpdateAddUser(char* packet, float fTimeElapsed);
+	void UpdateDeleteUser(char* packet, float fTimeElapsed);
 private:
 	vector<CUiShader*> instacingUiShaders;
 	bool isClickedButton = false;

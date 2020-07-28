@@ -65,6 +65,7 @@ private:
 	CS_PACKET_USE_ITEM* pItem = NULL;
 	CS_PACKET_GET_ITEM* pGetItem = NULL;
 	CS_PACKET_PLAYER_INFO* pInfo = NULL;
+	CS_PACKET_EVENT* pEvent = NULL;  //이벤트처리용
 
 	HWND m_hWnd{ NULL };
 	int m_iNumPlayer = 0;
@@ -121,7 +122,7 @@ public:
 	void SendNotReady();
 	void SendReqStart();
 	void SendReleaseKey();
-	void SendPlayerInfoPacket();
+	void SendPlayerInfoPacket(const CS_PACKET_PLAYER_INFO& packet);
 	void SendAnimationState(char animNum);
 	void SendNickName(char id, _TCHAR* name);
 	void SendChattingText(char id, const _TCHAR* text);
@@ -130,7 +131,7 @@ public:
 	void SendPlayerCollision(unsigned char playerID);
 	void SendGetItem(const string& itemIndex);
 	void SendUseItem(int useItem, int targetID);
-
+	void SendEventPacket(const MessageStruct& msg);
 
 public:
 	CS_PACKET_REQUEST_START* GetRS() { return pRequestStart; }

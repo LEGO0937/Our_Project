@@ -154,6 +154,11 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_fCountDownTime = 4.0f;
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+
+#ifdef isConnectedToServer
+	NetWorkManager::GetInstance()->ConnectToServer();
+#endif
+
 	m_pCreateManager->RenderLoading();
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 	
@@ -196,9 +201,9 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.positions.clear();
 	view_info.f_uvY.clear();
 
-	view_info.textureName = "Resources/Images/T_Gauge_Frame.dds";
-	view_info.meshSize = XMFLOAT2(0.07f, 0.05f);
-	view_info.positions.emplace_back(XMFLOAT3(+0.93f, -0.95f, 0.0f));
+	view_info.textureName = "Resources/Images/T_Speed.dds";
+	view_info.meshSize = XMFLOAT2(0.07f, 0.1f);
+	view_info.positions.emplace_back(XMFLOAT3(+0.93f, -0.92f, 0.0f));
 	view_info.maxUv = XMFLOAT2(1.0f, 1.0f);
 	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
 	view_info.f_uvY.emplace_back(0.0f);
@@ -711,7 +716,7 @@ void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 
 	if (!isStart)
 	{
-		if (m_fCountDownTime > 0.0f)
+		if (m_fCountDownTime > 0.9f)
 		{
 			m_fCountDownTime -= fTimeElapsed;
 		}
@@ -722,6 +727,16 @@ void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 		}
 	}
 	m_pCountDownShader->Update(fTimeElapsed, &m_fCountDownTime);
+
+#ifdef isConnectedToServer
+	CS_PACKET_PLAYER_INFO playerInfo;
+	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
+	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
+	playerInfo.keyState = dwDirection;
+	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
+	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
+	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
+#endif
 
 }
 
@@ -1153,33 +1168,53 @@ void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
 }
 void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
-	
+	switch (packet[1])
+	{
+	case SC_PLAYER_INFO:
+		updatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
+		//역으로 자신의 정보를 줄때는? Update에서 끝나는 지점에서 send할것
+		break;
+	case SC_GET_ITEM:
+		updateEventInfo(packet, fTimeElapsed); //이벤트처리
+		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
+		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
+
+		break;
+	default:
+		break;
+	}
 }
 void GameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_PLAYER_INFO* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_INFO*>(packet);
-
+	
 	vector<CGameObject*> obList = PLAYER_SHADER->getList();
 	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-		return a->GetName() == playerInfo->playerNames; });
+		return a->GetId() == playerInfo->id; });
 	if (obj != obList.end())
 	{
 		(*obj)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents;
 		((CPlayer*)(*obj))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);
+		((CPlayer*)(*obj))->SetCheckPoint(playerInfo->checkPoints);
 	}
 	else
 	{
 		auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-			return a->GetName() == "None"; });
+			return a->GetId() == 0; });
 		if (findId != obList.end())
 		{
-			(*findId)->SetName(playerInfo->playerNames);
-			(*findId)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents;
-			((CPlayer*)(*obj))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);
+			(*findId)->SetId(playerInfo->id);
+			(*findId)->SetName(playerInfo->playerNames); // 없을경우 이름지정
+			(*findId)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents; //변환행렬 처리
+			((CPlayer*)(*findId))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);  //애니메이션처리
+			((CPlayer*)(*findId))->SetCheckPoint(playerInfo->checkPoints);
 		}
 	}
 }
 void GameScene::updateEventInfo(char* packet, float fTimeElapsed)
 {
+	SC_PACKET_EVENT* playerInfo = reinterpret_cast<SC_PACKET_EVENT*>(packet);
+	MessageStruct msg = playerInfo->msg;
 
+	EventHandler::GetInstance()->RegisterEvent(msg);
 }
