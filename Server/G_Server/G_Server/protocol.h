@@ -1,11 +1,9 @@
 #pragma once
-#include "MyDefine.h"
 #include "DirectX.h"
+#include <string.h>
 
 //#define SERVER_IP "172.30.1.1"
 #define SERVER_IP "192.168.200.130"
-
-using namespace std;
 
 constexpr int MAX_USER = 6;
 constexpr int MAX_ROUND = 3;
@@ -24,7 +22,6 @@ struct clientsInfo
 	char	name[32];
 };
 
-enum ROLE { RUNNER, BOMBER };
 enum ITEM { MUD, ROCK, BANANA, EMPTY };
 
 enum PLAYER_NUM { P1, P2, P3, P4, P5, P6 };						// 몇번 플레이어 인지 
@@ -78,6 +75,23 @@ constexpr int CS_USEITEM = 19;
 constexpr int CS_PLAYER_INFO = 20;
 constexpr int CS_GET_ITEM = 24;
 
+struct MessageStruct
+{
+	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
+	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
+	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
+	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
+
+	MessageStruct() {}
+	MessageStruct(const MessageStruct& msg)
+	{
+		msgName = msg.msgName;
+		shaderName = msg.shaderName;
+		departMat = msg.departMat;
+		objectSerialNum = msg.objectSerialNum;
+	}
+};
+
 
 
 //[클라->서버]
@@ -89,37 +103,16 @@ constexpr int CS_GET_ITEM = 24;
 //<< InGame 패킷 종류 >>
 
 //[클라->서버]
-struct CS_PACKET_ID_POS
-{
-	char size;
-	char type;
-	unsigned char playerID;
-	
-	float xPos;
-	float yPos;
-	float zPos;
-
-	//캐릭터의 진행 방향
-	float xLook;
-	float yLook;
-	float zLook;
-	float xUp;
-	float yUp;
-	float zUp;
-	float xRight;
-	float yRight;
-	float zRight;
-};
 
 struct CS_PACKET_PLAYER_INFO
 {
 	char size;
 	char type;
 	char id;
-	XMFLOAT4X4 xmf4x4Parents[6] = {};
-	//string playerNames[6] = {};
-	int checkPoints[6];
-	DWORD keyState[6];
+	int checkPoints;
+	DWORD keyState;
+	XMFLOAT4X4 xmf4x4Parents;
+	string playerNames;
 };
 
 struct CS_PACKET_RIGHT_KEY
@@ -183,6 +176,13 @@ struct CS_PACKET_ANIMATION
 	char animation;			//애니메이션 정보를 클라에서 받아오는 패킷
 	char padding;			//4바이트 정렬을 위한 
 	//float animationTime;	//현재 애니메이션 시간
+};
+
+struct CS_PACKET_BOMBER_TOUCH
+{
+	char size;
+	char type;
+	char touchId;	// 터치한 플레이어 번호
 };
 
 struct CS_PACKET_RELEASE_KEY
@@ -251,34 +251,7 @@ struct CS_PACKET_USE_ITEM
 
 
 // 몇 라운드 인지는 라운드가 시작할 때 한 번만 보내도 됨
-struct SC_PACKET_INGAME_PACKET
-{
-	//char id;
-	//char isBomber;
-	//char xPos;
-	//char yPos;
-	//char zPos;
-	//char xDir;
-	//char yDir;
-	//char zDir;
-	//char wDir;
-	//
-	//char animNum;			// 애니메이션 번호
-	//char animTime;			// 애니메이션 시간 정보
-	//char playerState;		// 플레이어 상태
 
-	//char usedItem;			// 사용되는 아이템 정보
-	//char roundCount;		// 몇 라운드인지
-	//char timer;				// 서버 시간
-	//char isBoomed;			// 폭탄이 터졌는지
-
-	// parameter 생성자
-	/*SC_INGAME_PACKET(char _id, char _isBomber, char _xPos, char _yPos, char _zPos, char _xDir, char _yDir, char _zDir, char _wDir,
-		char _animNum, char _animTime, char _usedItem, char _playerState, char _roundCount, char _timer, char _isBoomed) :
-		id(_id), isBomber(_isBomber), xPos(_xPos), yPos(_yPos), zPos(_zPos), xDir(_xDir), yDir(_yDir), zDir(_zDir), wDir(_wDir),
-		animNum(_animNum), animTime(_animTime), usedItem(_usedItem), playerState(_playerState), roundCount(_roundCount), timer(_timer),
-		isBoomed(_isBoomed) {};*/
-};
 
 //<< Ready Room 패킷 종류 >>
 struct SC_PACKET_ACCESS_COMPLETE
@@ -287,7 +260,8 @@ struct SC_PACKET_ACCESS_COMPLETE
 	char type;
 	char myId;
 	char hostId;
-	char rank;				// 플레이어 등수
+	char score;				// 플레이어 점수
+	char roundCount;		// 몇 라운드인지
 	char serverTime;				// 서버 시간
 };
 
@@ -388,6 +362,7 @@ struct SC_PACKET_STOP_RUN_ANIM
 	char type;
 	char id;
 };
+
 //현재 Ready중인 플레이어의 정보를 담은 패킷
 struct SC_PACKET_READY_STATE
 {
@@ -446,6 +421,7 @@ struct SC_PACKET_REMOVE_PLAYER
 	char hostId;
 };
 
+
 struct SC_PACKET_ROUND_END
 {
 	char size;
@@ -461,12 +437,14 @@ struct SC_PACKET_GO_LOBBY
 	char type;
 };
 
+
 struct SC_PACKET_COLLIDED
 {
 	char size;
 	char type;
 	char id;
 };
+
 
 struct SC_PACKET_NOT_COLLIDED
 {
@@ -475,15 +453,34 @@ struct SC_PACKET_NOT_COLLIDED
 	char id;
 };
 
+
 struct SC_PACKET_PLAYER_INFO
 {
 	char size;
 	char type;
 	char id;
-	XMFLOAT4X4 xmf4x4Parents[6] = {};
-	string playerNames[6] = {};
-	int checkPoints[6];
-	DWORD keyState[6];
+	int checkPoints;
+	DWORD keyState;
+	XMFLOAT4X4 xmf4x4Parents;
+	string playerNames;
+	// 아이템 삭제, 추가(같은 이름)
+	// 숫자 같은 건 부여 못하고 hmm...
 };
 
+
 //////////////////////////////////////////////////////
+struct CS_PACKET_EVENT
+{
+	char size;
+	char type;
+
+	MessageStruct msg;
+};
+
+struct SC_PACKET_EVENT
+{
+	char size;
+	char type;
+
+	MessageStruct msg;
+};

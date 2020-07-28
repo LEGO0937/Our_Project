@@ -1,4 +1,5 @@
 #include "Server.h"
+#include <WinSock2.h>
 
 
 Server::Server()
