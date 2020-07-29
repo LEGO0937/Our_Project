@@ -10,7 +10,6 @@ constexpr int MAX_BUFFER = 1024;
 constexpr int SERVER_PORT = 9000;
 
 
-
 constexpr int MAX_WORKER_THREAD = 3;
 
 enum EVENT_TYPE
@@ -121,7 +120,8 @@ public:
 	void SendPlayerInfo(char toClietn, char fromClient);
 	void SendGetItem(char toClient, char fromClient, string& itemidx);
 	void SendUseItem(char toClient, char fromClient, char useItem);
-
+	//void SendUpdateEventInfo(char client, );
+	void SendEventPacket(char client, const MessageStruct& msg); // 애니메이션 상태 패킷
 public:
 	void SetAnimationState(char client, char animationNum);
 	void SetClient_Initialize(char client);
@@ -134,3 +134,20 @@ public:
 	void err_display(const char*);
 };
 
+
+struct MessageStruct
+{
+	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
+	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
+	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
+	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
+
+	MessageStruct() {}
+	MessageStruct(const MessageStruct& msg)
+	{
+		msgName = msg.msgName;
+		shaderName = msg.shaderName;
+		departMat = msg.departMat;
+		objectSerialNum = msg.objectSerialNum;
+	}
+};

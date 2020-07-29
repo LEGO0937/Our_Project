@@ -1,20 +1,18 @@
 #pragma once
+#include "../G_Server/MyInclude.h"
 #include "DirectX.h"
-#include <string.h>
+#include <string>
+
+using namespace std;
 
 //#define SERVER_IP "172.30.1.1"
 #define SERVER_IP "192.168.200.130"
 
 constexpr int MAX_USER = 6;
-constexpr int MAX_ROUND = 3;
 
 constexpr int MAX_ROUND_TIME = 0;
 constexpr int MAX_ITEM_NAME_LENGTH = 16;
 constexpr int MAX_CHATTING_LENGTH = 100;
-constexpr int COOLTIME = 3;
-constexpr float VELOCITY = 0.7f;
-constexpr float ROTATE_RATE = 0.02f;
-
 struct clientsInfo
 {
 	char    id;
@@ -50,6 +48,7 @@ constexpr int SC_CHANGE_HOST_ID = 22;
 constexpr int SC_GET_ITEM = 23;
 //constexpr int SC_ROUND_SCORE = 24;
 constexpr int SC_GO_LOBBY = 27;
+constexpr int SC_EVNET = 28;
 
 
 constexpr int CS_UP_KEY = 0;
@@ -74,23 +73,7 @@ constexpr int CS_NOT_PLAYER_COLLISION = 18;
 constexpr int CS_USEITEM = 19;
 constexpr int CS_PLAYER_INFO = 20;
 constexpr int CS_GET_ITEM = 24;
-
-struct MessageStruct
-{
-	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
-	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
-	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
-	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
-
-	MessageStruct() {}
-	MessageStruct(const MessageStruct& msg)
-	{
-		msgName = msg.msgName;
-		shaderName = msg.shaderName;
-		departMat = msg.departMat;
-		objectSerialNum = msg.objectSerialNum;
-	}
-};
+constexpr int CS_EVENT = 25;
 
 
 
@@ -103,6 +86,27 @@ struct MessageStruct
 //<< InGame 패킷 종류 >>
 
 //[클라->서버]
+struct CS_PACKET_ID_POS
+{
+	char size;
+	char type;
+	unsigned char playerID;
+
+	float xPos;
+	float yPos;
+	float zPos;
+
+	//캐릭터의 진행 방향
+	float xLook;
+	float yLook;
+	float zLook;
+	float xUp;
+	float yUp;
+	float zUp;
+	float xRight;
+	float yRight;
+	float zRight;
+};
 
 struct CS_PACKET_PLAYER_INFO
 {
@@ -251,7 +255,34 @@ struct CS_PACKET_USE_ITEM
 
 
 // 몇 라운드 인지는 라운드가 시작할 때 한 번만 보내도 됨
+struct SC_PACKET_INGAME_PACKET
+{
+	//char id;
+	//char isBomber;
+	//char xPos;
+	//char yPos;
+	//char zPos;
+	//char xDir;
+	//char yDir;
+	//char zDir;
+	//char wDir;
+	//
+	//char animNum;			// 애니메이션 번호
+	//char animTime;			// 애니메이션 시간 정보
+	//char playerState;		// 플레이어 상태
 
+	//char usedItem;			// 사용되는 아이템 정보
+	//char roundCount;		// 몇 라운드인지
+	//char timer;				// 서버 시간
+	//char isBoomed;			// 폭탄이 터졌는지
+
+	// parameter 생성자
+	/*SC_INGAME_PACKET(char _id, char _isBomber, char _xPos, char _yPos, char _zPos, char _xDir, char _yDir, char _zDir, char _wDir,
+		char _animNum, char _animTime, char _usedItem, char _playerState, char _roundCount, char _timer, char _isBoomed) :
+		id(_id), isBomber(_isBomber), xPos(_xPos), yPos(_yPos), zPos(_zPos), xDir(_xDir), yDir(_yDir), zDir(_zDir), wDir(_wDir),
+		animNum(_animNum), animTime(_animTime), usedItem(_usedItem), playerState(_playerState), roundCount(_roundCount), timer(_timer),
+		isBoomed(_isBoomed) {};*/
+};
 
 //<< Ready Room 패킷 종류 >>
 struct SC_PACKET_ACCESS_COMPLETE
@@ -473,7 +504,7 @@ struct CS_PACKET_EVENT
 {
 	char size;
 	char type;
-
+	char id;
 	MessageStruct msg;
 };
 
@@ -481,6 +512,6 @@ struct SC_PACKET_EVENT
 {
 	char size;
 	char type;
-
+	char id;
 	MessageStruct msg;
 };

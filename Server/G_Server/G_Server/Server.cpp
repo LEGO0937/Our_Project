@@ -1,5 +1,4 @@
 #include "Server.h"
-#include <WinSock2.h>
 
 
 Server::Server()
@@ -400,6 +399,11 @@ void Server::ProcessPacket(char client, char* packet)
 		}
 		break;
 	}
+	case CS_GET_ITEM:
+	{
+		CS_PACKET_GET_ITEM* p = reinterpret_cast<CS_PACKET_GET_ITEM*>(packet);
+		break;
+	}
 	default:
 		wcout << L"정의되지 않은 패킷 도착 오류!!\n";
 		while (true);
@@ -533,6 +537,18 @@ void Server::SendUseItem(char toClient, char fromClient, char usedItem)
 	packet.type = SC_USE_ITEM;
 
 	SendFunc(toClient, &packet);
+}
+
+void Server::SendEventPacket(char client, const MessageStruct& msg)
+{
+	SC_PACKET_EVENT packet;
+
+	packet.id = client;
+	packet.msg = msg;
+	packet.size = sizeof(packet);
+	packet.type = SC_EVENT;
+	
+	SendFunc(client, &packet);
 }
 
 void Server::SetAnimationState(char client, char animationNum)
