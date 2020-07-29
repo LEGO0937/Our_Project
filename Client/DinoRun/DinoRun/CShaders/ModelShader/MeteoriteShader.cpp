@@ -4,7 +4,7 @@
 
 MeteoriteShader::MeteoriteShader()
 {
-	shaderName = "MeteoriteShader";
+	shaderName = _METEORITE_SHADER;
 	isFixedUpdate = true;
 }
 MeteoriteShader::~MeteoriteShader()
@@ -70,7 +70,7 @@ void MeteoriteShader::Update(float fTimeElapsed)
 	}
 }
 
-void MeteoriteShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition)
+void MeteoriteShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemMeteorite* pItemObject = NULL;
 	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);

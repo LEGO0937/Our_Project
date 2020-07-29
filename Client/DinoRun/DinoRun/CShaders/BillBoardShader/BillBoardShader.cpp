@@ -6,7 +6,7 @@
 
 BillBoardShader::BillBoardShader()
 {
-	shaderName = "BillBoardShader";
+	shaderName = _BILLBOARD_SHADER;
 }
 BillBoardShader::~BillBoardShader()
 {

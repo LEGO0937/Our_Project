@@ -1438,3 +1438,23 @@ vector<string> split(string target, string delimiter) {
 	return result;
 	
 }
+
+void TransformPacketToMatrix(XMFLOAT4X4& mat, char* packet)
+{
+	mat._11 = packet[0];
+	mat._12 = packet[1];
+	mat._13 = packet[2];
+	mat._14 = packet[3];
+	mat._21 = packet[4];
+	mat._22 = packet[5];
+	mat._23 = packet[6];
+	mat._24 = packet[7];
+	mat._31 = packet[8];
+	mat._32 = packet[9];
+	mat._33 = packet[10];
+	mat._34 = packet[11];
+	mat._41 = packet[12];
+	mat._42 = packet[13];
+	mat._43 = packet[14];
+	mat._44 = packet[15];
+}

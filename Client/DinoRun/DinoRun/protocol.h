@@ -4,8 +4,6 @@
 //#define SERVER_IP "172.30.1.1"
 #define SERVER_IP "192.168.200.130"
 
-using namespace std;
-
 constexpr int MAX_USER = 6;
 constexpr int MAX_ROUND = 3;
 
@@ -47,10 +45,12 @@ constexpr int SC_CLIENT_LOBBY_OUT = 15;
 constexpr int SC_CHATTING = 16;
 constexpr int SC_READY_STATE = 17;
 constexpr int SC_UNREADY_STATE = 18;
+constexpr int SC_PLAYER_INFO = 20;
 constexpr int SC_CHANGE_HOST_ID = 22;
 constexpr int SC_GET_ITEM = 23;
 //constexpr int SC_ROUND_SCORE = 24;
 constexpr int SC_GO_LOBBY = 27;
+
 
 constexpr int CS_UP_KEY = 0;
 constexpr int CS_DOWN_KEY = 1;
@@ -72,6 +72,7 @@ constexpr int CS_NOT_COLLISION = 16;
 constexpr int CS_PLAYER_COLLISION = 17;
 constexpr int CS_NOT_PLAYER_COLLISION = 18;
 constexpr int CS_USEITEM = 19;
+constexpr int CS_PLAYER_INFO = 20;
 constexpr int CS_GET_ITEM = 24;
 
 
@@ -90,7 +91,7 @@ struct CS_PACKET_ID_POS
 	char size;
 	char type;
 	unsigned char playerID;
-	
+
 	float xPos;
 	float yPos;
 	float zPos;
@@ -105,6 +106,17 @@ struct CS_PACKET_ID_POS
 	float xRight;
 	float yRight;
 	float zRight;
+};
+
+struct CS_PACKET_PLAYER_INFO
+{
+	char size;
+	char type;
+	char id;
+	int checkPoints;
+	DWORD keyState;
+	XMFLOAT4X4 xmf4x4Parents;
+	string playerNames;
 };
 
 struct CS_PACKET_RIGHT_KEY
@@ -325,11 +337,6 @@ struct SC_PACKET_ROUND_START
 	char size;
 	char type;
 	char clientCount;
-	char bomberID;
-	char goldTimerCnt;
-	char goldHammerCnt;
-	char hammerCnt;
-	char round;
 	unsigned short startTime;
 };
 
@@ -386,6 +393,7 @@ struct SC_PACKET_STOP_RUN_ANIM
 	char type;
 	char id;
 };
+
 //현재 Ready중인 플레이어의 정보를 담은 패킷
 struct SC_PACKET_READY_STATE
 {
@@ -444,6 +452,7 @@ struct SC_PACKET_REMOVE_PLAYER
 	char hostId;
 };
 
+
 struct SC_PACKET_ROUND_END
 {
 	char size;
@@ -451,19 +460,14 @@ struct SC_PACKET_ROUND_END
 	bool isWinner;
 	char score[MAX_USER];
 };
-//
-//struct SC_PACKET_ROUND_SCORE
-//{
-//	char size;
-//	char type;
-//	char score[MAX_USER];
-//};
+
 
 struct SC_PACKET_GO_LOBBY
 {
 	char size;
 	char type;
 };
+
 
 struct SC_PACKET_COLLIDED
 {
@@ -472,6 +476,7 @@ struct SC_PACKET_COLLIDED
 	char id;
 };
 
+
 struct SC_PACKET_NOT_COLLIDED
 {
 	char size;
@@ -479,15 +484,34 @@ struct SC_PACKET_NOT_COLLIDED
 	char id;
 };
 
+
 struct SC_PACKET_PLAYER_INFO
 {
 	char size;
 	char type;
 	char id;
-	XMFLOAT4X4 xmf4x4Parents[6] = {};
-	string playerNames[6] = {};
-	int checkPoints[6];
-	DWORD keyState[6];
+	int checkPoints;
+	DWORD keyState;
+	XMFLOAT4X4 xmf4x4Parents;
+	string playerNames;
+	// 아이템 삭제, 추가(같은 이름)
+	// 숫자 같은 건 부여 못하고 hmm...
 };
 
+
 //////////////////////////////////////////////////////
+struct CS_PACKET_EVENT
+{
+	char size;
+	char type;
+
+	MessageStruct msg;
+};
+
+struct SC_PACKET_EVENT
+{
+	char size;
+	char type;
+
+	MessageStruct msg;
+};

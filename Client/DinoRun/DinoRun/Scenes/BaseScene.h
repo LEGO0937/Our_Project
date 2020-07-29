@@ -108,7 +108,7 @@ public:
 	//--------------------EventHandler---
 	virtual void ProcessEvent(const MessageStruct& msg) {}
 	//---------NetWork
-	virtual void ProcessPacket(char* packet) {}
+	virtual void ProcessPacket(char* packet,float fTimeElapsed) {}
 protected:
 	string m_sPlayerId;
 	shared_ptr<CreateManager> m_pCreateManager = NULL;

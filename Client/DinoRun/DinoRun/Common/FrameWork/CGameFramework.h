@@ -24,6 +24,8 @@ public:
 
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID,
 		WPARAM wParam, LPARAM lParam);
+	LRESULT CALLBACK OnProcessingPacket(HWND hWnd, UINT nMessageID,
+		WPARAM wParam, LPARAM lParam);
 
 	bool IsRunning() { return m_running; }
 

@@ -4,7 +4,7 @@
 
 ItemShader::ItemShader()
 {
-	shaderName = "ItemShader";
+	shaderName = _ITEM_SHADER;
 }
 ItemShader::~ItemShader()
 {

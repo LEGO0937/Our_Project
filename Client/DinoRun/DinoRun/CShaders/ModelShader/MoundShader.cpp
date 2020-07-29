@@ -4,7 +4,7 @@
 
 MoundShader::MoundShader()
 {
-	shaderName = "MoundShader";
+	shaderName = _MOUND_SHADER;
 }
 MoundShader::~MoundShader()
 {
@@ -69,7 +69,7 @@ void MoundShader::Update(float fTimeElapsed)
 	}
 }
 
-void MoundShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition)
+void MoundShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemMound* pItemObject = NULL;
 	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);

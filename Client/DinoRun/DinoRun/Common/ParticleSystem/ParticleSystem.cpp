@@ -2,7 +2,7 @@
 #include <time.h>
 
 
-ParticleSystem::ParticleSystem(CreateManager* pCreateManager, string name, CGameObject* pTarget,
+ParticleSystem::ParticleSystem(CreateManager* pCreateManager, char name, CGameObject* pTarget,
 	const XMFLOAT3& xmf3Position)
 {
 	FindValue(name);
@@ -224,6 +224,40 @@ void ParticleSystem::CreateParticles()
 		m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
 		curNumParticle++;
 		break;
+	case HEAT:
+		if (curNumParticle + 30 < m_uMaxSize)
+		{
+			XMFLOAT3 vel = XMFLOAT3(m_fVelocity, 0.0f, 0.0f);
+			if (m_pTarget)
+			{
+				vel = Vector3::TransformCoord(vel, m_pTarget->m_xmf4x4World);
+				vel = Vector3::Normalize(vel);
+				vel = XMFLOAT3(vel.x*0.5f, vel.x, 0.0f);
+			}
+
+			XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+			XMVECTOR up = XMLoadFloat3(&xmf3Up);
+
+			XMMATRIX mat = XMMatrixRotationAxis(up, XMConvertToRadians(24));
+			for (int i = 0; i < 15; ++i)
+			{
+				m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
+				vel = Vector3::TransformNormal(vel, mat);
+			}
+			curNumParticle += 15;
+
+			xmf3Up = XMFLOAT3(0.0f, 0.0f, 1.0f);
+			up = XMLoadFloat3(&xmf3Up);
+			mat = XMMatrixRotationAxis(up, XMConvertToRadians(24));
+			vel = XMFLOAT3(0.0f, m_fVelocity, 0.0f);
+			for (int i = 0; i < 15; ++i)
+			{
+				m_vParticles.emplace_back(Particle(pos, vel, m_fParticleLife));
+				vel = Vector3::TransformNormal(vel, mat);
+			}
+			curNumParticle += 15;
+		}
+		break;
 	default:
 		break;
 	}
@@ -316,9 +350,9 @@ void ParticleSystem::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera 
 		m_pMesh->Render(pd3dCommandList, 0, m_vParticles.size());
 }
 
-void ParticleSystem::FindValue(string name)
+void ParticleSystem::FindValue(char name)
 {
-	if (name == "Spawn")
+	if (name == SPAWN)
 	{
 		m_cPattern = LOOP;
 		m_cShape = RAND;
@@ -329,18 +363,18 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 50;
 		m_sTextureName = "Resources/Images/T_Linepoint.dds";
 	}
-	else if (name == "HeatEffect")
+	else if (name == HEAT_EFFECT)
 	{
 		m_cPattern = ONES;
-		m_cShape = BOOM;
+		m_cShape = HEAT;
 		m_fSize = (5.0f);
-		m_fParticleLife = 0.5f;
-		m_fVelocity = (0.0f);
+		m_fParticleLife = 0.3f;
+		m_fVelocity = (50.0f);
 		m_fGravity = 0.0f;
-		m_uMaxSize = 1;
-		m_sTextureName = "Resources/Images/T_Damage1.dds";
+		m_uMaxSize = 31;
+		m_sTextureName = "Resources/Images/T_Damage2.dds";
 	}
-	else if (name == "BoxParticle")
+	else if (name == BOX_PARTICLE)
 	{
 		m_cPattern = ONES;
 		m_cShape = CONE;
@@ -351,7 +385,7 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 120;
 		m_sTextureName = "Resources/Images/T_Itemboxeat.dds";
 	}
-	else if (name == "MeatParticle")
+	else if (name == MEAT_PARTICLE)
 	{
 		m_cPattern = ONES;
 		m_cShape = CONE;
@@ -362,7 +396,7 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 120;
 		m_sTextureName = "Resources/Images/T_Meateat_P.dds";
 	}
-	else if (name == "Dust")
+	else if (name == DUST_PARTICLE)
 	{
 		m_cPattern = LOOP;
 		m_cShape = DUST;
@@ -373,7 +407,7 @@ void ParticleSystem::FindValue(string name)
 		m_uMaxSize = 60;
 		m_sTextureName = "Resources/Images/dust.dds";
 	}
-	else if (name == "StoneParticle")
+	else if (name == STONE_PARTICLE)
 	{
 		m_cPattern = ONES;
 		m_cShape = CONE;

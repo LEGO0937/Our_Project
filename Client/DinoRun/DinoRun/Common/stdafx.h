@@ -41,6 +41,7 @@ using namespace FMOD;
 
 #include "../Common/TextureLoad/DDSTextureLoader12.h"
 #include "../Global/Global.h"
+
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
@@ -57,6 +58,7 @@ using namespace std;
 
 #pragma comment(lib, "wsock32.lib")
 #pragma comment(lib, "Ws2_32.lib")
+
 #define FRAME_BUFFER_WIDTH 1280
 #define FRAME_BUFFER_HEIGHT 700
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
@@ -82,22 +84,18 @@ typedef struct Point2D
 
 struct MessageStruct
 {
-	string msgName;
-	string shaderName;
-	string objectName = "None";
-	int integerValue;
-	XMFLOAT4X4 departMat;
-	XMFLOAT4X4 arriveMat;
+	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
+	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
+	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
+	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
 
 	MessageStruct() {}
 	MessageStruct(const MessageStruct& msg)
 	{
 		msgName = msg.msgName;
 		shaderName = msg.shaderName;
-		integerValue = msg.integerValue;
 		departMat = msg.departMat;
-		arriveMat = msg.arriveMat;
-		objectName = msg.objectName;
+		objectSerialNum = msg.objectSerialNum;
 	}
 };
 

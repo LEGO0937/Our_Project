@@ -114,10 +114,14 @@ LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_MOUSEMOVE:
 	case WM_KEYDOWN:
 	case WM_KEYUP:
+	case WM_CHAR:
 		frameWork.OnProcessingWindowMessage(hwnd, msg, wParam, lParam);
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
+		break;
+	case WM_SOCKET:
+		frameWork.OnProcessingPacket(hwnd, msg, wParam, lParam);
 		break;
 	case WM_MOVE:
 		break;

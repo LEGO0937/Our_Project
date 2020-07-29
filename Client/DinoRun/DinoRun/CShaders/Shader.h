@@ -85,7 +85,7 @@ protected:
 	int drawingCount = 0;         // after culling, instancing number
 	int drawingBillBoardCount = 0;         // after culling, instancing BillBoard's number
 
-	string shaderName = ""; //shader's name
+	char shaderName = _OBJECTS_SHADER; //shader's name
 	string instancingModelName;   // model's name for instancing
 	
 	ID3D12Resource *m_pd3dcbStruct = NULL;
@@ -93,7 +93,7 @@ public:
 	CObjectsShader();
 	virtual ~CObjectsShader();
 
-	string GetName() { return shaderName; }
+	char GetName() { return shaderName; }
 
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) = 0;
 	virtual void ReleaseObjects() = 0;
@@ -101,10 +101,10 @@ public:
 
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed) {}
-	virtual void FixedUpdate(float fTimeElapsed) {}
+	virtual void FixedUpdate(float fTimeElapsed);
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position) {}
-	virtual void DeleteObject(const string& iSerealNum) {}
-	virtual void DisEnableObject(const string& iSerealNum) {}
+	virtual void DeleteObject(const int& iSerealNum) {}
+	virtual void DisEnableObject(const int& iSerealNum) {}
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) = 0;
 
@@ -143,10 +143,9 @@ public:
 	
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void FixedUpdate(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition) {}
-	virtual void DeleteObject(const string& iSerealNum);
-	virtual void DisEnableObject(const string& iSerealNum);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition) {}
+	virtual void DeleteObject(const int& iSerealNum);
+	virtual void DisEnableObject(const int& iSerealNum);
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
@@ -183,7 +182,6 @@ public:
 
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed) {}
-	virtual void FixedUpdate(float fTimeElapsed) {}
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);

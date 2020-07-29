@@ -6,6 +6,7 @@
 
 SkinedShader::SkinedShader()
 {
+	shaderName = _SKINED_SHADER;
 }
 SkinedShader::~SkinedShader()
 {

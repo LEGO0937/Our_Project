@@ -43,7 +43,7 @@ void CountDownShader::BuildObjects(CreateManager* pCreateManager, void* pInforma
 	pObject->SetPosition(0.0f, 0.5f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
-	uvX.emplace_back(0.75f);
+	uvX.emplace_back(0.76f);
 	uvY.emplace_back(0.0f);
 
 	m_fScaleValue = 4.0f;
@@ -66,6 +66,11 @@ void CountDownShader::Update(float fTimeElapsed, void* pInformation)
 		m_fScaleValue = 4.0f;
 		objectList[0]->m_xmf4x4World._11 = m_fScaleValue;
 		objectList[0]->m_xmf4x4World._22 = m_fScaleValue;
+		
+		if (t != 0.0f)
+			SoundManager::GetInstance()->Play("CountDown",0.2f);
+		else
+			SoundManager::GetInstance()->Play("CountDownZero",0.2f);
 	}
 
 	if (m_fScaleValue > 2.0f)

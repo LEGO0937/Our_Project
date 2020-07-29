@@ -4,7 +4,7 @@
 
 BananaShader::BananaShader()
 {
-	shaderName = "BananaShader";
+	shaderName = _BANANA_SHADER;
 }
 BananaShader::~BananaShader()
 {
@@ -72,7 +72,7 @@ void BananaShader::Update(float fTimeElapsed)
 	}
 }
 
-void BananaShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition)
+void BananaShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemBanana* pItemObject = NULL;
 	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);

@@ -10,7 +10,7 @@ public:
 	virtual ~ModelShader();
 	void BuildObjects(CreateManager* pCreateManager, void* pInformation);
 	virtual void Update(float fTimeElapsed){}
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition) {}
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition) {}
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 };
@@ -72,7 +72,7 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition);
 };
 
 class MudShader : public ModelShader
@@ -83,7 +83,7 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition);
 };
 
 class StoneShader : public ModelShader
@@ -94,7 +94,7 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition);
 };
 
 class MeteoriteShader : public ModelShader
@@ -105,7 +105,7 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition);
 };
 
 class MoundShader : public ModelShader
@@ -116,5 +116,5 @@ public:
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition);
 };

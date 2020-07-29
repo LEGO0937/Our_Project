@@ -39,22 +39,22 @@ void VelocityCountShader::BuildObjects(CreateManager* pCreateManager, void* pInf
 	uvX.reserve(3);
 	uvY.reserve(3);
 
-	pObject = new CGameObject;    //6자리
-	pObject->SetPosition(0.82f, -0.90f, 0.0f);
+	pObject = new CGameObject;    //3자리
+	pObject->SetPosition(0.68f, -0.92f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.885f, -0.90f, 0.0f);
+	pObject->SetPosition(0.745f, -0.92f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);
 	uvY.emplace_back(0);
 
 	pObject = new CGameObject;
-	pObject->SetPosition(0.95f, -0.90f, 0.0f);
+	pObject->SetPosition(0.81f, -0.92f, 0.0f);
 	pObject->AddRef();
 	objectList.emplace_back(pObject);
 	uvX.emplace_back(0);

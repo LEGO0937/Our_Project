@@ -4,7 +4,7 @@
 
 StoneShader::StoneShader()
 {
-	shaderName = "StoneShader";
+	shaderName = _STONE_SHADER;
 }
 StoneShader::~StoneShader()
 {
@@ -69,7 +69,7 @@ void StoneShader::Update(float fTimeElapsed)
 	}
 }
 
-void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition, const XMFLOAT4X4& xmf3ArrivePosition)
+void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemStone* pItemObject = NULL;
 	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);

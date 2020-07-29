@@ -4,7 +4,7 @@
 
 BlockShader::BlockShader()
 {
-	shaderName = "BlockShader";
+	shaderName = _BLOCK_SHADER;
 }
 BlockShader::~BlockShader()
 {

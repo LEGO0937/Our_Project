@@ -306,7 +306,66 @@ void RoomScene::setCamera(CCamera* camera)
 	BaseScene::setCamera(camera);
 }
 
-void RoomScene::ProcessPacket(char* packet)
+void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
+	switch (packet[1])
+	{
+	case SC_READY_STATE:
+		UpdateReadyState(packet, fTimeElapsed);
+		break;
+	case SC_UNREADY_STATE:
+		UpdateUnreadyState(packet, fTimeElapsed);
+		break;
+	case SC_CLIENT_LOBBY_IN:
+		UpdateAddUser(packet, fTimeElapsed);
+		break;
+	case SC_CLIENT_LOBBY_OUT:
+		UpdateDeleteUser(packet, fTimeElapsed);
+		break;
+	}
+}
+void RoomScene::UpdateUnreadyState(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_UNREADY_STATE* playerInfo = reinterpret_cast<SC_PACKET_UNREADY_STATE*>(packet);
+	auto obj = find_if(m_vUsers.begin(), m_vUsers.end(), [&](const User& a) {
+		return a.m_id == playerInfo->id; });
+	if (obj != m_vUsers.end())
+	{
+		(*obj).m_bButtonState = false;
+	}
+}
 
+void RoomScene::UpdateReadyState(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_READY_STATE* playerInfo = reinterpret_cast<SC_PACKET_READY_STATE*>(packet);
+	auto obj = find_if(m_vUsers.begin(), m_vUsers.end(), [&](const User& a) {
+		return a.m_id == playerInfo->id; });
+	if (obj != m_vUsers.end())
+	{
+		(*obj).m_bButtonState = true;
+	}
+}
+
+void RoomScene::UpdateAddUser(char* packet, float fTimeElapsed)
+{
+	//패킷 구조체안에 현재 버튼이 어떤 상태인지도 보내줄 필요가 있음. 
+	SC_PACKET_LOBBY_IN* playerInfo = reinterpret_cast<SC_PACKET_LOBBY_IN*>(packet);
+	//m_vUsers
+	auto obj = find_if(m_vUsers.begin(), m_vUsers.end(), [&](const User& a) {
+		return a.m_id == playerInfo->id; });
+	if (obj == m_vUsers.end())
+	{
+		User user;
+		user.m_sName = playerInfo->client_state.name;
+		user.m_bButtonState = false;
+		user.m_id = playerInfo->id;
+		m_vUsers.emplace_back(user);
+	}
+}
+void RoomScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_LOBBY_OUT* playerInfo = reinterpret_cast<SC_PACKET_LOBBY_OUT*>(packet);
+
+	m_vUsers.erase(remove_if(m_vUsers.begin(), m_vUsers.end(), [&](const User& a) {
+		return a.m_id == playerInfo->id; }), m_vUsers.end());
 }

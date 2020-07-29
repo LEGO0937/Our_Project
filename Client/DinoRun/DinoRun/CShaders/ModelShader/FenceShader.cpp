@@ -3,7 +3,7 @@
 #include "FenceObject.h"
 FenceShader::FenceShader()
 {
-	shaderName = "FenceShader";
+	shaderName = _FENCE_SHADER;
 }
 FenceShader::~FenceShader()
 {

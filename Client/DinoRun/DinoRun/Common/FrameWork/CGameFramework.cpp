@@ -138,7 +138,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pCreateManager);
 	m_pScene->SetId(m_sPlayerID);
 	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
-	pPlayer->SetMaxForce(MIN_FORCE);
+	pPlayer->SetMaxForce(MAX_FORCE);
 	m_pPlayer = pPlayer;
 
 	m_pScene->setPlayer(m_pPlayer);
@@ -164,7 +164,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->setCamera(m_pCamera);
 	
 	//-----------------------
-
+	
 	m_pCreateManager->ExecuteCommandList();
 
 	if (m_pScene)
@@ -225,7 +225,33 @@ void CGameFramework::CalculateFrameStats()
 		timeElapsed += 1.0f;
 	}
 }
-
+LRESULT CALLBACK CGameFramework::OnProcessingPacket(HWND hWnd, UINT nMessageID,
+	WPARAM wParam, LPARAM lParam)
+{
+	switch (nMessageID)
+	{
+	case WM_SOCKET:
+		if (WSAGETSELECTERROR(lParam))
+		{
+			//Network::GetInstance()->DeleteInstance();
+			closesocket((SOCKET)wParam);
+			PostQuitMessage(0);
+		}
+		switch (WSAGETSELECTEVENT(lParam))
+		{
+		case FD_READ:
+			NetWorkManager::GetInstance()->ReadPacket(m_GameTimer.DeltaTime());
+			break;
+		case FD_CLOSE:
+			closesocket((SOCKET)wParam);
+			//Network::GetInstance()->DeleteInstance();
+			PostQuitMessage(0);
+			break;
+		}
+		break;
+	}
+	return(0);
+}
 LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMessageID)
@@ -265,6 +291,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		break;
 	case WM_KEYDOWN:
 	case WM_KEYUP:
+	case WM_CHAR:
 		if (m_pScene) m_pScene->OnProcessingKeyboardMessage(hWnd, nMessageID, wParam, lParam, m_GameTimer.DeltaTime());
 		break;
 	case WM_DESTROY:
@@ -380,11 +407,11 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
+		if (type == SceneType::ItemGame_Scene)
+			m_pPlayer->SetMaxVelocityXZ(25);
 
 		m_pScene->setPlayer(m_pPlayer);
 		m_pScene->setCamera(m_pPlayer->GetCamera());
-
-
 	}
 
 	m_pCreateManager->ExecuteCommandList();

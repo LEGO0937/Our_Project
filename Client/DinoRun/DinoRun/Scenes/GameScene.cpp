@@ -154,6 +154,11 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_fCountDownTime = 4.0f;
 
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+
+#ifdef isConnectedToServer
+	NetWorkManager::GetInstance()->ConnectToServer();
+#endif
+
 	m_pCreateManager->RenderLoading();
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 	
@@ -193,6 +198,21 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.f_uvY.emplace_back(0);
 	m_pEffectShader = new ImageShader;
 	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
+	view_info.positions.clear();
+	view_info.f_uvY.clear();
+
+	view_info.textureName = "Resources/Images/T_Speed.dds";
+	view_info.meshSize = XMFLOAT2(0.07f, 0.1f);
+	view_info.positions.emplace_back(XMFLOAT3(+0.93f, -0.92f, 0.0f));
+	view_info.maxUv = XMFLOAT2(1.0f, 1.0f);
+	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
+	view_info.f_uvY.emplace_back(0.0f);
+	uiShader = new ImageShader;
+	uiShader->BuildObjects(pCreateManager.get(), &view_info);
+	instancingImageUiShaders.emplace_back(uiShader);
+	view_info.positions.clear();
+	view_info.f_uvY.clear();
+
 
 	m_pCountDownShader = new CountDownShader;
 	m_pCountDownShader->BuildObjects(pCreateManager.get(), NULL);
@@ -370,9 +390,9 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), "Spawn", NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 	BuildLights();
 	m_pCreateManager->RenderLoading();
 	BuildSubCameras(pCreateManager);
@@ -482,6 +502,8 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 	static UCHAR pKeyBuffer[256];
 	dwDirection = 0;
+	if (!isStart)
+		return;
 	/*키보드의 상태 정보를 반환한다. 화살표 키(‘→’, ‘←’, ‘↑’, ‘↓’)를 누르면 플레이어를 오른쪽/왼쪽(로컬 x-축), 앞/
 	뒤(로컬 z-축)로 이동한다. ‘Page Up’과 ‘Page Down’ 키를 누르면 플레이어를 위/아래(로컬 y-축)로 이동한다.*/
 	if (::GetKeyboardState(pKeyBuffer))
@@ -507,7 +529,8 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 	}
 	else
 		m_pPlayer->m_fForce = 0;
-	m_pPlayer->Move(dwDirection, 30.0f, deltaTime, true);
+	m_pPlayer->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
+	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -682,7 +705,6 @@ void GameScene::AnimateObjects(float fTimeElapsed)
 void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	//물리
-	if (isStart)
 	{
 		m_pPlayer->FixedUpdate(fTimeElapsed);
 
@@ -692,13 +714,29 @@ void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 		}
 	}
 
-	if (m_fCountDownTime > 0.0f)
+	if (!isStart)
 	{
-		m_fCountDownTime -= fTimeElapsed;
+		if (m_fCountDownTime > 0.9f)
+		{
+			m_fCountDownTime -= fTimeElapsed;
+		}
+		else
+		{
+			m_fCountDownTime = 0.0f;
+			isStart = true;
+		}
 	}
-	else
-		m_fCountDownTime = 0.0f;
 	m_pCountDownShader->Update(fTimeElapsed, &m_fCountDownTime);
+
+#ifdef isConnectedToServer
+	CS_PACKET_PLAYER_INFO playerInfo;
+	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
+	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
+	playerInfo.keyState = dwDirection;
+	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
+	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
+	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
+#endif
 
 }
 
@@ -780,11 +818,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		{
 			return sceneType;
 		}
-		//if (m_pLights)
-		//{
-		//	m_pLights->m_pLights[1].m_xmf3Position = m_pPlayer->GetPosition();
-		//	m_pLights->m_pLights[1].m_xmf3Direction = m_pPlayer->GetLookVector();
-		//}
+	
 		MessageStruct message;
 		for (CObjectsShader* shader : UpdatedShaders)
 		{
@@ -833,7 +867,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	}
 	else
 	{
-		isStart = true;
+		//isStart = true;
 		//서버에서 스타트 신호를 받음. 모든 유저가 접속이 되었다면. start신호를 받고 isStart값을 true로 전환하고 
 		//start대문이미지 출력할 것.
 	}
@@ -1113,17 +1147,17 @@ void GameScene::ResetShadowBuffer(CreateManager* pCreateManager)
 void GameScene::ProcessEvent(const MessageStruct& msg)
 {
 	
-	if (msg.msgName == "Add_Particle")
+	if (msg.msgName == _ADD_PARTICLE)
 	{
 		XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
 		particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName, NULL, pos));
 	}
-	else if (msg.msgName == "DisEnable_Model")
+	else if (msg.msgName == _DISENABLE_OBJECT)
 	{
 		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
 			return a->GetName() == msg.shaderName; });
 		if (shader != instancingModelShaders.end())
-			(*shader)->DisEnableObject(msg.objectName);
+			(*shader)->DisEnableObject(msg.objectSerialNum);
 	}
 }
 void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
@@ -1132,7 +1166,55 @@ void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
 	ResetShadowBuffer(m_pCreateManager.get());
 	ReBuildSubCameras(pCreateManager);
 }
-void GameScene::ProcessPacket(char* packet)
+void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
+	switch (packet[1])
+	{
+	case SC_PLAYER_INFO:
+		updatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
+		//역으로 자신의 정보를 줄때는? Update에서 끝나는 지점에서 send할것
+		break;
+	case SC_GET_ITEM:
+		updateEventInfo(packet, fTimeElapsed); //이벤트처리
+		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
+		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
+
+		break;
+	default:
+		break;
+	}
+}
+void GameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_PLAYER_INFO* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_INFO*>(packet);
 	
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == playerInfo->id; });
+	if (obj != obList.end())
+	{
+		(*obj)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents;
+		((CPlayer*)(*obj))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);
+		((CPlayer*)(*obj))->SetCheckPoint(playerInfo->checkPoints);
+	}
+	else
+	{
+		auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+			return a->GetId() == 0; });
+		if (findId != obList.end())
+		{
+			(*findId)->SetId(playerInfo->id);
+			(*findId)->SetName(playerInfo->playerNames); // 없을경우 이름지정
+			(*findId)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents; //변환행렬 처리
+			((CPlayer*)(*findId))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);  //애니메이션처리
+			((CPlayer*)(*findId))->SetCheckPoint(playerInfo->checkPoints);
+		}
+	}
+}
+void GameScene::updateEventInfo(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_EVENT* playerInfo = reinterpret_cast<SC_PACKET_EVENT*>(packet);
+	MessageStruct msg = playerInfo->msg;
+
+	EventHandler::GetInstance()->RegisterEvent(msg);
 }

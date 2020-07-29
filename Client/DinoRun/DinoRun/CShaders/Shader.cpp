@@ -202,6 +202,15 @@ void CObjectsShader::AnimateObjects(float fTimeElapsed)
 	}
 }
 
+void CObjectsShader::FixedUpdate(float fTimeElapsed)
+{
+	if (!isFixedUpdate)
+		return;
+	for (CGameObject* obj : objectList)
+	{
+		obj->FixedUpdate(fTimeElapsed);
+	}
+}
 void CObjectsShader::ReleaseUploadBuffers()
 {
 	if (objectList.size())
@@ -289,30 +298,21 @@ void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 	}
 }
 
-void CObInstancingShader::FixedUpdate(float fTimeElapsed)
-{
-	if (!isFixedUpdate)
-		return;
-	for (CGameObject* obj : objectList)
-	{
-		obj->FixedUpdate(fTimeElapsed);
-	}
-}
 
-void CObInstancingShader::DeleteObject(const string& iSerealNum)
+void CObInstancingShader::DeleteObject(const int& iSerealNum)
 {
 	auto obj = find_if(objectList.begin(), objectList.end(), [&](CGameObject* a) {
-		return a->GetName() == iSerealNum; });
+		return a->GetId() == iSerealNum; });
 	if (obj != objectList.end())
 	{
 		(*obj)->Release();
 		objectList.erase(obj);
 	}
 }
-void CObInstancingShader::DisEnableObject(const string& iSerealNum)
+void CObInstancingShader::DisEnableObject(const int& iSerealNum)
 {
 	auto obj = find_if(objectList.begin(), objectList.end(), [&](CGameObject* a) {
-		return a->GetName() == iSerealNum; });
+		return a->GetId() == iSerealNum; });
 	if (obj != objectList.end())
 	{
 		(*obj)->SetEnableState(false);

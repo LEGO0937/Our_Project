@@ -75,8 +75,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 #ifdef _WITH_LEFT_HAND_COORDINATES
 		if (dwDirection & DIR_FORWARD)
 		{
-			KeyDownUp();
-			m_fForce += fDistance;
+			KeyDownUp(); 
+			if((dwDirection & DIR_RIGHT) || (dwDirection & DIR_LEFT))
+				m_fForce += fDistance * 0.5f;
+			else
+				m_fForce += fDistance;
 			if (!SoundManager::GetInstance()->Playing("Running"))
 				SoundManager::GetInstance()->Play("Running");
 		}
@@ -91,7 +94,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		if (dwDirection & DIR_BACKWARD)
 		{
 			KeyDownDown();
-			m_fForce -= fDistance;
+			m_fForce -= fDistance * 0.5f;
 			if (!SoundManager::GetInstance()->Playing("Running"))
 				SoundManager::GetInstance()->Play("Running");
 		}
@@ -241,7 +244,7 @@ void CPlayer::Rotate(float x, float y, float z)
 
 			if (!isShift)
 			{
-				if (Vector3::Length(m_xmf3Velocity) < 35)
+				//if (Vector3::Length(m_xmf3Velocity) < 35)
 				m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
 			}
 			else
@@ -295,10 +298,14 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 	{
 		if (Vector3::Length(m_xmf3Velocity) > 20)
 		{
-			message.shaderName = "HeatEffect";
+			message.shaderName = HEAT_EFFECT;
 			message.departMat = m_xmf4x4World;
-			message.msgName = "Add_Particle";
+			message.msgName = _ADD_PARTICLE;
+#ifndef isConnectedToServer
 			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 			OnCollisionAni();
 		}
 
@@ -331,15 +338,22 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		return true;
 	case ModelType::Item_Box:
 		//아이템 습득
-		message.objectName = target->GetName();
-		message.shaderName = "ItemShader";
-		message.msgName = "DisEnable_Model";
+		message.objectSerialNum = target->GetId();
+		message.shaderName = _ITEM_SHADER;
+		message.msgName = _DISENABLE_OBJECT;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
-
-		message.shaderName = "BoxParticle";
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
+		message.shaderName = BOX_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
-		message.msgName = "Add_Particle";
+		message.msgName = _ADD_PARTICLE;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 		SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 		return true;
 	case ModelType::Item_Meat:
@@ -347,15 +361,23 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		if (m_fMaxVelocityXZ > MAX_VELOCITY)
 			m_fMaxVelocityXZ = MAX_VELOCITY;
 
-		message.objectName = target->GetName();
-		message.shaderName = "MeatShader";
-		message.msgName = "DisEnable_Model";
+		message.objectSerialNum = target->GetId();
+		message.shaderName = _MEAT_SHADER;
+		message.msgName = _DISENABLE_OBJECT;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 
-		message.shaderName = "MeatParticle";
+		message.shaderName = MEAT_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
-		message.msgName = "Add_Particle";
+		message.msgName = _ADD_PARTICLE;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 		SoundManager::GetInstance()->Play("MeatEat", 0.5f);
 		//target->SetEnableState(false);  //서버 비활성화 신호 서버에 보내주고 쉐이더에서 처리할 것.
 		return true;
@@ -365,10 +387,14 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		//else if (m_fWheelDegree < 0)
 		//	m_fWheelDegree = -30;
 		OnSliding();
-		message.objectName = target->GetName();
-		message.shaderName = "BananaShader";
-		message.msgName = "Delete_Model";
+		message.objectSerialNum = target->GetId();
+		message.shaderName = _BANANA_SHADER;
+		message.msgName = _DELETE_OBJECT;
+#ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
+#else
+		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+#endif
 		break;		
 	case ModelType::Item_Mud:
 		fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
@@ -434,20 +460,20 @@ void CPlayer::ProcessRotate(float fTimeElapsed)
 
 		if (!isShift)
 		{
-			if (length > 30)
+			//if (length > 20)
 			{
-				if (m_fWheelDegree > 5)
-					m_fWheelDegree = 5;
-				else if (m_fWheelDegree < -5)
-					m_fWheelDegree = -5;
+				if (m_fWheelDegree > 7)
+					m_fWheelDegree = 7;
+				else if (m_fWheelDegree < -7)
+					m_fWheelDegree = -7;
 			}
-			else
-			{
-				if (m_fWheelDegree > 5)
-					m_fWheelDegree = 5;
-				else if (m_fWheelDegree < -5)
-					m_fWheelDegree = -5;
-			}
+			//else
+			//{
+			//	if (m_fWheelDegree > 15)
+			//		m_fWheelDegree = 15;
+			//	else if (m_fWheelDegree < -15)
+			//		m_fWheelDegree = -15;
+			//}
 		}
 		else
 		{
@@ -502,26 +528,28 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	{
 		float degree = m_fWheelDegree;  //현재 머리의 회전 각도
 		
-		float w;
-		
-		if (Vector3::Length(m_xmf3Velocity) < 10.0f)
-			w = Vector3::Length(m_xmf3Velocity)*sinf(XMConvertToRadians(degree*1.5f)) / (3.8f); // 공룡 몸체가 회전해야하는 각도 radian
-		else
-		{
-			w = Vector3::Length(m_xmf3Velocity)*(sinf(XMConvertToRadians(degree))) / (3.8f);
-		}
 		//3.8f = 바이크의 전륜 후륜사이의 길이
 		//57.3f = 각도를 degree값으로 변환하기위해 사용됨
 		//--------------------연습중
 		float slipB = Vector3::DotProduct(m_xmf3Look, m_xmf3Velocity)
 			/(Vector3::Length(m_xmf3Look)*Vector3::Length(m_xmf3Velocity));  //이게 슬립각도의 코사인값임.
 			
-		float result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree)*slipB)
-			/ 3.8f;
+		float result;
+
+		if (Vector3::Length(m_xmf3Velocity) < 13.0f)
+			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree)*slipB)*3.0f
+				/ 3.8f;
+		else if(!isShift)
+			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree)*slipB)*0.7f
+				/ 3.8f;
+		else
+			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree)*slipB)
+				/ 3.8f;
+
 		//--------------------------
 
 		//w = Vector3::Length(m_xmf3Velocity) * cosf(XMConvertToRadians(slipB)) * tanf(XMConvertToRadians(degree)) / 3.8f;
-		Rotate(0, result, 0.0f); //degree로 바꿔서 회전 시작 
+		Rotate(0, result*70*fTimeElapsed, 0.0f); //degree로 바꿔서 회전 시작 
 		
 	}
 	//else
@@ -549,7 +577,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	float W = m_fMass * 9.8f;
 	float L = 3.8f, c = 1.9f, b = 1.9f; //L은 전륜 후륜사이 거리. c = 중심에서 전륜까지 거리, b는 생략
 	float h = 1.4f; //cg의 높이
-	float Wf, Wr;  //Wf전방 차축 무게, Wr= 후방 차축 무게
+	float Wf;  //Wf전방 차축 무게, Wr= 후방 차축 무게
 	float scaleVel = Vector3::Length(vel);
 	//코너링 강성 67830 or 67.8  or 678
 	XMFLOAT3 acc = m_xmf3AcceleratingForce;
@@ -558,12 +586,11 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	if (scaleVel)
 	{
 		Wf = 0.5f * W - (h / L)* m_fMass * Vector3::Length(acc);
-		Wr = 0.5f * W + (h / L)* m_fMass * Vector3::Length(acc);  //0.5f = c/ L  c,b둘 다 같으므로 결과는 0.5f
+		//0.5f = c/ L  c,b둘 다 같으므로 결과는 0.5f
 	}
 	else
 	{
 		Wf = 0.5f * W;
-		Wr = 0.5f * W;
 	}
 	XMFLOAT3 xmf3Fdrag;
 	xmf3Fdrag.x = -drag * vel.x * scaleVel;
@@ -795,11 +822,11 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	CreateShaderVariables(pCreateManager);
 
-	SetPosition(XMFLOAT3(700.0f, 76.0f, 1150.0f)); //(XMFLOAT3(700.0f, 76.0f, 1150.0f));//800,76,900
+	SetPosition(XMFLOAT3(800.0f, 76.0f, 1150.0f)); //(XMFLOAT3(700.0f, 76.0f, 1150.0f));//800,76,900
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager,"Dust", this, XMFLOAT3(0.0f, 0, 18));
+	m_pParticleSystem = new ParticleSystem(pCreateManager,DUST_PARTICLE, this, XMFLOAT3(0.0f, 0, 18));
 	//SetScale(XMFLOAT3(0.05f, 0.05f, 0.05f));
 
 }

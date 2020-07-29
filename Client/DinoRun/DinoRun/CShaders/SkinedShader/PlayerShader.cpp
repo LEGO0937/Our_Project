@@ -4,6 +4,7 @@
 
 PlayerShader::PlayerShader()
 {
+	shaderName = _PLAYER_SHADER;
 }
 PlayerShader::~PlayerShader()
 {
@@ -45,12 +46,15 @@ void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, con
 		//pPlayerObject->SetScale(XMFLOAT3(1.0f, 1.0f, 1.0f));
 		//pPlayerObject->OnPrepareRender();
 		//pPlayerObject->SetId(m_iCurSerealNum++);
+		//XMFLOAT3(700.0f, 76.0f, 1150.0f)
+		pPlayerObject->SetUpdatedContext(m_pUpdatedContext);
+
 		if (i == 0)
-			pPlayerObject->SetPosition(XMFLOAT3(750.0f, 76.0f, 1150.0f));
+			pPlayerObject->SetPosition(XMFLOAT3(650.0f, 70.7f, 1150.0f));
 		else if (i == 1)
-			pPlayerObject->SetPosition(XMFLOAT3(850.0f, 76.0f, 1150.0f));
+			pPlayerObject->SetPosition(XMFLOAT3(680.0f, 70.7f, 1150.0f));
 		else if (i == 2)
-			pPlayerObject->SetPosition(XMFLOAT3(900.0f, 76.0f, 1150.0f));
+			pPlayerObject->SetPosition(XMFLOAT3(710.0f, 70.7f, 1150.0f));
 		//애니메이션 적용을 find_if를 통해서 아이디와 맞는 오브젝트 찾고 적용하도록 하자.
 		objectList.emplace_back(pPlayerObject);
 	}
