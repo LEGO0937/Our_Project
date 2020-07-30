@@ -611,24 +611,31 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	
-	if (::GetCapture() == hwnd)
+	POINT ptCursorPos;
+	if (GetCapture() == hwnd)
 	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
 	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
-	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	if ((cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
-		
-		if (dwDirection)
+		if ((cxDelta || cyDelta) && m_pCamera->GetMode() == SPACESHIP_CAMERA)
 		{
-			//m_pPlayer->Move(dwDirection, 20.0f, deltaTime, true);
-			//((CPlayer*)PLAYER_SHADER->getSkiendList()[0])->Move(dwDirection, 20.0f, deltaTime, true);
+			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+			else
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
-
 	}
-	else
+
+	if (dwDirection == 0)
 		m_pPlayer->m_fForce = 0;
 
-	m_pPlayer->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
+	m_pPlayer->Move(dwDirection, 1200.0f*deltaTime, deltaTime, true);
 	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);

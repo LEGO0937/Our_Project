@@ -67,6 +67,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		return;
 
 	//if (dwDirection)
+	DWORD nCurrentCameraMode = m_pCamera->GetMode();
+	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
 	{
 		XMFLOAT3 vel = GetVelocity();
 		float length = (vel.x * vel.x + vel.z * vel.z);
@@ -188,6 +190,18 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		}
 		*/
 	}
+	else
+	{
+		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
+		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
+		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
+		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
+		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
+
+		Move(xmf3Shift, false);
+	}
 	if (m_fForce > m_fMaxForce)
 		m_fForce = m_fMaxForce;
 	if (m_fForce < -m_fMaxForce)
@@ -206,6 +220,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	{
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
+		m_pCamera->RegenerateViewMatrix();
 	}
 }
 
@@ -486,6 +501,9 @@ void CPlayer::ProcessRotate(float fTimeElapsed)
 }
 void CPlayer::FixedUpdate(float fTimeElapsed)
 {
+	DWORD nCurrentCameraMode = m_pCamera->GetMode();
+	if (!(nCurrentCameraMode == THIRD_PERSON_CAMERA))
+		return;
 	/*
 	if (!isLeft && !isRight)
 	{
@@ -641,11 +659,12 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
-	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+//	DWORD nCurrentCameraMode = m_pCamera->GetMode();
+	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) 
+	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
-		((CThirdPersonCamera*)m_pCamera)->SetLookAt(m_xmf3Position);
+	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
+	((CThirdPersonCamera*)m_pCamera)->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
 
 	//fLength = Vector3::Length(m_xmf3Velocity);
@@ -869,7 +888,7 @@ CCamera *CDinoRunPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 1800.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 		break;
