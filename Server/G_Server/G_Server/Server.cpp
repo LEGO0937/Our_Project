@@ -351,13 +351,13 @@ void Server::ProcessPacket(char client, char* packet)
 	{
 		printf("Player Info Success: %d\n", client);
 		// 각 클라에게 위치 인덱스 전송
-		/*for (int i = 0; i < MAX_USER; ++i)
+		for (int i = 0; i < MAX_USER; ++i)
 		{
 			if (false == clients[i].in_use)
 				continue;
 
-			SendPutPlayer(i);
-		}*/
+			SendPlayerInfo(i, client);
+		}
 		break;
 	}
 	case CS_READY:
@@ -401,7 +401,13 @@ void Server::ProcessPacket(char client, char* packet)
 	}
 	case CS_GET_ITEM:
 	{
-		CS_PACKET_GET_ITEM* p = reinterpret_cast<CS_PACKET_GET_ITEM*>(packet);
+		CS_PACKET_EVENT* p = reinterpret_cast<CS_PACKET_EVENT*>(packet);
+		//clients[client].msg = p->msg;
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (true == clients[i].in_use)
+				SendEventPacket(i, p->msg);
+		}
 		break;
 	}
 	default:
@@ -478,6 +484,7 @@ void Server::SendReadyStatePacket(char toClient, char fromClient)
 	SendFunc(toClient, &packet);
 }
 
+
 void Server::SendUnReadyStatePacket(char toClient, char fromClient)
 {
 	SC_PACKET_UNREADY_STATE packet;
@@ -500,6 +507,7 @@ void Server::SendPlayerInfo(char toClient, char fromClient)
 	SendFunc(toClient, &packet);
 }
 
+
 // 플레이어 인포로 사용...? 
 //void Server::SendPutPlayer(char toClient, char fromClient)
 //{
@@ -514,41 +522,18 @@ void Server::SendPlayerInfo(char toClient, char fromClient)
 //	SendFunc(toClient, &packet);
 //}
 
-void Server::SendGetItem(char toClient, char fromClient, string& itemIndex)
-{
 
-	SC_PACKET_GET_ITEM packet;
-
-	packet.id = fromClient;
-	packet.size = sizeof(SC_PACKET_GET_ITEM);
-	packet.type = SC_GET_ITEM;
-	ZeroMemory(packet.itemIndex, MAX_ITEM_NAME_LENGTH);
-	strncpy_s(packet.itemIndex, itemIndex.c_str(), itemIndex.length());
-	SendFunc(toClient, &packet);
-}
-
-void Server::SendUseItem(char toClient, char fromClient, char usedItem)
-{
-	SC_PACKET_USE_ITEM packet;
-
-	packet.id = fromClient;
-	packet.usedItem = usedItem;
-	packet.size = sizeof(packet);
-	packet.type = SC_USE_ITEM;
-
-	SendFunc(toClient, &packet);
-}
-
-void Server::SendEventPacket(char client, const MessageStruct& msg)
+// 플레이어 애니메이션 처리
+void Server::SendEventPacket(char toClient, const MessageStruct& msg)
 {
 	SC_PACKET_EVENT packet;
 
-	packet.id = client;
+	packet.id = toClient;
 	packet.msg = msg;
 	packet.size = sizeof(packet);
 	packet.type = SC_EVENT;
 	
-	SendFunc(client, &packet);
+	SendFunc(toClient, &packet);
 }
 
 void Server::SetAnimationState(char client, char animationNum)
@@ -565,6 +550,7 @@ void Server::SendRemovePlayer(char toClient, char fromClient)
 
 	SendFunc(toClient, &packet);
 }
+
 
 void Server::ClientDisconnect(char client)
 {

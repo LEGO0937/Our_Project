@@ -1,9 +1,5 @@
 #pragma once
-#include "../G_Server/MyInclude.h"
-#include "DirectX.h"
-#include <string>
-
-using namespace std;
+#include "../stdafx.h"
 
 //#define SERVER_IP "172.30.1.1"
 #define SERVER_IP "192.168.200.130"
@@ -13,6 +9,7 @@ constexpr int MAX_USER = 6;
 constexpr int MAX_ROUND_TIME = 0;
 constexpr int MAX_ITEM_NAME_LENGTH = 16;
 constexpr int MAX_CHATTING_LENGTH = 100;
+
 struct clientsInfo
 {
 	char    id;
@@ -75,28 +72,7 @@ constexpr int CS_GET_ITEM = 24;
 constexpr int CS_EVENT = 25;
 
 
-struct MessageStruct
-{
-	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
-	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
-	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
-	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
-
-	MessageStruct() {}
-	MessageStruct(const MessageStruct& msg)
-	{
-		msgName = msg.msgName;
-		shaderName = msg.shaderName;
-		departMat = msg.departMat;
-		objectSerialNum = msg.objectSerialNum;
-	}
-};
-
 //[클라->서버]
-
-
-
-
 
 //////////////////////////////////////////////////////
 
@@ -113,7 +89,6 @@ struct CS_PACKET_PLAYER_INFO // 클라의 위치, 이름, 체크포인트 상태 등
 	XMFLOAT4X4 xmf4x4Parents;
 	string playerNames;
 };
-
 
 struct CS_PACKET_RIGHT_KEY
 {
@@ -278,7 +253,6 @@ struct SC_PACKET_ROUND_START
 };
 
 
-
 // 플레이어 이동 시
 struct SC_PACKET_PLAYER_INFO
 {
@@ -337,12 +311,12 @@ struct SC_PACKET_CHATTING
 // 플레이어가 아이템 사용 시
 struct SC_PACKET_EVENT
 {
-	char id;
 	char size;
 	char type;
 
 	MessageStruct msg;
 };
+
 
 // 일정 간격으로 서버시간과 클라시간을 비교하기 위해
 // 다를 경우 클라시간을 서버시간으로 재설정
@@ -394,16 +368,15 @@ struct SC_PACKET_NOT_COLLIDED
 };
 
 
-struct SC_PACKET_PLAYER_INFO
+
+
+//////////////////////////////////////////////////////
+struct CS_PACKET_EVENT
 {
 	char size;
 	char type;
-	char id;
-	int checkPoints;
-	DWORD keyState;
-	XMFLOAT4X4 xmf4x4Parents;
-	string playerNames;
-	// 아이템 삭제, 추가(같은 이름)
-	// 숫자 같은 건 부여 못하고 hmm...
+
+	MessageStruct msg;
 };
+
 

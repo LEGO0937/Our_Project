@@ -55,7 +55,9 @@ public:
 	// 조립불가한 메모리를 다음번에 조립하기 위한 임시저장소
 	char packet_buffer[MAX_BUFFER];
 	int prev_size;
-	XMFLOAT4X4 xmf4x4Parents[6] = {};
+	XMFLOAT4X4 xmf4x4Parents = {};
+	MessageStruct msg;
+	
 	char rank; //등수
 	char item;
 	char animation;
@@ -113,15 +115,11 @@ public:
 public:
 	void SendAcessComplete(char client);
 	void SendGoLobby(char toClient);
-	//void SendPutPlayer(char toClient, char fromClient);
 	void SendReadyStatePacket(char toClient, char fromClient);
 	void SendUnReadyStatePacket(char toClient, char fromClient);
 	void SendRemovePlayer(char toClient, char fromClient);
 	void SendPlayerInfo(char toClietn, char fromClient);
-	void SendGetItem(char toClient, char fromClient, string& itemidx);
-	void SendUseItem(char toClient, char fromClient, char useItem);
-	//void SendUpdateEventInfo(char client, );
-	void SendEventPacket(char client, const MessageStruct& msg); // 애니메이션 상태 패킷
+	void SendEventPacket(char toClient, const MessageStruct& msg); // 애니메이션 상태 패킷
 public:
 	void SetAnimationState(char client, char animationNum);
 	void SetClient_Initialize(char client);
