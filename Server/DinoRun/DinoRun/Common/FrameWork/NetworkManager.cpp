@@ -9,6 +9,7 @@
 //volatile bool g_LoginFinished;
 //const char* g_serverIP = nullptr;
 
+
 NetWorkManager::NetWorkManager()
 {
 	sock = NULL;
@@ -19,6 +20,7 @@ NetWorkManager::NetWorkManager()
 	//Initialize();
 }
 
+
 NetWorkManager::~NetWorkManager()
 {
 	//m_pGameClient = nullptr;
@@ -26,10 +28,8 @@ NetWorkManager::~NetWorkManager()
 }
 
 
-
 void NetWorkManager::Initialize()
 {
-
 	m_ConnectState = CONNECT_STATE::NONE;
 
 	WSADATA wsa;
@@ -48,17 +48,17 @@ void NetWorkManager::Initialize()
 		err_quit("socket()");
 		return;
 	}
-
 }
+
 
 void NetWorkManager::Release()
 {
 	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 }
 
+
 void NetWorkManager::ConnectToServer()
 {
-
 	// connect()
 	m_ServerIP = "127.0.0.1";
 	SOCKADDR_IN serveraddr;
@@ -94,7 +94,6 @@ void NetWorkManager::ConnectToServer()
 	recv_wsabuf.len = BUF_SIZE;
 
 	m_ConnectState = CONNECT_STATE::OK;
-
 }
 
 
@@ -106,7 +105,6 @@ SOCKET NetWorkManager::getSock()
 
 void NetWorkManager::ReadPacket()
 {
-
 	DWORD iobyte, ioflag = 0;
 
 	int retval = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
@@ -145,6 +143,8 @@ void NetWorkManager::ReadPacket()
 		}
 	}
 }
+
+
 void NetWorkManager::ReadPacket(float fTimeElapsed)
 {
 
@@ -187,6 +187,7 @@ void NetWorkManager::ReadPacket(float fTimeElapsed)
 	}
 }
 
+
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
 void NetWorkManager::SendPacket(DWORD dataBytes)
 {
@@ -202,6 +203,7 @@ void NetWorkManager::SendPacket(DWORD dataBytes)
 		}
 	}
 }
+
 
 void NetWorkManager::SendPacket()
 {

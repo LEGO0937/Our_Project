@@ -68,6 +68,7 @@ void ItemGameScene::ReleaseUploadBuffers()
 	if (m_pCountDownShader)
 		m_pCountDownShader->ReleaseUploadBuffers();
 }
+
 void ItemGameScene::ReleaseObjects()
 {
 	BaseScene::ReleaseObjects();
@@ -464,6 +465,7 @@ void ItemGameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	}
 }
+
 void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 	lParam, float deltaTime)
 {
@@ -588,6 +590,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		break;
 	}
 }
+
 void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 	static UCHAR pKeyBuffer[256];
@@ -633,6 +636,7 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
+
 
 void ItemGameScene::Render()
 {
@@ -791,6 +795,8 @@ void ItemGameScene::AnimateObjects(float fTimeElapsed)
 void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	//자기 정보 보내기
+
+	
 	/*
 	SC_PACKET_PLAYER_INFO packet; 
 	packet.checkPoints[0] = m_pPlayer->GetCheckPoint();
@@ -978,7 +984,6 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 				m_pPlayer->SetMaxVelocityXZ(25);
 				isBoost = false;
 			}
-
 		}
 		//충돌을 위한 update
 		if (sceneType != SceneType::ItemGame_Scene)
@@ -1014,7 +1019,6 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							
 						}
 					}
-					
 					//타겟 오브젝트 타입 구해오고 경우에 맞게 처리하도록 작성할 것
 				}
 			}
@@ -1392,6 +1396,7 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 	//사운드 종료, 네트워크매니저에 패배 신호 주고 승리자는 이 패킷을 안받음.
 
 }
+
 
 void ItemGameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
 {

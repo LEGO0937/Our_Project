@@ -120,17 +120,20 @@ struct CS_PACKET_READY
 	char type;
 };
 
+
 struct CS_PACKET_UNREADY
 {
 	char size;
 	char type;
 };
 
+
 struct CS_PACKET_REQUEST_START
 {
 	char size;
 	char type;
 };
+
 
 struct CS_PACKET_ANIMATION
 {
@@ -141,11 +144,13 @@ struct CS_PACKET_ANIMATION
 	//float animationTime;	//현재 애니메이션 시간
 };
 
+
 struct CS_PACKET_RELEASE_KEY
 {
 	char size;
 	char type;
 };
+
 
 // 플레이어 닉네임 서버에 통보
 struct CS_PACKET_NICKNAME
@@ -157,6 +162,7 @@ struct CS_PACKET_NICKNAME
 	char name[24];
 };
 
+
 struct CS_PACKET_CHATTING
 {
 	char size;
@@ -166,12 +172,14 @@ struct CS_PACKET_CHATTING
 	char chatting[MAX_CHATTING_LENGTH];
 };
 
+
 //struct CS_PACKET_OBJECT_COLLISION
 //{
 //	char size;
 //	char type;
 //	unsigned short objId;		//object개수는 66536을 넘지 않기 때문에 unsigned short로 변경
 //};
+
 
 struct CS_PACKET_NOT_COLLISION
 {
@@ -327,6 +335,7 @@ struct SC_PACKET_COMPARE_TIME
 	unsigned short serverTime;				// 서버 시간
 };
 
+
 struct SC_PACKET_REMOVE_PLAYER
 {
 	char size;
@@ -369,14 +378,5 @@ struct SC_PACKET_NOT_COLLIDED
 
 
 
-
-//////////////////////////////////////////////////////
-struct CS_PACKET_EVENT
-{
-	char size;
-	char type;
-
-	MessageStruct msg;
-};
 
 

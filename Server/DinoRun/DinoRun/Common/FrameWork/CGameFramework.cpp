@@ -44,6 +44,7 @@ bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
 	
 	return(true);
 }
+
 void CGameFramework::Release()
 {
 	ReleaseObjects();

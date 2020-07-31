@@ -17,12 +17,12 @@ Server::~Server()
 	//clients.clear();
 }
 
+
 bool Server::InitServer()
 {
 	setlocale(LC_ALL, "korean");
 
 	clientCount = 0;
-	hostId = -1;
 	// Winsock Start - windock.dll 로드
 	WSADATA WSAData;
 	if (WSAStartup(MAKEWORD(2, 2), &WSAData) != 0)
@@ -71,6 +71,7 @@ bool Server::InitServer()
 	return true;
 }
 
+
 void Server::RunServer()
 {
 	iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
@@ -94,11 +95,13 @@ void Server::RunServer()
 		th.join();
 }
 
+
 void Server::AcceptThread(LPVOID arg)
 {
 	Server* pServer = static_cast<Server*>(arg);
 	pServer->AcceptThreadFunc();
 }
+
 
 void Server::AcceptThreadFunc()
 {
@@ -119,6 +122,7 @@ void Server::AcceptThreadFunc()
 		}
 
 		// id를 0~5까지 사용할 예정
+		// 흠.. 이 아이디를 1부터 사용한다고...?
 		int new_id = -1;
 		for (int i = 0; i < MAX_USER; ++i)
 		{
@@ -154,11 +158,7 @@ void Server::AcceptThreadFunc()
 
 		///////////////////////////////////// 클라이언트 초기화 정보 수정 위치 /////////////////////////////////////
 		clients[new_id].socket = clientSocket;
-		if (-1 == hostId)
-		{
-			hostId = new_id;
-			printf("현재 방장은 %d입니다.\n", hostId);
-		}
+
 		SetClient_Initialize(new_id);
 		///////////////////////////////////// 클라이언트 초기화 정보 수정 위치 /////////////////////////////////////
 		ZeroMemory(&clients[new_id].over_ex.over, sizeof(clients[new_id].over_ex.over));
@@ -168,13 +168,15 @@ void Server::AcceptThreadFunc()
 		CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), iocp, new_id, 0);
 
 		clients[new_id].in_use = true;
-
+		clients[new_id].gameState = GS_ID_INPUT;
 		SendAcessComplete(new_id);
+
 		printf("%d 클라이언트 접속 완료\n", new_id);
 		// 기존 유저들에게 이후 접속한 유저들 출력
 		for (int i = 0; i < MAX_USER; ++i)
 			if (true == clients[i].in_use)
-				SendPlayerInfo(i, new_id);
+				SendAccessPlayer(i, new_id);
+				//SendPlayerInfo(i, new_id);
 
 		// 처음 접속한 나에게 기존 유저들 출력
 		for (int i = 0; i < MAX_USER; ++i)
@@ -183,7 +185,8 @@ void Server::AcceptThreadFunc()
 				continue;
 			if (i == new_id)
 				continue;
-			SendPlayerInfo(new_id, i);
+			SendAccessPlayer(new_id, i);
+			//SendPlayerInfo(new_id, i);
 		}
 		clientCnt_l.lock();
 		++clientCount;
@@ -200,6 +203,7 @@ void Server::AcceptThreadFunc()
 }
 
 
+
 void Server::RecvFunc(char client)
 {
 	DWORD flags = 0;
@@ -209,21 +213,23 @@ void Server::RecvFunc(char client)
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
 			cout << "Error - IO pending Failure\n";
-			while (true);
+			//while (true);
 		}
 	}
 	else {
 		// 비동기식으로 돌아가지 않고 동기식으로 돌아갔다는 오류.
 		cout << "Non Overlapped Recv return.\n";
-		while (true);
+		//while (true);
 	}
 }
+
 
 void Server::WorkerThread(LPVOID arg)
 {
 	Server* pServer = static_cast<Server*>(arg);
 	pServer->WorkerThreadFunc();
 }
+
 
 void Server::WorkerThreadFunc()
 {
@@ -321,12 +327,10 @@ void Server::WorkerThreadFunc()
 	}
 }
 
+
 void Server::ProcessPacket(char client, char* packet)
 {
-	
-	/*int x = clients[client].xPos;
-	int y = clients[client].yPos;
-	int z = clients[client].zPos;*/
+
 
 	// 0번은 사이즈, 1번이 패킷타입
 	// packet[0] packet[1] 
@@ -335,26 +339,13 @@ void Server::ProcessPacket(char client, char* packet)
 
 	switch (packet[1]) // 0번째는 패킷 사이즈 1번쨰는 패킷 타입
 	{
-	case CS_UP_KEY:
-		printf("Press UP Key ID: %d\n", client);
-		break;
-	case CS_DOWN_KEY:
-		printf("Press DOWN Key ID: %d\n", client);
-		break;
-	case CS_LEFT_KEY:
-		printf("Press LEFT Key ID: %d\n", client);
-		break;
-	case CS_RIGHT_KEY:
-		printf("Press RIGHT Key ID: %d\n", client);
-		break;
-	case CS_PLAYER_INFO:
+	case CS_PLAYER_INFO: // 플레이어 전체적인 위치 담당
 	{
 		printf("Player Info Success: %d\n", client);
 		// 각 클라에게 위치 인덱스 전송
 		for (int i = 0; i < MAX_USER; ++i)
 		{
-			if (false == clients[i].in_use)
-				continue;
+			if(clients[i].in_use == true)
 
 			SendPlayerInfo(i, client);
 		}
@@ -373,7 +364,7 @@ void Server::ProcessPacket(char client, char* packet)
 		clientCnt_l.unlock();
 		readyCnt_l.unlock();
 
-
+		
 		clients[client].isReady = true;
 		for (int i = 0; i < MAX_USER; ++i)
 		{
@@ -411,12 +402,16 @@ void Server::ProcessPacket(char client, char* packet)
 		break;
 	}
 	default:
+		wcout << L"패킷 사이즈: " << (int)packet[0] << endl;
+		wcout << L"패킷 타입 : " << (int)packet[1] << endl;
+		cout << "Client prev size : " << clients[client].prev_size << "\n";
+		for (int i = 2; i < (int)packet[0]; ++i)
+			wcout << packet[i];
+		wcout << L"\n";
 		wcout << L"정의되지 않은 패킷 도착 오류!!\n";
-		while (true);
+		break;
 	}
-	/*clients[client].xPos = x;
-	clients[client].yPos = y;
-	clients[client].zPos = z;*/
+
 }
 
 
@@ -447,6 +442,7 @@ void Server::SendFunc(char client, void* packet)
 	}
 }
 
+
 void Server::SetClient_Initialize(char client)
 {
 	clients[client].collision = CL_NONE;
@@ -459,9 +455,21 @@ void Server::SendAcessComplete(char client)
 	packet.myId = client;
 	packet.size = sizeof(packet);
 	packet.type = SC_ACCESS_COMPLETE;
-
+	// 다들 로그인 되면 바꾸는 거라 호스트 삭제
 	SendFunc(client, &packet);
 }
+
+
+void Server::SendAccessPlayer(char toClient, char fromClient)
+{
+	SC_PACKET_ACCESS_PLAYER packet;
+	packet.id = fromClient;
+	packet.size = sizeof(packet);
+	packet.type = SC_ACCESS_PLAYER;
+
+	SendFunc(toClient, &packet);
+}
+
 
 void Server::SendGoLobby(char toClient)
 {
@@ -472,6 +480,7 @@ void Server::SendGoLobby(char toClient)
 
 	SendFunc(toClient, &packet);
 }
+
 
 void Server::SendReadyStatePacket(char toClient, char fromClient)
 {
@@ -551,9 +560,9 @@ void Server::SendRemovePlayer(char toClient, char fromClient)
 	SendFunc(toClient, &packet);
 }
 
-
 void Server::ClientDisconnect(char client)
 {
+	clients[client].in_use = false;
 	for (int i = 0; i < MAX_USER; ++i)
 	{
 		if (false == clients[i].in_use)
@@ -563,10 +572,10 @@ void Server::ClientDisconnect(char client)
 		SendRemovePlayer(i, client);
 	}
 	closesocket(clients[client].socket);
-	clients[client].in_use = false;
-	printf("%d 클라이언트 접속 종료\n", (int)client);
+	clientCnt_l.lock();
+	printf("%d 클라이언트 접속 종료, 현재 클라이언트 수: %d\n", (int)client, clientCount);
+	clientCnt_l.unlock();
 }
-
 
 
 void Server::err_quit(const char* msg)

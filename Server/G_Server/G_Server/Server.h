@@ -8,8 +8,6 @@
 constexpr int MAX_BUFFER = 1024;
 //constexpr int MAX_USER = 6;
 constexpr int SERVER_PORT = 9000;
-
-
 constexpr int MAX_WORKER_THREAD = 3;
 
 enum EVENT_TYPE
@@ -35,12 +33,15 @@ enum GAME_STATE			//로비 상태인지 인게임 중인지
 };
 
 // Overlapped구조체 확장
-struct OVER_EX {
+struct OVER_EX 
+{
 	WSAOVERLAPPED	over;
 	WSABUF			dataBuffer;
 	char			messageBuffer[MAX_BUFFER];
 	EVENT_TYPE		event_t;
 };
+
+
 
 class SOCKETINFO
 {
@@ -98,7 +99,6 @@ private:
 	vector<thread> workerThreads;
 	int clientCount;
 	int readyCount;
-	int hostId;
 public:
 	Server();
 	~Server();
@@ -114,6 +114,7 @@ public:
 	void ClientDisconnect(char client);
 public:
 	void SendAcessComplete(char client);
+	void SendAccessPlayer(char toClient, char fromClient);
 	void SendGoLobby(char toClient);
 	void SendReadyStatePacket(char toClient, char fromClient);
 	void SendUnReadyStatePacket(char toClient, char fromClient);
@@ -123,7 +124,6 @@ public:
 public:
 	void SetAnimationState(char client, char animationNum);
 	void SetClient_Initialize(char client);
-
 public:
 	bool InitServer();
 	void RunServer();
@@ -133,19 +133,19 @@ public:
 };
 
 
-struct MessageStruct
-{
-	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
-	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
-	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
-	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
-
-	MessageStruct() {}
-	MessageStruct(const MessageStruct& msg)
-	{
-		msgName = msg.msgName;
-		shaderName = msg.shaderName;
-		departMat = msg.departMat;
-		objectSerialNum = msg.objectSerialNum;
-	}
-};
+//struct MessageStruct
+//{
+//	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
+//	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
+//	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
+//	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
+//
+//	MessageStruct() {}
+//	MessageStruct(const MessageStruct& msg)
+//	{
+//		msgName = msg.msgName;
+//		shaderName = msg.shaderName;
+//		departMat = msg.departMat;
+//		objectSerialNum = msg.objectSerialNum;
+//	}
+//};

@@ -358,7 +358,6 @@ struct SC_PACKET_REMOVE_PLAYER
 	char size;
 	char type;
 	char id;
-	char hostId;
 };
 
 
@@ -394,16 +393,4 @@ struct SC_PACKET_NOT_COLLIDED
 };
 
 
-struct SC_PACKET_PLAYER_INFO
-{
-	char size;
-	char type;
-	char id;
-	int checkPoints;
-	DWORD keyState;
-	XMFLOAT4X4 xmf4x4Parents;
-	string playerNames;
-	// 아이템 삭제, 추가(같은 이름)
-	// 숫자 같은 건 부여 못하고 hmm...
-};
 
