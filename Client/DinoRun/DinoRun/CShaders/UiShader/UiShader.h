@@ -29,6 +29,9 @@ public:
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
 	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+
+	float GetSecond() { return m_fSecond; }
+	int GetMinute() { return m_iMinute; }
 };
 
 class GaugeShader : public CUiShader

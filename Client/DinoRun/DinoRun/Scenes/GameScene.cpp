@@ -24,6 +24,7 @@
 #include "EventHandler/EventHandler.h"
 
 #define PLAYER_SHADER instancingAnimatedModelShaders[0]
+#define TIME_COUNT_SHADER instancingNumberUiShaders[0]
 
 GameScene::GameScene() :BaseScene()
 {
@@ -163,11 +164,11 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 	
 	m_pSkyBox = new SkyBoxObject(pCreateManager.get());
-	m_pCreateManager->RenderLoading();
+
 	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 7,
 		7, xmf3Scale);
 	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
+
 	m_pCreateManager->RenderLoading();
 	CObInstancingShader* shader;
 	CUiShader* uiShader;
@@ -404,9 +405,9 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.43f)));
 
 	CreateShaderVariables(pCreateManager.get());
-	SoundManager::GetInstance()->Play("InGame_BGM", 0.2f);
+	SoundManager::GetInstance()->Play("InGame_BGM", 0.1f);
 
-
+	m_pCreateManager->RenderLoading();
 }
 
 void GameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -654,13 +655,15 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
 	if (length > 30)
 	{
-		int idx = length - 30;
+		if (!SoundManager::GetInstance()->Playing("Boost"))
+			SoundManager::GetInstance()->Play("Boost", 0.5f);
+		//int idx = length - 10;
 		//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
 		motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
 
 
-		
+
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_EFFECT]);
 		m_pEffectShader->Render(m_pd3dCommandList, m_pCamera);
 		m_pEffectShader->getUvXs()[0] = deltaUvX;
@@ -668,6 +671,9 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 		if (deltaUvX >= 1.0)
 			deltaUvX = 0.0f;
 	}
+	else
+		if (SoundManager::GetInstance()->Playing("Boost"))
+			SoundManager::GetInstance()->Stop("Boost");
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	for (CUiShader* shader : instancingImageUiShaders)
@@ -785,6 +791,10 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
 			SoundManager::GetInstance()->AllStop();
+			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+
 			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 		}
 		else
@@ -823,6 +833,15 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 					gameTexts[idx++].text = m_sPlayerId;
 			}
 			m_pPlayer->SetRank(rank);
+
+			if (((CPlayer*)list[0])->GetCheckPoint() == CHECKPOINT_GOAL)
+			{
+				EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+				EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+				EventHandler::GetInstance()->m_sWinner = ((CPlayer*)list[0])->GetName();
+
+				sceneType = End_Scene;
+			}
 		}
 
 		//충돌을 위한 update

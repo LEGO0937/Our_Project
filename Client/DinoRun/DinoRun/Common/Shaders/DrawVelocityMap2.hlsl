@@ -25,20 +25,22 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedAnimation(VS_SKINNED_INPUT input)
 		normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 	}
 
+	//curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
+	//prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxView), gmtxProjection);
 	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
 	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
-
 	
-	float3 dir = curPos.xyz - prevPos.xyz;
-
+	float3 dir = (curPos.xyz) - (prevPos.xyz);
+	/*
 	float a = dot(normalize(dir), normalize(normalW));
-
+	
 	if (a < 0.0f)
 		output.position = prevPos;
 	else
 		output.position = curPos;
-	//output.position = curPos;
-	output.direction.xy = dir.xy;
+		*/
+	output.position = curPos;
+	output.direction.xy = dir.xy * 0.5f;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
 	output.direction.y *= -1.0f;
@@ -75,18 +77,19 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedInstancingAnimation(VS_SKINNED_INPUT inpu
 	}
 
 	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
-	prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
-	float3 dir = curPos.xyz - prevPos.xyz;
-
+	float3 dir = (curPos.xyz) - (prevPos.xyz);
+	/*
 	float a = dot(normalize(dir), normalize(normalW));
 
 	if (a < 0.0f)
 		output.position = prevPos;
 	else
 		output.position = curPos;
-	//output.position = curPos;
-	output.direction.xy = dir.xy;
+		*/
+	output.position = curPos;
+	output.direction.xy = dir.xy * 0.5f;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
 	output.direction.y *= -1.0f;
@@ -142,18 +145,19 @@ CREATE_VEL_MAP_OUTPUT VSVelocityTextedInstancing(VS_TEXTED_INSTANCING_INPUT inpu
 
 
 	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
-	prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
-	float3 dir = curPos.xyz - prevPos.xyz;
-
+	float3 dir = (curPos.xyz ) - (prevPos.xyz);
+	/*
 	float a = dot(normalize(dir), normalize(normalW));
 
 	if (a < 0.0f)
 		output.position = prevPos;
 	else
 		output.position = curPos;
-	//output.position = curPos;
-	output.direction.xy = dir.xy ;
+		*/
+	output.position = curPos;
+	output.direction.xy = dir.xy;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
 	output.direction.y *= -1.0f;
@@ -210,20 +214,22 @@ void VelocityGS(point VS_TEXTED_INSTANCING_OUTPUT input[1], inout TriangleStream
 	for (int i = 0; i < 4; ++i)
 	{
 		curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
-		prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+		prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
 		normalW = vLook;
-		dir = curPos.xyz - prevPos.xyz;
-
-		a = dot(normalize(dir), normalize(normalW));
+		dir = (curPos.xyz) - (prevPos.xyz);
+		/*
+		float a = dot(normalize(dir), normalize(normalW));
 
 		if (a < 0.0f)
 			output.position = prevPos;
 		else
 			output.position = curPos;
-		//output.position = curPos;
-		output.direction.xy = dir.xy;
+			*/
+		output.position = curPos;
+		output.direction.xy = dir.xy * 0.5f;
 
+		// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
 		output.direction.y *= -1.0f;
 
 		output.direction.z = output.position.z;
@@ -258,18 +264,19 @@ CREATE_VEL_MAP_OUTPUT VSVelocityTer(VS_TEXT_INPUT input)
 
 
 	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
-	prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
-	float3 dir = curPos.xyz - prevPos.xyz;
-
+	float3 dir = (curPos.xyz) - (prevPos.xyz);
+	/*
 	float a = dot(normalize(dir), normalize(normalW));
 
 	if (a < 0.0f)
 		output.position = prevPos;
 	else
 		output.position = curPos;
+		*/
 	output.position = curPos;
-	output.direction.xy = dir.xy ;
+	output.direction.xy = dir.xy * 0.5f;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
 	output.direction.y *= -1.0f;
@@ -308,18 +315,19 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkyBox(VS_SKYBOX_INPUT input)
 
 
 	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
-	prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxPrevView), gmtxProjection);
+	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
-	float3 dir = curPos.xyz - prevPos.xyz;
+	float3 dir = (curPos.xyz) - (prevPos.xyz);
+	/*
+	float a = dot(normalize(dir), normalize(normalW));
 
-	//float a = dot(normalize(dir), normalize(normalW));
-
-	//if (a < 0.0f)
-	//	output.position = prevPos;
-	//else
+	if (a < 0.0f)
+		output.position = prevPos;
+	else
 		output.position = curPos;
-	//output.position = prevPos;
-	output.direction.xy = dir.xy ;
+		*/
+	output.position = curPos;
+	output.direction.xy = dir.xy * 0.5f;
 
 	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
 	output.direction.y *= -1.0f;

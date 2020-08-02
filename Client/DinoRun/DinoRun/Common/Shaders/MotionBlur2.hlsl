@@ -36,7 +36,7 @@ void MotionBlurCS(int3 groupThreadID : SV_GroupThreadID,
 	int3 dispatchThreadID : SV_DispatchThreadID)
 {
 
-	int Blur =13;
+	int Blur = 15;
 
 	// 속도 맵에서 속도 벡터 및 Z 값을 얻을
 	float4 Velocity = velocityMap[dispatchThreadID.xy];
@@ -55,7 +55,7 @@ void MotionBlurCS(int3 groupThreadID : SV_GroupThreadID,
 		BColor = renderImage[(dispatchThreadID.xy + (Velocity.xy * (float)i))];
 
 		// 속도 맵의 Z 값과 속도 벡터 방향에있는 텍셀 위치를 샘플링 한 장면의 렌더링 이미지의 Z 값을 비교한다. (주의 1)
-		if (Velocity.a < BColor.a + 0.04f)
+		//if (Velocity.a < BColor.a + 0.04f)
 		{
 			cnt++;
 			Out += BColor;

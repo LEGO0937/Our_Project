@@ -119,6 +119,7 @@ void CCamera::RegenerateViewMatrix()
 {
 	//카메라의 z-축을 기준으로 카메라의 좌표축들이 직교하도록 카메라 변환 행렬을 갱신한다. 
 	//카메라의 z-축 벡터를 정규화한다. 
+
 	m_xmf4x4PrevView = m_xmf4x4View;
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	//카메라의 z-축과 y-축에 수직인 벡터를 x-축으로 설정한다.
@@ -162,7 +163,12 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Projection)));
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4View, &xmf4x4View, sizeof(XMFLOAT4X4));
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4Projection, &xmf4x4Projection, sizeof(XMFLOAT4X4));
-	XMStoreFloat4x4(&m_pcbMappedCamera->m_xmf4x4PrevView, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevView)));
+
+	XMFLOAT4X4 xmf4x4PrevView;
+	XMStoreFloat4x4(&xmf4x4PrevView, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevView)));
+	::memcpy(&m_pcbMappedCamera->m_xmf4x4PrevView, &xmf4x4PrevView, sizeof(XMFLOAT4X4));
+
+	
 	m_pcbMappedCamera->m_cameraPosition = GetPosition();
 
 
@@ -369,7 +375,8 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		//	}
 		//}
 		//--------------------------------
-		float c = 1.0f, k = 25.0f;
+		float c = 3.0f, k = 20.0f;
+		float cXZ = 0.8f, kXZ = 18.0f;
 		{
 			//k = 0.04  ,  c = 0.2
 			//f= - cv -k*x   -cv -kx아닌가?..
@@ -385,7 +392,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			XMFLOAT3 vel = m_pPlayer->GetVelocity();
 			float length = (vel.x * vel.x + vel.z * vel.z);
 			if (length > 900)
-				m_xmf3Offset = XMFLOAT3(0.0f, 25.0f, -80.0f);
+				m_xmf3Offset = XMFLOAT3(0.0f, 35.0f, -80.0f);
 			else
 				m_xmf3Offset = XMFLOAT3(0.0f, 30.0f, -60.0f);
 
@@ -438,14 +445,18 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			//XMMATRIX xmvViewInverse = XMMatrixInverse(&det2, XMLoadFloat4x4(&viewM));  //view의 역행렬
 
 
-			float forceX = (-c * xmf3ResultVel.x) + (-k * xmf3ResultVec.x);
+			float forceX = (-cXZ * xmf3ResultVel.x) + (-kXZ * xmf3ResultVec.x);
 			float forceY = (-c * xmf3ResultVel.y) + (-k * xmf3ResultVec.y);
-			float forceZ = (-c * xmf3ResultVel.z) + (-k * xmf3ResultVec.z);
+			float forceZ = (-cXZ * xmf3ResultVel.z) + (-kXZ * xmf3ResultVec.z);
 
 			XMFLOAT4 xmf4Force = XMFLOAT4(forceX, forceY, forceZ,0);
+
+			//xmf4Force = Vector3::DivProduct
 			XMFLOAT3 accelerationForce;
 
 			XMStoreFloat3(&accelerationForce,XMVector4Transform(XMLoadFloat4(&xmf4Force), XMLoadFloat4x4(&inverseViewM)));
+			//accelerationForce = Vector3::DivProduct(accelerationForce, m_fMass, false);
+
 			//force에 질량을 나누어 가속도를 구해야하지만 질량이 1이므로 나누지않고 바로 가속도로 지정.
 			//if (xmf3ResultVec.x > 3.01)
 			//	xmf3ResultVec.x = 3.01;
