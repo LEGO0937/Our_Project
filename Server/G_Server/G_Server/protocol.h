@@ -6,8 +6,8 @@
 using namespace std;
 
 //#define SERVER_IP "172.30.1.1"
-#define SERVER_IP "192.168.200.130"
-
+//#define SERVER_IP "192.168.200.130"
+#define SERVER_IP "127.0.0.1"
 constexpr int MAX_USER = 6;
 
 constexpr int MAX_ROUND_TIME = 0;
@@ -108,36 +108,12 @@ struct CS_PACKET_PLAYER_INFO // 클라의 위치, 이름, 체크포인트 상태 등
 	char size;
 	char type;
 	char id;
-	int checkPoints;
+	UCHAR checkPoints;
 	DWORD keyState;
 	XMFLOAT4X4 xmf4x4Parents;
 	string playerNames;
 };
 
-
-struct CS_PACKET_RIGHT_KEY
-{
-	char size;
-	char type;
-};
-
-struct CS_PACKET_LEFT_KEY
-{
-	char size;
-	char type;
-};
-
-struct CS_PACKET_UP_KEY
-{
-	char size;
-	char type;
-};
-
-struct CS_PACKET_DOWN_KEY
-{
-	char size;
-	char type;
-};
 
 struct CS_PACKET_READY
 {
@@ -285,7 +261,7 @@ struct SC_PACKET_PLAYER_INFO
 	char size;
 	char type;
 	char id;
-	int checkPoints;
+	UCHAR checkPoints;
 	DWORD keyState;
 	XMFLOAT4X4 xmf4x4Parents;
 	string playerNames;
@@ -366,7 +342,7 @@ struct SC_PACKET_ROUND_END
 	char size;
 	char type;
 	bool isWinner;
-	char score[MAX_USER];
+	UCHAR checkPoints;
 };
 
 

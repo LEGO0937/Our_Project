@@ -443,6 +443,7 @@ void Server::SendFunc(char client, void* packet)
 }
 
 
+
 void Server::SetClient_Initialize(char client)
 {
 	clients[client].collision = CL_NONE;
@@ -481,6 +482,22 @@ void Server::SendGoLobby(char toClient)
 	SendFunc(toClient, &packet);
 }
 
+void Server::SendRoundEnd(char client)
+{
+	SC_PACKET_ROUND_END packet;
+	packet.isWinner = true;
+	for (int i = 0; i < MAX_USER; ++i)
+	{
+		if (false == clients[i].in_use)
+			packet.checkPoints = 0;
+		else
+			break;
+	}
+	packet.size = sizeof(SC_PACKET_ROUND_END);
+	packet.type = SC_ROUND_END;
+
+	SendFunc(client, &packet);
+}
 
 void Server::SendReadyStatePacket(char toClient, char fromClient)
 {
@@ -492,6 +509,8 @@ void Server::SendReadyStatePacket(char toClient, char fromClient)
 
 	SendFunc(toClient, &packet);
 }
+
+
 
 
 void Server::SendUnReadyStatePacket(char toClient, char fromClient)
@@ -512,7 +531,16 @@ void Server::SendPlayerInfo(char toClient, char fromClient)
 	packet.id = fromClient;
 	packet.size = sizeof(packet);
 	packet.type = SC_PLAYER_INFO;
+	packet.xmf4x4Parents = clients[fromClient].xmf4x4Parents;
+	packet.checkPoints = clients[fromClient].checkPoints;
 
+	/*char size;
+	char type;
+	char id;
+	int checkPoints;
+	DWORD keyState;
+	XMFLOAT4X4 xmf4x4Parents;
+	string playerNames;*/
 	SendFunc(toClient, &packet);
 }
 
@@ -538,17 +566,13 @@ void Server::SendEventPacket(char toClient, const MessageStruct& msg)
 	SC_PACKET_EVENT packet;
 
 	packet.id = toClient;
-	packet.msg = msg;
 	packet.size = sizeof(packet);
 	packet.type = SC_EVENT;
-	
+	packet.msg = msg;
+
 	SendFunc(toClient, &packet);
 }
 
-void Server::SetAnimationState(char client, char animationNum)
-{
-	clients[client].animation = animationNum;
-}
 
 void Server::SendRemovePlayer(char toClient, char fromClient)
 {
@@ -614,3 +638,4 @@ void Server::err_display(const char* msg)
 
 	LocalFree(lpMsgBuf);
 }
+
