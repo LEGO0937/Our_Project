@@ -103,8 +103,11 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 	case WM_LBUTTONDOWN:
 		if (point.x > 0.16f && point.x < 0.46f && point.y > -0.62f && point.y < -0.38f) //로그인 버튼 충돌체크
 		{
-			BUTTON_SHADER->getUvXs()[0] = 0.5f;
-			isClickedLogin = true;
+			if (!isClickedLogin)
+			{
+				BUTTON_SHADER->getUvXs()[0] = 0.5f;
+				isClickedLogin = true;
+			}
 		}
 		else if (point.x > -0.48f && point.x < 0.13f && point.y > -0.31f && point.y < -0.2f) //ID TEXT 충돌체크
 		{
@@ -131,17 +134,14 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (isClickedLogin)
 			{
 				//*서버*
-				//이 구간에서 서버와 연결하여 아이디와 패스워드를 보냄, 서버에서 확인후 존재하는 아이디가 맞다면
-				//닉네임을 보내줌, 없을 시 ""빈 문자열(string형으로 받을 것)
-				// 닉네임을 받았다면 네트워크 클래스에 닉네임 저장 후, Lobbyscene으로 이동.
-				//씬 전환 
-				//m_sPlayerId = 로그인 성공 시 서버로부터 닉네임 받음;
-				
-				
+
+				gameTexts[PASSWORD].text; //패스워드  
+				gameTexts[ID].text;  //아이디  둘 다 영문   string자료형임.
 				//순서
 				//아이디와 비밀번호가 있는 패킷을 send
 				//recv로 로그인 성공인지 실패인지 확인.
-				//로그인 성공시에는 m_sPlayerId에 닉네임을 입력하고 로비씬으로 넘어감.
+				//로그인 성공시에는 아래 세줄 수행 후 로비씬으로 넘어감.
+				//패킷 구현 후에는 아래 세줄이 프로세스 처리 함수중 로그인 성공함수에 들어갈 예정->UpdateLogin()
 				m_sPlayerId = gameTexts[ID].text;
 				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
 				sceneType = Lobby_Scene;
@@ -296,5 +296,29 @@ void StartScene::setCamera(CCamera* camera)
 
 void StartScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
+	switch (packet[1])
+	{
+	case SC_READY_STATE:   //케이스는 로그인용으로 따로 만들어줄 것.
+		UpdateLogin(packet, fTimeElapsed);  //이 함수가 호출 되면 다음 프레임에 로비씬으로 넘어가게 됨.
+		break;
+	case 1: //로그인 실패 케이스  -> 실패이므로 로그인 버튼을 다시 비활성화 시킨다.
+		if (isClickedLogin)
+		{
+			isClickedLogin = false;
+			BUTTON_SHADER->getUvXs()[0] = 0.0f;
+		}
+		break;
+	default: // 로그인 실패같은 경우에는 무시함.
+		break;
+	}
+}
 
+void StartScene::UpdateLogin(char* packet, float fTimeElapsed)
+{
+	m_sPlayerId = gameTexts[ID].text;
+	NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
+	sceneType = Lobby_Scene;
+
+	//그리고 여기서 클라이언트 넘버를 받는게 맞다면
+	//NetWorkManager::GetInstance()->SetMyID()로 아이디 적용할것.
 }

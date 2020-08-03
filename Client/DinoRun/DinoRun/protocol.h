@@ -515,3 +515,28 @@ struct SC_PACKET_EVENT
 
 	MessageStruct msg;
 };
+
+//------룸 정보 업데이트에 대한 패킷
+
+
+struct CS_PACKET_ROOM
+{
+	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
+	char type;
+
+	char m_iRoomNumber;
+	char m_iUserNumber;
+	bool m_bIsGaming;
+	bool m_bMode;
+};
+
+struct SC_PACKET_ROOM
+{
+	char size;
+	char type;
+
+	char m_iRoomNumber;
+	char m_iUserNumber;
+	bool m_bIsGaming;
+	bool m_bMode;
+};

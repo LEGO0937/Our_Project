@@ -1381,20 +1381,20 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 	switch (packet[1])
 	{
 	case SC_PLAYER_INFO:
-		updatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
+		UpdatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
 		//역으로 자신의 정보를 줄때는? Update에서 끝나는 지점에서 send할것
 		break;
 	case SC_GET_ITEM:
-		updateEventInfo(packet, fTimeElapsed); //이벤트처리
+		UpdateEventInfo(packet, fTimeElapsed); //이벤트처리
 		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
 		break;
 	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치
-		updateInitInfo(packet, fTimeElapsed);
+		UpdateInitInfo(packet, fTimeElapsed);
 
 		break;
 	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리
-		updateStartInfo(packet, fTimeElapsed);
+		UpdateStartInfo(packet, fTimeElapsed);
 		break;
 	default:
 		break;
@@ -1449,7 +1449,7 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 
 }
 
-void ItemGameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
+void ItemGameScene::UpdatePlayerInfo(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_PLAYER_INFO* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_INFO*>(packet);
 
@@ -1478,7 +1478,7 @@ void ItemGameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
 		}
 	}
 }
-void ItemGameScene::updateEventInfo(char* packet, float fTimeElapsed)
+void ItemGameScene::UpdateEventInfo(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_EVENT* playerInfo = reinterpret_cast<SC_PACKET_EVENT*>(packet);
 	MessageStruct msg = playerInfo->msg;
@@ -1486,11 +1486,11 @@ void ItemGameScene::updateEventInfo(char* packet, float fTimeElapsed)
 	EventHandler::GetInstance()->RegisterEvent(msg);
 }
 
-void ItemGameScene::updateInitInfo(char* packet, float fTimeElapsed)
+void ItemGameScene::UpdateInitInfo(char* packet, float fTimeElapsed)
 {
 
 }
-void ItemGameScene::updateStartInfo(char* packet, float fTimeElapsed)
+void ItemGameScene::UpdateStartInfo(char* packet, float fTimeElapsed)
 {
 
 }
