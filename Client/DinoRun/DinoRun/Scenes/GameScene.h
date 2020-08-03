@@ -69,6 +69,8 @@ public:
 
 	void updatePlayerInfo(char* packet, float fTimeElapsed);
 	void updateEventInfo(char* packet, float fTimeElapsed);
+	void updateInitInfo(char* packet, float fTimeElapsed);
+	void updateStartInfo(char* packet, float fTimeElapsed);
 private:
 	DWORD dwDirection;
 
@@ -103,6 +105,8 @@ private:
 
 	MinimapShader* m_pMinimapShader = NULL;
 	IconShader* m_pIconShader = NULL;
+
+	bool isAllConnected = false;
 	bool isStart = false;
 
 	float m_fCountDownTime = 0.0f;

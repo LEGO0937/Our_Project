@@ -56,7 +56,7 @@ protected:
 	D3D12_RECT m_d3dScissorRect;
 	
 	//카메라를 가지고 있는 플레이어에 대한 포인터이다. 
-	CPlayer *m_pPlayer = NULL;
+	CGameObject *m_pPlayer = NULL;
 
 	ID3D12Resource *m_pd3dcbCamera = NULL;
 	VS_CB_CAMERA_INFO* m_pcbMappedCamera = NULL;
@@ -99,7 +99,7 @@ public:
 	virtual void SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommandList);
 
 	void SetPlayer(CPlayer *pPlayer) { m_pPlayer = pPlayer; }
-	CPlayer *GetPlayer() { return(m_pPlayer); }
+	CGameObject *GetPlayer() { return(m_pPlayer); }
 
 	void SetMode(DWORD nMode) { m_nMode = nMode; }
 	DWORD GetMode() { return(m_nMode); }

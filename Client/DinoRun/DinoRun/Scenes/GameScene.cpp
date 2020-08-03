@@ -408,6 +408,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	SoundManager::GetInstance()->Play("InGame_BGM", 0.1f);
 
 	m_pCreateManager->RenderLoading();
+	isAllConnected = true;
 }
 
 void GameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -542,7 +543,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 	if(dwDirection == 0)
 		m_pPlayer->m_fForce = 0;
 
-	m_pPlayer->Move(dwDirection, 1200.0f*deltaTime, deltaTime, true);
+	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
 	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
@@ -587,7 +588,8 @@ void GameScene::Render()
 	
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE]);
 	//particleSystem->Render(m_pd3dCommandList.Get(), m_pCamera);
-	m_pPlayer->m_pParticleSystem->Render(m_pd3dCommandList, m_pCamera);
+	if ( Vector3::Length(m_pPlayer->m_xmf3Velocity) > 0)
+		m_pPlayer->m_pParticleSystem->Render(m_pd3dCommandList, m_pCamera);
 	for (ParticleSystem* system : particleSystems)
 	{
 		system->Render(m_pd3dCommandList, m_pCamera);
@@ -731,21 +733,22 @@ void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 			shader->FixedUpdate(fTimeElapsed);  //물리 적용할 것
 		}
 	}
-
-	if (!isStart)
+	if (isAllConnected)
 	{
-		if (m_fCountDownTime > 0.9f)
+		if (!isStart)
 		{
-			m_fCountDownTime -= fTimeElapsed;
+			if (m_fCountDownTime > 0.9f)
+			{
+				m_fCountDownTime -= fTimeElapsed;
+			}
+			else
+			{
+				m_fCountDownTime = 0.0f;
+				isStart = true;
+			}
 		}
-		else
-		{
-			m_fCountDownTime = 0.0f;
-			isStart = true;
-		}
+		m_pCountDownShader->Update(fTimeElapsed, &m_fCountDownTime);
 	}
-	m_pCountDownShader->Update(fTimeElapsed, &m_fCountDownTime);
-
 #ifdef isConnectedToServer
 	CS_PACKET_PLAYER_INFO playerInfo;
 	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
@@ -902,6 +905,17 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		//서버에서 스타트 신호를 받음. 모든 유저가 접속이 되었다면. start신호를 받고 isStart값을 true로 전환하고 
 		//start대문이미지 출력할 것.
 	}
+
+#ifdef isConnectedToServer
+	CS_PACKET_PLAYER_INFO playerInfo;
+	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
+	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
+	playerInfo.keyState = dwDirection;
+	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
+	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
+	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
+#endif
+
 	return Game_Scene;
 }
 
@@ -1209,7 +1223,12 @@ void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		updateEventInfo(packet, fTimeElapsed); //이벤트처리
 		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
-
+		break;
+	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치
+		updateInitInfo(packet, fTimeElapsed);
+		break;
+	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리
+		updateStartInfo(packet, fTimeElapsed);
 		break;
 	default:
 		break;
@@ -1248,4 +1267,13 @@ void GameScene::updateEventInfo(char* packet, float fTimeElapsed)
 	MessageStruct msg = playerInfo->msg;
 
 	EventHandler::GetInstance()->RegisterEvent(msg);
+}
+
+void GameScene::updateInitInfo(char* packet, float fTimeElapsed)
+{
+
+}
+void GameScene::updateStartInfo(char* packet, float fTimeElapsed)
+{
+
 }

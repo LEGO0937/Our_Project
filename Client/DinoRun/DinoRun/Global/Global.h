@@ -48,8 +48,8 @@
 #define MAX_FORCE 3200
 #define MIDDLE_FORCE 1300
 #define MIN_FORCE 600
-#define MIN_VELOCITY 15.0f
-#define MAX_VELOCITY 50.f
+#define MIN_VELOCITY 25.0f
+#define MAX_VELOCITY 50.0f
 
 //¥‹¿ß ¿Ø¥÷ vs Meter or Kilometer
 #define METER_PER_UNIT 0.1

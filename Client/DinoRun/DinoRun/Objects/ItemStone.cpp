@@ -1,7 +1,7 @@
 #include "ItemObject.h"
 ItemStone::ItemStone(int nMeshes) :CGameObject(nMeshes)
 {
-	m_fMass = 100;
+	m_fMass = 150;
 	isKinematic = false;
 	m_ModelType = ModelType::Item_Stone;
 	m_fLifeCount = 10;
