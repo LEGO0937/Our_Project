@@ -13,7 +13,6 @@ Server::Server()
 
 Server::~Server()
 {	
-	
 	//clients.clear();
 }
 
@@ -45,6 +44,7 @@ bool Server::InitServer()
 	serverAddr.sin_family = PF_INET;
 	serverAddr.sin_port = htons(SERVER_PORT);
 	serverAddr.sin_addr.S_un.S_addr = htonl(INADDR_ANY);
+
 
 	// 2. 소켓설정
 	// std의 bind가 호출되므로 소켓의 bind를 불러주기 위해 앞에 ::붙임
@@ -176,7 +176,6 @@ void Server::AcceptThreadFunc()
 		for (int i = 0; i < MAX_USER; ++i)
 			if (true == clients[i].in_use)
 				SendAccessPlayer(i, new_id);
-				//SendPlayerInfo(i, new_id);
 
 		// 처음 접속한 나에게 기존 유저들 출력
 		for (int i = 0; i < MAX_USER; ++i)
@@ -186,7 +185,6 @@ void Server::AcceptThreadFunc()
 			if (i == new_id)
 				continue;
 			SendAccessPlayer(new_id, i);
-			//SendPlayerInfo(new_id, i);
 		}
 		clientCnt_l.lock();
 		++clientCount;
@@ -194,7 +192,6 @@ void Server::AcceptThreadFunc()
 		clientCnt_l.unlock();
 		RecvFunc(new_id);
 	}
-
 	// 6-2. 리슨 소켓종료
 	closesocket(listenSocket);
 
@@ -224,11 +221,13 @@ void Server::RecvFunc(char client)
 }
 
 
+
 void Server::WorkerThread(LPVOID arg)
 {
 	Server* pServer = static_cast<Server*>(arg);
 	pServer->WorkerThreadFunc();
 }
+
 
 
 void Server::WorkerThreadFunc()
@@ -328,10 +327,9 @@ void Server::WorkerThreadFunc()
 }
 
 
+
 void Server::ProcessPacket(char client, char* packet)
 {
-
-
 	// 0번은 사이즈, 1번이 패킷타입
 	// packet[0] packet[1] 
 
@@ -446,7 +444,7 @@ void Server::SendFunc(char client, void* packet)
 
 void Server::SetClient_Initialize(char client)
 {
-	clients[client].collision = CL_NONE;
+	
 }
 
 
@@ -533,6 +531,7 @@ void Server::SendPlayerInfo(char toClient, char fromClient)
 	packet.type = SC_PLAYER_INFO;
 	packet.xmf4x4Parents = clients[fromClient].xmf4x4Parents;
 	packet.checkPoints = clients[fromClient].checkPoints;
+	packet.keyState = clients[fromClient].keyState;
 
 	/*char size;
 	char type;
@@ -580,6 +579,19 @@ void Server::SendRemovePlayer(char toClient, char fromClient)
 	packet.id = fromClient;
 	packet.size = sizeof(packet);
 	packet.type = SC_REMOVE_PLAYER;
+
+	SendFunc(toClient, &packet);
+}
+
+void Server::SendPutPlayer(char toClient)
+{
+	SC_PACKET_PUT_PLAYER packet;
+	packet.size = sizeof(SC_PACKET_PUT_PLAYER);
+	packet.type = SC_PUT_PLAYER;
+	for (int i = 0; i < MAX_USER; ++i)
+	{
+		packet.xmf3PutPos = {};
+	}
 
 	SendFunc(toClient, &packet);
 }

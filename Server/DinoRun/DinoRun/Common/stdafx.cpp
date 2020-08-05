@@ -1231,7 +1231,7 @@ void CreatePsoVelocitySkinMesh(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_
 	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
 	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "VSVelocitySkinnedAnimation", "vs_5_1", &pd3dVertexShaderBlob);
 	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "PSVelocityMap", "ps_5_1", &pd3dPixelShaderBlob);
-	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = CreateSkinMeshLayout();

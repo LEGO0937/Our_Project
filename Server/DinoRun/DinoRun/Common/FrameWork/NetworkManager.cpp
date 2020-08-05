@@ -9,7 +9,6 @@
 //volatile bool g_LoginFinished;
 //const char* g_serverIP = nullptr;
 
-
 NetWorkManager::NetWorkManager()
 {
 	sock = NULL;
@@ -20,7 +19,6 @@ NetWorkManager::NetWorkManager()
 	//Initialize();
 }
 
-
 NetWorkManager::~NetWorkManager()
 {
 	//m_pGameClient = nullptr;
@@ -28,8 +26,10 @@ NetWorkManager::~NetWorkManager()
 }
 
 
+
 void NetWorkManager::Initialize()
 {
+
 	m_ConnectState = CONNECT_STATE::NONE;
 
 	WSADATA wsa;
@@ -48,14 +48,13 @@ void NetWorkManager::Initialize()
 		err_quit("socket()");
 		return;
 	}
-}
 
+}
 
 void NetWorkManager::Release()
 {
 	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 }
-
 
 void NetWorkManager::ConnectToServer()
 {
@@ -85,6 +84,7 @@ void NetWorkManager::ConnectToServer()
 		}
 	}
 
+	printf("여기 안들가짐?");
 
 	WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ); // 작동하는거야
 
@@ -105,6 +105,7 @@ SOCKET NetWorkManager::getSock()
 
 void NetWorkManager::ReadPacket()
 {
+
 	DWORD iobyte, ioflag = 0;
 
 	int retval = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
@@ -143,8 +144,6 @@ void NetWorkManager::ReadPacket()
 		}
 	}
 }
-
-
 void NetWorkManager::ReadPacket(float fTimeElapsed)
 {
 
@@ -187,7 +186,6 @@ void NetWorkManager::ReadPacket(float fTimeElapsed)
 	}
 }
 
-
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
 void NetWorkManager::SendPacket(DWORD dataBytes)
 {
@@ -204,7 +202,6 @@ void NetWorkManager::SendPacket(DWORD dataBytes)
 	}
 }
 
-
 void NetWorkManager::SendPacket()
 {
 	DWORD iobyte = 0;
@@ -219,99 +216,18 @@ void NetWorkManager::SendPacket()
 	}
 }
 
-void NetWorkManager::SendPlayerInfoPacket(const CS_PACKET_PLAYER_INFO& packet)
+void NetWorkManager::SendPlayerInfo(int checkPoints,DWORD keyState, XMFLOAT4X4 xmf4x4Parents)
 {
 	pInfo = reinterpret_cast<CS_PACKET_PLAYER_INFO*>(send_buffer);
 	pInfo->size = sizeof(pInfo);
 	send_wsabuf.len = sizeof(pInfo);
 	pInfo->type = CS_PLAYER_INFO;
+	pInfo->checkPoints = checkPoints;
+	pInfo->keyState = keyState;
+	pInfo->xmf4x4Parents = xmf4x4Parents;
 
-	pInfo->checkPoints = packet.checkPoints;
-	pInfo->id = packet.id;
-	pInfo->keyState = packet.keyState;
-	pInfo->playerNames = packet.playerNames;
-	pInfo->xmf4x4Parents = packet.xmf4x4Parents;
-	SendPacket();
-}
 
-void NetWorkManager::SendUpKey()
-{
-	pUp = reinterpret_cast<CS_PACKET_UP_KEY*>(send_buffer);
-	pUp->size = sizeof(pUp);
-	send_wsabuf.len = sizeof(pUp);
-	pUp->type = CS_UP_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendUpRightKey()
-{
-	pUp = reinterpret_cast<CS_PACKET_UP_KEY*>(send_buffer);
-	pUp->size = sizeof(pUp);
-	send_wsabuf.len = sizeof(pUp);
-	pUp->type = CS_UPRIGHT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendUpLeftKey()
-{
-	pUp = reinterpret_cast<CS_PACKET_UP_KEY*>(send_buffer);
-	pUp->size = sizeof(pUp);
-	send_wsabuf.len = sizeof(pUp);
-	pUp->type = CS_UPLEFT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendDownKey()
-{
-	pDown = reinterpret_cast<CS_PACKET_DOWN_KEY*>(send_buffer);
-	pDown->size = sizeof(pDown);
-	send_wsabuf.len = sizeof(pDown);
-	pDown->type = CS_DOWN_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendDownRightKey()
-{
-	pDown = reinterpret_cast<CS_PACKET_DOWN_KEY*>(send_buffer);
-	pDown->size = sizeof(pDown);
-	send_wsabuf.len = sizeof(pDown);
-	pDown->type = CS_DOWNRIGHT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendDownLeftKey()
-{
-	pDown = reinterpret_cast<CS_PACKET_DOWN_KEY*>(send_buffer);
-	pDown->size = sizeof(pDown);
-	send_wsabuf.len = sizeof(pDown);
-	pDown->type = CS_DOWNLEFT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendRightKey()
-{
-	pRight = reinterpret_cast<CS_PACKET_RIGHT_KEY*>(send_buffer);
-	pRight->size = sizeof(pRight);
-	send_wsabuf.len = sizeof(pRight);
-	pRight->type = CS_RIGHT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendLeftKey()
-{
-	pLeft = reinterpret_cast<CS_PACKET_LEFT_KEY*>(send_buffer);
-	pLeft->size = sizeof(pLeft);
-	send_wsabuf.len = sizeof(pLeft);
-	pLeft->type = CS_LEFT_KEY;
-
-	SendPacket();
+	SendPacket(pInfo->size);
 }
 
 
@@ -357,18 +273,6 @@ void NetWorkManager::SendReleaseKey()
 	SendPacket();
 }
 
-void NetWorkManager::SendAnimationState(char animNum)
-{
-	pAnimation = reinterpret_cast<CS_PACKET_ANIMATION*>(send_buffer);
-	pAnimation->size = sizeof(pAnimation);
-	send_wsabuf.len = sizeof(pAnimation);
-	pAnimation->type = CS_ANIMATION_INFO;
-	pAnimation->animation = animNum;
-
-	SendPacket();
-}
-
-
 void NetWorkManager::SendChattingText(char id, const _TCHAR* text)
 {
 	pText = reinterpret_cast<CS_PACKET_CHATTING*>(send_buffer);
@@ -411,17 +315,6 @@ void NetWorkManager::SetGameFrameworkPtr(HWND hWnd, shared_ptr<BaseScene>client)
 }
 
 
-void NetWorkManager::SendNotCollision()
-{
-	pNotCollide = reinterpret_cast<CS_PACKET_NOT_COLLISION*>(send_buffer);
-	pNotCollide->size = sizeof(pNotCollide);
-	pNotCollide->type = CS_NOT_COLLISION;
-	send_wsabuf.len = sizeof(pNotCollide);
-
-	SendPacket();
-}
-
-
 
 // 아이템 -> 고기, 바위, 바나나, 진흙
 // ItemColllision <- 아이템과 플레이어간의 충돌
@@ -431,6 +324,20 @@ void NetWorkManager::SendNotCollision()
 // 아이템 같은 경우에는 충돌을 했잖아 아이템충돌
 
 
+
+
+
+// Use아이템으로 사용했다는 신호와 동시에 사라지게 하는거야
+void NetWorkManager::SendEvent(MessageStruct& msg)
+{
+	pEvent = reinterpret_cast<CS_PACKET_EVENT*>(send_buffer);
+	pEvent->msg = msg;
+	pEvent->size = sizeof(pEvent);
+	send_wsabuf.len = sizeof(pEvent);
+	pEvent->type = CS_EVENT;
+
+	SendPacket(pEvent->size);
+}
 
 
 // 소켓 함수 오류 출력 후 종료
@@ -446,6 +353,7 @@ void NetWorkManager::err_quit(const char* msg)
 	LocalFree(lpMsgBuf);
 	exit(1);
 }
+
 
 // 소켓 함수 오류 출력
 void NetWorkManager::err_display(const char* msg)

@@ -65,7 +65,7 @@ public:
 	XMFLOAT3 GetUpVector() { return(m_xmf3Up); }
 	XMFLOAT3 GetRightVector() { return(m_xmf3Right); }
 
-	UINT SetCheckPoint(UINT point) { return m_uCheckpointCount = point; }
+	void SetCheckPoint(UINT point) { m_uCheckpointCount = point; }
 	UINT GetCheckPoint() { return m_uCheckpointCount; }
 	void UpCheckPoint() { m_uCheckpointCount++; }
 	void DownCheckPoint() { if(m_uCheckpointCount > 0 ) m_uCheckpointCount--; }

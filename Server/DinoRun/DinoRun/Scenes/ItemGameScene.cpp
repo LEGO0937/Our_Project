@@ -28,12 +28,14 @@
 #define ITEM_TILE 1
 #define ITEM_UI 2   //아이템 틀안의 이미지의 쉐이더 리스트상에서의 인덱스
 #define PLAYER_SHADER instancingAnimatedModelShaders[0]
+#define TIME_COUNT_SHADER instancingNumberUiShaders[0]
 
 char ItemShaderName[5] = { 0,_BANANA_SHADER,_MUD_SHADER,_STONE_SHADER,_METEORITE_SHADER };
 
 ItemGameScene::ItemGameScene() :BaseScene()
 {
 	sceneType = SceneType::ItemGame_Scene;
+	//NetWorkManager::GetInstance()->ConnectToServer();
 }
 ItemGameScene::~ItemGameScene()
 {
@@ -68,7 +70,6 @@ void ItemGameScene::ReleaseUploadBuffers()
 	if (m_pCountDownShader)
 		m_pCountDownShader->ReleaseUploadBuffers();
 }
-
 void ItemGameScene::ReleaseObjects()
 {
 	BaseScene::ReleaseObjects();
@@ -166,7 +167,6 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pCreateManager->RenderLoading();
 	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 7,
 		7, xmf3Scale);
-	m_pCreateManager->RenderLoading();
 	m_pCreateManager->RenderLoading();
 	m_pCreateManager->RenderLoading();
 	CObInstancingShader* shader;
@@ -436,7 +436,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CreateShaderVariables(pCreateManager.get());
 	m_pCreateManager->RenderLoading();
 
-	SoundManager::GetInstance()->Play("InGame_BGM", 0.2f);
+	SoundManager::GetInstance()->Play("InGame_BGM", 0.1f);
 	m_pCreateManager->RenderLoading();
 }
 
@@ -465,7 +465,6 @@ void ItemGameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	}
 }
-
 void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 	lParam, float deltaTime)
 {
@@ -590,7 +589,6 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		break;
 	}
 }
-
 void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 	static UCHAR pKeyBuffer[256];
@@ -614,29 +612,35 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 	}
 	float cxDelta = 0.0f, cyDelta = 0.0f;
 	
-	if (::GetCapture() == hwnd)
+	POINT ptCursorPos;
+	if (GetCapture() == hwnd)
 	{
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
+		cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
+		SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
 	}
 	//마우스 또는 키 입력이 있으면 플레이어를 이동하거나(dwDirection) 회전한다(cxDelta 또는 cyDelta).
-	if ((dwDirection != 0) || (cxDelta != 0.0f) || (cyDelta != 0.0f))
+	if ((cxDelta != 0.0f) || (cyDelta != 0.0f))
 	{
-		
-		if (dwDirection)
+		if ((cxDelta || cyDelta) && m_pCamera->GetMode() == SPACESHIP_CAMERA)
 		{
-			//m_pPlayer->Move(dwDirection, 20.0f, deltaTime, true);
-			//((CPlayer*)PLAYER_SHADER->getSkiendList()[0])->Move(dwDirection, 20.0f, deltaTime, true);
+			if (pKeyBuffer[VK_RBUTTON] & 0xF0)
+				m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
+			else
+				m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
 		}
-
 	}
-	else
+
+	if (dwDirection == 0)
 		m_pPlayer->m_fForce = 0;
 
-	m_pPlayer->Move(dwDirection, 20.0f, deltaTime, true);
-	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 20.0f, deltaTime, true);
+	m_pPlayer->Move(dwDirection, 1200.0f*deltaTime, deltaTime, true);
+	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
-
 
 void ItemGameScene::Render()
 {
@@ -745,7 +749,9 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<I
 	float length = sqrtf(vel.x * vel.x + vel.z * vel.z);
 	if (length > 30)
 	{
-		int idx = length - 30;
+		if (!SoundManager::GetInstance()->Playing("Boost"))
+			SoundManager::GetInstance()->Play("Boost", 0.5f);
+		//int idx = length - 30;
 		//blurShader->Dispatch(m_pd3dCommandList, m_ppd3dPipelineStates[PSO_HORZ_BLUR], m_ppd3dPipelineStates[PSO_VERT_BLUR], curBuffer.Get(), idx/10);
 		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_MOTION_BLUR]);
 		motionBlurShader->Dispatch(m_pd3dCommandList, curBuffer.Get(), velocityMap.Get(), 10);
@@ -756,6 +762,9 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<I
 		if (deltaUvX >= 1.0)
 			deltaUvX = 0.0f;
 	}
+	else
+		if (SoundManager::GetInstance()->Playing("Boost"))
+			SoundManager::GetInstance()->Stop("Boost");
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI_NUMBER]);
 	for (CUiShader* shader : instancingNumberUiShaders)
 		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
@@ -795,8 +804,6 @@ void ItemGameScene::AnimateObjects(float fTimeElapsed)
 void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	//자기 정보 보내기
-
-	
 	/*
 	SC_PACKET_PLAYER_INFO packet; 
 	packet.checkPoints[0] = m_pPlayer->GetCheckPoint();
@@ -844,6 +851,8 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 
 
 	//명령 send(플레이어 애니메이션 혹은 행렬 최신화)
+
+	NetWorkManager::GetInstance()->SendPlayerInfo(m_pPlayer->GetCheckPoint(), dwDirection, m_pPlayer->m_xmf4x4ToParent);
 	//명령 recv
 	//ProcessPacket(패킷)
 	
@@ -879,7 +888,7 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 	m_pCountDownShader->Update(fTimeElapsed,&m_fCountDownTime);
 
 	//서버와 연결 성공때 닉네임과 아이디 반드시 받아올것!
-
+	//체크포인트까지 생각하게되면 이젠 업데이트 이후에 플레이어정보를 보내도록 해야함.
 #ifdef isConnectedToServer
 	CS_PACKET_PLAYER_INFO playerInfo;
 	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
@@ -897,6 +906,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 
 	if (sceneType != SceneType::ItemGame_Scene)
 	{
+		SoundManager::GetInstance()->AllStop();
 		//서버와 연결 끊기, 엔드씬에서 룸씬으로 넘어가고 다시 시작하면 연결해야함
 		return sceneType;
 	}
@@ -927,9 +937,16 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 
 	if (isStart)
 	{
+		//m_pPlayer->SetCheckPoint(CHECKPOINT_GOAL);
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
-			SoundManager::GetInstance()->AllStop();
+			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+
+			//EventHandler::GetInstance()->m_fSecond = 43.25f;
+			//EventHandler::GetInstance()->m_iMinute = 13;
+
 			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 		}
 		else
@@ -968,6 +985,15 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 					gameTexts[idx++].text = m_sPlayerId;
 			}
 			m_pPlayer->SetRank(rank);
+
+			if (((CPlayer*)list[0])->GetCheckPoint() == CHECKPOINT_GOAL)
+			{
+				EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+				EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+				EventHandler::GetInstance()->m_sWinner = ((CPlayer*)list[0])->GetName();
+
+				sceneType = End_Scene;
+			}
 		}
 
 		//if (isMugen)
@@ -984,10 +1010,12 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 				m_pPlayer->SetMaxVelocityXZ(25);
 				isBoost = false;
 			}
+
 		}
 		//충돌을 위한 update
 		if (sceneType != SceneType::ItemGame_Scene)
 		{
+			SoundManager::GetInstance()->AllStop();
 			return sceneType;
 		}
 		
@@ -1019,6 +1047,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 							
 						}
 					}
+					
 					//타겟 오브젝트 타입 구해오고 경우에 맞게 처리하도록 작성할 것
 				}
 			}
@@ -1341,12 +1370,11 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		updatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
 		//역으로 자신의 정보를 줄때는? Update에서 끝나는 지점에서 send할것
 		break;
-	case SC_GET_ITEM:
+	case SC_EVENT:
 		updateEventInfo(packet, fTimeElapsed); //이벤트처리
 		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
 		break;
-	
 	default:
 		break;
 	}
@@ -1391,12 +1419,14 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		}
 	}
 	*/
-	
+
+
+
+
 	//끝났음을 알림
 	//사운드 종료, 네트워크매니저에 패배 신호 주고 승리자는 이 패킷을 안받음.
 
 }
-
 
 void ItemGameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
 {
@@ -1427,9 +1457,6 @@ void ItemGameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
 		}
 	}
 }
-
-
-// 서버에서 사용하는 함수
 void ItemGameScene::updateEventInfo(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_EVENT* playerInfo = reinterpret_cast<SC_PACKET_EVENT*>(packet);

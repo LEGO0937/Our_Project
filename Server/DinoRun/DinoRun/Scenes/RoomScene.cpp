@@ -135,8 +135,6 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			//*서버*
 			//버튼이 클릭 되는 구간
 			//클릭하여 버튼상태 변화 시 클라에게 버튼의 현재상태 정보를 보냄
-			//판정에 따라 한번 클릭되면 레디, 두번 누르면 레디 안되게 설정
-			//NetWorkManager::GetInstance()->SendReady();
 		}
 		::ReleaseCapture();
 		break;
@@ -217,8 +215,8 @@ void RoomScene::Render()
 void RoomScene::AnimateObjects(float fTimeElapsed)
 {
 	//말 그대로 애니메이션 update
-}
 
+}
 
 SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
@@ -364,7 +362,6 @@ void RoomScene::UpdateAddUser(char* packet, float fTimeElapsed)
 		m_vUsers.emplace_back(user);
 	}
 }
-
 void RoomScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_LOBBY_OUT* playerInfo = reinterpret_cast<SC_PACKET_LOBBY_OUT*>(packet);
@@ -372,4 +369,3 @@ void RoomScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
 	m_vUsers.erase(remove_if(m_vUsers.begin(), m_vUsers.end(), [&](const User& a) {
 		return a.m_id == playerInfo->id; }), m_vUsers.end());
 }
-

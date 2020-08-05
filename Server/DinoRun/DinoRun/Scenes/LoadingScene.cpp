@@ -98,12 +98,11 @@ void LoadingScene::Render()
 	BaseScene::Render();
 	
 	static float deltaUvX = 0.0f;
+	if (deltaUvX >= 1.0f)
+		deltaUvX = 0.0f;
 	//말 그대로 애니메이션 update
 	instacingUiShaders[0]->getUvXs()[0] = deltaUvX;
 	deltaUvX += 0.125f;
-	
-	if (deltaUvX > 1.0f)
-		deltaUvX = 0.0f;
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_UI]);
 	if (instacingUiShaders[0])

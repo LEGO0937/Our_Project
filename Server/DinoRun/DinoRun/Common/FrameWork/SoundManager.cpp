@@ -7,7 +7,7 @@
 
 
 SoundManager::SoundManager()
-	:system(nullptr), channel(nullptr), sound(nullptr), buffer(15), volume(0.5f)
+	:system(nullptr), channel(nullptr), sound(nullptr), buffer(20), volume(0.5f)
 {
 	// 시스템(Device) 생성
 	System_Create(&system);
@@ -64,6 +64,11 @@ void SoundManager::Initialize()
 	AddSound("Running", "Resources/Sounds/Running.mp3", true);
 	AddSound("CountDown", "Resources/Sounds/123.mp3", false);
 	AddSound("CountDownZero", "Resources/Sounds/Go.mp3", false);
+	AddSound("MeteoriteMove", "Resources/Sounds/MeteoriteMove.mp3", true);
+	AddSound("MeteoriteBoom", "Resources/Sounds/Boom.mp3", false);
+	AddSound("Boost", "Resources/Sounds/Boost.mp3", true);
+	AddSound("End_BGM", "Resources/Sounds/End_BGM.mp3", true);
+	AddSound("Sliding", "Resources/Sounds/Sliding.mp3", false);
 }
 void SoundManager::AddSound(string name, string soundFile, bool loop)
 {

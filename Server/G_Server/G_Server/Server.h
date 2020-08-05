@@ -53,32 +53,34 @@ public:
 	bool in_use;
 	OVER_EX over_ex;
 	SOCKET socket;
-	int prev_size;
 	// 조립불가한 메모리를 다음번에 조립하기 위한 임시저장소
 	char packet_buffer[MAX_BUFFER];
+	int prev_size;
 	
 	// 인게임용
 	char rank; //등수
-	char item;
-	char animation;
+	//char item;
 	char nickname[32];
 	XMFLOAT4X4 xmf4x4Parents = {};
 	MessageStruct msg;
 	int checkPoints;
-	COLLISION_TYPE collision;
 	bool isReady;
 	GAME_STATE gameState;
+	DWORD keyState;
+	XMFLOAT3 xmf3PutPos = {};
 public:
 	SOCKETINFO() {
 		in_use = false;
 		rank = 0;
-		item = ITEM::EMPTY;
+		//item = ITEM::EMPTY;
 		checkPoints = 0;
+		keyState = 0;
 		ZeroMemory(&xmf4x4Parents, sizeof(xmf4x4Parents));
 		ZeroMemory(&msg, sizeof(msg));
 		ZeroMemory(nickname, sizeof(wchar_t) * 12);
 		ZeroMemory(&over_ex.messageBuffer, sizeof(over_ex.messageBuffer));
 		ZeroMemory(&packet_buffer, sizeof(packet_buffer));
+		ZeroMemory(&xmf3PutPos, sizeof(xmf3PutPos));
 		over_ex.dataBuffer.len = MAX_BUFFER;
 		over_ex.dataBuffer.buf = over_ex.messageBuffer;
 		over_ex.event_t = EV_RECV;
@@ -86,7 +88,6 @@ public:
 	void InitPlayer(){
 		rank = 0;
 		isReady = false;
-		item = ITEM::EMPTY;
 	}
 };
 
@@ -120,14 +121,15 @@ public:
 public:
 	void SendAcessComplete(char client);
 	void SendAccessPlayer(char toClient, char fromClient);
+	void SendPutPlayer(char toClient);
 	void SendGoLobby(char toClient);
 	void SendReadyStatePacket(char toClient, char fromClient);
 	void SendUnReadyStatePacket(char toClient, char fromClient);
 	void SendRemovePlayer(char toClient, char fromClient);
 	void SendPlayerInfo(char toClietn, char fromClient);
 	void SendRoundEnd(char client);
-public:
 	void SendEventPacket(char toClient, const MessageStruct& msg); // 애니메이션 상태 패킷
+public:
 	void SetClient_Initialize(char client);
 public:
 	bool InitServer();

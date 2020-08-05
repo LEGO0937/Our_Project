@@ -130,7 +130,16 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.09f, 0.43f), XMFLOAT2(0.8f, 0.8f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.40f, 0.24f), XMFLOAT2(0.8f, 0.8f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.40f, 0.43f), XMFLOAT2(0.8f, 0.8f)));
+	//-----------------RoomNum--------------------------
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.09f, 0.34f), XMFLOAT2(0.8f, 0.8f)));  //¹æ ¹øÈ£ 12~15 idx
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.09f, 0.53f), XMFLOAT2(0.8f, 0.8f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.40f, 0.34f), XMFLOAT2(0.8f, 0.8f)));
+	gameTexts.emplace_back(GameText(XMFLOAT2(0.40f, 0.53f), XMFLOAT2(0.8f, 0.8f)));
 
+	gameTexts[12].text = "1";
+	gameTexts[13].text = "2";
+	gameTexts[14].text = "3";
+	gameTexts[15].text = "4";
 	//------------------isGmaing? Image----  1'st
 	UI_INFO view_info;    
 	view_info.textureName = "Resources/Images/T_Button.dds";
@@ -484,12 +493,14 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 				gameTexts[n + 8].text = to_string(m_vRooms[i].m_iUserNumber) + " / " + to_string(m_vRooms[i].m_iMaxUserNumber);
 				instacingUiShaders[IS_GAMING_IMAGE]->getUvXs()[n] = 0.5f * m_vRooms[i].m_bIsGaming;
 				instacingUiShaders[MODE_IMAGE]->getUvXs()[n] = 0.5f * m_vRooms[i].m_bMode;
+				gameTexts[n + 12].text = to_string(m_vRooms[i].m_iRoomNumber);
 			}
 			else
 			{
 				gameTexts[n + 8].text = "None";
 				instacingUiShaders[IS_GAMING_IMAGE]->getUvXs()[n] = 0;
 				instacingUiShaders[MODE_IMAGE]->getUvXs()[n] = 0.0f;
+				gameTexts[n + 12].text = "";
 			}
 		}
 	}

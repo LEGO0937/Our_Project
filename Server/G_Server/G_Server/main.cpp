@@ -7,3 +7,5 @@ int main(int argc, char* argv[])
 	if (server.InitServer())
 		server.RunServer();
 }
+
+
