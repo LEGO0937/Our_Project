@@ -82,6 +82,8 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//방 정보에는 방 번호, 현재 인원수, 게임중 or 대기중 상태의 변수를 가짐
 
 	//==================================임시로 작성한 부분
+#ifdef isConnectedToServer
+#else
 	m_vRooms.emplace_back(Room(1, 5, false, true));
 	m_vRooms.emplace_back(Room(2, 2, false,false));
 	m_vRooms.emplace_back(Room(3, 1, true,false));
@@ -115,6 +117,7 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_vUsers.emplace_back(LobbyUser(19,"das19"));
 	m_vUsers.emplace_back(LobbyUser(20,"das20"));
 	m_vUsers.emplace_back(LobbyUser(21,"das21"));
+#endif
 	//------------------UserList----------------------
 		
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.28f),XMFLOAT2(1.05f,1.05f)));  //유저 목록 8줄 0~7 idx
@@ -204,6 +207,8 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//fontShader->BuildObjects(pCreateManager, NULL);
 
 	CreateShaderVariables(pCreateManager.get());
+
+	//랜더링 준비가 끝났으니 방목록과 유저목록을 달라는 send할 것.
 }
 
 void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -272,7 +277,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							    //서버에서 패킷받고 여유자리있는지 확인하고 입장가능여부 send
 							    //recv로 들어오라는 신호를 받음 그 처리는 Process패킷함수에서
 								//호출하는 updateEntryRoom함수가 함.
-
+								//아래 세개 if들도 이와 같음.
 								m_iResultNum = m_vRooms[clickNum].m_iRoomNumber;
 								m_bMode = m_vRooms[clickNum].m_bMode;
 								sceneType = SceneType::Room_Scene;
@@ -574,6 +579,11 @@ void LobbyScene::ProcessPacket(char* packet, float fTimeElapsed)
 		UpdateRoomInfo(packet, fTimeElapsed);
 		break;
 	case 4: //방입장에 성공했다는 패킷
+		//방 클릭시 화면에는 인원이 다 안차보일 수 있어도 한자리 남은 상황에 두클라가 동시 참가시도할 경우 한명은
+		//못들어가게 해야함 그러면 클라에서 방클릭시 입장할 수 있는지 물어보고 서버는 인원이 남고 게임중이 아닐 경우
+		//들어오라는 메시지를 보내는데 이 메시지를 처리하는곳이 이곳임.
+		UpdateEntryRoom(packet, fTimeElapsed);
+		break;
 	default:
 		break;
 	}
@@ -634,10 +644,9 @@ void LobbyScene::UpdateLogOut(char* packet, float fTimeElapsed)
 }
 void LobbyScene::UpdateEntryRoom(char* packet, float fTimeElapsed)
 {
-	/*
-	패킷 = packet
-	m_iResultNum = 패킷.방번호
-	m_bMode = 패킷.모드 : 아이템 or 스피드
+	SC_PACKET_ROOM* roomInfo = reinterpret_cast<SC_PACKET_ROOM*>(packet);
+	m_iResultNum = roomInfo->m_iRoomNumber;
+	m_bMode = roomInfo->m_bMode;
 	sceneType = SceneType::Room_Scene;
-	*/
+
 }

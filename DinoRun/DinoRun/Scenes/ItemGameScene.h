@@ -77,6 +77,7 @@ public:
 	void UpdateEventInfo(char* packet, float fTimeElapsed);
 	void UpdateInitInfo(char* packet, float fTimeElapsed);
 	void UpdateStartInfo(char* packet, float fTimeElapsed);
+	void UpdateFinishInfo(char* packet, float fTimeElapsed);
 private:
 	DWORD dwDirection;
 

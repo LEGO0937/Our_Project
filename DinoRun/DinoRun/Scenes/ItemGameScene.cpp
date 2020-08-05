@@ -898,14 +898,15 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		//m_pPlayer->SetCheckPoint(CHECKPOINT_GOAL);
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
+#ifdef isConnectedToServer
+			//골인했다는 신호를 서버에게 send
+#else
 			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
 			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
 
-			//EventHandler::GetInstance()->m_fSecond = 43.25f;
-			//EventHandler::GetInstance()->m_iMinute = 13;
-
 			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+#endif
 		}
 		else
 		{
@@ -946,11 +947,15 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 
 			if (((CPlayer*)list[0])->GetCheckPoint() == CHECKPOINT_GOAL)
 			{
+#ifdef isConnectedToServer
+				//골인했다는 신호를 서버에게 send
+#else
 				EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 				EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
 				EventHandler::GetInstance()->m_sWinner = ((CPlayer*)list[0])->GetName();
 
 				sceneType = End_Scene;
+#endif
 			}
 		}
 
@@ -1331,7 +1336,7 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
 		break;
-	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치
+	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치 만일 룸씬에서 받는거라면 이건 필요없게 됨.
 		UpdateInitInfo(packet, fTimeElapsed);
 
 		break;
@@ -1390,5 +1395,13 @@ void ItemGameScene::UpdateInitInfo(char* packet, float fTimeElapsed)
 }
 void ItemGameScene::UpdateStartInfo(char* packet, float fTimeElapsed)
 {
-
+	isAllConnected = true;
+}
+void ItemGameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
+{
+	EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+	EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
+	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 }

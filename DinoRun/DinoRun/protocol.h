@@ -39,7 +39,7 @@ constexpr int SC_UNREADY_STATE = 12; // 언레디
 constexpr int SC_GO_LOBBY = 13; // 로그인하고 로비 들감
 constexpr int SC_EVENT = 14; // 플레이어 아이템 관리
 constexpr int SC_COMPARE_TIME = 15; // 서버와 클라 시간 비교
-
+//----추가
 
 constexpr int CS_READY = 0; // 레디
 constexpr int CS_UNREADY = 1; // 언레디
@@ -49,7 +49,7 @@ constexpr int CS_NICKNAME_INFO = 4; // 닉넴 정보
 constexpr int CS_CHATTING = 5; // 채팅
 constexpr int CS_PLAYER_INFO = 6; // 플레이어 위치
 constexpr int CS_EVENT = 7; // 플레이어 아이템
-
+//----추가 
 
 //struct MessageStruct
 //{

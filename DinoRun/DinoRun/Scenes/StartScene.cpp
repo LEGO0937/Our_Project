@@ -137,6 +137,8 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 			if (isClickedLogin)
 			{
 				//*서버*
+				BUTTON_SHADER->getUvXs()[0] = 0.0f;
+				isClickedLogin = false;
 
 				gameTexts[PASSWORD].text; //패스워드  
 				gameTexts[ID].text;  //아이디  둘 다 영문   string자료형임.
@@ -148,14 +150,6 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				m_sPlayerId = gameTexts[ID].text;
 				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
 				sceneType = Lobby_Scene;
-			}
-		}
-		else
-		{
-			if (isClickedLogin)
-			{
-				isClickedLogin = false;
-				BUTTON_SHADER->getUvXs()[0] = 0.0f;
 			}
 		}
 		::ReleaseCapture();
@@ -306,13 +300,6 @@ void StartScene::ProcessPacket(char* packet, float fTimeElapsed)
 	{
 	case SC_READY_STATE:   //케이스는 로그인용으로 따로 만들어줄 것.
 		UpdateLogin(packet, fTimeElapsed);  //이 함수가 호출 되면 다음 프레임에 로비씬으로 넘어가게 됨.
-		break;
-	case 1: //로그인 실패 케이스  -> 실패이므로 로그인 버튼을 다시 비활성화 시킨다.
-		if (isClickedLogin)
-		{
-			isClickedLogin = false;
-			BUTTON_SHADER->getUvXs()[0] = 0.0f;
-		}
 		break;
 	default: // 로그인 실패같은 경우에는 무시함.
 		break;

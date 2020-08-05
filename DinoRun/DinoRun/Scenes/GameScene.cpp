@@ -1256,3 +1256,11 @@ void GameScene::UpdateStartInfo(char* packet, float fTimeElapsed)
 {
 	isAllConnected = true;
 }
+void GameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
+{
+	EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+	EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
+	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+}

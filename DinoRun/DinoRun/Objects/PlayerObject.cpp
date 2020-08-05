@@ -223,8 +223,8 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		if (m_pCamera)
 		{
-			if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
-				m_pCamera->Move(xmf3Shift);
+			
+			m_pCamera->Move(xmf3Shift);
 			//m_pCamera->RegenerateViewMatrix();
 		}
 	}
