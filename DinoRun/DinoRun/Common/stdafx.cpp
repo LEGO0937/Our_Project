@@ -1190,8 +1190,8 @@ void CreatePsoMinimap(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_pd3dGraph
 	d3dBlendDesc.IndependentBlendEnable = FALSE;
 	d3dBlendDesc.RenderTarget[0].BlendEnable = TRUE;
 	d3dBlendDesc.RenderTarget[0].LogicOpEnable = FALSE;
-	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_DEST_COLOR;
-	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ZERO;
+	d3dBlendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_INV_SRC_ALPHA;
+	d3dBlendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_SRC_ALPHA;
 	d3dBlendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
 	d3dBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
 	d3dBlendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
@@ -1231,7 +1231,7 @@ void CreatePsoVelocitySkinMesh(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_
 	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
 	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "VSVelocitySkinnedAnimation", "vs_5_1", &pd3dVertexShaderBlob);
 	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "PSVelocityMap", "ps_5_1", &pd3dPixelShaderBlob);
-	d3dPipelineStateDesc.RasterizerState = CreateShadowRasterizerState();
+	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.InputLayout = CreateSkinMeshLayout();

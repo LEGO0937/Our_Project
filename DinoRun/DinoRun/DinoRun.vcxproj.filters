@@ -262,7 +262,7 @@
     <Filter Include="CShaders\UiShader\10CountDown">
       <UniqueIdentifier>{a0fe0277-402b-41e0-85a5-82b4be9b4f10}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Objects\SkyBoxObject\BaseScene">
+    <Filter Include="Scenes\BaseScene">
       <UniqueIdentifier>{bc465297-5264-4fa2-a967-cb8931c9cb54}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -295,7 +295,7 @@
       <Filter>Scenes\GameScene</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\BaseScene.h">
-      <Filter>Objects\SkyBoxObject\BaseScene</Filter>
+      <Filter>Scenes\BaseScene</Filter>
     </ClInclude>
     <ClInclude Include="Common\Camera\Camera.h">
       <Filter>Common\Camera</Filter>
@@ -447,7 +447,7 @@
       <Filter>Common\TextureLoad</Filter>
     </ClCompile>
     <ClCompile Include="Scenes\BaseScene.cpp">
-      <Filter>Objects\SkyBoxObject\BaseScene</Filter>
+      <Filter>Scenes\BaseScene</Filter>
     </ClCompile>
     <ClCompile Include="Common\Camera\Camera.cpp">
       <Filter>Common\Camera</Filter>

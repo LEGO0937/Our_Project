@@ -414,8 +414,8 @@ void ParticleSystem::FindValue(char name)
 		m_fSize = (10.0f);
 		m_fParticleLife = 7.0f;
 		m_fVelocity = (170.0f);
-		m_fGravity = 3.0f;
-		m_uMaxSize = 48;
-		m_sTextureName = "Resources/Images/T_Meateat_P.dds";
+		m_fGravity = 5.0f;
+		m_uMaxSize = 16;
+		m_sTextureName = "Resources/Images/T_Minimeteo.dds";
 	}
 }

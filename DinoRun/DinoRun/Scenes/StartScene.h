@@ -40,6 +40,8 @@ public:
 	virtual string GetPassWord() { return gameTexts[1].text; }
 
 	virtual void ProcessPacket(char* packet, float fTimeElapsed);
+
+	void UpdateLogin(char* packet, float fTimeElapsed);
 private:
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CUiShader*> instacingUiShaders;
