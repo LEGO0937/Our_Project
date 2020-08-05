@@ -257,6 +257,13 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	//clear로 m_vUsers초기화 후 send,recv로 현재 방안에 있는 유저의 정보를 받아와서 최신화한다.
 	//send때 자신의 방번호와 닉네임을 보내고 서버에서는 이 닉네임을 제외한 다른 유저들의 정보를
 	//넘긴다.
+
+	//m_vUsers.clear();
+	//for (int i = 0; i < db 데이터량; ++i)
+	//{
+	//	m_vUsers.emplace_back(User("닉네임", 버튼상태, id));
+	//}
+
 	for (int i = 0; i < m_vUsers.size(); ++i)
 	{
 		if (m_vUsers[i].m_sName == m_sPlayerId)
@@ -289,6 +296,10 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		return SceneType::Room_Scene;
 	
 	//문제 1. 현재는 싱글플레이니까 이렇게 처리하는데 멀티플레이시에는 어떻게 처리할건지?...
+	//제안 1. 클라가 버튼을 누르면 send를 하게되는데.. 이 신호를 서버가 받고 그 버튼상태를
+	//데이터베이스에 적용함. 이후 데이터베이스로부터 룸에있는 유저들이 모두 ready상태인지를 확인하고
+	//조건이 성립하면 다음씬으로 넘어가라는 패킷을 룸에 있는 모든 유저에게 보냄.
+	//
 
 	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
 	if (NetWorkManager::GetInstance()->GetGameMode())
@@ -341,6 +352,9 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 	case SC_CLIENT_LOBBY_OUT:
 		UpdateDeleteUser(packet, fTimeElapsed);
 		break;
+	case 4: //게임을 실행하라는 신호
+		UpdateNextScene(packet, fTimeElapsed);
+		break;
 	}
 }
 void RoomScene::UpdateUnreadyState(char* packet, float fTimeElapsed)
@@ -387,4 +401,20 @@ void RoomScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
 
 	m_vUsers.erase(remove_if(m_vUsers.begin(), m_vUsers.end(), [&](const User& a) {
 		return a.m_id == playerInfo->id; }), m_vUsers.end());
+}
+
+void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
+{
+	//패킷안에 초기위치(각 플레이어마다 다름) 
+	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
+	if (NetWorkManager::GetInstance()->GetGameMode())
+		sceneType = SceneType::ItemGame_Scene;
+	else
+		sceneType = SceneType::Game_Scene;
+
+	//여기서 게임씬으로 넘어가게될텐데 서버는 이 신호를 보내면서 데이터베이스에 있는 유저들의 버튼상태를 
+	//취소로 바꿔놔야함. 왜냐하면 end씬에서 esc누르면 룸씬으로 바로 넘어가서 유저정보를 받게되는데
+	//저걸 안바꾸고 업데이트에서 유저정보를 받아오면 모두가 레디된 상태로 받아오게 되니까.
+
+	//NetWorkManager::GetInstance()->SetPosition(packet->position);
 }

@@ -21,6 +21,7 @@ private:
 	int m_iRoomNum;
 	bool m_bGameMode;
 	string m_sPlayerName;
+	XMFLOAT3 m_xmf3Position;
 
 	SOCKET	sock;
 	int		myId;
@@ -40,6 +41,7 @@ public:
 	void SetGameMode(const bool& mode) { m_bGameMode = mode; }
 	void SetPlayerName(const string& name) { m_sPlayerName = name; }
 	void SetNumPlayer(const int& num) { m_iNumPlayer = num; }
+	void SetPosition(const XMFLOAT3& position) { m_xmf3Position = position; }
 
 	void SetHwnd(const HWND& hwnd) { m_hWnd = hwnd; }
 
@@ -47,6 +49,7 @@ public:
 	bool GetGameMode() { return m_bGameMode; }
 	string GetPlayerName() { return m_sPlayerName; }
 	int GetNumPlayer() { return m_iNumPlayer; }
+	XMFLOAT3 GetPosition() { return m_xmf3Position; }
 private:
 	CS_PACKET_READY* pReady = NULL; // 레디
 	CS_PACKET_UNREADY* pUnReady = NULL; // 레디 안함

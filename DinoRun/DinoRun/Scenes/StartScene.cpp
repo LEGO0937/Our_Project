@@ -147,9 +147,13 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				//recv로 로그인 성공인지 실패인지 확인.
 				//로그인 성공시에는 아래 세줄 수행 후 로비씬으로 넘어감.
 				//패킷 구현 후에는 아래 세줄이 프로세스 처리 함수중 로그인 성공함수에 들어갈 예정->UpdateLogin()
+#ifdef isConnectedToServer
+				//send
+#else
 				m_sPlayerId = gameTexts[ID].text;
 				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
 				sceneType = Lobby_Scene;
+#endif
 			}
 		}
 		::ReleaseCapture();

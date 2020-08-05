@@ -278,7 +278,10 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							    //recv로 들어오라는 신호를 받음 그 처리는 Process패킷함수에서
 								//호출하는 updateEntryRoom함수가 함.
 								//아래 세개 if들도 이와 같음.
+								//send를하는데 방번호만
+
 								m_iResultNum = m_vRooms[clickNum].m_iRoomNumber;
+								//이 시점에서 룸 데이터베이스 나정보가 들어가야함.
 								m_bMode = m_vRooms[clickNum].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -462,6 +465,16 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	}
 
 	//----------------- 매번 서버로부터 방들의 정보를 갱신 
+	//m_vRooms
+	//m_vUsers
+	//m_vRooms.clear();
+	//for (int i = 0; i < db_size(); ++i)
+	//{
+	//	m_vRooms.emplace_back(룸정보);
+	//}
+	//m_vUsers같은 경우에는 나 자신을 빼야해요. 나를 제외한 다른 유저들만 넣어주면 된다.
+	
+
 	//m_iPageNum 
 	//m_vRooms.clear();
 	/*
