@@ -369,7 +369,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 		//--------------------------------
 		float c = 3.0f, k = 20.0f;
-		float cXZ = 0.8f, kXZ = 18.0f;
+		float cXZ = 1.0f, kXZ = 18.0f;
 		{
 			//k = 0.04  ,  c = 0.2
 			//f= - cv -k*x   -cv -kx¾Æ´Ñ°¡?..

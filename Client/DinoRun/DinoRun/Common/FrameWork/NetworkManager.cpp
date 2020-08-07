@@ -58,7 +58,6 @@ void NetWorkManager::Release()
 
 void NetWorkManager::ConnectToServer()
 {
-
 	// connect()
 	m_ServerIP = "127.0.0.1";
 	SOCKADDR_IN serveraddr;
@@ -85,6 +84,7 @@ void NetWorkManager::ConnectToServer()
 		}
 	}
 
+	printf("여기 안들가짐?");
 
 	WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ); // 작동하는거야
 
@@ -94,7 +94,6 @@ void NetWorkManager::ConnectToServer()
 	recv_wsabuf.len = BUF_SIZE;
 
 	m_ConnectState = CONNECT_STATE::OK;
-
 }
 
 
@@ -128,7 +127,7 @@ void NetWorkManager::ReadPacket()
 
 			if (m_pCurScene)
 			{
-				m_pCurScene->ProcessPacket(packet_buffer,0);
+				m_pCurScene->ProcessPacket(packet_buffer, 0);
 			}
 			// 각 Scene의 ProcessPacket으로 처리를 넘김
 			// ProcessPacket(packet_buffer);
@@ -217,99 +216,18 @@ void NetWorkManager::SendPacket()
 	}
 }
 
-void NetWorkManager::SendPlayerInfoPacket(const CS_PACKET_PLAYER_INFO& packet)
+void NetWorkManager::SendPlayerInfo(int checkPoints, DWORD keyState, XMFLOAT4X4 xmf4x4Parents)
 {
 	pInfo = reinterpret_cast<CS_PACKET_PLAYER_INFO*>(send_buffer);
 	pInfo->size = sizeof(pInfo);
 	send_wsabuf.len = sizeof(pInfo);
 	pInfo->type = CS_PLAYER_INFO;
+	pInfo->checkPoints = checkPoints;
+	pInfo->keyState = keyState;
+	pInfo->xmf4x4Parents = xmf4x4Parents;
 
-	pInfo->checkPoints = packet.checkPoints;
-	pInfo->id = packet.id;
-	pInfo->keyState = packet.keyState;
-	pInfo->playerNames = packet.playerNames;
-	pInfo->xmf4x4Parents = packet.xmf4x4Parents;
-	SendPacket();
-}
 
-void NetWorkManager::SendUpKey()
-{
-	pUp = reinterpret_cast<CS_PACKET_UP_KEY*>(send_buffer);
-	pUp->size = sizeof(pUp);
-	send_wsabuf.len = sizeof(pUp);
-	pUp->type = CS_UP_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendUpRightKey()
-{
-	pUp = reinterpret_cast<CS_PACKET_UP_KEY*>(send_buffer);
-	pUp->size = sizeof(pUp);
-	send_wsabuf.len = sizeof(pUp);
-	pUp->type = CS_UPRIGHT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendUpLeftKey()
-{
-	pUp = reinterpret_cast<CS_PACKET_UP_KEY*>(send_buffer);
-	pUp->size = sizeof(pUp);
-	send_wsabuf.len = sizeof(pUp);
-	pUp->type = CS_UPLEFT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendDownKey()
-{
-	pDown = reinterpret_cast<CS_PACKET_DOWN_KEY*>(send_buffer);
-	pDown->size = sizeof(pDown);
-	send_wsabuf.len = sizeof(pDown);
-	pDown->type = CS_DOWN_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendDownRightKey()
-{
-	pDown = reinterpret_cast<CS_PACKET_DOWN_KEY*>(send_buffer);
-	pDown->size = sizeof(pDown);
-	send_wsabuf.len = sizeof(pDown);
-	pDown->type = CS_DOWNRIGHT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendDownLeftKey()
-{
-	pDown = reinterpret_cast<CS_PACKET_DOWN_KEY*>(send_buffer);
-	pDown->size = sizeof(pDown);
-	send_wsabuf.len = sizeof(pDown);
-	pDown->type = CS_DOWNLEFT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendRightKey()
-{
-	pRight = reinterpret_cast<CS_PACKET_RIGHT_KEY*>(send_buffer);
-	pRight->size = sizeof(pRight);
-	send_wsabuf.len = sizeof(pRight);
-	pRight->type = CS_RIGHT_KEY;
-
-	SendPacket();
-}
-
-void NetWorkManager::SendLeftKey()
-{
-	pLeft = reinterpret_cast<CS_PACKET_LEFT_KEY*>(send_buffer);
-	pLeft->size = sizeof(pLeft);
-	send_wsabuf.len = sizeof(pLeft);
-	pLeft->type = CS_LEFT_KEY;
-
-	SendPacket();
+	SendPacket(pInfo->size);
 }
 
 
@@ -355,18 +273,6 @@ void NetWorkManager::SendReleaseKey()
 	SendPacket();
 }
 
-void NetWorkManager::SendAnimationState(char animNum)
-{
-	pAnimation = reinterpret_cast<CS_PACKET_ANIMATION*>(send_buffer);
-	pAnimation->size = sizeof(pAnimation);
-	send_wsabuf.len = sizeof(pAnimation);
-	pAnimation->type = CS_ANIMATION_INFO;
-	pAnimation->animation = animNum;
-
-	SendPacket();
-}
-
-
 void NetWorkManager::SendChattingText(char id, const _TCHAR* text)
 {
 	pText = reinterpret_cast<CS_PACKET_CHATTING*>(send_buffer);
@@ -408,38 +314,7 @@ void NetWorkManager::SetGameFrameworkPtr(HWND hWnd, shared_ptr<BaseScene>client)
 	}
 }
 
-void NetWorkManager::SendSurroundingCollision(USHORT objID)
-{
-	pCollide = reinterpret_cast<CS_PACKET_OBJECT_COLLISION*>(send_buffer);
-	pCollide->objId = objID;
-	pCollide->size = sizeof(pCollide);
-	send_wsabuf.len = sizeof(pCollide);
-	pCollide->type = CS_OBJECT_COLLISION;
 
-	SendPacket();
-}
-
-
-void NetWorkManager::SendNotCollision()
-{
-	pNotCollide = reinterpret_cast<CS_PACKET_NOT_COLLISION*>(send_buffer);
-	pNotCollide->size = sizeof(pNotCollide);
-	pNotCollide->type = CS_NOT_COLLISION;
-	send_wsabuf.len = sizeof(pNotCollide);
-
-	SendPacket();
-}
-
-void NetWorkManager::SendPlayerCollision(unsigned char playerID)
-{
-	pPlayerCollision = reinterpret_cast<CS_PACKET_PLAYER_COLLISION*>(send_buffer);
-	pPlayerCollision->size = sizeof(pPlayerCollision);
-	pPlayerCollision->type = CS_PLAYER_COLLISION;
-	pPlayerCollision->playerID = playerID;		//충돌한 플레이어 ID
-	send_wsabuf.len = sizeof(pPlayerCollision);
-
-	SendPacket();
-}
 
 // 아이템 -> 고기, 바위, 바나나, 진흙
 // ItemColllision <- 아이템과 플레이어간의 충돌
@@ -451,43 +326,19 @@ void NetWorkManager::SendPlayerCollision(unsigned char playerID)
 
 
 
-void NetWorkManager::SendGetItem(const string& itemIndex)
-{
-	pGetItem = reinterpret_cast<CS_PACKET_GET_ITEM*>(send_buffer);
-	pGetItem->size = sizeof(CS_PACKET_GET_ITEM);
-	send_wsabuf.len = sizeof(CS_PACKET_GET_ITEM);
-	pGetItem->type = CS_GET_ITEM;
-	//for (int i = 0; i < 15; ++i)
-	//	cout << pGetItem->itemIndex;
-	// cout << "\n";
-	ZeroMemory(pGetItem->itemIndex, MAX_ITEM_NAME_LENGTH);
-	strncpy(pGetItem->itemIndex, itemIndex.c_str(), itemIndex.length());
 
-	SendPacket();
-}
-
-
-void NetWorkManager::SendUseItem(int useItem, int targetID)
-{
-	pItem = reinterpret_cast<CS_PACKET_USE_ITEM*>(send_buffer);
-	pItem->usedItem = useItem;
-	pItem->target = targetID;
-	pItem->size = sizeof(pItem);
-	send_wsabuf.len = sizeof(pItem);
-	pItem->type = CS_USEITEM;
-
-	SendPacket();
-}
 // Use아이템으로 사용했다는 신호와 동시에 사라지게 하는거야
-
-void NetWorkManager::SendEventPacket(const MessageStruct& msg)
+void NetWorkManager::SendEvent(MessageStruct& msg)
 {
 	pEvent = reinterpret_cast<CS_PACKET_EVENT*>(send_buffer);
 	pEvent->msg = msg;
-	pEvent->size = sizeof(pItem);
-	send_wsabuf.len = sizeof(pItem);
-	pEvent->type = CS_GET_ITEM;
+	pEvent->size = sizeof(pEvent);
+	send_wsabuf.len = sizeof(pEvent);
+	pEvent->type = CS_EVENT;
+
+	SendPacket(pEvent->size);
 }
+
 
 // 소켓 함수 오류 출력 후 종료
 void NetWorkManager::err_quit(const char* msg)
@@ -502,6 +353,7 @@ void NetWorkManager::err_quit(const char* msg)
 	LocalFree(lpMsgBuf);
 	exit(1);
 }
+
 
 // 소켓 함수 오류 출력
 void NetWorkManager::err_display(const char* msg)

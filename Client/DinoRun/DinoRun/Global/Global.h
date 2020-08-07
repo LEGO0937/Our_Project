@@ -71,25 +71,28 @@ enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 #define ROTATE_ACCELERATING 0.086   //각 가속력 초당 5도   2초 15도
 
 
-//#define isDebug
+#define isDebug
 
 //#define isConnectedToServer
 
 //shaderName
-#define _MODEL_SHADER 0
-#define _BILLBOARD_SHADER 1
-#define _TREE_SHADER 2
-#define _BLOCK_SHADER 3
-#define _FENCE_SHADER 4
-#define _ITEM_SHADER 5
-#define _MEAT_SHADER 6
-#define _BANANA_SHADER 7
-#define _METEORITE_SHADER 8
-#define _MOUND_SHADER 9
-#define _MUD_SHADER 10
-#define _STONE_SHADER 11
-#define _SKINED_SHADER 12
-#define _PLAYER_SHADER 13
+#define _ITEM_SHADER 0
+#define _MEAT_SHADER 0
+
+#define _BANANA_SHADER 1
+#define _MUD_SHADER 2
+#define _STONE_SHADER 3
+#define _METEORITE_SHADER 4
+#define _MOUND_SHADER 5
+
+#define _MODEL_SHADER 6
+#define _BILLBOARD_SHADER 7
+#define _TREE_SHADER 8
+#define _BLOCK_SHADER 9
+#define _FENCE_SHADER 10
+
+#define _SKINED_SHADER 11
+#define _PLAYER_SHADER 12
 
 #define _OBJECTS_SHADER 99
 

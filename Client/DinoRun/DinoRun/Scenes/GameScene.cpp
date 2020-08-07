@@ -218,21 +218,6 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pCountDownShader = new CountDownShader;
 	m_pCountDownShader->BuildObjects(pCreateManager.get(), NULL);
 
-	shader = new MeteoriteShader;
-	model_info.modelName = "Resources/Models/M_Meteorite.bin";
-	model_info.dataFileName = NULL;
-	model_info.useBillBoard = false;
-	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instancingModelShaders.emplace_back(shader);
-	shader->AddRef();
-	UpdatedShaders.emplace_back(shader);
-
-	shader = new MoundShader;
-	model_info.modelName = "Resources/Models/M_RockRIP.bin";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instancingModelShaders.emplace_back(shader);
-	shader->AddRef();
-	UpdatedShaders.emplace_back(shader);
 	m_pCreateManager->RenderLoading();
 
 	model_info.useBillBoard = true;
@@ -260,12 +245,25 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instancingBillBoardShaders.emplace_back(shader);
 #endif
 	m_pCreateManager->RenderLoading();
+	//
+	//model_info.useBillBoard = true;
+
+	shader = new MeatShader;
+	model_info.modelName = "Resources/Models/M_Meat.bin";
+	model_info.dataFileName = "Resources/ObjectData/MeatData";
+	model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+
 #ifdef isDebug
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Tree.bin";
 	model_info.dataFileName = "Resources/ObjectData/TreeData";
+	model_info.useBillBoard = true;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instancingModelShaders.emplace_back(shader); 
+	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Stone.bin";
@@ -317,8 +315,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 #endif
-	//
-	//model_info.useBillBoard = true;
+
 	shader = new FenceShader;
 	model_info.modelName = "Resources/Models/M_Block.bin";
 	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
@@ -340,14 +337,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instancingModelShaders.emplace_back(shader);
 	//M_Cavern
 	//m_pCheckPointShader->AddRef();
-	
-	shader = new MeatShader;
-	model_info.modelName = "Resources/Models/M_Meat.bin";
-	model_info.dataFileName = "Resources/ObjectData/MeatData";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instancingModelShaders.emplace_back(shader);
-	shader->AddRef();
-	UpdatedShaders.emplace_back(shader);
+
 
 	m_pCreateManager->RenderLoading();
 	m_pGuageShader = new GaugeShader;
@@ -749,16 +739,6 @@ void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 		}
 		m_pCountDownShader->Update(fTimeElapsed, &m_fCountDownTime);
 	}
-#ifdef isConnectedToServer
-	CS_PACKET_PLAYER_INFO playerInfo;
-	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
-	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
-	playerInfo.keyState = dwDirection;
-	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
-	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
-	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
-#endif
-
 }
 
 
@@ -767,6 +747,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	if (sceneType != SceneType::Game_Scene)
 	{
 		//서버와 연결 끊기, 엔드씬에서 룸씬으로 넘어가고 다시 시작하면 연결해야함
+		SoundManager::GetInstance()->AllStop();
 		return sceneType;
 	}
 
@@ -850,6 +831,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		//충돌을 위한 update
 		if (sceneType != SceneType::Game_Scene)
 		{
+			SoundManager::GetInstance()->AllStop();
 			return sceneType;
 		}
 	
@@ -1199,10 +1181,8 @@ void GameScene::ProcessEvent(const MessageStruct& msg)
 	}
 	else if (msg.msgName == _DISENABLE_OBJECT)
 	{
-		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
-			return a->GetName() == msg.shaderName; });
-		if (shader != instancingModelShaders.end())
-			(*shader)->DisEnableObject(msg.objectSerialNum);
+		if(instancingModelShaders[msg.shaderName])
+			instancingModelShaders[msg.shaderName]->DisEnableObject(msg.objectSerialNum);
 	}
 }
 void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
@@ -1219,7 +1199,7 @@ void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		UpdatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
 		//역으로 자신의 정보를 줄때는? Update에서 끝나는 지점에서 send할것
 		break;
-	case SC_GET_ITEM:
+	case SC_EVENT:
 		UpdateEventInfo(packet, fTimeElapsed); //이벤트처리
 		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
@@ -1227,7 +1207,8 @@ void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치
 		UpdateInitInfo(packet, fTimeElapsed);
 		break;
-	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리
+	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 
+		//이 패킷을 받으면 바로 게임 카운트다운 시작
 		UpdateStartInfo(packet, fTimeElapsed);
 		break;
 	default:
@@ -1275,5 +1256,13 @@ void GameScene::UpdateInitInfo(char* packet, float fTimeElapsed)
 }
 void GameScene::UpdateStartInfo(char* packet, float fTimeElapsed)
 {
-
+	isAllConnected = true;
+}
+void GameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
+{
+	EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+	EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
+	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 }

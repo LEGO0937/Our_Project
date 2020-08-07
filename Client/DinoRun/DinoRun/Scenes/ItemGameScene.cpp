@@ -224,9 +224,10 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingBillBoardShaders.emplace_back(shader);
 #endif
-	shader = new FenceShader;
-	model_info.modelName = "Resources/Models/M_Block.bin";
-	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
+
+	shader = new ItemShader;
+	model_info.modelName = "Resources/Models/M_Itembox.bin";
+	model_info.dataFileName = "Resources/ObjectData/MeatData";
 	model_info.useBillBoard = false;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
@@ -338,9 +339,9 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instancingModelShaders.emplace_back(shader);
 #endif
 
-	shader = new ItemShader;
-	model_info.modelName = "Resources/Models/M_Itembox.bin";
-	model_info.dataFileName = "Resources/ObjectData/MeatData";
+	shader = new FenceShader;
+	model_info.modelName = "Resources/Models/M_Block.bin";
+	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
 	model_info.useBillBoard = false;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
@@ -533,7 +534,11 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				message.shaderName = ItemShaderName[m_eCurrentItem];
 				message.departMat = matrix;
 				message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
 				EventHandler::GetInstance()->RegisterEvent(message);
+#else
+				NetWorkManager::GetInstance()->SendEvent(message);
+#endif
 				break;
 			case IconMeat:
 				SoundManager::GetInstance()->Play("MeatEat", 0.5f);
@@ -549,7 +554,11 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				mat._42 += 500;
 				message.departMat = mat;
 				message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
 				EventHandler::GetInstance()->RegisterEvent(message);
+#else
+				NetWorkManager::GetInstance()->SendEvent(message);
+#endif
 				break;
 			}
 			m_eCurrentItem = IconDefault;
@@ -566,7 +575,11 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			mat._42 += 500;
 			message.departMat = mat;
 			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
 			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
 			break;
 		case VK_LEFT:
 			//if (m_pPlayer)	m_pPlayer->KeyDownLeft();
@@ -807,56 +820,6 @@ void ItemGameScene::AnimateObjects(float fTimeElapsed)
 
 void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 {
-	//자기 정보 보내기
-	/*
-	SC_PACKET_PLAYER_INFO packet; 
-	packet.checkPoints[0] = m_pPlayer->GetCheckPoint();
-	packet.playerNames[0] = m_sPlayerId;
-	packet.xmf4x4Parents[0] = m_pPlayer->m_xmf4x4ToParent;
-	packet.keyState[0] = dwDirection;   //키입력정보, 이 정보로 타플레이어 애니메이션 적용
-	packet.type = SC_MOVE_PLAYER;
-
-	//자기정보 send
-	//모든플레이어 정보 recv 변수 packet으로 받음
-	//recv로 받은 패킷을 통해 위치 초기화
-
-	for (int i = 0; i < NetWorkManager::GetInstance()->GetNumPlayer(); ++i)
-	{
-		if (packet.playerNames[i] == m_sPlayerId)
-			continue;
-
-		vector<CGameObject*> obList = PLAYER_SHADER->getList();
-		auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-			return a->GetName() == packet.playerNames[i]; });
-		if (obj != obList.end())
-		{
-			(*obj)->m_xmf4x4ToParent = packet.xmf4x4Parents[i];
-			((CPlayer*)(*obj))->SetCheckPoint(packet.checkPoints[i]);
-			((CPlayer*)(*obj))->Move(packet.keyState[i], 20.0f, fTimeElapsed, true);
-		}
-		else
-		{
-			auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-				return a->GetName() == "None"; });
-			if (findId != obList.end())
-			{
-				(*findId)->SetName(packet.playerNames[i]);
-				(*findId)->m_xmf4x4ToParent = packet.xmf4x4Parents[i];
-				((CPlayer*)(*findId))->SetCheckPoint(packet.checkPoints[i]);
-				((CPlayer*)(*obj))->Move(packet.keyState[i], 20.0f, fTimeElapsed, true);
-					// 위치값 + 행렬
-			}
-
-		}
-	}
-	*/
-	//서버가 recv, 자신까지 포함한 본인정보까지 받을것 이때 쓰는 패킷은 player_info 패킷
-	//
-
-
-	//명령 send(플레이어 애니메이션 혹은 행렬 최신화)
-	//명령 recv
-	//ProcessPacket(패킷)
 	
 	//물리
 	{
@@ -893,15 +856,6 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 	}
 	//서버와 연결 성공때 닉네임과 아이디 반드시 받아올것!
 	//체크포인트까지 생각하게되면 이젠 업데이트 이후에 플레이어정보를 보내도록 해야함.
-#ifdef isConnectedToServer
-	CS_PACKET_PLAYER_INFO playerInfo;
-	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
-	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
-	playerInfo.keyState = dwDirection;
-	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
-	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
-	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
-#endif
 }
 
 
@@ -944,25 +898,28 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		//m_pPlayer->SetCheckPoint(CHECKPOINT_GOAL);
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
+#ifdef isConnectedToServer
+			//골인했다는 신호를 서버에게 send
+			//서버는 send를 받자마자 보낸 유저의 닉네임이 포함되어있는 패킷을 유저들에게 보냄. 보낸 자신도 포함.
+			//닉네임만있으면 시간은 클라가 알아서처리함.
+#else
 			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
 			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
 
-			//EventHandler::GetInstance()->m_fSecond = 43.25f;
-			//EventHandler::GetInstance()->m_iMinute = 13;
-
 			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+#endif
 		}
 		else
 		{
 			int rank = 1;
 			vector<CGameObject*> list = PLAYER_SHADER->getList();
-			((CPlayer*)list[0])->SetCheckPoint(1);
-			((CPlayer*)list[0])->SetName("player3");
-			((CPlayer*)list[1])->SetCheckPoint(4);
-			((CPlayer*)list[1])->SetName("player1");
-			((CPlayer*)list[2])->SetCheckPoint(3);
-			((CPlayer*)list[2])->SetName("player2");
+			//((CPlayer*)list[0])->SetCheckPoint(1);
+			//((CPlayer*)list[0])->SetName("player3");
+			//((CPlayer*)list[1])->SetCheckPoint(4);
+			//((CPlayer*)list[1])->SetName("player1");
+			//((CPlayer*)list[2])->SetCheckPoint(3);
+			//((CPlayer*)list[2])->SetName("player2");
 
 			sort(list.begin(), list.end(), [](CGameObject* a, CGameObject* b) {
 				return ((CPlayer*)a)->GetCheckPoint() > ((CPlayer*)b)->GetCheckPoint(); });
@@ -992,20 +949,18 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 
 			if (((CPlayer*)list[0])->GetCheckPoint() == CHECKPOINT_GOAL)
 			{
+#ifdef isConnectedToServer
+				//골인했다는 신호를 서버에게 send
+#else
 				EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 				EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
 				EventHandler::GetInstance()->m_sWinner = ((CPlayer*)list[0])->GetName();
 
 				sceneType = End_Scene;
+#endif
 			}
 		}
 
-		//if (isMugen)
-		//{
-		//	m_fMugenTimer -= fTimeElapsed;
-		//	if (m_fMugenTimer < 0)
-		//		isMugen = false;
-		//}
 		if (isBoost)
 		{
 			m_fBoostTimer -= fTimeElapsed;
@@ -1341,17 +1296,13 @@ void ItemGameScene::ProcessEvent(const MessageStruct& msg)
 {
 	if (msg.msgName == _ADD_OBJECT)
 	{
-		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
-			return a->GetName() == msg.shaderName; });
-		if (shader != instancingModelShaders.end())
-			(*shader)->addObject(m_pCreateManager.get(), msg.departMat);
+		if (instancingModelShaders[msg.shaderName])
+			instancingModelShaders[msg.shaderName]->addObject(m_pCreateManager.get(), msg.departMat);
 	}
 	else if (msg.msgName == _DELETE_OBJECT)
 	{
-		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
-			return a->GetName() == msg.shaderName; });
-		if (shader != instancingModelShaders.end())
-			(*shader)->DeleteObject(msg.objectSerialNum);
+		if (instancingModelShaders[msg.shaderName])
+			instancingModelShaders[msg.shaderName]->DeleteObject(msg.objectSerialNum);
 	}
 	else if (msg.msgName == _ADD_PARTICLE)
 	{
@@ -1360,10 +1311,8 @@ void ItemGameScene::ProcessEvent(const MessageStruct& msg)
 	}
 	else if (msg.msgName == _DISENABLE_OBJECT)
 	{
-		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
-			return a->GetName() == msg.shaderName; });
-		if (shader != instancingModelShaders.end())
-			(*shader)->DisEnableObject(msg.objectSerialNum);
+		if (instancingModelShaders[msg.shaderName])
+			instancingModelShaders[msg.shaderName]->DisEnableObject(msg.objectSerialNum);
 	}
 }
 
@@ -1384,65 +1333,24 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		UpdatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
 		//역으로 자신의 정보를 줄때는? Update에서 끝나는 지점에서 send할것
 		break;
-	case SC_GET_ITEM:
+	case SC_EVENT:
 		UpdateEventInfo(packet, fTimeElapsed); //이벤트처리
 		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
 		break;
-	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치
-		UpdateInitInfo(packet, fTimeElapsed);
+	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치 만일 룸씬에서 받는거라면 이건 필요없게 됨.
+		UpdateInitInfo(packet, fTimeElapsed); //무시하셈.
 
 		break;
-	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리
+	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 이걸 받고나서 카운트다운 시작.
 		UpdateStartInfo(packet, fTimeElapsed);
+		break;
+	case 5: //누군가가(나 포함) 골인에 도착했다는 신호를 보낸경우
+		UpdateFinishInfo(packet, fTimeElapsed);
 		break;
 	default:
 		break;
 	}
-
-	//패킷의 switch문으로 행동 결정
-	// 플레이어 위치값 갱신
-	/*
-	vector<CGameObject*> obList = PLAYER_SHADER->getList();
-	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-		return a->GetName() == t.Name; });
-	if (obj != obList.end())
-		(*obj)->m_xmf4x4ToParent = 행렬
-	else
-	{
-		auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-			return a->GetName() == "None"; });
-		if (findId != obList.end())
-		{
-			(*findId)->SetId(이름)
-			(*findId)->m_xmf4x4ToParent = 행렬
-			// 위치값 + 행렬
-		}
-
-	}
-	*/
-
-	// 플레이어 애니메이션
-	/*
-	vector<CGameObject*> obList = PLAYER_SHADER->getList();
-	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-		return a->GetName() == t.Name; });
-	if (obj != obList.end())
-	{
-		CPlayer* player = (CPlayer*)(*obj);
-		switch (t.animation)
-		{
-		case 'R':   //오른쪽 키 down
-			player->KeyDownRight();
-			break;
-		default:
-			break;
-		}
-	}
-	*/
-
-
-
 
 	//끝났음을 알림
 	//사운드 종료, 네트워크매니저에 패배 신호 주고 승리자는 이 패킷을 안받음.
@@ -1492,5 +1400,13 @@ void ItemGameScene::UpdateInitInfo(char* packet, float fTimeElapsed)
 }
 void ItemGameScene::UpdateStartInfo(char* packet, float fTimeElapsed)
 {
-
+	isAllConnected = true;
+}
+void ItemGameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
+{
+	EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+	EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
+	//EventHandler::GetInstance()->m_sWinner = packet->승자이름;
+	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 }

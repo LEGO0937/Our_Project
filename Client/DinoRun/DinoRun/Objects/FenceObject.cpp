@@ -2,7 +2,7 @@
 
 FenceObject::FenceObject(int nMeshes) :CGameObject(nMeshes)
 {
-	m_fMass = 0;//180;
+	m_fMass = 130;//180;
 	isKinematic = true;
 	m_ModelType = ModelType::Fence;
 }

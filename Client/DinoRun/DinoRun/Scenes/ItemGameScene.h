@@ -77,6 +77,7 @@ public:
 	void UpdateEventInfo(char* packet, float fTimeElapsed);
 	void UpdateInitInfo(char* packet, float fTimeElapsed);
 	void UpdateStartInfo(char* packet, float fTimeElapsed);
+	void UpdateFinishInfo(char* packet, float fTimeElapsed);
 private:
 	DWORD dwDirection;
 
@@ -86,7 +87,7 @@ private:
 	SkyBoxObject* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 
-	list<CObjectsShader*> UpdatedShaders;  //물리적용이 되는 셰이더를 담음
+	vector<CObjectsShader*> UpdatedShaders;  //물리적용이 되는 셰이더를 담음
 
 	vector<CObInstancingShader*> instancingBillBoardShaders;
 	vector<CObInstancingShader*> instancingModelShaders;

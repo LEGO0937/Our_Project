@@ -60,6 +60,7 @@ public:
 	void UpdateAddRoom(char* packet, float fTimeElapsed);
 	void UpdateRoomInfo(char* packet, float fTimeElapsed);
 	void UpdateLogOut(char* packet, float fTimeElapsed);
+	void UpdateEntryRoom(char* packet, float fTimeElapsed);
 private:
 	vector<CObInstancingShader*> instacingBillBoardShaders;
 	vector<CUiShader*> instacingUiShaders;

@@ -223,8 +223,8 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		if (m_pCamera)
 		{
-			if (m_pCamera->GetMode() == SPACESHIP_CAMERA)
-				m_pCamera->Move(xmf3Shift);
+			
+			m_pCamera->Move(xmf3Shift);
 			//m_pCamera->RegenerateViewMatrix();
 		}
 	}
@@ -325,7 +325,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 			EventHandler::GetInstance()->RegisterEvent(message);
 #else
-			NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+			NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 			OnCollisionAni();
 		}
@@ -365,7 +365,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 		message.shaderName = BOX_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
@@ -373,7 +373,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 		SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 		return true;
@@ -388,7 +388,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 
 		message.shaderName = MEAT_PARTICLE;
@@ -397,7 +397,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 		SoundManager::GetInstance()->Play("MeatEat", 0.5f);
 		//target->SetEnableState(false);  //서버 비활성화 신호 서버에 보내주고 쉐이더에서 처리할 것.
@@ -416,7 +416,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 		break;		
 	case ModelType::Item_Mud:
@@ -461,20 +461,26 @@ void CPlayer::ProcessRotate(float fTimeElapsed)
 			break;
 		case IDLE_LEFT_TURN:
 		case IDLE_LEFT_TURNING:
-			m_fWheelDegree -= 20 * fTimeElapsed;
+			if (!isShift)
+				m_fWheelDegree -= 25 * fTimeElapsed;
+			else
+				m_fWheelDegree -= 35 * fTimeElapsed;
 			break;
 		case IDLE_RIGHT_RETURN:
-			m_fWheelDegree -= 40 * fTimeElapsed;
+			m_fWheelDegree -= 30 * fTimeElapsed;
 			if (m_fWheelDegree < 0)
 				m_fWheelDegree = 0;
 
 			break;
 		case IDLE_RIGHT_TURN:
 		case IDLE_RIGHT_TURNING:
-			m_fWheelDegree += 20 * fTimeElapsed;
+			if (!isShift)
+				m_fWheelDegree += 25 * fTimeElapsed;
+			else
+				m_fWheelDegree += 35 * fTimeElapsed;
 			break;
 		case IDLE_LEFT_RETURN:
-			m_fWheelDegree += 40 * fTimeElapsed;
+			m_fWheelDegree += 30 * fTimeElapsed;
 			if (m_fWheelDegree > 0)
 				m_fWheelDegree = 0;
 			break;
@@ -616,7 +622,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	XMFLOAT3 xmf3Ftraction;
 
 	xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); //앞키로 얻은 힘을 통한 진행 힘 구하는 식
-	if (isShift )
+	if (isShift && !m_fWheelDegree)
 		xmf3Ftraction = Vector3::Add(xmf3Ftraction, Vector3::ScalarProduct(Vector3::Normalize(m_xmf3Velocity), -1000.0f, false));
 	//	xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, -400.0f, false); //브레이크 시
 
