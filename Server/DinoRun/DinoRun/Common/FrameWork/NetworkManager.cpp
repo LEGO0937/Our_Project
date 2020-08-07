@@ -9,6 +9,7 @@
 //volatile bool g_LoginFinished;
 //const char* g_serverIP = nullptr;
 
+
 NetWorkManager::NetWorkManager()
 {
 	sock = NULL;
@@ -16,8 +17,9 @@ NetWorkManager::NetWorkManager()
 	in_packet_size = 0;
 	saved_packet_size = 0;
 
-	//Initialize();
+	Initialize();
 }
+
 
 NetWorkManager::~NetWorkManager()
 {
@@ -48,7 +50,6 @@ void NetWorkManager::Initialize()
 		err_quit("socket()");
 		return;
 	}
-
 }
 
 void NetWorkManager::Release()
@@ -56,14 +57,14 @@ void NetWorkManager::Release()
 	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 }
 
-void NetWorkManager::ConnectToServer()
+void NetWorkManager::ConnectToServer(HWND hWnd)
 {
 	// connect()
 	m_ServerIP = "127.0.0.1";
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr(m_ServerIP);
+	serveraddr.sin_addr.s_addr = inet_addr(NetWorkManager::GetInstance()->GetServerIP());
 	serveraddr.sin_port = htons(SERVER_PORT);
 
 	int retval = WSAConnect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr), NULL, NULL, NULL, NULL);
@@ -84,8 +85,9 @@ void NetWorkManager::ConnectToServer()
 		}
 	}
 
-	printf("여기 안들가짐?");
 
+	
+	//printf("여기 안들가짐?");
 	WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ); // 작동하는거야
 
 	send_wsabuf.buf = send_buffer;
@@ -105,7 +107,6 @@ SOCKET NetWorkManager::getSock()
 
 void NetWorkManager::ReadPacket()
 {
-
 	DWORD iobyte, ioflag = 0;
 
 	int retval = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
@@ -127,7 +128,7 @@ void NetWorkManager::ReadPacket()
 
 			if (m_pCurScene)
 			{
-				m_pCurScene->ProcessPacket(packet_buffer,0);
+				m_pCurScene->ProcessPacket(packet_buffer, 0);
 			}
 			// 각 Scene의 ProcessPacket으로 처리를 넘김
 			// ProcessPacket(packet_buffer);
@@ -186,6 +187,7 @@ void NetWorkManager::ReadPacket(float fTimeElapsed)
 	}
 }
 
+
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
 void NetWorkManager::SendPacket(DWORD dataBytes)
 {
@@ -202,6 +204,7 @@ void NetWorkManager::SendPacket(DWORD dataBytes)
 	}
 }
 
+
 void NetWorkManager::SendPacket()
 {
 	DWORD iobyte = 0;
@@ -216,7 +219,8 @@ void NetWorkManager::SendPacket()
 	}
 }
 
-void NetWorkManager::SendPlayerInfo(int checkPoints,DWORD keyState, XMFLOAT4X4 xmf4x4Parents)
+
+void NetWorkManager::SendPlayerInfo(int checkPoints, DWORD keyState, XMFLOAT4X4 xmf4x4Parents)
 {
 	pInfo = reinterpret_cast<CS_PACKET_PLAYER_INFO*>(send_buffer);
 	pInfo->size = sizeof(pInfo);

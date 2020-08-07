@@ -4,11 +4,14 @@
 #include "EventHandler/EventHandler.h"
 ID3D12PipelineState** CGameFramework::m_ppd3dPipelineStates = NULL;
 
+int g_State = GAMESTATE::ID_INPUT;
+
+
 CGameFramework::CGameFramework()
 {
 	EventHandler::GetInstance()->Update();
 	SoundManager::GetInstance()->Initialize();
-	//NetWorkManager::GetInstance()->Initialize();
+	NetWorkManager::GetInstance()->Initialize();
 }
 
 CGameFramework::~CGameFramework()
@@ -16,7 +19,7 @@ CGameFramework::~CGameFramework()
 	EventHandler::GetInstance()->destroy();
 	SoundManager::GetInstance()->destroy();
 	//NetWorkManager::GetInstance()->Release();
-	//NetWorkManager::GetInstance()->destroy();
+	NetWorkManager::GetInstance()->destroy();
 }
 
 bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
@@ -120,7 +123,7 @@ void CGameFramework::BuildObjects()
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
 	m_pFontManager->Initialize(m_pCreateManager.get());
 	//-----------
-	
+	/*
 	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
 	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
@@ -132,7 +135,7 @@ void CGameFramework::BuildObjects()
 
 	m_pCreateManager->SetLoadingScene(m_pLoadingScene);
 
-	m_pScene = shared_ptr<ItemGameScene>(new ItemGameScene()); // 여기에 따라 아이템 게임 씬, 스피드전 게임 씬으로 바뀐다
+	m_pScene = shared_ptr<ItemGameScene>(new ItemGameScene());
 	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
 	m_pScene->BuildObjects(m_pCreateManager);
@@ -143,10 +146,10 @@ void CGameFramework::BuildObjects()
 
 	m_pScene->setPlayer(m_pPlayer);
 	m_pScene->setCamera(m_pPlayer->GetCamera());
-	
+	*/
 	//--------
 	
-	/*m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
+	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
 	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
 	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
 	m_pLoadingScene->BuildObjects(m_pCreateManager);
@@ -161,7 +164,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
 	m_pScene->BuildObjects(m_pCreateManager);
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
-	m_pScene->setCamera(m_pCamera);*/
+	m_pScene->setCamera(m_pCamera);
 	
 	//-----------------------
 	
@@ -407,6 +410,9 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
+		//-----------------만일 룸씬에서 시작신호 받으면서 위치를 받는게 맞다면 이곳에서 그 값으로 setPosition을 해야함.
+		//m_pPlayer->SetPosition(NetWorkManager::GetInstance()->m_xmf3Position);
+
 		if (type == SceneType::ItemGame_Scene)
 			m_pPlayer->SetMaxVelocityXZ(25);
 
@@ -478,4 +484,39 @@ void CGameFramework::CreatePSOs()
 	CreatePsoVertBlur(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_VERT_BLUR);
 
 	CreatePsoParticleCs(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE_CALC);
+}
+
+
+// 서버와 함께
+void CGameFramework::ConnectingSever(HWND hWnd)
+{
+	switch (NetWorkManager::GetInstance()->GetConnectState())
+	{
+	case NetWorkManager::CONNECT_STATE::NONE:
+	{
+		printf_s("Connect State: NONE\n");
+		break;
+	}
+
+	case NetWorkManager::CONNECT_STATE::TRY:
+	{
+		NetWorkManager::GetInstance()->ConnectToServer(hWnd);
+		break;
+	}
+
+	case NetWorkManager::CONNECT_STATE::FAIL:
+	{
+		printf_s("Connect State: FAIL\n");
+		break;
+	}
+
+	case NetWorkManager::CONNECT_STATE::OK:
+	{
+		g_State = GAMESTATE::LOGIN;
+		break;
+	}
+
+	default:
+		break;
+	}
 }

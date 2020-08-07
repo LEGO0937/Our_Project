@@ -48,20 +48,14 @@ public:
 	string GetPlayerName() { return m_sPlayerName; }
 	int GetNumPlayer() { return m_iNumPlayer; }
 private:
-	CS_PACKET_UP_KEY* pUp = NULL;
-	CS_PACKET_DOWN_KEY* pDown = NULL;
-	CS_PACKET_RIGHT_KEY* pRight = NULL;
-	CS_PACKET_LEFT_KEY* pLeft = NULL;
-	CS_PACKET_READY* pReady = NULL;
-	CS_PACKET_UNREADY* pUnReady = NULL;
-	CS_PACKET_REQUEST_START* pRequestStart = NULL;
-	CS_PACKET_RELEASE_KEY* pReleaseKey = NULL;
-	CS_PACKET_ANIMATION* pAnimation = NULL;
+	CS_PACKET_READY* pReady = NULL; // 레디
+	CS_PACKET_UNREADY* pUnReady = NULL; // 레디 안함
+	CS_PACKET_REQUEST_START* pRequestStart = NULL; // 시작해라
+	CS_PACKET_RELEASE_KEY* pReleaseKey = NULL; // 
 	CS_PACKET_NICKNAME* pNickName = NULL;
 	CS_PACKET_CHATTING* pText = NULL;
-	CS_PACKET_NOT_COLLISION* pNotCollide = NULL;
-	CS_PACKET_PLAYER_INFO* pInfo = NULL;
-	CS_PACKET_EVENT* pEvent = NULL;  //이벤트처리용
+	CS_PACKET_PLAYER_INFO* pInfo = NULL; // 플레이어 위치, 애니메이션
+	CS_PACKET_EVENT* pEvent = NULL;  // 아이템 
 
 	HWND m_hWnd{ NULL };
 	int m_iNumPlayer = 0;
@@ -103,28 +97,17 @@ public:
 	void SendPacket(DWORD dataBytes);
 
 public:
-	void SendUpKey();
-	void SendUpRightKey();
-	void SendUpLeftKey();
-	void SendDownKey();
-	void SendDownRightKey();
-	void SendDownLeftKey();
-	void SendRightKey();
-	void SendLeftKey();
 
+	void SendReady(); // 룸씬에다
+	void SendNotReady(); // 룸씬에다
+	void SendReqStart(); // 룸씬(선택)
+	void SendReleaseKey(); // 그냥 혹시몰라서
+	void SendPlayerInfo(int checkPoints, DWORD keyState, XMFLOAT4X4 xmf4x4Parents); // 아이템 게임씬, 스피드 게임씬
+	
+	void SendNickName(char id, _TCHAR* name); // 닉네임 값(나중에 의논)
+	void SendChattingText(char id, const _TCHAR* text); // 채팅(졸작 끝나고 어떻게 좀)
+	void SendEvent(MessageStruct& msg); // 아이템 관리 패킷(아이템 게임 씬)
 
-
-	void SendReady();
-	void SendNotReady();
-	void SendReqStart();
-	void SendReleaseKey();
-	void SendPlayerInfoPacket(const CS_PACKET_PLAYER_INFO& packet);
-	void SendAnimationState(char animNum);
-	void SendNickName(char id, _TCHAR* name);
-	void SendChattingText(char id, const _TCHAR* text);
-	void SendSurroundingCollision(USHORT objID);
-	void SendNotCollision();
-	void SendPlayerCollision(unsigned char playerID);
 public:
 	CS_PACKET_REQUEST_START* GetRS() { return pRequestStart; }
 	void SetNullRS() { pRequestStart = NULL; }

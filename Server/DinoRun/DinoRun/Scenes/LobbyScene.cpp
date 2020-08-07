@@ -82,6 +82,8 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//방 정보에는 방 번호, 현재 인원수, 게임중 or 대기중 상태의 변수를 가짐
 
 	//==================================임시로 작성한 부분
+#ifdef isConnectedToServer
+#else
 	m_vRooms.emplace_back(Room(1, 5, false, true));
 	m_vRooms.emplace_back(Room(2, 2, false,false));
 	m_vRooms.emplace_back(Room(3, 1, true,false));
@@ -115,6 +117,7 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_vUsers.emplace_back(LobbyUser(19,"das19"));
 	m_vUsers.emplace_back(LobbyUser(20,"das20"));
 	m_vUsers.emplace_back(LobbyUser(21,"das21"));
+#endif
 	//------------------UserList----------------------
 		
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.71f, 0.28f),XMFLOAT2(1.05f,1.05f)));  //유저 목록 8줄 0~7 idx
@@ -204,6 +207,9 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//fontShader->BuildObjects(pCreateManager, NULL);
 
 	CreateShaderVariables(pCreateManager.get());
+
+	//랜더링 준비가 끝났으니 방목록과 유저목록을 달라는 send할 것.
+	// 이 주석자리에 유저 정보 DB에서 불러오기
 }
 
 void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -266,13 +272,21 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							
 							
 							if (!m_vRooms[clickNum].m_bIsGaming && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
-							{
+							{// 조건문 내의 내용 앞에서부터 게임중 or 대기중, 방안의 유저수, 최대 유저 고정
 								//순서
 							    //방번호를 갖고있는 패킷을 send
 							    //서버에서 패킷받고 여유자리있는지 확인하고 입장가능여부 send
-							    //recv로 들어오라는 신호를 받음
-
+							    //recv로 들어오라는 신호를 받음 그 처리는 Process패킷함수에서
+								//호출하는 updateEntryRoom함수가 함.
+								//아래 세개 if들도 이와 같음.
+								//방번호만 send 방번호에 여유가 있는지 확인
+								//새로 패킷 하나 만들어서 조건문 걸어야겠네
+								//만약 조건 만족해서 들어갈 수 있으면 m_vRooms[clickNum].m_iUserNumber + 1시키기
+								//아래의 UpdateEntryRoom 함수 있으면 사용
+								//우선순위를 나중으로
+								//추후에 DB추가(아이디, 비번, 닉네임, 방번호, 레디 언레디)
 								m_iResultNum = m_vRooms[clickNum].m_iRoomNumber;
+								// 이 시점에서 룸 데이터베이스에 내 정보가 들가야한다
 								m_bMode = m_vRooms[clickNum].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -296,7 +310,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 						{
 							if (!m_vRooms[clickNum + 2].m_bIsGaming && m_vRooms[clickNum + 2].m_iUserNumber < m_vRooms[clickNum + 2].m_iMaxUserNumber)
 							{
-								m_iResultNum = m_vRooms[clickNum + 2].m_iRoomNumber;  //방번호
+								m_iResultNum = m_vRooms[clickNum + 2].m_iRoomNumber; //방번호
 								m_bMode = m_vRooms[clickNum + 2].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -309,6 +323,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							if (!m_vRooms[clickNum + 3].m_bIsGaming && m_vRooms[clickNum + 3].m_iUserNumber < m_vRooms[clickNum + 3].m_iMaxUserNumber)
 							{
 								m_iResultNum = m_vRooms[clickNum + 3].m_iRoomNumber;
+								//아이디 만 넣어 DB쪽 구현
 								m_bMode = m_vRooms[clickNum + 3].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -401,6 +416,7 @@ void LobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		switch (wParam)
 		{
 		case VK_ESCAPE:
+			//여기서 로그아웃에 대한 send
 			sceneType = SceneType::Start_Scene;
 			break;
 		default:
@@ -413,9 +429,12 @@ void LobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	}
 }
+
+
 void LobbyScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 }
+
 
 void LobbyScene::Render()
 {
@@ -455,6 +474,16 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	}
 
 	//----------------- 매번 서버로부터 방들의 정보를 갱신 
+	// m_vRooms -> 룸넘버
+	// m_vUsers -> 유저 넘버
+	/*m_vRooms.clear();
+	for (int i = 0; i < db.size(); ++i)
+	{
+		m_vRooms.emplace_back(룸정보);
+	}*/
+	// 유저 넘버도 똑같은 방식 단 m_vUsers같은 경우 나 자신 제외
+	// 이는 조건문 걸어서 이용하자!
+	
 	//m_iPageNum 
 	//m_vRooms.clear();
 	/*
@@ -556,24 +585,36 @@ void LobbyScene::ProcessPacket(char* packet, float fTimeElapsed)
 	*/
 	switch (packet[1])
 	{
-	//case SC_READY_STATE:
-	//	UpdateReadyState(packet, fTimeElapsed);
-	//	break;
-	//case SC_UNREADY_STATE:
-	//	UpdateUnreadyState(packet, fTimeElapsed);
-	//	break;
-	case SC_CLIENT_LOBBY_IN:
+	case SC_CLIENT_LOBBY_IN:  //추가 유저 접속
 		UpdateAddUser(packet, fTimeElapsed);
 		break;
-	case SC_CLIENT_LOBBY_OUT:
+	case SC_CLIENT_LOBBY_OUT: //추가 접속종료 유저
 		UpdateDeleteUser(packet, fTimeElapsed);
+		break;
+	case 0:  //로그아웃 성공에 대한 패킷
+		UpdateLogOut(packet, fTimeElapsed);
+		break;
+	case 1: //방 추가에 대한 패킷
+		UpdateAddRoom(packet, fTimeElapsed);
+		break;
+	case 2: //방 업데이트에 대한 패킷
+		UpdateRoomInfo(packet, fTimeElapsed);
+		break;
+	case 4: //방입장에 성공했다는 패킷
+		//방 클릭시 화면에는 인원이 다 안차보일 수 있어도 한자리 남은 상황에 두클라가 동시 참가시도할 경우 한명은
+		//못들어가게 해야함 그러면 클라에서 방클릭시 입장할 수 있는지 물어보고 서버는 인원이 남고 게임중이 아닐 경우
+		//들어오라는 메시지를 보내는데 이 메시지를 처리하는곳이 이곳임.
+		UpdateEntryRoom(packet, fTimeElapsed);
+		break;
+	default:
 		break;
 	}
 }
 
 void LobbyScene::UpdateAddUser(char* packet, float fTimeElapsed)
 {
-	//패킷 구조체안에 현재 버튼이 어떤 상태인지도 보내줄 필요가 있음. 보류
+	//추가 접속유저에 대한 처리 패킷
+	//일단 구조체가 대강 맞는것 같아 이걸로 쓰긴했음, 다른걸로 교체해도 됨.
 	SC_PACKET_LOBBY_IN* playerInfo = reinterpret_cast<SC_PACKET_LOBBY_IN*>(packet);
 	//m_vUsers
 	auto iter = find_if(m_vUsers.begin(), m_vUsers.end(), [&](const LobbyUser& a) {
@@ -581,7 +622,7 @@ void LobbyScene::UpdateAddUser(char* packet, float fTimeElapsed)
 	if (iter == m_vUsers.end())
 	{
 		LobbyUser user;
-		//ConvertCHARtoWCHAR(playerInfo->client_state.name);
+		
 		user.m_sName = playerInfo->client_state.name;
 		user.m_id = playerInfo->id;
 		m_vUsers.emplace_back(user);
@@ -589,6 +630,7 @@ void LobbyScene::UpdateAddUser(char* packet, float fTimeElapsed)
 }
 void LobbyScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
 {
+	//접속 종료 유저 추가
 	SC_PACKET_LOBBY_OUT* playerInfo = reinterpret_cast<SC_PACKET_LOBBY_OUT*>(packet);
 
 	m_vUsers.erase(remove_if(m_vUsers.begin(), m_vUsers.end(), [&](const LobbyUser& a) {
@@ -597,9 +639,36 @@ void LobbyScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
 
 void LobbyScene::UpdateAddRoom(char* packet, float fTimeElapsed)
 {
-
+	//하나의 방을 방목록에 추가하는 패킷
+	SC_PACKET_ROOM* roomInfo = reinterpret_cast<SC_PACKET_ROOM*>(packet);
+	m_vRooms.emplace_back(Room(roomInfo->m_iRoomNumber, roomInfo->m_iUserNumber, 
+		roomInfo->m_bIsGaming, roomInfo->m_bMode));
 }
 void LobbyScene::UpdateRoomInfo(char* packet, float fTimeElapsed)
 {
+	//하나의 방을 대상으로하는 방 정보 최신화
+	SC_PACKET_ROOM* roomInfo = reinterpret_cast<SC_PACKET_ROOM*>(packet);
+
+	//방번호로 목록에서 방을 찾고, 게임방 상태, 모드,접속 유저수를 최신화한다.
+	auto room = find_if(m_vRooms.begin(), m_vRooms.end(), [&](const Room& a) {
+		return a.m_iRoomNumber == roomInfo->m_iRoomNumber; });
+	if (room != m_vRooms.end())
+	{
+		(*room).m_bIsGaming = roomInfo->m_bIsGaming;
+		(*room).m_bMode = roomInfo->m_bMode;
+		(*room).m_iUserNumber = roomInfo->m_iUserNumber;
+	}
+}
+
+void LobbyScene::UpdateLogOut(char* packet, float fTimeElapsed)
+{
+	sceneType = SceneType::Start_Scene;
+}
+void LobbyScene::UpdateEntryRoom(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_ROOM* roomInfo = reinterpret_cast<SC_PACKET_ROOM*>(packet);
+	m_iResultNum = roomInfo->m_iRoomNumber;
+	m_bMode = roomInfo->m_bMode;
+	sceneType = SceneType::Room_Scene;
 
 }

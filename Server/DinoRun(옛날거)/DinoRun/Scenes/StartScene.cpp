@@ -19,10 +19,12 @@ StartScene::StartScene():BaseScene()
 {
 	sceneType = SceneType::Start_Scene;
 }
+
 StartScene::~StartScene()
 {
 	SoundManager::GetInstance()->Stop("Start_BGM");
 }
+
 void StartScene::ReleaseUploadBuffers()
 {
 	BaseScene::ReleaseUploadBuffers();
@@ -33,6 +35,7 @@ void StartScene::ReleaseUploadBuffers()
 	for (CUiShader* shader : instacingUiShaders)
 		if (shader) { shader->ReleaseUploadBuffers(); }
 }
+
 void StartScene::ReleaseObjects()
 {
 	BaseScene::ReleaseObjects();
@@ -47,11 +50,13 @@ void StartScene::ReleaseObjects()
 	instacingBillBoardShaders.clear();
 
 }
+
+// 
 void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
 	m_pCreateManager = pCreateManager;
 
-
+	// 여기에 커넥트 서버를 한다.
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 	SoundManager::GetInstance()->Play("Start_BGM", 0.2f);
@@ -130,6 +135,9 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		{
 			if (isClickedLogin)
 			{
+				// 일단 신경 써도되고 안써도되고
+				// 여기서 DB연결
+
 				//*서버*
 				//이 구간에서 서버와 연결하여 아이디와 패스워드를 보냄, 서버에서 확인후 존재하는 아이디가 맞다면
 				//닉네임을 보내줌, 없을 시 ""빈 문자열(string형으로 받을 것)

@@ -218,21 +218,6 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pCountDownShader = new CountDownShader;
 	m_pCountDownShader->BuildObjects(pCreateManager.get(), NULL);
 
-	shader = new MeteoriteShader;
-	model_info.modelName = "Resources/Models/M_Meteorite.bin";
-	model_info.dataFileName = NULL;
-	model_info.useBillBoard = false;
-	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instancingModelShaders.emplace_back(shader);
-	shader->AddRef();
-	UpdatedShaders.emplace_back(shader);
-
-	shader = new MoundShader;
-	model_info.modelName = "Resources/Models/M_RockRIP.bin";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instancingModelShaders.emplace_back(shader);
-	shader->AddRef();
-	UpdatedShaders.emplace_back(shader);
 	m_pCreateManager->RenderLoading();
 
 	model_info.useBillBoard = true;
@@ -260,12 +245,25 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instancingBillBoardShaders.emplace_back(shader);
 #endif
 	m_pCreateManager->RenderLoading();
+	//
+	//model_info.useBillBoard = true;
+
+	shader = new MeatShader;
+	model_info.modelName = "Resources/Models/M_Meat.bin";
+	model_info.dataFileName = "Resources/ObjectData/MeatData";
+	model_info.useBillBoard = false;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+
 #ifdef isDebug
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Tree.bin";
 	model_info.dataFileName = "Resources/ObjectData/TreeData";
+	model_info.useBillBoard = true;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instancingModelShaders.emplace_back(shader); 
+	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Stone.bin";
@@ -317,8 +315,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 #endif
-	//
-	//model_info.useBillBoard = true;
+
 	shader = new FenceShader;
 	model_info.modelName = "Resources/Models/M_Block.bin";
 	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
@@ -340,14 +337,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	instancingModelShaders.emplace_back(shader);
 	//M_Cavern
 	//m_pCheckPointShader->AddRef();
-	
-	shader = new MeatShader;
-	model_info.modelName = "Resources/Models/M_Meat.bin";
-	model_info.dataFileName = "Resources/ObjectData/MeatData";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
-	instancingModelShaders.emplace_back(shader);
-	shader->AddRef();
-	UpdatedShaders.emplace_back(shader);
+
 
 	m_pCreateManager->RenderLoading();
 	m_pGuageShader = new GaugeShader;
@@ -408,6 +398,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	SoundManager::GetInstance()->Play("InGame_BGM", 0.1f);
 
 	m_pCreateManager->RenderLoading();
+	isAllConnected = true;
 }
 
 void GameScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -542,7 +533,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 	if(dwDirection == 0)
 		m_pPlayer->m_fForce = 0;
 
-	m_pPlayer->Move(dwDirection, 1200.0f*deltaTime, deltaTime, true);
+	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
 	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
@@ -587,7 +578,8 @@ void GameScene::Render()
 	
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PARTICLE]);
 	//particleSystem->Render(m_pd3dCommandList.Get(), m_pCamera);
-	m_pPlayer->m_pParticleSystem->Render(m_pd3dCommandList, m_pCamera);
+	if ( Vector3::Length(m_pPlayer->m_xmf3Velocity) > 0)
+		m_pPlayer->m_pParticleSystem->Render(m_pd3dCommandList, m_pCamera);
 	for (ParticleSystem* system : particleSystems)
 	{
 		system->Render(m_pd3dCommandList, m_pCamera);
@@ -731,31 +723,22 @@ void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 			shader->FixedUpdate(fTimeElapsed);  //물리 적용할 것
 		}
 	}
-
-	if (!isStart)
+	if (isAllConnected)
 	{
-		if (m_fCountDownTime > 0.9f)
+		if (!isStart)
 		{
-			m_fCountDownTime -= fTimeElapsed;
+			if (m_fCountDownTime > 0.9f)
+			{
+				m_fCountDownTime -= fTimeElapsed;
+			}
+			else
+			{
+				m_fCountDownTime = 0.0f;
+				isStart = true;
+			}
 		}
-		else
-		{
-			m_fCountDownTime = 0.0f;
-			isStart = true;
-		}
+		m_pCountDownShader->Update(fTimeElapsed, &m_fCountDownTime);
 	}
-	m_pCountDownShader->Update(fTimeElapsed, &m_fCountDownTime);
-
-#ifdef isConnectedToServer
-	CS_PACKET_PLAYER_INFO playerInfo;
-	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
-	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
-	playerInfo.keyState = dwDirection;
-	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
-	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
-	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
-#endif
-
 }
 
 
@@ -902,6 +885,17 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		//서버에서 스타트 신호를 받음. 모든 유저가 접속이 되었다면. start신호를 받고 isStart값을 true로 전환하고 
 		//start대문이미지 출력할 것.
 	}
+
+#ifdef isConnectedToServer
+	CS_PACKET_PLAYER_INFO playerInfo;
+	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
+	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
+	playerInfo.keyState = dwDirection;
+	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
+	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
+	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
+#endif
+
 	return Game_Scene;
 }
 
@@ -1185,10 +1179,8 @@ void GameScene::ProcessEvent(const MessageStruct& msg)
 	}
 	else if (msg.msgName == _DISENABLE_OBJECT)
 	{
-		auto shader = find_if(instancingModelShaders.begin(), instancingModelShaders.end(), [&](CObInstancingShader* a) {
-			return a->GetName() == msg.shaderName; });
-		if (shader != instancingModelShaders.end())
-			(*shader)->DisEnableObject(msg.objectSerialNum);
+		if(instancingModelShaders[msg.shaderName])
+			instancingModelShaders[msg.shaderName]->DisEnableObject(msg.objectSerialNum);
 	}
 }
 void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
@@ -1202,20 +1194,26 @@ void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 	switch (packet[1])
 	{
 	case SC_PLAYER_INFO:
-		updatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
+		UpdatePlayerInfo(packet, fTimeElapsed);//플레이어 정보 처리
 		//역으로 자신의 정보를 줄때는? Update에서 끝나는 지점에서 send할것
 		break;
 	case SC_EVENT:
-		updateEventInfo(packet, fTimeElapsed); //이벤트처리
+		UpdateEventInfo(packet, fTimeElapsed); //이벤트처리
 		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
-
+		break;
+	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치
+		UpdateInitInfo(packet, fTimeElapsed);
+		break;
+	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 
+		//이 패킷을 받으면 바로 게임 카운트다운 시작
+		UpdateStartInfo(packet, fTimeElapsed);
 		break;
 	default:
 		break;
 	}
 }
-void GameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
+void GameScene::UpdatePlayerInfo(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_PLAYER_INFO* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_INFO*>(packet);
 	
@@ -1242,10 +1240,27 @@ void GameScene::updatePlayerInfo(char* packet, float fTimeElapsed)
 		}
 	}
 }
-void GameScene::updateEventInfo(char* packet, float fTimeElapsed)
+void GameScene::UpdateEventInfo(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_EVENT* playerInfo = reinterpret_cast<SC_PACKET_EVENT*>(packet);
 	MessageStruct msg = playerInfo->msg;
 
 	EventHandler::GetInstance()->RegisterEvent(msg);
+}
+
+void GameScene::UpdateInitInfo(char* packet, float fTimeElapsed)
+{
+
+}
+void GameScene::UpdateStartInfo(char* packet, float fTimeElapsed)
+{
+	isAllConnected = true;
+}
+void GameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
+{
+	EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+	EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
+	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 }

@@ -13,7 +13,7 @@
 
 #include "EventHandler/EventHandler.h"
 
-#define PLAYER_ANI_TIME_LENGTH 0.48f
+#define PLAYER_ANI_TIME_LENGTH 0.49f
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
@@ -223,7 +223,8 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		if (m_pCamera)
 		{
-			//m_pCamera->Move(xmf3Shift);
+			
+			m_pCamera->Move(xmf3Shift);
 			//m_pCamera->RegenerateViewMatrix();
 		}
 	}
@@ -324,7 +325,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 			EventHandler::GetInstance()->RegisterEvent(message);
 #else
-			NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+			NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 			OnCollisionAni();
 		}
@@ -364,7 +365,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 		message.shaderName = BOX_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
@@ -372,7 +373,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 		SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 		return true;
@@ -387,7 +388,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 
 		message.shaderName = MEAT_PARTICLE;
@@ -396,7 +397,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 		SoundManager::GetInstance()->Play("MeatEat", 0.5f);
 		//target->SetEnableState(false);  //서버 비활성화 신호 서버에 보내주고 쉐이더에서 처리할 것.
@@ -415,7 +416,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEventPacket(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
 		break;		
 	case ModelType::Item_Mud:
@@ -459,14 +460,23 @@ void CPlayer::ProcessRotate(float fTimeElapsed)
 			m_fWheelDegree = 0;
 			break;
 		case IDLE_LEFT_TURN:
-		case IDLE_RIGHT_RETURN:
 		case IDLE_LEFT_TURNING:
-			m_fWheelDegree -= 30 * fTimeElapsed;
+			m_fWheelDegree -= 20 * fTimeElapsed;
+			break;
+		case IDLE_RIGHT_RETURN:
+			m_fWheelDegree -= 40 * fTimeElapsed;
+			if (m_fWheelDegree < 0)
+				m_fWheelDegree = 0;
+
 			break;
 		case IDLE_RIGHT_TURN:
-		case IDLE_LEFT_RETURN:
 		case IDLE_RIGHT_TURNING:
-			m_fWheelDegree += 30 * fTimeElapsed;
+			m_fWheelDegree += 20 * fTimeElapsed;
+			break;
+		case IDLE_LEFT_RETURN:
+			m_fWheelDegree += 40 * fTimeElapsed;
+			if (m_fWheelDegree > 0)
+				m_fWheelDegree = 0;
 			break;
 		}
 
@@ -500,7 +510,10 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	if (!(nCurrentCameraMode == THIRD_PERSON_CAMERA))
+	{
+		m_pCamera->RegenerateViewMatrix();
 		return;
+	}
 	/*
 	if (!isLeft && !isRight)
 	{
@@ -542,7 +555,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		float result;
 
 		if (!isShift)
-			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree))*5.0f*slipB/ Vector3::Length(m_xmf3Velocity)
+			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree))*slipB*(8.0f/ Vector3::Length(vel))
 			/ 3.8f;
 		else
 			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree))*slipB
@@ -551,7 +564,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		//--------------------------
 
 		//w = Vector3::Length(m_xmf3Velocity) * cosf(XMConvertToRadians(slipB)) * tanf(XMConvertToRadians(degree)) / 3.8f;
-		Rotate(0, result*fTimeElapsed*60.0f, 0.0f); //degree로 바꿔서 회전 시작 
+		Rotate(0, XMConvertToDegrees(result)*fTimeElapsed, 0.0f); //degree로 바꿔서 회전 시작 
 		
 	}
 	//else
@@ -645,10 +658,21 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 
 //	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) 
+	//for (int i = 0; i < m_uNCamera; ++i)
+	//{
+	//	if (m_ppCamera[i])
+	//	{
+	//		if (i == 0)
+	//			m_ppCamera[i]->Update(m_xmf3Position, fTimeElapsed);
+	//		else
+	//			m_ppCamera[i]->Update(m_ppCamera[i - 1]->GetPosition(), fTimeElapsed);
+	//	}
+	//}
 	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+	// 카메라 작업 이전: m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
 	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
-	((CThirdPersonCamera*)m_pCamera)->SetLookAt(m_xmf3Position);
+	//((CThirdPersonCamera*)m_pCamera)->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
 
 	//fLength = Vector3::Length(m_xmf3Velocity);
@@ -768,7 +792,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	SetChild(pAngrybotModel->m_pModelRootObject->GetChild(), true);
 	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 16, pAngrybotModel);
 	//위의 매개변수들 중 1은 애니메이션 트랙의 갯수 현재는 idle 뿐이니 1임 늘어날 수록 숫자 높일것.
-	m_fMass = 130.0f;   //이전 몸무게 130
+	m_fMass = 100.0f;   //이전 몸무게 130
 
 	m_fMaxForce = 2000.0f;
 
@@ -812,26 +836,6 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(SLIDING, SLIDING); //left_turn_start
 	m_pSkinnedAnimationController->SetTrackAnimationSet(BIG_COLLISION, BIG_COLLISION); //left_turn_start
-	//m_pSkinnedAnimationController->SetTrackEnable(BIG_COLLISION, true);
-
-	//m_pSkinnedAnimationController->SetTrackEnable(RUN_RIGHT_RETURN, true);
-
-	/*
-	m_pSkinnedAnimationController->SetCallbackKeys(1, 3);
-#ifdef _WITH_SOUND_RESOURCE
-	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.1f, _T("Footstep01"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.5f, _T("Footstep02"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 2, 0.9f, _T("Footstep03"));
-#else
-	m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.1f, _T("Sound/Footstep01.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.5f, _T("Sound/Footstep02.wav"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 2, 0.9f, _T("Sound/Footstep03.wav"));
-#endif
-	CAnimationCallbackHandler *pAnimationCallbackHandler = new CSoundCallbackHandler();
-	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
-*/
-//SetUpdatedContext(pContext);
-//SetCameraUpdatedContext(pContext);
 
 	if (pAngrybotModel) delete pAngrybotModel;
 
@@ -852,8 +856,6 @@ void CDinoRunPlayer::OnPrepareRender()
 {
 	CPlayer::OnPrepareRender();
 
-	//m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
-	//m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixRotationY(XMConvertToRadians(180.f)), m_xmf4x4ToParent);
 }
 
 CCamera *CDinoRunPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
@@ -891,6 +893,7 @@ CCamera *CDinoRunPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetGravity(XMFLOAT3(0.0f, -0.0f, 0.0f));
 		SetMaxVelocityXZ(25.0f);
 		SetMaxVelocityY(400.0f);
+
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.10f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 30.0f, -60.0f));
@@ -1596,6 +1599,7 @@ void CDinoRunPlayer::returnIdle()
 		SoundManager::GetInstance()->Stop("Running");
 	}
 	//m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE);
+	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 }
 
 void CDinoRunPlayer::OnSliding()

@@ -67,8 +67,11 @@ public:
 	virtual void ProcessEvent(const MessageStruct& msg);
 	virtual void ProcessPacket(char* packet, float fTimeElapsed);
 
-	void updatePlayerInfo(char* packet, float fTimeElapsed);
-	void updateEventInfo(char* packet, float fTimeElapsed);
+	void UpdatePlayerInfo(char* packet, float fTimeElapsed);
+	void UpdateEventInfo(char* packet, float fTimeElapsed);
+	void UpdateInitInfo(char* packet, float fTimeElapsed);
+	void UpdateStartInfo(char* packet, float fTimeElapsed);
+	void UpdateFinishInfo(char* packet, float fTimeElapsed);
 private:
 	DWORD dwDirection;
 
@@ -78,7 +81,7 @@ private:
 	SkyBoxObject* m_pSkyBox = NULL;
 	CHeightMapTerrain* m_pTerrain = NULL;
 
-	list<CObjectsShader*> UpdatedShaders;  //물리적용이 되는 셰이더를 담음
+	vector<CObjectsShader*> UpdatedShaders;  //물리적용이 되는 셰이더를 담음
 
 	vector<CObInstancingShader*> instancingBillBoardShaders;
 	vector<CObInstancingShader*> instancingModelShaders;
@@ -103,6 +106,8 @@ private:
 
 	MinimapShader* m_pMinimapShader = NULL;
 	IconShader* m_pIconShader = NULL;
+
+	bool isAllConnected = false;
 	bool isStart = false;
 
 	float m_fCountDownTime = 0.0f;

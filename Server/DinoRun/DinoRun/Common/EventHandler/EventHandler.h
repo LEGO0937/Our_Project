@@ -16,7 +16,6 @@ public:
 	EventHandler() {}
 	void SetCurScene(shared_ptr<BaseScene> curScene) { m_pCurScene = curScene; }
 	void ResetCurScene() { m_pCurScene.reset(); messageQueue.clear(); }
-	void SendEvent(MessageStruct& msg);
 	void RegisterEvent(const MessageStruct& msg);
 
 	bool GetIsBuild() { return completeBuild; }

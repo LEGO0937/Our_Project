@@ -3,7 +3,7 @@ ItemMud::ItemMud(int nMeshes) :CGameObject(nMeshes)
 {
 	isKinematic = true;
 	m_ModelType = ModelType::Item_Mud;
-	m_fLifeCount = 20;
+	m_fLifeCount = 10;
 }
 ItemMud::~ItemMud()
 {

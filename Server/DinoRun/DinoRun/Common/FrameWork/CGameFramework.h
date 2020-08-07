@@ -5,6 +5,9 @@
 #include "../../Scenes/BaseScene.h"
 #include "CreateManager.h"
 #include "DrawManager.h"
+
+enum GAMESTATE { ID_INPUT, LOBBY, INGAME, PAUSE, OPTION, CONNECT, LOGIN, LOADING };
+
 class CGameFramework
 {
 
@@ -50,12 +53,8 @@ private: // 변수
 	bool m_running{ true };
 	
 	POINT m_ptOldCursorPos;
-
-	// 씬 바꿀때 일단 필요한 것 중 하나
-	//SceneType m_CurState = Start_Scene;
-	//SceneType m_PrevState = Start_Scene;
-	SceneType m_CurState = ItemGame_Scene;
-	SceneType m_PrevState = ItemGame_Scene;
+	SceneType m_CurState = Start_Scene;
+	SceneType m_PrevState = Start_Scene;
 
 	CGameTimer m_GameTimer; //게임 프레임워크에서 사용할 타이머이다.
 	CPlayer* m_pPlayer = NULL;
@@ -63,5 +62,9 @@ private: // 변수
 
 	int m_nPipelineStates = 0;
 	static ID3D12PipelineState **m_ppd3dPipelineStates;
+
+// 서버 연결용
+public:
+	void ConnectingSever(HWND hWnd);
 };
 

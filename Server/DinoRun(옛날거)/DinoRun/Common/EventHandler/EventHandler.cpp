@@ -1,6 +1,6 @@
 #include "EventHandler.h"
 
-void EventHandler::SendEvent(const MessageStruct& msg)
+void EventHandler::SendEvent(MessageStruct& msg)
 {
 	MessageStruct message = msg;
 	//서버에 message를 send

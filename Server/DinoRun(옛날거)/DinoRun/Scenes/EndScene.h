@@ -33,6 +33,7 @@ public:
 	virtual void ProcessPacket(char* packet);
 private:
 	vector<CUiShader*> instacingUiShaders;
+	vector<CUiShader*> instancingNumberUiShaders;
 	bool isClickedButton = false;
 
 };
