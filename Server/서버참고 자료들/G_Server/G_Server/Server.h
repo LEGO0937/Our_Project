@@ -1,6 +1,5 @@
 #pragma once
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
-#define Default_LEN 10
 //#include "MyInclude.h"
 #include "protocol.h"
 
@@ -33,14 +32,6 @@ enum GAME_STATE			//로비 상태인지 인게임 중인지
 	GS_INGAME
 };
 
-enum DB_Info
-{
-	DB_Success,
-	DB_NoData,
-	DB_NoConnect,
-	DB_Overlap
-};
-
 // Overlapped구조체 확장
 struct OVER_EX 
 {
@@ -51,7 +42,7 @@ struct OVER_EX
 };
 
 
-// 클라이언트
+
 class SOCKETINFO
 {
 public:
@@ -68,24 +59,15 @@ public:
 	
 	// 인게임용
 	char rank; //등수
-	char game_id[10]; // 인게임 아이디
-	char password[10]; // 인게임 비밀번호(이것도 굳이 써야하나...?)
-	char roomNo; // 현재 들어가있는 방번호
-	int isConnect; // 현재 연결되있냐 안되있냐
-	// char nickname[32]; // 이걸 굳이 받아야하나...? 나중에 상의 
-	XMFLOAT4X4 xmf4x4Parents = {}; // 플레이어 위치값
-	MessageStruct msg; // 애니메이션
-	int checkPoints; // 인게임 내 체크포인트
-	bool isReady; // 레디 or 언레디
-	GAME_STATE gameState; // 현재 이 클라의 접속 상태
-	DWORD keyState; // 이것도 애니메이션 부분
-	XMFLOAT3 xmf3PutPos = {}; // 초기위치 지정이라는데...
-
-	RoomInfo room_info[8];// 8개의 방을 임시로 만들것이므로 일단 배열로 적용
-	// 나중에 벡터로 바꾸든지 하자
-
-
-	
+	//char item;
+	char nickname[32];
+	XMFLOAT4X4 xmf4x4Parents = {};
+	MessageStruct msg;
+	int checkPoints;
+	bool isReady;
+	GAME_STATE gameState;
+	DWORD keyState;
+	XMFLOAT3 xmf3PutPos = {};
 public:
 	SOCKETINFO() {
 		in_use = false;
@@ -95,7 +77,7 @@ public:
 		keyState = 0;
 		ZeroMemory(&xmf4x4Parents, sizeof(xmf4x4Parents));
 		ZeroMemory(&msg, sizeof(msg));
-		//ZeroMemory(nickname, sizeof(wchar_t) * 12);
+		ZeroMemory(nickname, sizeof(wchar_t) * 12);
 		ZeroMemory(&over_ex.messageBuffer, sizeof(over_ex.messageBuffer));
 		ZeroMemory(&packet_buffer, sizeof(packet_buffer));
 		ZeroMemory(&xmf3PutPos, sizeof(xmf3PutPos));
@@ -108,9 +90,6 @@ public:
 		isReady = false;
 	}
 };
-
-
-// 방 생성정보(방 번호) 및 방 인원, 게임중, 아이템전 or 스피드전
 
 
 class Server
@@ -126,22 +105,6 @@ private:
 	vector<thread> workerThreads;
 	int clientCount;
 	int readyCount;
-
-
-	// DB와 함께 사용
-	SQLHENV henv;
-	SQLHDBC hdbc;
-	SQLHSTMT hstmt = 0;
-	SQLRETURN retcode;
-	SQLWCHAR sz_id[Default_LEN];
-	SQLWCHAR sz_password[Default_LEN];
-	char db_roomNo, db_ready;
-	int  db_connect;
-	SQLLEN cb_id = 0, cb_password = 0, cb_roomNo = 0, cb_ready = 0, cb_connect = 0;
-
-	char  buf[255];
-	wchar_t sql_data[255];
-	SQLWCHAR sqldata[255] = { 0 };
 public:
 	Server();
 	~Server();
@@ -174,13 +137,6 @@ public:
 public:
 	void err_quit(const char*);
 	void err_display(const char*);
-// for DB
-public:
-	void init_DB();
-	int get_DB_Info(int ci);
-	void set_DB_Info(int ci);
-	void set_DB_Shutdown(int ci);
-	void new_DB_Id(int ci);
 };
 
 

@@ -14,7 +14,6 @@
 #include <iostream>
 #include <string>
 #include <DirectXMath.h>
-#include <sqlext.h>
 
 
 using std::cout;

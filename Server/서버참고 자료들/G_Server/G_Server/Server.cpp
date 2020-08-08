@@ -120,7 +120,7 @@ void Server::AcceptThreadFunc()
 			cout << "Error - Accept Failure\n";
 			return;
 		}
-		// cout << "여기11" << endl;
+
 		// id를 0~5까지 사용할 예정
 		// 흠.. 이 아이디를 1부터 사용한다고...?
 		int new_id = -1;
@@ -138,7 +138,7 @@ void Server::AcceptThreadFunc()
 			cout << "MAX USER overflow\n";
 			continue;
 		}
-		// cout << "여기22" << endl;
+
 		bool isStarted = false;
 		for (int i = 0; i < MAX_USER; ++i)
 		{
@@ -361,7 +361,7 @@ void Server::ProcessPacket(char client, char* packet)
 		printf("Ready한 클라 수: %d\n", readyCount);
 		clientCnt_l.unlock();
 		readyCnt_l.unlock();
-		
+
 		
 		clients[client].isReady = true;
 		for (int i = 0; i < MAX_USER; ++i)
@@ -388,7 +388,7 @@ void Server::ProcessPacket(char client, char* packet)
 		}
 		break;
 	}
-	case CS_EVENT:
+	case CS_GET_ITEM:
 	{
 		CS_PACKET_EVENT* p = reinterpret_cast<CS_PACKET_EVENT*>(packet);
 		//clients[client].msg = p->msg;
@@ -409,6 +409,7 @@ void Server::ProcessPacket(char client, char* packet)
 		wcout << L"정의되지 않은 패킷 도착 오류!!\n";
 		break;
 	}
+
 }
 
 
@@ -445,7 +446,6 @@ void Server::SetClient_Initialize(char client)
 {
 	
 }
-
 
 
 void Server::SendAcessComplete(char client)
@@ -487,9 +487,7 @@ void Server::SendRoundEnd(char client)
 	for (int i = 0; i < MAX_USER; ++i)
 	{
 		if (false == clients[i].in_use)
-		{
 			packet.checkPoints = 0;
-		}
 		else
 			break;
 	}
@@ -653,175 +651,3 @@ void Server::err_display(const char* msg)
 	LocalFree(lpMsgBuf);
 }
 
-
-// for DB
-void Server::init_DB()
-{
-	// Allocate environment handle  
-	retcode = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &henv);
-
-	// Set the ODBC version environment attribute  
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-		retcode = SQLSetEnvAttr(henv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0);
-		// Allocate connection handle  
-		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-			retcode = SQLAllocHandle(SQL_HANDLE_DBC, henv, &hdbc);
-
-			// Set login timeout to 5 seconds  
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO)
-			{
-				SQLSetConnectAttr(hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0);
-			}
-		}
-	}
-
-	std::cout << std::endl << "DB 로드에 성공하셨습니다!" << std::endl;
-}
-
-int  Server::get_DB_Info(int ci)
-{
-	// Connect to data source  
-	retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2015180014_Graduate", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
-
-	// Allocate statement handle  
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-		retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-
-		sprintf(buf, "EXEC dbo.Search_id %s", clients[ci].game_id);
-		MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), sql_data, sizeof sql_data / sizeof * sql_data);
-		sql_data[strlen(buf)] = '\0';
-
-		retcode = SQLExecDirect(hstmt, sql_data, SQL_NTS);
-		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-
-			// Bind columns 1, 2, and 3  
-			// 이 DB에 있는 정보는 id, 비밀번호(이건 굳이 필요할려나...?), 방번호, 레디 or 언레디 
-			retcode = SQLBindCol(hstmt, 1, SQL_WCHAR, sz_id, Default_LEN, &cb_id);
-			retcode = SQLBindCol(hstmt, 2, SQL_WCHAR, sz_password, Default_LEN, &cb_password); // 아이디만 입력하면 된느거고
-			retcode = SQLBindCol(hstmt, 3, SQL_CHAR, &db_roomNo, Default_LEN, &cb_roomNo); // 
-			retcode = SQLBindCol(hstmt, 4, SQL_CHAR, &db_ready, Default_LEN, &cb_ready); //
-			retcode = SQLBindCol(hstmt, 5, SQL_INTEGER, &db_connect, Default_LEN, &cb_connect); 
-			// 플레이어 객체에다 넣으면 될것이지
-			// 이걸 굳이 DB에서 두번 처리한다?
-
-			// Fetch and print each row of data. On an error, display a message and exit.  
-
-			retcode = SQLFetch(hstmt);
-
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("ID : %s\tPASSWORD : %s\n", sz_id, sz_password);
-				SQLDisconnect(hdbc);
-				return DB_Success;
-			}
-		}
-
-		if (retcode == SQL_NO_DATA) {
-			SQLDisconnect(hdbc);
-			return DB_NoData;
-		}
-
-		if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
-			SQLDisconnect(hdbc);
-			return DB_NoConnect;
-		}
-	}
-	SQLDisconnect(hdbc);
-}
-
-void Server::set_DB_Info(int ci)
-{
-	// Connect to data source  
-	retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2015180014_Graduate", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
-
-	// Allocate statement handle  
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-		retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-
-		sprintf(buf, "EXEC dbo.Set_id %s, %s, %c, %c, %d\n", clients[ci].game_id, clients[ci].password, clients[ci].roomNo, clients[ci].isReady, clients[ci].isConnect );
-		MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), sql_data, sizeof sql_data / sizeof * sql_data);
-		sql_data[strlen(buf)] = '\0';
-
-		retcode = SQLExecDirect(hstmt, sql_data, SQL_NTS);
-		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-
-			// Bind columns 1, 2, and 3  
-			// 이 DB에 있는 정보는 id, 비밀번호(이건 굳이 필요할려나...?), 방번호, 레디 or 언레디 
-			retcode = SQLBindCol(hstmt, 1, SQL_WCHAR, sz_id, Default_LEN, &cb_id);
-			retcode = SQLBindCol(hstmt, 2, SQL_WCHAR, sz_password, Default_LEN, &cb_password);
-			retcode = SQLBindCol(hstmt, 3, SQL_CHAR, &db_roomNo, Default_LEN, &cb_roomNo);
-			retcode = SQLBindCol(hstmt, 4, SQL_CHAR, &db_ready, Default_LEN, &cb_ready);
-			retcode = SQLBindCol(hstmt, 5, SQL_INTEGER, &db_connect, Default_LEN, &cb_connect);
-
-			// Fetch and print each row of data. On an error, display a message and exit.  
-
-			retcode = SQLFetch(hstmt);
-			if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("set_DB_info error! \n");
-			}
-
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("ID : %s\tPASS : %s\n", sz_id, sz_password);
-			}
-
-		}
-	}
-	SQLDisconnect(hdbc);
-}
-
-void Server::new_DB_Id(int ci)
-{
-	// Connect to data source  
-	retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2015180014_Graduate", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
-
-	// Allocate statement handle  
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-		retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-
-		sprintf(buf, "EXEC dbo.Set_id %s, %s, %c, %c, %d\n", clients[ci].game_id, clients[ci].password, clients[ci].roomNo, clients[ci].isReady, clients[ci].isConnect);
-		MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), sql_data, sizeof sql_data / sizeof * sql_data);
-		sql_data[strlen(buf)] = '\0';
-
-		retcode = SQLExecDirect(hstmt, sql_data, SQL_NTS);
-		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-
-			retcode = SQLFetch(hstmt);
-			if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
-			}
-
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("ID : %s\tPASS : %s\n", sz_id, sz_password);
-			}
-
-		}
-	}
-	SQLDisconnect(hdbc);
-}
-
-void Server::set_DB_Shutdown(int ci)
-{
-	// Connect to data source  
-	retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2015180014_Graduate", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
-
-	// Allocate statement handle  
-	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-		retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
-
-		sprintf(buf, "EXEC dbo.shutdown_id %s", clients[ci].game_id);
-		MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), sql_data, sizeof sql_data / sizeof * sql_data);
-		sql_data[strlen(buf)] = '\0';
-
-		retcode = SQLExecDirect(hstmt, sql_data, SQL_NTS);
-		if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-			retcode = SQLFetch(hstmt);
-			if (retcode == SQL_ERROR || retcode == SQL_SUCCESS_WITH_INFO) {
-			}
-
-			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("ID : %s\tPASSWORD : %d\n", sz_id, sz_password);
-
-			}
-
-		}
-	}
-	SQLDisconnect(hdbc);
-}
