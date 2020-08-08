@@ -337,6 +337,19 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
+
+	model_info.useBillBoard = false;
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Sub_Dino.bin";
+	model_info.dataFileName = "Resources/ObjectData/DinoData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Sub_Dino2.bin";
+	model_info.dataFileName = "Resources/ObjectData/Dino2Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
 #endif
 
 	shader = new FenceShader;
@@ -713,6 +726,7 @@ void ItemGameScene::Render()
 #endif
 }
 
+
 void ItemGameScene::RenderShadow()
 {
 	BaseScene::RenderShadow();
@@ -900,8 +914,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		{
 #ifdef isConnectedToServer
 			//골인했다는 신호를 서버에게 send
-			//서버는 send를 받자마자 보낸 유저의 닉네임이 포함되어있는 패킷을 유저들에게 보냄. 보낸 자신도 포함.
-			//닉네임만있으면 시간은 클라가 알아서처리함.
+			//신호만 유저에게 보낸다
 #else
 			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
@@ -1339,14 +1352,11 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
 		break;
 	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치 만일 룸씬에서 받는거라면 이건 필요없게 됨.
-		UpdateInitInfo(packet, fTimeElapsed); //무시하셈.
+		UpdateInitInfo(packet, fTimeElapsed);
 
 		break;
 	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 이걸 받고나서 카운트다운 시작.
 		UpdateStartInfo(packet, fTimeElapsed);
-		break;
-	case 5: //누군가가(나 포함) 골인에 도착했다는 신호를 보낸경우
-		UpdateFinishInfo(packet, fTimeElapsed);
 		break;
 	default:
 		break;
@@ -1407,6 +1417,6 @@ void ItemGameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
 	EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 	EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
 	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
-	//EventHandler::GetInstance()->m_sWinner = packet->승자이름;
+	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
 	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
 }

@@ -314,6 +314,19 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
+
+	model_info.useBillBoard = false;
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Sub_Dino.bin";
+	model_info.dataFileName = "Resources/ObjectData/DinoData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Sub_Dino2.bin";
+	model_info.dataFileName = "Resources/ObjectData/Dino2Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
 #endif
 
 	shader = new FenceShader;
@@ -747,6 +760,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	if (sceneType != SceneType::Game_Scene)
 	{
 		//서버와 연결 끊기, 엔드씬에서 룸씬으로 넘어가고 다시 시작하면 연결해야함
+		SoundManager::GetInstance()->AllStop();
 		return sceneType;
 	}
 
@@ -830,6 +844,7 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		//충돌을 위한 update
 		if (sceneType != SceneType::Game_Scene)
 		{
+			SoundManager::GetInstance()->AllStop();
 			return sceneType;
 		}
 	

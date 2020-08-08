@@ -46,7 +46,6 @@ public:
 	void UpdateReadyState(char* packet, float fTimeElapsed);
 	void UpdateAddUser(char* packet, float fTimeElapsed);
 	void UpdateDeleteUser(char* packet, float fTimeElapsed);
-	void UpdateNextScene(char* packet, float fTimeElapsed);
 private:
 	vector<CUiShader*> instacingUiShaders;
 	bool isClickedButton = false;

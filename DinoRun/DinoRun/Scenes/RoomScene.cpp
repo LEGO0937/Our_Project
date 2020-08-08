@@ -108,7 +108,10 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CreateShaderVariables(pCreateManager.get());
 
 	//랜더링 준비가 끝났으니 유저 목록을 달라는 메시지 send
+	//닉네임, 버튼 상태, 클라아이디
+	//DB에 방번호 및 레디 or 낫레디 추가
 	//이때 send로 보내는 패킷에는 룸번호가 필요하니 networkmanager에 있는 GetRoomNum()을 활용하자
+	//바로 위에꺼는 혹시 모르니 보류 DB로 처리해보도록 하자!
 }
 
 void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -258,12 +261,11 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	//send때 자신의 방번호와 닉네임을 보내고 서버에서는 이 닉네임을 제외한 다른 유저들의 정보를
 	//넘긴다.
 
-	//m_vUsers.clear();
-	//for (int i = 0; i < db 데이터량; ++i)
-	//{
-	//	m_vUsers.emplace_back(User("닉네임", 버튼상태, id));
-	//}
-
+	// m_vUsers.clear();
+	/*for (int i = 0; i < db.데이터사이즈; ++i)
+	{
+		m_vUsers.emplace_back(User("닉네임", 버튼상태, id));
+	}*/
 	for (int i = 0; i < m_vUsers.size(); ++i)
 	{
 		if (m_vUsers[i].m_sName == m_sPlayerId)
@@ -286,7 +288,7 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	{
 		//이 부분은 들어와있는 모든 유저가 레디상태인지 확인 한명이라도 취소상태이면 다음씬으로 안넘어감.
 		if (instacingUiShaders[1]->getUvXs()[i + 1] != 0.5f && m_vUsers[i].m_sName != "")
-			return SceneType::Room_Scene;
+			return SceneType::Room_Scene; 
 	}
 	//이 구간에 왔다는것은 접속한 유저들이 모두 레디상태라는 뜻.
 	//마지막으로 나를 제외한 유저가 한명이라도 있다면 두명 이상 레디상태이니 다음 게임씬으로 넘어간다.
@@ -296,16 +298,17 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		return SceneType::Room_Scene;
 	
 	//문제 1. 현재는 싱글플레이니까 이렇게 처리하는데 멀티플레이시에는 어떻게 처리할건지?...
-	//제안 1. 클라가 버튼을 누르면 send를 하게되는데.. 이 신호를 서버가 받고 그 버튼상태를
-	//데이터베이스에 적용함. 이후 데이터베이스로부터 룸에있는 유저들이 모두 ready상태인지를 확인하고
-	//조건이 성립하면 다음씬으로 넘어가라는 패킷을 룸에 있는 모든 유저에게 보냄.
-	//
+	//제안 1. 클라가 버튼을 누르면 send를 하게되는데 이 신호를 서버가 받고
+	//그 버튼 상태를 DB에 적용함, 이후 DB로부터 룸에 있는 유저들이 모두 ready
+	//상태인지를 확인하고 조건이 성립하면 다음 씬으로 넘어가라는 패킷을 룸에 있는
+	//모든 유저에게 보냄
 
 	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
 	if (NetWorkManager::GetInstance()->GetGameMode())
 		sceneType = SceneType::ItemGame_Scene;
 	else
 		sceneType = SceneType::Game_Scene;
+	// 스피드전 or 아이템전 판단.
 
 	return SceneType::Room_Scene;
 }
@@ -351,9 +354,6 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 		break;
 	case SC_CLIENT_LOBBY_OUT:
 		UpdateDeleteUser(packet, fTimeElapsed);
-		break;
-	case 4: //게임을 실행하라는 신호
-		UpdateNextScene(packet, fTimeElapsed);
 		break;
 	}
 }
@@ -401,20 +401,4 @@ void RoomScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
 
 	m_vUsers.erase(remove_if(m_vUsers.begin(), m_vUsers.end(), [&](const User& a) {
 		return a.m_id == playerInfo->id; }), m_vUsers.end());
-}
-
-void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
-{
-	//패킷안에 초기위치(각 플레이어마다 다름) 
-	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
-	if (NetWorkManager::GetInstance()->GetGameMode())
-		sceneType = SceneType::ItemGame_Scene;
-	else
-		sceneType = SceneType::Game_Scene;
-
-	//여기서 게임씬으로 넘어가게될텐데 서버는 이 신호를 보내면서 데이터베이스에 있는 유저들의 버튼상태를 
-	//취소로 바꿔놔야함. 왜냐하면 end씬에서 esc누르면 룸씬으로 바로 넘어가서 유저정보를 받게되는데
-	//저걸 안바꾸고 업데이트에서 유저정보를 받아오면 모두가 레디된 상태로 받아오게 되니까.
-
-	//NetWorkManager::GetInstance()->SetPosition(packet->position);
 }
