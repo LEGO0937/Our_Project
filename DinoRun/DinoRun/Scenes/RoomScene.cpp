@@ -348,7 +348,13 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
 	switch (packet[1])
 	{
-	case SC_READY_STATE:
+	case SC_ACCESS_COMPLETE:
+		UpdateAccessUser(packet, fTimeElapsed);
+		break;
+	case SC_ACCESS_PLAYER:
+		//SC_PACKET_ACCESS_PLAYER* pAP = reinterpret_cast<SC_PACKET_ACCESS_PLAYER*>(packet);
+		break;
+	/*case SC_READY_STATE:
 		UpdateReadyState(packet, fTimeElapsed);
 		break;
 	case SC_UNREADY_STATE:
@@ -359,11 +365,15 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 		break;
 	case SC_CLIENT_LOBBY_OUT:
 		UpdateDeleteUser(packet, fTimeElapsed);
-		break;
+		break;*/
 	case SC_PUT_PLAYER:   //모든 플레이어가 레디를 하였으니 게임모드로 넘어가라는 명령
 		UpdateNextScene(packet, fTimeElapsed);
 		break;
-	case SC_PLAYER_INFO:
+	case SC_ROOM_INFO:
+		UpdateUserList(packet, fTimeElapsed);
+		break; // 플레이어 리스트 및 레디 상태
+	case SC_RESET_ROOM_INFO:
+		UpdateClearUserList(packet, fTimeElapsed);
 		break;
 	}
 }
@@ -424,12 +434,18 @@ void RoomScene::UpdateLogOut(char* packet, float fTimeElapsed)
 void RoomScene::UpdateUserList(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_USERS_INFO* usersInfo = reinterpret_cast<SC_PACKET_USERS_INFO*>(packet);
-	m_vUsers.clear();
-
-	for (const UserInfo& user : usersInfo->users)
+	//m_vUsers.clear();
 	{
-		m_vUsers.emplace_back(User(user.m_sName,user.m_bReadyState));
+		if (usersInfo->users.m_sName != "" && 
+			usersInfo->users.m_sName != NetWorkManager::GetInstance()->GetPlayerName())
+		{
+			m_vUsers.emplace_back(usersInfo->users.m_sName, usersInfo->users.m_bReadyState);
+		}
 	}
+	//for (const UserInfo& user : usersInfo->users)
+	//{
+	//	m_vUsers.emplace_back(User(user.m_sName,user.m_bReadyState));
+	//}
 }
 void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
 {
@@ -445,3 +461,15 @@ void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
 
 }
 
+void RoomScene::UpdateAccessUser(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_ACCESS_COMPLETE* access = reinterpret_cast<SC_PACKET_ACCESS_COMPLETE*>(packet);
+	NetWorkManager::GetInstance()->SetMyID(access->myId);
+	NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
+
+}
+
+void RoomScene::UpdateClearUserList(char* packet, float fTimeElapsed)
+{
+	m_vUsers.clear();
+}

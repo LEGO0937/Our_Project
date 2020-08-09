@@ -39,7 +39,8 @@ constexpr int SC_UNREADY_STATE = 12; // 언레디
 constexpr int SC_GO_LOBBY = 13; // 로그인하고 로비 들감
 constexpr int SC_EVENT = 14; // 플레이어 아이템 관리
 constexpr int SC_COMPARE_TIME = 15; // 서버와 클라 시간 비교
-
+constexpr int SC_ROOM_INFO = 16;
+constexpr int SC_RESET_ROOM_INFO = 17;
 
 constexpr int SC_SLIDING_ANI = 16; // 특정 플레이어 충돌 애니메이션 실행
 constexpr int SC_COLLISION_ANI = 17; // 특정 플레이어 미끄러짐 애니메이션 실행
@@ -350,7 +351,7 @@ struct UserInfo
 	string m_sName;
 	bool m_bReadyState;
 	//
-	UserInfo(string name, bool readyState) :m_sName(name),
+	UserInfo(string name = "", bool readyState = 0) :m_sName(name),
 		m_bReadyState(readyState)
 	{}
 };
@@ -391,7 +392,7 @@ struct CS_PACKET_USERS_INFO
 	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
 	char type;
 
-	vector<UserInfo> users;
+	UserInfo users[MAX_USER];
 };
 
 struct SC_PACKET_USERS_INFO
@@ -399,5 +400,11 @@ struct SC_PACKET_USERS_INFO
 	char size;
 	char type;
 
-	vector<UserInfo> users;
+	UserInfo users;
+};
+
+struct SC_PACKET_RESET_USERS_INFO
+{
+	char size;
+	char type;
 };

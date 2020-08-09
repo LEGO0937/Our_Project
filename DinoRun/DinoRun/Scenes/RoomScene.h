@@ -49,6 +49,8 @@ public:
 	void UpdateLogOut(char* packet, float fTimeElapsed);
 	void UpdateNextScene(char* packet, float fTimeElapsed);
 	void UpdateUserList(char* packet, float fTimeElapsed);
+	void UpdateAccessUser(char* packet, float fTimeElapsed);
+	void UpdateClearUserList(char* packet, float fTimeElapsed);
 private:
 	vector<CUiShader*> instacingUiShaders;
 	bool isClickedButton = false;

@@ -182,7 +182,7 @@ void CGameFramework::BuildObjects()
 	m_pFontManager->ReleaseUploadBuffers();
 	if (m_pPlayer)
 		m_pPlayer->ReleaseUploadBuffers();
-
+	NetWorkManager::GetInstance()->SetCurScene(m_pScene);
 	EventHandler::GetInstance()->SetCurScene(m_pScene);
 	m_GameTimer.Reset();
 }
@@ -248,6 +248,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingPacket(HWND hWnd, UINT nMessageID,
 		{
 		case FD_READ:
 			NetWorkManager::GetInstance()->ReadPacket(m_GameTimer.DeltaTime());
+			//NetWorkManager::GetInstance()->ReadPacket(0);
 			break;
 		case FD_CLOSE:
 			closesocket((SOCKET)wParam);
@@ -437,7 +438,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		m_pPlayer->ReleaseUploadBuffers();
 
 	m_PrevState = type;
-
+	NetWorkManager::GetInstance()->SetCurScene(m_pScene);
 	EventHandler::GetInstance()->SetCurScene(m_pScene);
 }
 
