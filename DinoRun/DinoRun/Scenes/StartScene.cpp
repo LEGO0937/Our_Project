@@ -321,7 +321,9 @@ void StartScene::UpdateLogin(char* packet, float fTimeElapsed)
 	NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId); // 플레이어 아이디 설정
 #ifdef noLobby
 	sceneType = Room_Scene;
+	NetWorkManager::GetInstance()->SetRoomNum(0);
 	NetWorkManager::GetInstance()->SetGameMode(0);
+	sceneType = Room_Scene;
 #else
 	sceneType = Lobby_Scene;
 #endif
