@@ -20,6 +20,8 @@ Server::~Server()
 bool Server::InitServer()
 {
 	setlocale(LC_ALL, "korean");
+	// 바로 DB설정
+	Server::init_DB();
 
 	clientCount = 0;
 	// Winsock Start - windock.dll 로드
@@ -111,6 +113,8 @@ void Server::AcceptThreadFunc()
 	SOCKET clientSocket{};
 	DWORD flags;
 
+
+
 	while (1)
 	{
 		// clientSocket을 비동기식으로 만들기 위해서는 listenSocket이 비동기식이어야 한다.
@@ -138,7 +142,7 @@ void Server::AcceptThreadFunc()
 			cout << "MAX USER overflow\n";
 			continue;
 		}
-		// cout << "여기22" << endl;
+		//cout << "여기22" << endl;
 		bool isStarted = false;
 		for (int i = 0; i < MAX_USER; ++i)
 		{
@@ -156,12 +160,59 @@ void Server::AcceptThreadFunc()
 			continue;
 		}
 
+
+		//-----------------------DB 처리부분-----------------------------
+		char  buf[255];
+		int retval = recv(clientSocket, buf, 10, 0);
+		if (retval == SOCKET_ERROR) {
+			std::cout << "Not Recv Game_ID : " << new_id << std::endl;
+			closesocket(clientSocket);
+			continue;
+		}
+		buf[retval] = '\0';
+
+		strcpy(clients[new_id].game_id, buf);
+		printf_s("DB처리부의 Game ID: %s\n", clients[new_id].game_id);
+		
+
+		int is_accept = get_DB_Info(new_id);
+		if (is_accept == DB_Success && db_connect == 0) {
+			cout << "DB잘 받음\n" << endl;
+			strcpy(buf, "Okay");
+			retval = send(clientSocket, buf, strlen(buf), 0);
+		}
+		else if (is_accept == DB_NoConnect) {
+			cout << "DB연결안됨\n" << endl;
+			strcpy(buf, "False");
+			retval = send(clientSocket, buf, strlen(buf), 0);
+		}
+		else if (db_connect == 1) {
+			strcpy(buf, "Overlap");
+			retval = send(clientSocket, buf, strlen(buf), 0);
+			closesocket(clientSocket);
+			continue;
+		}
+		else if (is_accept == DB_NoData) {
+			cout << "DB새로 만들자\n" << endl;
+			//cout << new_id << endl;
+			strcpy(buf, "Newid");
+
+			new_DB_Id(new_id);
+			get_DB_Info(new_id);
+			retval = send(clientSocket, buf, strlen(buf), 0);
+		}
+		//---------------------------------------------------------------------------------------------------------------------------------------------------
+		
+		
+		// 들어온 접속 아이디 init 처리
+
 		///////////////////////////////////// 클라이언트 초기화 정보 수정 위치 /////////////////////////////////////
 		clients[new_id].socket = clientSocket;
 
 		SetClient_Initialize(new_id);
 		///////////////////////////////////// 클라이언트 초기화 정보 수정 위치 /////////////////////////////////////
-		ZeroMemory(&clients[new_id].over_ex.over, sizeof(clients[new_id].over_ex.over));
+
+		
 
 		flags = 0;
 
@@ -399,6 +450,65 @@ void Server::ProcessPacket(char client, char* packet)
 		}
 		break;
 	}
+	case CS_REQUEST_START:
+	{
+		clientCnt_l.lock();
+		readyCnt_l.lock();
+		if (clientCount - 1 == readyCount)
+		{
+			//cout << clientCount << ", " << readyCount << "\n";
+			readyCnt_l.unlock();
+			clientCnt_l.unlock();
+
+
+			// 이 주석부분에 초기 위치 설정
+
+			for (int i = 0; i < MAX_USER; ++i)
+			{
+				if (clients[i].in_use == true)
+				{
+					clients[i].gameState = GS_INGAME;
+				}
+			}
+
+
+			// 랜덤으로 결정된 시작위치인덱스에 해당하는 위치 적용
+			for (int i = 0; i < MAX_USER; ++i)
+			{
+				if (false == clients[i].in_use)
+					continue;
+				
+			}
+
+			// 각 클라에게 시작위치 인덱스 전송
+			for (int i = 0; i < MAX_USER; ++i)
+			{
+				if (false == clients[i].in_use)
+					continue;
+
+				SendRoundStart(i);
+				SendPutPlayer(i);
+			}
+			//add_timer(-1, EV_COUNT, chrono::high_resolution_clock::now() + 1s);
+
+
+			printf("Round Start\n");
+		}
+		else
+		{
+			readyCnt_l.unlock();
+			clientCnt_l.unlock();
+			////이 부분 READYCOUNT 보다
+			//for (int i = 0; i < MAX_USER; ++i)
+			//{
+			//	if (true == clients[i].in_use)
+			//		SendPleaseReady(i);
+			//}
+			// 나중에 채팅 서버 구현되면 적용
+			printf("Please Ready\n");
+		}
+		break;
+	}
 	default:
 		wcout << L"패킷 사이즈: " << (int)packet[0] << endl;
 		wcout << L"패킷 타입 : " << (int)packet[1] << endl;
@@ -443,9 +553,24 @@ void Server::SendFunc(char client, void* packet)
 
 void Server::SetClient_Initialize(char client)
 {
+	std::cout << "id : " << client << std::endl;
 	
+	/*
+	clients[new_id].in_use = true;
+	clients[new_id].gameState = GS_ID_INPUT;
+	*/
 }
 
+void Server::SendRoundStart(char client)
+{
+	SC_PACKET_ROUND_START packet;
+	clientCnt_l.lock();
+	packet.clientCount = clientCount;
+	clientCnt_l.unlock();
+	packet.size = sizeof(packet);
+	packet.type = SC_ROUND_START;
+	SendFunc(client, &packet);
+}
 
 
 void Server::SendAcessComplete(char client)
@@ -590,10 +715,17 @@ void Server::SendPutPlayer(char toClient)
 	SC_PACKET_PUT_PLAYER packet;
 	packet.size = sizeof(SC_PACKET_PUT_PLAYER);
 	packet.type = SC_PUT_PLAYER;
-	for (int i = 0; i < MAX_USER; ++i)
-	{
-		packet.xmf3PutPos = {};
-	}
+	packet.xmf3PutPos = {};
+
+	/*
+	1. (650.0f, 70.7f, 1150.0f)
+	2. (680.0f, 70.7f, 1150.0f)
+	3. (710.0f, 70.7f, 1150.0f)
+	4. (740.0f, 70.7f, 1150.0f)
+	5. (770.0f, 70.7f, 1150.0f)
+	*/
+
+
 
 	SendFunc(toClient, &packet);
 }
@@ -611,6 +743,7 @@ void Server::ClientDisconnect(char client)
 	}
 	closesocket(clients[client].socket);
 	clientCnt_l.lock();
+	--clientCount;
 	printf("%d 클라이언트 접속 종료, 현재 클라이언트 수: %d\n", (int)client, clientCount);
 	clientCnt_l.unlock();
 }
@@ -697,19 +830,15 @@ int  Server::get_DB_Info(int ci)
 			// Bind columns 1, 2, and 3  
 			// 이 DB에 있는 정보는 id, 비밀번호(이건 굳이 필요할려나...?), 방번호, 레디 or 언레디 
 			retcode = SQLBindCol(hstmt, 1, SQL_WCHAR, sz_id, Default_LEN, &cb_id);
-			retcode = SQLBindCol(hstmt, 2, SQL_WCHAR, sz_password, Default_LEN, &cb_password); // 아이디만 입력하면 된느거고
-			retcode = SQLBindCol(hstmt, 3, SQL_CHAR, &db_roomNo, Default_LEN, &cb_roomNo); // 
-			retcode = SQLBindCol(hstmt, 4, SQL_CHAR, &db_ready, Default_LEN, &cb_ready); //
-			retcode = SQLBindCol(hstmt, 5, SQL_INTEGER, &db_connect, Default_LEN, &cb_connect); 
+			retcode = SQLBindCol(hstmt, 2, SQL_INTEGER, &db_connect, Default_LEN, &cb_connect); 
 			// 플레이어 객체에다 넣으면 될것이지
-			// 이걸 굳이 DB에서 두번 처리한다?
 
 			// Fetch and print each row of data. On an error, display a message and exit.  
 
 			retcode = SQLFetch(hstmt);
 
 			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("ID : %s\tPASSWORD : %s\n", sz_id, sz_password);
+				printf("ID : %s\n", sz_id);
 				SQLDisconnect(hdbc);
 				return DB_Success;
 			}
@@ -737,7 +866,7 @@ void Server::set_DB_Info(int ci)
 	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 		retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
-		sprintf(buf, "EXEC dbo.Set_id %s, %s, %c, %c, %d\n", clients[ci].game_id, clients[ci].password, clients[ci].roomNo, clients[ci].isReady, clients[ci].isConnect );
+		sprintf(buf, "EXEC dbo.Set_id %s, %d\n", clients[ci].game_id, clients[ci].in_use );
 		MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), sql_data, sizeof sql_data / sizeof * sql_data);
 		sql_data[strlen(buf)] = '\0';
 
@@ -747,10 +876,7 @@ void Server::set_DB_Info(int ci)
 			// Bind columns 1, 2, and 3  
 			// 이 DB에 있는 정보는 id, 비밀번호(이건 굳이 필요할려나...?), 방번호, 레디 or 언레디 
 			retcode = SQLBindCol(hstmt, 1, SQL_WCHAR, sz_id, Default_LEN, &cb_id);
-			retcode = SQLBindCol(hstmt, 2, SQL_WCHAR, sz_password, Default_LEN, &cb_password);
-			retcode = SQLBindCol(hstmt, 3, SQL_CHAR, &db_roomNo, Default_LEN, &cb_roomNo);
-			retcode = SQLBindCol(hstmt, 4, SQL_CHAR, &db_ready, Default_LEN, &cb_ready);
-			retcode = SQLBindCol(hstmt, 5, SQL_INTEGER, &db_connect, Default_LEN, &cb_connect);
+			retcode = SQLBindCol(hstmt, 2, SQL_INTEGER, &db_connect, Default_LEN, &cb_connect);
 
 			// Fetch and print each row of data. On an error, display a message and exit.  
 
@@ -760,7 +886,7 @@ void Server::set_DB_Info(int ci)
 			}
 
 			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("ID : %s\tPASS : %s\n", sz_id, sz_password);
+				printf("ID : %s\n", sz_id);
 			}
 
 		}
@@ -772,12 +898,13 @@ void Server::new_DB_Id(int ci)
 {
 	// Connect to data source  
 	retcode = SQLConnect(hdbc, (SQLWCHAR*)L"2015180014_Graduate", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0);
+	printf("여기에 과연 어떤 ID가 들어가 있을라나?! %s\n", clients[ci].game_id);
 
 	// Allocate statement handle  
 	if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
 		retcode = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
-		sprintf(buf, "EXEC dbo.Set_id %s, %s, %c, %c, %d\n", clients[ci].game_id, clients[ci].password, clients[ci].roomNo, clients[ci].isReady, clients[ci].isConnect);
+		sprintf(buf, "EXEC dbo.Set_id %s, %d\n", clients[ci].game_id, clients[ci].in_use);
 		MultiByteToWideChar(CP_UTF8, 0, buf, strlen(buf), sql_data, sizeof sql_data / sizeof * sql_data);
 		sql_data[strlen(buf)] = '\0';
 
@@ -789,7 +916,7 @@ void Server::new_DB_Id(int ci)
 			}
 
 			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("ID : %s\tPASS : %s\n", sz_id, sz_password);
+				printf("ID : %s\n", sz_id);
 			}
 
 		}
@@ -817,7 +944,7 @@ void Server::set_DB_Shutdown(int ci)
 			}
 
 			if (retcode == SQL_SUCCESS || retcode == SQL_SUCCESS_WITH_INFO) {
-				printf("ID : %s\tPASSWORD : %d\n", sz_id, sz_password);
+				printf("ID : %s\n", sz_id);
 
 			}
 

@@ -58,6 +58,40 @@ void NetWorkManager::Release()
 	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 }
 
+void NetWorkManager::LoadToServer(HWND hWnd)
+{
+	switch (NetWorkManager::GetInstance()->GetConnectState())
+	{
+	case NetWorkManager::CONNECT_STATE::NONE:
+	{
+		
+		break;
+	}
+
+	case NetWorkManager::CONNECT_STATE::TRY:
+	{
+		NetWorkManager::GetInstance()->ConnectToServer(hWnd);
+		break;
+	}
+
+	case NetWorkManager::CONNECT_STATE::FAIL:
+	{
+		
+		break;
+	}
+
+	case NetWorkManager::CONNECT_STATE::OK:
+	{
+		//g_State = GAMESTATE::LOGIN;
+		break;
+	}
+
+	default:
+		break;
+	}
+}
+
+
 void NetWorkManager::ConnectToServer(HWND hWnd)
 {
 	// connect()
@@ -103,7 +137,7 @@ void NetWorkManager::ConnectToServer(HWND hWnd)
 		exit(-1);
 	}
 	else if (strcmp(buf, "Newid") == 0)
-	{
+	{	
 		//printf_s("아이디가 없습니다.\n ID를 만들어 게임을 시작하겠습니다.\n DB생성\n");
 	}
 

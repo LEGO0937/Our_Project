@@ -71,17 +71,6 @@ struct MessageStruct
 	}
 };
 
-struct RoomInfo
-{
-	char m_iRoomNumber;
-	char m_iUserNumber;
-	bool m_bIsGaming;
-	bool m_bMode;
-	//
-	Room(char roomNum, char userNum, bool isGameing, bool mode) :m_iRoomNumber(roomNum),
-		m_iUserNumber(userNum), m_bIsGaming(isGameing), m_bMode(mode)  //isGameing 0: 대기중, 1: 게임중
-	{}
-};
 
 
 //[클라->서버]

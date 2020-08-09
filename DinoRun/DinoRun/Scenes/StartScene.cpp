@@ -147,8 +147,11 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				//recv로 로그인 성공인지 실패인지 확인.
 				//로그인 성공시에는 아래 세줄 수행 후 로비씬으로 넘어감.
 				//패킷 구현 후에는 아래 세줄이 프로세스 처리 함수중 로그인 성공함수에 들어갈 예정->UpdateLogin()
+				//NetWorkManager::GetInstance()->SetServerIP("127.0.0.1"); // IP를 통한 연결 필요, 나중에 다른 컴에 접속을 요구할거면 ipconfig로 ip주소 따서 진행
 				m_sPlayerId = gameTexts[ID].text;
 				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
+				NetWorkManager::GetInstance()->SetConnectState(NetWorkManager::CONNECT_STATE::TRY); // 연결상태를 TRY로 하여 NetWorkManager::GetInstance()->ConnecttoServer호출
+				NetWorkManager::GetInstance()->LoadToServer(hWnd);
 #ifdef noLobby
 				sceneType = Room_Scene;
 #else
@@ -321,12 +324,11 @@ void StartScene::UpdateLogin(char* packet, float fTimeElapsed)
 
 	m_sPlayerId = gameTexts[ID].text;
 	NetWorkManager::GetInstance()->SetMyID(accessInfo->myId);
-	NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId); // 플레이어 아이디 설정
+	//NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId); // 플레이어 아이디 설정
 #ifdef noLobby
 	sceneType = Room_Scene;
 	NetWorkManager::GetInstance()->SetRoomNum(0);
 	NetWorkManager::GetInstance()->SetGameMode(0);
-	sceneType = Room_Scene;
 #else
 	sceneType = Lobby_Scene;
 #endif

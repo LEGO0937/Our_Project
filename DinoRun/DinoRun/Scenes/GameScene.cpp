@@ -911,13 +911,13 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	}
 
 #ifdef isConnectedToServer
-	CS_PACKET_PLAYER_INFO playerInfo;
+	/*CS_PACKET_PLAYER_INFO playerInfo;
 	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
 	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
 	playerInfo.keyState = dwDirection;
 	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
 	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
-	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
+	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);*/
 #endif
 
 	return Game_Scene;

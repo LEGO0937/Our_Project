@@ -21,6 +21,7 @@ private:
 	int m_iRoomNum;
 	bool m_bGameMode;
 	string m_sPlayerName;
+	XMFLOAT3 m_xmf3Position;
 
 	SOCKET	sock;
 	int		myId;
@@ -41,8 +42,11 @@ public:
 	void SetPlayerName(const string& name) { m_sPlayerName = name; }
 	void SetNumPlayer(const int& num) { m_iNumPlayer = num; }
 
+	void SetPosition(const XMFLOAT3& position) { m_xmf3Position = position; }
+
 	void SetHwnd(const HWND& hwnd) { m_hWnd = hwnd; }
 
+	XMFLOAT3 GetPosition() { return m_xmf3Position; }
 	int GetRoomNum() { return m_iRoomNum; }
 	bool GetGameMode() { return m_bGameMode; }
 	string GetPlayerName() { return m_sPlayerName; }
@@ -86,6 +90,7 @@ public:
 	SOCKET getSock();
 	void Initialize();
 	void Release();
+	void LoadToServer(HWND hWnd);
 	void ConnectToServer(HWND hWnd);
 
 	//Network클래스도 씬에접근하기 위해서에 접근가능하게 하기위해 내부 포인터를 갖고있게 함.

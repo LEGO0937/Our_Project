@@ -111,9 +111,12 @@ void CGameFramework::BuildObjects()
 	//m_pLoadingScene->Initialize(m_pCreateMgr, m_pNetwork);
 	//m_pLoadingScene->ReleaseUploadBuffers();
 	//m_pDrawMgr->SetLoadingScene(m_pLoadingScene);
-
+	
 #ifdef isConnectedToServer
 //NetWorkManager::GetInstance()->ConnectToServer();
+	NetWorkManager::GetInstance()->SetServerIP("127.0.0.1"); // IP를 통한 연결 필요, 나중에 다른 컴에 접속을 요구할거면 ipconfig로 ip주소 따서 진행
+	NetWorkManager::GetInstance()->SetConnectState(NetWorkManager::CONNECT_STATE::NONE); // 연결상태를 TRY로 하여 NetWorkManager::GetInstance()->ConnecttoServer호출
+
 #endif
 
 	BuildPipelineState();

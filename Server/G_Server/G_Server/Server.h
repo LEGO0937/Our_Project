@@ -59,7 +59,7 @@ public:
 	// in_use가 true인걸 확인하고 send하려고 하는데 그 이전에 접속 종료해서 false가된다면?
 	// 그리고 send 전에 새 플레이어가 id를 재사용한다면? => 엉뚱한 곳에 send가 됨
 	// mutex access_lock;
-	bool in_use;
+	bool in_use; // 연결됬냐 연결 안됬냐
 	OVER_EX over_ex;
 	SOCKET socket;
 	// 조립불가한 메모리를 다음번에 조립하기 위한 임시저장소
@@ -69,9 +69,6 @@ public:
 	// 인게임용
 	char rank; //등수
 	char game_id[10]; // 인게임 아이디
-	char password[10]; // 인게임 비밀번호(이것도 굳이 써야하나...?)
-	char roomNo; // 현재 들어가있는 방번호
-	int isConnect; // 현재 연결되있냐 안되있냐
 	// char nickname[32]; // 이걸 굳이 받아야하나...? 나중에 상의 
 	XMFLOAT4X4 xmf4x4Parents = {}; // 플레이어 위치값
 	MessageStruct msg; // 애니메이션
@@ -81,7 +78,7 @@ public:
 	DWORD keyState; // 이것도 애니메이션 부분
 	XMFLOAT3 xmf3PutPos = {}; // 초기위치 지정이라는데...
 
-	RoomInfo room_info[8];// 8개의 방을 임시로 만들것이므로 일단 배열로 적용
+	
 	// 나중에 벡터로 바꾸든지 하자
 
 
@@ -102,11 +99,22 @@ public:
 		over_ex.dataBuffer.len = MAX_BUFFER;
 		over_ex.dataBuffer.buf = over_ex.messageBuffer;
 		over_ex.event_t = EV_RECV;
-	}
-	void InitPlayer(){
-		rank = 0;
 		isReady = false;
+
 	}
+
+	/*
+	clients[client].isConnect = true;
+	clients[client].prev_size = 0;
+	ZeroMemory(&clients[client].over_ex, sizeof(clients[client].over_ex));
+	clients[client].over_ex.event_t = EV_RECV;
+	clients[client].over_ex.dataBuffer.buf = reinterpret_cast<CHAR*>(clients[client].over_ex.messageBuffer);
+	clients[client].over_ex.dataBuffer.len = sizeof(clients[client].over_ex.messageBuffer);
+	clients[client].checkPoints = 0;
+	clients[client].isReady = false;
+	clients[client].
+	*/
+	
 };
 
 
@@ -127,6 +135,7 @@ private:
 	int clientCount;
 	int readyCount;
 
+	
 
 	// DB와 함께 사용
 	SQLHENV henv;
@@ -134,10 +143,8 @@ private:
 	SQLHSTMT hstmt = 0;
 	SQLRETURN retcode;
 	SQLWCHAR sz_id[Default_LEN];
-	SQLWCHAR sz_password[Default_LEN];
-	char db_roomNo, db_ready;
 	int  db_connect;
-	SQLLEN cb_id = 0, cb_password = 0, cb_roomNo = 0, cb_ready = 0, cb_connect = 0;
+	SQLLEN cb_id = 0, cb_connect = 0;
 
 	char  buf[255];
 	wchar_t sql_data[255];
@@ -166,6 +173,7 @@ public:
 	void SendPlayerInfo(char toClietn, char fromClient);
 	void SendRoundEnd(char client);
 	void SendEventPacket(char toClient, const MessageStruct& msg); // 애니메이션 상태 패킷
+	void SendRoundStart(char client);
 public:
 	void SetClient_Initialize(char client);
 public:
