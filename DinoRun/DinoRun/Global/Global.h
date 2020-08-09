@@ -72,7 +72,7 @@ enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 
 
 #define isDebug
-
+//#define noLobby
 //#define isConnectedToServer
 
 //shaderName

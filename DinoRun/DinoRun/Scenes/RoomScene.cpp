@@ -186,7 +186,12 @@ void RoomScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM w
 #ifdef isConnectedToServer
 			//서버에게 나간다는 메시지 send
 #else
+#ifdef noLobby
+			sceneType = SceneType::Start_Scene;
+#else
 			sceneType = SceneType::Lobby_Scene;
+#endif //noLobby
+
 #endif
 			break;
 		default:
@@ -355,6 +360,9 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 	case SC_CLIENT_LOBBY_OUT:
 		UpdateDeleteUser(packet, fTimeElapsed);
 		break;
+	case SC_PUT_PLAYER:   //모든 플레이어가 레디를 하였으니 게임모드로 넘어가라는 명령
+		UpdateNextScene(packet, fTimeElapsed);
+		break;
 	}
 }
 void RoomScene::UpdateUnreadyState(char* packet, float fTimeElapsed)
@@ -401,4 +409,27 @@ void RoomScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
 
 	m_vUsers.erase(remove_if(m_vUsers.begin(), m_vUsers.end(), [&](const User& a) {
 		return a.m_id == playerInfo->id; }), m_vUsers.end());
+}
+
+void RoomScene::UpdateLogOut(char* packet, float fTimeElapsed)
+{
+#ifdef noLobby
+	sceneType = SceneType::Start_Scene;
+#else
+	sceneType = SceneType::Lobby_Scene;
+#endif
+}
+
+void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
+{
+	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
+
+	SC_PACKET_PUT_PLAYER* playerInfo = reinterpret_cast<SC_PACKET_PUT_PLAYER*>(packet);
+	NetWorkManager::GetInstance()->SetPosition(playerInfo->xmf3PutPos);
+
+	if (NetWorkManager::GetInstance()->GetGameMode())
+		sceneType = SceneType::ItemGame_Scene;
+	else
+		sceneType = SceneType::Game_Scene;
+
 }

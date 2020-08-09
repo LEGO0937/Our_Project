@@ -158,7 +158,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 #ifdef isConnectedToServer
-	NetWorkManager::GetInstance()->ConnectToServer();
+	//NetWorkManager::GetInstance()->ConnectToServer();
 #endif
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 
@@ -1358,6 +1358,12 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 이걸 받고나서 카운트다운 시작.
 		UpdateStartInfo(packet, fTimeElapsed);
 		break;
+	case SC_SLIDING_ANI:
+		UpdatePlayerSliding(packet, fTimeElapsed);
+		break;
+	case SC_COLLISION_ANI:
+		UpdatePlayerCollision(packet, fTimeElapsed);
+		break;
 	default:
 		break;
 	}
@@ -1419,4 +1425,29 @@ void ItemGameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
 	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
 	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
 	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+}
+
+void ItemGameScene::UpdatePlayerSliding(char* packet, float fTimeElapsed)
+{
+	SC_PLAYER_ANI* playerInfo = reinterpret_cast<SC_PLAYER_ANI*>(packet);
+
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == playerInfo->id; });
+	if (obj != obList.end())
+	{
+		((CPlayer*)(*obj))->OnSliding();
+	}
+}
+void ItemGameScene::UpdatePlayerCollision(char* packet, float fTimeElapsed)
+{
+	SC_PLAYER_ANI* playerInfo = reinterpret_cast<SC_PLAYER_ANI*>(packet);
+
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == playerInfo->id; });
+	if (obj != obList.end())
+	{
+		((CPlayer*)(*obj))->OnCollisionAni();
+	}
 }

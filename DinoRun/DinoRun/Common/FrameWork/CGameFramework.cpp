@@ -111,7 +111,11 @@ void CGameFramework::BuildObjects()
 	//m_pLoadingScene->Initialize(m_pCreateMgr, m_pNetwork);
 	//m_pLoadingScene->ReleaseUploadBuffers();
 	//m_pDrawMgr->SetLoadingScene(m_pLoadingScene);
-	
+
+#ifdef isConnectedToServer
+//NetWorkManager::GetInstance()->ConnectToServer();
+#endif
+
 	BuildPipelineState();
 
 	//m_pCreateMgr->GetDrawMgr()->WaitForGpuComplete();
@@ -345,7 +349,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		return;
 		break;
 	case Start_Scene:
-		if (m_PrevState == SceneType::Lobby_Scene)
+		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::Room_Scene)
 		{
 			m_sPlayerID = "";
 			m_pScene = shared_ptr<StartScene>(new StartScene());
@@ -363,12 +367,17 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		}
 		break;
 	case Room_Scene:
-		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::End_Scene)
+		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::End_Scene || m_PrevState == SceneType::Start_Scene)
 		{
 			m_pScene = shared_ptr<RoomScene>(new RoomScene());
 			m_pScene->SetId(m_sPlayerID);
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
+#ifdef noLobby
+			NetWorkManager::GetInstance()->SetRoomNum(0);
+			NetWorkManager::GetInstance()->SetGameMode(0); //1이면 아이템전 룸으로
+#endif 
+
 		}
 		break;
 	case Game_Scene:

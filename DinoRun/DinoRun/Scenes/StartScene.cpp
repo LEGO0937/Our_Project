@@ -149,7 +149,11 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				//패킷 구현 후에는 아래 세줄이 프로세스 처리 함수중 로그인 성공함수에 들어갈 예정->UpdateLogin()
 				m_sPlayerId = gameTexts[ID].text;
 				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
+#ifdef noLobby
+				sceneType = Room_Scene;
+#else
 				sceneType = Lobby_Scene;
+#endif
 				// 바로 위의 코드는 나중에 프로세스 패킷에서 처리하는 함수로 만들어졌다
 				// 추후에 삭제
 			}
@@ -315,8 +319,12 @@ void StartScene::UpdateLogin(char* packet, float fTimeElapsed)
 {
 	m_sPlayerId = gameTexts[ID].text;
 	NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId); // 플레이어 아이디 설정
-	
+#ifdef noLobby
+	sceneType = Room_Scene;
+	NetWorkManager::GetInstance()->SetGameMode(0);
+#else
 	sceneType = Lobby_Scene;
+#endif
 
 	//그리고 여기서 클라이언트 넘버를 받는게 맞다면
 	//NetWorkManager::GetInstance()->SetMyID()로 아이디 적용할것.
