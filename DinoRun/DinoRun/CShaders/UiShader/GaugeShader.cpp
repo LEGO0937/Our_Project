@@ -55,7 +55,7 @@ void GaugeShader::Update(float fTimeElapsed, void* pInformation)
 {
 	CPlayer* pPlayer = (CPlayer*)pInformation;
 	UINT nGauge = (UINT)pPlayer->GetMaxVelocityXZ();
-	pPlayer->SetMaxVelocityXZ(pPlayer->GetMaxVelocityXZ() - fTimeElapsed * 0.3f);
+	pPlayer->SetMaxVelocityXZ(pPlayer->GetMaxVelocityXZ() - fTimeElapsed * 0.5f);
 	if (pPlayer->GetMaxVelocityXZ() < MIN_VELOCITY)
 		pPlayer->SetMaxVelocityXZ(MIN_VELOCITY);
 	if (uvX[0] < (int)(nGauge * 2))

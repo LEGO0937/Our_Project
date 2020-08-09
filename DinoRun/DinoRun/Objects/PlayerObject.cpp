@@ -378,7 +378,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 		return true;
 	case ModelType::Item_Meat:
-		m_fMaxVelocityXZ += 15;
+		m_fMaxVelocityXZ += 10;
 		if (m_fMaxVelocityXZ > MAX_VELOCITY)
 			m_fMaxVelocityXZ = MAX_VELOCITY;
 
@@ -581,14 +581,19 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	float drag;
 	//float cDrag = 0.3f;
 	//위에는 횡력 처리 아래는 직진 힘.
-	if (isShift && m_fWheelDegree != 0)
+	if (isShift && m_fWheelDegree != 0 && Vector3::Length(m_xmf3Velocity) > MIN_VELOCITY + 10.0f)
 	{
-		drag = 0.5f* 1.0f* AIR * 3.8f;   //0.3f= 마찰계수 AIR = 공기저항 , 2.2f = 정면 면적
+		drag = 0.5f* 1.5f* AIR * 8.2f;   //0.3f= 마찰계수 AIR = 공기저항 , 8.2f = 정면 면적
+		//드리프트시에는 저항을 받는 면적이 정면이 아닌 옆면이이때문에 면적이 더 큼.
+	}
+	else if (isShift)
+	{
+		drag = 0.5f* 1.0f* AIR * 4.0f;   //0.3f= 마찰계수 AIR = 공기저항 , 4.0f = 정면 면적
 		//드리프트시에는 저항을 받는 면적이 정면이 아닌 옆면이이때문에 면적이 더 큼.
 	}
 	else
 	{
-		drag = 0.5f* 1.0f* AIR *2.2f;
+		drag = 0.5f* 1.0f* AIR *2.4f;
 	}
 	float rR = drag * 29.7f;   // -> C_Rr
 

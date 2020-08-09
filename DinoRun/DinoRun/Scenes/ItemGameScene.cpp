@@ -504,7 +504,16 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			//if (m_pPlayer)	m_pPlayer->KeyUpDown();
 			break;
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+#ifdef isConnectedToServer
+			//골인했다는 신호를 서버에게 send
+			//신호만 유저에게 보낸다
+#else
+			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+
+			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+#endif
 			break;
 		case VK_SHIFT:
 			if (m_pPlayer)
@@ -587,6 +596,96 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			XMFLOAT4X4 mat = m_pPlayer->m_xmf4x4World;
 			mat._42 += 500;
 			message.departMat = mat;
+			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+			break;
+		case VK_F5:
+			XMFLOAT4X4 matrix1 = m_pPlayer->m_xmf4x4ToParent;
+			XMFLOAT3 pos1 = m_pPlayer->GetLook();
+			pos1 = Vector3::ScalarProduct(pos1, 40, false);
+
+			matrix1._41 -= pos1.x;
+			matrix1._43 -= pos1.z;
+			matrix1._42 = m_pTerrain->GetHeight(matrix1._41, 256 * TerrainScaleZ - matrix1._43) + 1.0f;
+			XMFLOAT3 up1 = m_pTerrain->GetNormal(matrix1._41, matrix1._43);
+
+
+			matrix1._21 = up1.x;
+			matrix1._22 = up1.y;
+			matrix1._23 = up1.z;
+			XMFLOAT3 look1 = Vector3::CrossProduct(m_pPlayer->GetRight(), up1, true);
+
+			matrix1._31 = look1.x;
+			matrix1._32 = look1.y;
+			matrix1._33 = look1.z;
+
+			//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
+			message.shaderName = _BANANA_SHADER;
+			message.departMat = matrix1;
+			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+			break;
+		case VK_F6:
+			XMFLOAT4X4 matrix2 = m_pPlayer->m_xmf4x4ToParent;
+			XMFLOAT3 pos2 = m_pPlayer->GetLook();
+			pos2 = Vector3::ScalarProduct(pos2, 40, false);
+
+			matrix2._41 -= pos2.x;
+			matrix2._43 -= pos2.z;
+			matrix2._42 = m_pTerrain->GetHeight(matrix2._41, 256 * TerrainScaleZ - matrix2._43) + 1.0f;
+			XMFLOAT3 up2 = m_pTerrain->GetNormal(matrix2._41, matrix2._43);
+
+
+			matrix2._21 = up2.x;
+			matrix2._22 = up2.y;
+			matrix2._23 = up2.z;
+			XMFLOAT3 look2 = Vector3::CrossProduct(m_pPlayer->GetRight(), up2, true);
+
+			matrix2._31 = look2.x;
+			matrix2._32 = look2.y;
+			matrix2._33 = look2.z;
+
+			//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
+			message.shaderName = _MUD_SHADER;
+			message.departMat = matrix2;
+			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+			break;
+		case VK_F7:
+			XMFLOAT4X4 matrix3 = m_pPlayer->m_xmf4x4ToParent;
+			XMFLOAT3 pos3 = m_pPlayer->GetLook();
+			pos3 = Vector3::ScalarProduct(pos3, 40, false);
+
+			matrix3._41 -= pos3.x;
+			matrix3._43 -= pos3.z;
+			matrix3._42 = m_pTerrain->GetHeight(matrix3._41, 256 * TerrainScaleZ - matrix3._43) + 1.0f;
+			XMFLOAT3 up3 = m_pTerrain->GetNormal(matrix3._41, matrix3._43);
+
+
+			matrix3._21 = up3.x;
+			matrix3._22 = up3.y;
+			matrix3._23 = up3.z;
+			XMFLOAT3 look3 = Vector3::CrossProduct(m_pPlayer->GetRight(), up3, true);
+
+			matrix3._31 = look3.x;
+			matrix3._32 = look3.y;
+			matrix3._33 = look3.z;
+
+			//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
+			message.shaderName = _STONE_SHADER;
+			message.departMat = matrix3;
 			message.msgName = _ADD_OBJECT;
 #ifndef isConnectedToServer
 			EventHandler::GetInstance()->RegisterEvent(message);
@@ -732,19 +831,19 @@ void ItemGameScene::RenderShadow()
 	BaseScene::RenderShadow();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_SKIN_MESH]);
-	m_pPlayer->Render(m_pd3dCommandList, m_pShadowCamera);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_MODEL_INSTANCING]);
 	for (CObInstancingShader* shader : instancingModelShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instancingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 	for (CObInstancingShader* shader : instancingModelShaders)
 	{
 		if (shader)
-			shader->BillBoardRender(m_pd3dCommandList, m_pShadowCamera);
+			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
 	}
 }
 void ItemGameScene::RenderVelocity()
@@ -1079,7 +1178,7 @@ void ItemGameScene::BuildLights()
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -0.7f, 0.0f);
 	
 	m_pLights->m_pLights[1].m_bEnable = 1;
 	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
@@ -1187,14 +1286,14 @@ void ItemGameScene:: ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager)
 void ItemGameScene::UpdateShadow()
 {
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
-	float rad = 500;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
+	float rad = 600;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
 
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
 	lightDir = XMVector3Normalize(lightDir);
 
 	XMVECTOR shadowCameraPosition = XMLoadFloat3(&centerPosition) - 1.0f*rad*lightDir;
 	XMVECTOR targetPosition = XMLoadFloat3(&centerPosition);
-	XMVECTOR shadowUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR shadowUp = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
 
 	XMFLOAT3 xmf3CameraPosition;
 	XMFLOAT3 xmf3CameraTarget;

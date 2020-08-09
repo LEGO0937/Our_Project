@@ -39,6 +39,8 @@ void EndScene::ReleaseObjects()
 }
 void EndScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 {
+	SoundManager::GetInstance()->AllStop();
+
 	m_pCreateManager = pCreateManager;
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 

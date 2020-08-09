@@ -460,7 +460,16 @@ void GameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM w
 			//if (m_pPlayer)	m_pPlayer->KeyUpDown();
 			break;
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+#ifdef isConnectedToServer
+			//골인했다는 신호를 서버에게 send
+			//신호만 유저에게 보낸다
+#else
+			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+
+			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+#endif
 			break;
 		case VK_SHIFT:
 			if (m_pPlayer) 
@@ -612,19 +621,19 @@ void GameScene::RenderShadow()
 	BaseScene::RenderShadow();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_SKIN_MESH]);
-	m_pPlayer->Render(m_pd3dCommandList, m_pShadowCamera);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_MODEL_INSTANCING]);
 	for (CObInstancingShader* shader : instancingModelShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instancingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 	for (CObInstancingShader* shader : instancingModelShaders)
 	{
 		if (shader)
-			shader->BillBoardRender(m_pd3dCommandList, m_pShadowCamera);
+			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
 	}
 }
 void GameScene::RenderVelocity()
@@ -927,7 +936,7 @@ void GameScene::BuildLights()
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights->m_pLights[0].m_fFalloff = 0.0f;
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -0.7f, 0.0f);
 	m_pLights->m_pLights[0].m_fTheta = 0.0f; //cos(m_fTheta)
 	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.001f);;
 	m_pLights->m_pLights[0].m_fPhi = 0.0f; //cos(m_fPhi)
@@ -1066,7 +1075,7 @@ void GameScene::ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager)
 void GameScene::UpdateShadow()
 {
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
-	float rad = 500;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
+	float rad = 600;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
 
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
 	lightDir = XMVector3Normalize(lightDir);
