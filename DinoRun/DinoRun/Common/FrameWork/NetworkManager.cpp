@@ -1,6 +1,7 @@
 
 #include "NetworkManager.h"
 #include "../Common/FrameWork/CGameFramework.h"
+#include "../Scenes/StartScene.h"
 
 
 #pragma warning(disable : 4996)
@@ -9,6 +10,7 @@
 //volatile bool g_LoginFinished;
 //const char* g_serverIP = nullptr;
 
+
 NetWorkManager::NetWorkManager()
 {
 	sock = NULL;
@@ -16,8 +18,9 @@ NetWorkManager::NetWorkManager()
 	in_packet_size = 0;
 	saved_packet_size = 0;
 
-	//Initialize();
+	Initialize();
 }
+
 
 NetWorkManager::~NetWorkManager()
 {
@@ -48,7 +51,6 @@ void NetWorkManager::Initialize()
 		err_quit("socket()");
 		return;
 	}
-
 }
 
 void NetWorkManager::Release()
@@ -56,14 +58,14 @@ void NetWorkManager::Release()
 	//WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ);
 }
 
-void NetWorkManager::ConnectToServer()
+void NetWorkManager::ConnectToServer(HWND hWnd)
 {
 	// connect()
 	m_ServerIP = "127.0.0.1";
 	SOCKADDR_IN serveraddr;
 	ZeroMemory(&serveraddr, sizeof(serveraddr));
 	serveraddr.sin_family = AF_INET;
-	serveraddr.sin_addr.s_addr = inet_addr(m_ServerIP);
+	serveraddr.sin_addr.s_addr = inet_addr(NetWorkManager::GetInstance()->GetServerIP());
 	serveraddr.sin_port = htons(SERVER_PORT);
 
 	int retval = WSAConnect(sock, (SOCKADDR*)&serveraddr, sizeof(serveraddr), NULL, NULL, NULL, NULL);
@@ -84,7 +86,29 @@ void NetWorkManager::ConnectToServer()
 		}
 	}
 
-	printf("여기 안들가짐?");
+
+	int result = send(sock, m_sPlayerName.c_str(), strlen(m_sPlayerName.c_str()), 0); // 아이디 받는 부분
+	char buf[10];
+	result = recv(sock, buf, 10, 0);
+	buf[result] = '\0';
+
+	if (strcmp(buf, "False") == 0)
+	{
+		//printf_s("DB에서 ID를 확인할 수 없습니다\n DB오류\n");
+		exit(-1);
+	}
+	else if (strcmp(buf, "Overlap") == 0)
+	{
+		//printf_s("DB에서 ID를 확인할 수 없습니다\n DB접속\n");
+		exit(-1);
+	}
+	else if (strcmp(buf, "Newid") == 0)
+	{
+		//printf_s("아이디가 없습니다.\n ID를 만들어 게임을 시작하겠습니다.\n DB생성\n");
+	}
+
+
+
 
 	WSAAsyncSelect(sock, m_hWnd, WM_SOCKET, FD_CLOSE | FD_READ); // 작동하는거야
 
@@ -105,7 +129,6 @@ SOCKET NetWorkManager::getSock()
 
 void NetWorkManager::ReadPacket()
 {
-
 	DWORD iobyte, ioflag = 0;
 
 	int retval = WSARecv(sock, &recv_wsabuf, 1, &iobyte, &ioflag, NULL, NULL);
@@ -186,6 +209,7 @@ void NetWorkManager::ReadPacket(float fTimeElapsed)
 	}
 }
 
+
 //8바이트 이상일때는 이 SendPacket을 사용하여야한다.
 void NetWorkManager::SendPacket(DWORD dataBytes)
 {
@@ -202,6 +226,8 @@ void NetWorkManager::SendPacket(DWORD dataBytes)
 	}
 }
 
+
+
 void NetWorkManager::SendPacket()
 {
 	DWORD iobyte = 0;
@@ -215,6 +241,8 @@ void NetWorkManager::SendPacket()
 		}
 	}
 }
+
+
 
 void NetWorkManager::SendPlayerInfo(int checkPoints, DWORD keyState, XMFLOAT4X4 xmf4x4Parents)
 {
@@ -231,6 +259,7 @@ void NetWorkManager::SendPlayerInfo(int checkPoints, DWORD keyState, XMFLOAT4X4 
 }
 
 
+
 void NetWorkManager::SendReady()
 {
 	pReady = reinterpret_cast<CS_PACKET_READY*>(send_buffer);
@@ -240,6 +269,8 @@ void NetWorkManager::SendReady()
 
 	SendPacket();
 }
+
+
 
 void NetWorkManager::SendNotReady()
 {
@@ -252,6 +283,8 @@ void NetWorkManager::SendNotReady()
 	SendPacket();
 }
 
+
+
 void NetWorkManager::SendReqStart()
 {
 	pRequestStart = reinterpret_cast<CS_PACKET_REQUEST_START*>(send_buffer);
@@ -263,6 +296,7 @@ void NetWorkManager::SendReqStart()
 }
 
 
+
 void NetWorkManager::SendReleaseKey()
 {
 	pReleaseKey = reinterpret_cast<CS_PACKET_RELEASE_KEY*>(send_buffer);
@@ -272,6 +306,8 @@ void NetWorkManager::SendReleaseKey()
 
 	SendPacket();
 }
+
+
 
 void NetWorkManager::SendChattingText(char id, const _TCHAR* text)
 {
@@ -306,6 +342,8 @@ void NetWorkManager::SendNickName(char id, _TCHAR* name)
 	SendPacket(pNickName->size);
 }
 
+
+
 void NetWorkManager::SetGameFrameworkPtr(HWND hWnd, shared_ptr<BaseScene>client)
 {
 	if (client)
@@ -328,7 +366,7 @@ void NetWorkManager::SetGameFrameworkPtr(HWND hWnd, shared_ptr<BaseScene>client)
 
 
 // Use아이템으로 사용했다는 신호와 동시에 사라지게 하는거야
-void NetWorkManager::SendEvent(MessageStruct& msg)
+void NetWorkManager::SendEvent(MessageStruct msg)
 {
 	pEvent = reinterpret_cast<CS_PACKET_EVENT*>(send_buffer);
 	pEvent->msg = msg;
