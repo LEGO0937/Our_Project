@@ -229,7 +229,7 @@ void RoomScene::Render()
 	if (instacingUiShaders[1])
 		instacingUiShaders[1]->Render(m_pd3dCommandList, m_pCamera);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_FONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 

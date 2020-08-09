@@ -28,8 +28,8 @@
 #define PSO_SHADOW_TERRAIN 15
 #define PSO_SHADOW_SKINED_INSTANCING 16
 
-//PSO pont
-#define PSO_PONT 17
+//PSO Font
+#define PSO_FONT 17
 
 //PSO use computeShader
 #define PSO_HORZ_BLUR 18

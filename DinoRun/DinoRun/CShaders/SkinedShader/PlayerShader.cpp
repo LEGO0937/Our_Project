@@ -33,7 +33,7 @@ void PlayerShader::BuildObjects(CreateManager* pCreateManager, void* pInformatio
 void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	CDinoRunPlayer *pPlayerObject = NULL;
-	int nLength = 3;
+	int nLength = NetWorkManager::GetInstance()->GetNumPlayer();
 
 	//서버로부터 nLenght에 플레이어 수를 받음.
 	

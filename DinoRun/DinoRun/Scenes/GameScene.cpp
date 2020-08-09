@@ -556,7 +556,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		m_pPlayer->m_fForce = 0;
 
 	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
-	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
+	((CPlayer*)PLAYER_SHADER->getList()[0])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -706,7 +706,7 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 			shader->Render(m_pd3dCommandList, m_pCamera);
 	}
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_FONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 
@@ -808,11 +808,11 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 			int rank = 1;
 			vector<CGameObject*> list = PLAYER_SHADER->getList();
 			((CPlayer*)list[0])->SetCheckPoint(1);
-			((CPlayer*)list[0])->SetName("player3");
-			((CPlayer*)list[1])->SetCheckPoint(4);
-			((CPlayer*)list[1])->SetName("player1");
-			((CPlayer*)list[2])->SetCheckPoint(3);
-			((CPlayer*)list[2])->SetName("player2");
+			((CPlayer*)list[0])->SetName("player1");
+			//((CPlayer*)list[1])->SetCheckPoint(4);
+			//((CPlayer*)list[1])->SetName("player1");
+			//((CPlayer*)list[2])->SetCheckPoint(3);
+			//((CPlayer*)list[2])->SetName("player2");
 
 			sort(list.begin(), list.end(), [](CGameObject* a, CGameObject* b) {
 				return ((CPlayer*)a)->GetCheckPoint() > ((CPlayer*)b)->GetCheckPoint(); });

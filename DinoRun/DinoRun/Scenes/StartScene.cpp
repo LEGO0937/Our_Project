@@ -246,7 +246,7 @@ void StartScene::Render()
 	if (instacingUiShaders[1])
 		instacingUiShaders[1]->Render(m_pd3dCommandList, m_pCamera);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_FONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 
@@ -317,7 +317,10 @@ void StartScene::ProcessPacket(char* packet, float fTimeElapsed)
 
 void StartScene::UpdateLogin(char* packet, float fTimeElapsed)
 {
+	SC_PACKET_ACCESS_COMPLETE* accessInfo = reinterpret_cast<SC_PACKET_ACCESS_COMPLETE*>(packet);
+
 	m_sPlayerId = gameTexts[ID].text;
+	NetWorkManager::GetInstance()->SetMyID(accessInfo->myId);
 	NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId); // 플레이어 아이디 설정
 #ifdef noLobby
 	sceneType = Room_Scene;
