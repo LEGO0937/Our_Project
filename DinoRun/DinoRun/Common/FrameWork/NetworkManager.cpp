@@ -440,3 +440,23 @@ void NetWorkManager::err_display(const char* msg)
 	LocalFree(lpMsgBuf);
 }
 
+
+void NetWorkManager::SendColision()
+{
+	pAni = reinterpret_cast<CS_PLAYER_ANI*>(send_buffer);
+	pAni->size = sizeof(pAni);
+	send_wsabuf.len = sizeof(pAni);
+	pAni->type = CS_COLLISION_ANI;
+
+	SendPacket();
+}
+
+void NetWorkManager::SendSliding()
+{
+	pAni = reinterpret_cast<CS_PLAYER_ANI*>(send_buffer);
+	pAni->size = sizeof(pAni);
+	send_wsabuf.len = sizeof(pAni);
+	pAni->type = CS_SLIDING_ANI;
+
+	SendPacket();
+}

@@ -152,6 +152,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
 				NetWorkManager::GetInstance()->SetConnectState(NetWorkManager::CONNECT_STATE::TRY); // 연결상태를 TRY로 하여 NetWorkManager::GetInstance()->ConnecttoServer호출
 				NetWorkManager::GetInstance()->LoadToServer(hWnd);
+#ifndef isConnectedToServer
 #ifdef noLobby
 				sceneType = Room_Scene;
 #else
@@ -159,6 +160,7 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 #endif
 				// 바로 위의 코드는 나중에 프로세스 패킷에서 처리하는 함수로 만들어졌다
 				// 추후에 삭제
+#endif
 			}
 		}
 		::ReleaseCapture();

@@ -60,6 +60,7 @@ private:
 	CS_PACKET_CHATTING* pText = NULL;
 	CS_PACKET_PLAYER_INFO* pInfo = NULL; // 플레이어 위치, 애니메이션
 	CS_PACKET_EVENT* pEvent = NULL;  // 아이템 
+	CS_PLAYER_ANI* pAni = NULL; //슬라이딩 or 충돌 애니메이션용
 
 	HWND m_hWnd{ NULL };
 	int m_iNumPlayer = 0;
@@ -108,7 +109,8 @@ public:
 	void SendReleaseKey(); // 그냥 혹시몰라서
 	void SendPlayerInfo(int checkPoints, DWORD keyState, XMFLOAT4X4 xmf4x4Parents); // 아이템 게임씬, 스피드 게임씬
 
-
+	void SendSliding();
+	void SendColision();
 
 	void SendNickName(char id, _TCHAR* name); // 닉네임 값(나중에 의논)
 	void SendChattingText(char id, const _TCHAR* text); // 채팅(졸작 끝나고 어떻게 좀)

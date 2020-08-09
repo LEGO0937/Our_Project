@@ -345,6 +345,16 @@ struct RoomInfo
 	{}
 };
 
+struct UserInfo
+{
+	string m_sName;
+	bool m_bReadyState;
+	//
+	UserInfo(string name, bool readyState) :m_sName(name),
+		m_bReadyState(readyState)
+	{}
+};
+
 struct CS_PACKET_ROOM
 {
 	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
@@ -374,4 +384,20 @@ struct SC_PLAYER_ANI
 	char size;
 	char type;
 	char id;
+};
+
+struct CS_PACKET_USERS_INFO
+{
+	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
+	char type;
+
+	vector<UserInfo> users;
+};
+
+struct SC_PACKET_USERS_INFO
+{
+	char size;
+	char type;
+
+	vector<UserInfo> users;
 };

@@ -363,6 +363,8 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 	case SC_PUT_PLAYER:   //모든 플레이어가 레디를 하였으니 게임모드로 넘어가라는 명령
 		UpdateNextScene(packet, fTimeElapsed);
 		break;
+	case SC_PLAYER_INFO:
+		break;
 	}
 }
 void RoomScene::UpdateUnreadyState(char* packet, float fTimeElapsed)
@@ -419,7 +421,16 @@ void RoomScene::UpdateLogOut(char* packet, float fTimeElapsed)
 	sceneType = SceneType::Lobby_Scene;
 #endif
 }
+void RoomScene::UpdateUserList(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_USERS_INFO* usersInfo = reinterpret_cast<SC_PACKET_USERS_INFO*>(packet);
+	m_vUsers.clear();
 
+	for (const UserInfo& user : usersInfo->users)
+	{
+		m_vUsers.emplace_back(User(user.m_sName,user.m_bReadyState));
+	}
+}
 void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
 {
 	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
@@ -433,3 +444,4 @@ void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
 		sceneType = SceneType::Game_Scene;
 
 }
+
