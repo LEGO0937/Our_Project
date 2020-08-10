@@ -556,7 +556,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		m_pPlayer->m_fForce = 0;
 
 	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
-	((CPlayer*)PLAYER_SHADER->getList()[0])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
+	//((CPlayer*)PLAYER_SHADER->getList()[0])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -807,8 +807,8 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		{
 			int rank = 1;
 			vector<CGameObject*> list = PLAYER_SHADER->getList();
-			((CPlayer*)list[0])->SetCheckPoint(1);
-			((CPlayer*)list[0])->SetName("player1");
+			//((CPlayer*)list[0])->SetCheckPoint(1);
+			//((CPlayer*)list[0])->SetName("player1");
 			//((CPlayer*)list[1])->SetCheckPoint(4);
 			//((CPlayer*)list[1])->SetName("player1");
 			//((CPlayer*)list[2])->SetCheckPoint(3);
@@ -918,7 +918,9 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
 	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
 	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);*/
+	NetWorkManager::GetInstance()->SendPlayerInfo(m_pPlayer->GetCheckPoint(), dwDirection, m_pPlayer->m_xmf4x4ToParent);
 #endif
+
 
 	return Game_Scene;
 }

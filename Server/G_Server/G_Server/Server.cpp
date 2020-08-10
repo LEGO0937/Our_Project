@@ -1,4 +1,7 @@
 #include "Server.h"
+#include "string"
+
+using namespace std;
 
 
 Server::Server()
@@ -87,6 +90,7 @@ void Server::RunServer()
 		//이부분에 클라한테 초기위치 요청하는 명령 보내고
 		//clients.emplace_back(tmpClient);
 		//printf("Create Client ID: %d, PrevSize: %d, xPos: %d, yPos: %d, zPos: %d, xDir: %d, yDir: %d, zDir: %d\n", i, clients[i].prev_size, clients[i].xPos, clients[i].yPos, clients[i].zPos, clients[i].xDir, clients[i].yDir, clients[i].zDir);
+	
 	}
 
 	for (int i = 0; i < MAX_WORKER_THREAD; ++i)
@@ -225,17 +229,26 @@ void Server::AcceptThreadFunc()
 		printf("%d 클라이언트 접속 완료\n", new_id);
 		// 기존 유저들에게 이후 접속한 유저들 출력
 		for (int i = 0; i < MAX_USER; ++i)
+		{
 			if (true == clients[i].in_use)
+			{
 				SendAccessPlayer(i, new_id);
+			}
+		}
+
 
 		// 처음 접속한 나에게 기존 유저들 출력
 		for (int i = 0; i < MAX_USER; ++i)
 		{
 			if (false == clients[i].in_use)
 				continue;
-			if (i == new_id)
-				continue;
+			/*if (i == new_id)
+				continue;*/
+
 			SendAccessPlayer(new_id, i);
+			SendResetRoomInfo(i);
+			SendRoomInfo(i);
+			// 여기다 방 목록 업데이트 추가로 넣자!
 		}
 		clientCnt_l.lock();
 		++clientCount;
@@ -390,13 +403,18 @@ void Server::ProcessPacket(char client, char* packet)
 	{
 	case CS_PLAYER_INFO: // 플레이어 전체적인 위치 담당
 	{
-		printf("Player Info Success: %d\n", client);
+		//printf("Player Info Success: %d\n", client);
 		// 각 클라에게 위치 인덱스 전송
+		CS_PACKET_PLAYER_INFO* p = reinterpret_cast<CS_PACKET_PLAYER_INFO*>(packet);	
+		clients[client].checkPoints = p->checkPoints;
+		clients[client].xmf4x4Parents = p->xmf4x4Parents;
+		clients[client].keyState = p->keyState;
+		clients[client].id = p->playerNames;
+
 		for (int i = 0; i < MAX_USER; ++i)
 		{
 			if(clients[i].in_use == true)
-
-			SendPlayerInfo(i, client);
+				SendPlayerInfo(i, client);
 		}
 		break;
 	}
@@ -417,9 +435,20 @@ void Server::ProcessPacket(char client, char* packet)
 		clients[client].isReady = true;
 		for (int i = 0; i < MAX_USER; ++i)
 		{
-			if (clients[i].in_use == true)
-				SendReadyStatePacket(i, client);
+			if (false == clients[i].in_use)
+				continue;
+			/*if (i == new_id)
+				continue;*/
+
+			SendResetRoomInfo(i);
+			SendRoomInfo(i);
+			// 여기다 방 목록 업데이트 추가로 넣자!
 		}
+		//for (int i = 0; i < MAX_USER; ++i)
+		//{
+		//	if (clients[i].in_use == true)
+		//		SendReadyStatePacket(i, client);
+		//}
 		break;
 	}
 	case CS_UNREADY:
@@ -434,9 +463,21 @@ void Server::ProcessPacket(char client, char* packet)
 
 		for (int i = 0; i < MAX_USER; ++i)
 		{
-			if (clients[i].in_use == true)
-				SendUnReadyStatePacket(i, client);
+			if (false == clients[i].in_use)
+				continue;
+			/*if (i == new_id)
+				continue;*/
+
+			
+			SendResetRoomInfo(i);
+			SendRoomInfo(i);
+			// 여기다 방 목록 업데이트 추가로 넣자!
 		}
+		//for (int i = 0; i < MAX_USER; ++i)
+		//{
+		//	if (clients[i].in_use == true)
+		//		SendUnReadyStatePacket(i, client);
+		//}
 		break;
 	}
 	case CS_EVENT:
@@ -572,6 +613,34 @@ void Server::SendRoundStart(char client)
 	SendFunc(client, &packet);
 }
 
+void Server::SendRoomInfo(char client)
+{
+	SC_PACKET_USERS_INFO packet;
+	for (int i = 0; i < MAX_USER; ++i)
+	{
+		if (false == clients[i].in_use)
+			continue;
+
+		else
+		{
+			packet.users.m_sName = clients[i].game_id;
+			packet.users.m_bReadyState = clients[i].isReady;
+		}
+
+
+		packet.size = sizeof(SC_PACKET_USERS_INFO);
+		packet.type = SC_ROOM_INFO;
+
+		SendFunc(client, &packet);
+	}
+}
+void Server::SendResetRoomInfo(char client)
+{
+	SC_PACKET_RESET_USERS_INFO packet;
+	packet.size = sizeof(SC_PACKET_RESET_USERS_INFO);
+	packet.type = SC_RESET_ROOM_INFO;
+	SendFunc(client, &packet);
+}
 
 void Server::SendAcessComplete(char client)
 {
@@ -659,6 +728,7 @@ void Server::SendPlayerInfo(char toClient, char fromClient)
 	packet.xmf4x4Parents = clients[fromClient].xmf4x4Parents;
 	packet.checkPoints = clients[fromClient].checkPoints;
 	packet.keyState = clients[fromClient].keyState;
+	packet.playerNames = clients[fromClient].id;
 
 	/*char size;
 	char type;
@@ -715,8 +785,6 @@ void Server::SendPutPlayer(char toClient)
 	SC_PACKET_PUT_PLAYER packet;
 	packet.size = sizeof(SC_PACKET_PUT_PLAYER);
 	packet.type = SC_PUT_PLAYER;
-	packet.xmf3PutPos = {};
-
 	/*
 	1. (650.0f, 70.7f, 1150.0f)
 	2. (680.0f, 70.7f, 1150.0f)
@@ -724,8 +792,12 @@ void Server::SendPutPlayer(char toClient)
 	4. (740.0f, 70.7f, 1150.0f)
 	5. (770.0f, 70.7f, 1150.0f)
 	*/
-
-
+	XMFLOAT3 positions[5] = {XMFLOAT3(650.0f, 70.7f, 1150.0f),
+	XMFLOAT3(680.0f, 70.7f, 1150.0f),
+	XMFLOAT3(710.0f, 70.7f, 1150.0f),
+	XMFLOAT3(740.0f, 70.7f, 1150.0f),
+	XMFLOAT3(770.0f, 70.7f, 1150.0f)};
+	packet.xmf3PutPos = positions[toClient];
 
 	SendFunc(toClient, &packet);
 }

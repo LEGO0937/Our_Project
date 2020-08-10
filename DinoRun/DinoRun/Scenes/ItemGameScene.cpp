@@ -765,7 +765,7 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 		m_pPlayer->m_fForce = 0;
 
 	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
-	((CPlayer*)PLAYER_SHADER->getList()[0])->Move(dwDirection, deltaTime, deltaTime, true);
+	//((CPlayer*)PLAYER_SHADER->getList()[0])->Move(dwDirection, deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -1025,7 +1025,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		else
 		{
 			int rank = 1;
-			vector<CGameObject*> list = PLAYER_SHADER->getList();
+			 vector<CGameObject*> list = PLAYER_SHADER->getList();
 			//((CPlayer*)list[0])->SetCheckPoint(1);
 			//((CPlayer*)list[0])->SetName("player3");
 			//((CPlayer*)list[1])->SetCheckPoint(4);

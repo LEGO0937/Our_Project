@@ -421,8 +421,9 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
 		//-----------------만일 룸씬에서 시작신호 받으면서 위치를 받는게 맞다면 이곳에서 그 값으로 setPosition을 해야함.
-		//m_pPlayer->SetPosition(NetWorkManager::GetInstance()->m_xmf3Position);
-
+#ifdef isConnectedToServer
+		m_pPlayer->SetPosition(NetWorkManager::GetInstance()->GetPosition());
+#endif
 		if (type == SceneType::ItemGame_Scene)
 			m_pPlayer->SetMaxVelocityXZ(25);
 

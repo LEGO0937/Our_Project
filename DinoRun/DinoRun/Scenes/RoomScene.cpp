@@ -130,10 +130,10 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 		{
 			if (instacingUiShaders[1]->getUvXs()[0] == 0.0f)
 			{
-				//취소-> 레디 상태로 버튼 전환하는 구간
+				//레디-> 취소 상태로 버튼 전환하는 구간
 				//수행 후 버튼은 레디상태가 됨
 #ifdef isConnectedToServer
-				NetWorkManager::GetInstance()->SendReady();
+				NetWorkManager::GetInstance()->SendNotReady();
 #endif
 				BUTTON_STATE_SHADER->getUvXs()[0] = 0.5f;
 				BUTTON_STATE_SHADER->getUvXs()[1] = 0.0f;
@@ -144,9 +144,9 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			else
 			{
 #ifdef isConnectedToServer
-				NetWorkManager::GetInstance()->SendNotReady();
+				NetWorkManager::GetInstance()->SendReady();
 #endif
-				//레디-> 취소 상태로 버튼 전환하는 구간
+				//취소-> 레디 상태로 버튼 전환하는 구간
 				BUTTON_STATE_SHADER->getUvXs()[0] = 0.0f;
 				BUTTON_STATE_SHADER->getUvXs()[1] = 0.5f;
 			}
@@ -278,21 +278,23 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		if (i < m_vUsers.size())
 		{
 			gameTexts[i + 1].text = m_vUsers[i].m_sName;  //첫번째는 본인이름이 들어가니 두번째란부터 입력
-			BUTTON_STATE_SHADER->getUvXs()[i + 2] = 0.5 * m_vUsers[i].m_bButtonState;
+			BUTTON_STATE_SHADER->getUvXs()[i + 2] = 0.5f * (float)m_vUsers[i].m_bButtonState;
 		}
 		else
 		{
 			gameTexts[i + 1].text = "";
-			BUTTON_STATE_SHADER->getUvXs()[i + 2] = 0.5;
+			BUTTON_STATE_SHADER->getUvXs()[i + 2] = 0.5f;
 		}
 	}
 	for (CUiShader* shader : instacingUiShaders)
 		shader->Update(fTimeElapsed, NULL);
+	if (BUTTON_STATE_SHADER->getUvXs()[1] != 0.5f)
+		return SceneType::Room_Scene;
 
 	for (int i = 0; i < m_vUsers.size(); ++i)
 	{
 		//이 부분은 들어와있는 모든 유저가 레디상태인지 확인 한명이라도 취소상태이면 다음씬으로 안넘어감.
-		if (instacingUiShaders[1]->getUvXs()[i + 1] != 0.5f && m_vUsers[i].m_sName != "")
+		if (instacingUiShaders[1]->getUvXs()[i + 2] != 0.5f && m_vUsers[i].m_sName != "")
 			return SceneType::Room_Scene; 
 	}
 	//이 구간에 왔다는것은 접속한 유저들이 모두 레디상태라는 뜻.
@@ -307,12 +309,15 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	//그 버튼 상태를 DB에 적용함, 이후 DB로부터 룸에 있는 유저들이 모두 ready
 	//상태인지를 확인하고 조건이 성립하면 다음 씬으로 넘어가라는 패킷을 룸에 있는
 	//모든 유저에게 보냄
-
+#ifdef isConnectedToServer
+	NetWorkManager::GetInstance()->SendReqStart();
+#else
 	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
 	if (NetWorkManager::GetInstance()->GetGameMode())
 		sceneType = SceneType::ItemGame_Scene;
 	else
 		sceneType = SceneType::Game_Scene;
+#endif
 	// 스피드전 or 아이템전 판단.
 
 	return SceneType::Room_Scene;

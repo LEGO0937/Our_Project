@@ -120,7 +120,8 @@ void NetWorkManager::ConnectToServer(HWND hWnd)
 		}
 	}
 
-
+	
+	
 	int result = send(sock, m_sPlayerName.c_str(), strlen(m_sPlayerName.c_str()), 0); // 아이디 받는 부분
 	char buf[10];
 	result = recv(sock, buf, 10, 0);

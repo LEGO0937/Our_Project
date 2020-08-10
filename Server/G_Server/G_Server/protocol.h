@@ -2,13 +2,14 @@
 #include "../G_Server/MyInclude.h"
 #include "DirectX.h"
 #include <string>
+#include <vector>
 
 using namespace std;
 
 //#define SERVER_IP "172.30.1.1"
 //#define SERVER_IP "192.168.200.130"
 #define SERVER_IP "127.0.0.1"
-constexpr int MAX_USER = 6;
+constexpr int MAX_USER = 5;
 
 constexpr int MAX_ROUND_TIME = 0;
 constexpr int MAX_ITEM_NAME_LENGTH = 16;
@@ -41,7 +42,8 @@ constexpr int SC_UNREADY_STATE = 12; // 언레디
 constexpr int SC_GO_LOBBY = 13; // 로그인하고 로비 들감
 constexpr int SC_EVENT = 14; // 플레이어 아이템 관리
 constexpr int SC_COMPARE_TIME = 15; // 서버와 클라 시간 비교
-
+constexpr int SC_ROOM_INFO = 16;
+constexpr int SC_RESET_ROOM_INFO = 17;
 
 constexpr int CS_READY = 0; // 레디
 constexpr int CS_UNREADY = 1; // 언레디
@@ -71,6 +73,15 @@ struct MessageStruct
 	}
 };
 
+struct UserInfo
+{
+	string m_sName;
+	bool m_bReadyState;
+	//
+	UserInfo(string name = "", bool readyState = 0) :m_sName(name),
+		m_bReadyState(readyState)
+	{}
+};
 
 
 //[클라->서버]
@@ -361,3 +372,24 @@ struct SC_PACKET_NOT_COLLIDED
 
 
 
+struct CS_PACKET_USERS_INFO
+{
+	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
+	char type;
+
+	UserInfo users[MAX_USER];
+};
+
+struct SC_PACKET_USERS_INFO
+{
+	char size;
+	char type;
+
+	UserInfo users;
+};
+
+struct SC_PACKET_RESET_USERS_INFO //룸정보 유저리스트 리셋하라는 명령
+{
+	char size;
+	char type;
+};

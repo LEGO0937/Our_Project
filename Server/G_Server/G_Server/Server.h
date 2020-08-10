@@ -3,6 +3,7 @@
 #define Default_LEN 10
 //#include "MyInclude.h"
 #include "protocol.h"
+//#include "string"
 
 #define SERVER_IP "127.0.0.1"
 #pragma comment(lib, "Ws2_32.lib")
@@ -65,6 +66,8 @@ public:
 	// 조립불가한 메모리를 다음번에 조립하기 위한 임시저장소
 	char packet_buffer[MAX_BUFFER];
 	int prev_size;
+	string id;
+
 	
 	// 인게임용
 	char rank; //등수
@@ -135,6 +138,7 @@ private:
 	int clientCount;
 	int readyCount;
 
+
 	
 
 	// DB와 함께 사용
@@ -174,6 +178,8 @@ public:
 	void SendRoundEnd(char client);
 	void SendEventPacket(char toClient, const MessageStruct& msg); // 애니메이션 상태 패킷
 	void SendRoundStart(char client);
+	void SendRoomInfo(char client);
+	void SendResetRoomInfo(char client);
 public:
 	void SetClient_Initialize(char client);
 public:
