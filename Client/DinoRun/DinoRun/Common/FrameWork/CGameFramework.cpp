@@ -14,16 +14,17 @@ CGameFramework::CGameFramework()
 CGameFramework::~CGameFramework()
 {
 	EventHandler::GetInstance()->destroy();
+	NetWorkManager::GetInstance()->Release();
+	NetWorkManager::GetInstance()->destroy();
 	SoundManager::GetInstance()->destroy();
-	//NetWorkManager::GetInstance()->Release();
-	//NetWorkManager::GetInstance()->destroy();
 }
 
 bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
 {
 	m_hWnd = hWnd;
+#ifdef isConnectedToServer
 	NetWorkManager::GetInstance()->SetHwnd(hWnd);
-
+#endif
 	m_pCreateManager = shared_ptr<CreateManager>(new CreateManager);
 
 	m_pCreateManager->Initialize(hInstance, hWnd);
@@ -112,6 +113,13 @@ void CGameFramework::BuildObjects()
 	//m_pLoadingScene->ReleaseUploadBuffers();
 	//m_pDrawMgr->SetLoadingScene(m_pLoadingScene);
 	
+#ifdef isConnectedToServer
+//NetWorkManager::GetInstance()->ConnectToServer();
+	NetWorkManager::GetInstance()->SetServerIP("127.0.0.1"); // IP를 통한 연결 필요, 나중에 다른 컴에 접속을 요구할거면 ipconfig로 ip주소 따서 진행
+	NetWorkManager::GetInstance()->SetConnectState(NetWorkManager::CONNECT_STATE::NONE); // 연결상태를 TRY로 하여 NetWorkManager::GetInstance()->ConnecttoServer호출
+
+#endif
+
 	BuildPipelineState();
 
 	//m_pCreateMgr->GetDrawMgr()->WaitForGpuComplete();
@@ -176,6 +184,7 @@ void CGameFramework::BuildObjects()
 	if (m_pPlayer)
 		m_pPlayer->ReleaseUploadBuffers();
 
+	NetWorkManager::GetInstance()->SetCurScene(m_pScene);
 	EventHandler::GetInstance()->SetCurScene(m_pScene);
 	m_GameTimer.Reset();
 }
@@ -201,12 +210,12 @@ void CGameFramework::CalculateFrameStats()
 		wstring windowText;
 		if (m_pPlayer)
 		{
-			windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x) + L"   y:" + to_wstring(p.y)
-				+ L"pX: " + to_wstring(m_pPlayer->GetPosition().x)+ L" pY: " + to_wstring(m_pPlayer->GetPosition().y)  + L"  pZ:" + to_wstring(m_pPlayer->GetPosition().z);
+			windowText = L"DinoRun   fps: " + fpsStr; //+ L"x:" + to_wstring(p.x) + L"   y:" + to_wstring(p.y)
+				//+ L"pX: " + to_wstring(m_pPlayer->GetPosition().x)+ L" pY: " + to_wstring(m_pPlayer->GetPosition().y)  + L"  pZ:" + to_wstring(m_pPlayer->GetPosition().z);
 		}
 		else
 		{
-			windowText = L"DinoRun   fps: " + fpsStr + L"x:" + to_wstring(p.x) + L"   y:" + to_wstring(p.y);
+			windowText = L"DinoRun   fps: " + fpsStr; //+ L"x:" + to_wstring(p.x) + L"   y:" + to_wstring(p.y);
 		}
 			
 			/*+ L"  x:" +
@@ -241,6 +250,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingPacket(HWND hWnd, UINT nMessageID,
 		{
 		case FD_READ:
 			NetWorkManager::GetInstance()->ReadPacket(m_GameTimer.DeltaTime());
+			//NetWorkManager::GetInstance()->ReadPacket(0);
 			break;
 		case FD_CLOSE:
 			closesocket((SOCKET)wParam);
@@ -261,6 +271,8 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 		if (LOWORD(lParam) == 0 || HIWORD(lParam) == 0)
 			break;
 		m_pCreateManager->Resize(LOWORD(lParam), HIWORD(lParam));
+		EventHandler::GetInstance()->m_nWndClientWidth = LOWORD(lParam);
+		EventHandler::GetInstance()->m_nWndClientHeight = HIWORD(lParam);
 
 		m_pCamera->SetViewport(0, 0, LOWORD(lParam), HIWORD(lParam), 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, LOWORD(lParam), HIWORD(lParam));
@@ -345,7 +357,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		return;
 		break;
 	case Start_Scene:
-		if (m_PrevState == SceneType::Lobby_Scene)
+		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::Room_Scene)
 		{
 			m_sPlayerID = "";
 			m_pScene = shared_ptr<StartScene>(new StartScene());
@@ -363,12 +375,17 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		}
 		break;
 	case Room_Scene:
-		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::End_Scene)
+		if (m_PrevState == SceneType::Lobby_Scene || m_PrevState == SceneType::End_Scene || m_PrevState == SceneType::Start_Scene)
 		{
 			m_pScene = shared_ptr<RoomScene>(new RoomScene());
 			m_pScene->SetId(m_sPlayerID);
 			m_pScene->SetFontShader(m_pFontManager->getFontShader());
 			m_pScene->setCamera(m_pCamera);
+#ifdef noLobby
+			//NetWorkManager::GetInstance()->SetRoomNum(0);
+			//NetWorkManager::GetInstance()->SetGameMode(1); //1이면 아이템전 룸으로
+#endif 
+
 		}
 		break;
 	case Game_Scene:
@@ -408,8 +425,9 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
 		//-----------------만일 룸씬에서 시작신호 받으면서 위치를 받는게 맞다면 이곳에서 그 값으로 setPosition을 해야함.
-		//m_pPlayer->SetPosition(NetWorkManager::GetInstance()->m_xmf3Position);
-
+#ifdef isConnectedToServer
+		m_pPlayer->SetPosition(NetWorkManager::GetInstance()->GetPosition());
+#endif
 		if (type == SceneType::ItemGame_Scene)
 			m_pPlayer->SetMaxVelocityXZ(25);
 
@@ -425,7 +443,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		m_pPlayer->ReleaseUploadBuffers();
 
 	m_PrevState = type;
-
+	NetWorkManager::GetInstance()->SetCurScene(m_pScene);
 	EventHandler::GetInstance()->SetCurScene(m_pScene);
 }
 
@@ -474,7 +492,7 @@ void CGameFramework::CreatePSOs()
 	CreatePsoWire(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE);
 	CreatePsoWireInstance(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE_INSTANCING);
 	//Font
-	CreatePsoFont(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PONT);
+	CreatePsoFont(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_FONT);
 	//Blur
 	CreatePsoMotionBlur(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_MOTION_BLUR);
 	CreatePsoHorzBlur(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_HORZ_BLUR);

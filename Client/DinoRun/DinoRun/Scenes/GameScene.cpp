@@ -157,7 +157,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 #ifdef isConnectedToServer
-	NetWorkManager::GetInstance()->ConnectToServer();
+//	NetWorkManager::GetInstance()->ConnectToServer();
 #endif
 
 	m_pCreateManager->RenderLoading();
@@ -314,6 +314,19 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
+
+	model_info.useBillBoard = false;
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Sub_Dino.bin";
+	model_info.dataFileName = "Resources/ObjectData/DinoData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Sub_Dino2.bin";
+	model_info.dataFileName = "Resources/ObjectData/Dino2Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
 #endif
 
 	shader = new FenceShader;
@@ -447,7 +460,16 @@ void GameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM w
 			//if (m_pPlayer)	m_pPlayer->KeyUpDown();
 			break;
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+#ifdef isConnectedToServer
+			//골인했다는 신호를 서버에게 send
+			//신호만 유저에게 보낸다
+#else
+			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+
+			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+#endif
 			break;
 		case VK_SHIFT:
 			if (m_pPlayer) 
@@ -534,7 +556,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		m_pPlayer->m_fForce = 0;
 
 	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
-	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
+	//((CPlayer*)PLAYER_SHADER->getList()[0])->Move(dwDirection, 1500.0f*deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -545,6 +567,9 @@ void GameScene::Render()
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_CUBE_MAP]);
 	if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
+
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_TERRAIN]);
+	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SKIN_MESH]);
 	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
@@ -565,9 +590,6 @@ void GameScene::Render()
 		if (shader)
 			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
 	}
-
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_TERRAIN]);
-	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SKIN_MESH_INSTANCING]);
 	for (CSkinedObInstancingShader* shader : instancingAnimatedModelShaders)
@@ -599,19 +621,19 @@ void GameScene::RenderShadow()
 	BaseScene::RenderShadow();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_SKIN_MESH]);
-	m_pPlayer->Render(m_pd3dCommandList, m_pShadowCamera);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_MODEL_INSTANCING]);
 	for (CObInstancingShader* shader : instancingModelShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instancingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 	for (CObInstancingShader* shader : instancingModelShaders)
 	{
 		if (shader)
-			shader->BillBoardRender(m_pd3dCommandList, m_pShadowCamera);
+			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
 	}
 }
 void GameScene::RenderVelocity()
@@ -684,7 +706,7 @@ void GameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D1
 			shader->Render(m_pd3dCommandList, m_pCamera);
 	}
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_FONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 
@@ -785,12 +807,12 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		{
 			int rank = 1;
 			vector<CGameObject*> list = PLAYER_SHADER->getList();
-			((CPlayer*)list[0])->SetCheckPoint(1);
-			((CPlayer*)list[0])->SetName("player3");
-			((CPlayer*)list[1])->SetCheckPoint(4);
-			((CPlayer*)list[1])->SetName("player1");
-			((CPlayer*)list[2])->SetCheckPoint(3);
-			((CPlayer*)list[2])->SetName("player2");
+			//((CPlayer*)list[0])->SetCheckPoint(1);
+			//((CPlayer*)list[0])->SetName("player1");
+			//((CPlayer*)list[1])->SetCheckPoint(4);
+			//((CPlayer*)list[1])->SetName("player1");
+			//((CPlayer*)list[2])->SetCheckPoint(3);
+			//((CPlayer*)list[2])->SetName("player2");
 
 			sort(list.begin(), list.end(), [](CGameObject* a, CGameObject* b) {
 				return ((CPlayer*)a)->GetCheckPoint() > ((CPlayer*)b)->GetCheckPoint(); });
@@ -889,14 +911,16 @@ SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	}
 
 #ifdef isConnectedToServer
-	CS_PACKET_PLAYER_INFO playerInfo;
+	/*CS_PACKET_PLAYER_INFO playerInfo;
 	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
 	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
 	playerInfo.keyState = dwDirection;
 	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
 	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
-	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
+	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);*/
+	NetWorkManager::GetInstance()->SendPlayerInfo(m_pPlayer->GetCheckPoint(), dwDirection, m_pPlayer->m_xmf4x4ToParent);
 #endif
+
 
 	return Game_Scene;
 }
@@ -914,7 +938,7 @@ void GameScene::BuildLights()
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
 	m_pLights->m_pLights[0].m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_pLights->m_pLights[0].m_fFalloff = 0.0f;
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -0.7f, 0.0f);
 	m_pLights->m_pLights[0].m_fTheta = 0.0f; //cos(m_fTheta)
 	m_pLights->m_pLights[0].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.001f);;
 	m_pLights->m_pLights[0].m_fPhi = 0.0f; //cos(m_fPhi)
@@ -1058,7 +1082,7 @@ void GameScene::UpdateShadow()
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
 	lightDir = XMVector3Normalize(lightDir);
 
-	XMVECTOR shadowCameraPosition = XMLoadFloat3(&centerPosition) - 2.0f*rad*lightDir;
+	XMVECTOR shadowCameraPosition = XMLoadFloat3(&centerPosition) - 1.0f*rad*lightDir;
 	XMVECTOR targetPosition = XMLoadFloat3(&centerPosition);
 	XMVECTOR shadowUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
@@ -1190,6 +1214,7 @@ void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
 	BaseScene::ReSize(pCreateManager);
 	ResetShadowBuffer(m_pCreateManager.get());
 	ReBuildSubCameras(pCreateManager);
+	motionBlurShader->OnResize(pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
 }
 void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
@@ -1210,6 +1235,12 @@ void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 
 		//이 패킷을 받으면 바로 게임 카운트다운 시작
 		UpdateStartInfo(packet, fTimeElapsed);
+		break;
+	case SC_SLIDING_ANI:
+		UpdatePlayerSliding(packet, fTimeElapsed);
+		break;
+	case SC_COLLISION_ANI:
+		UpdatePlayerCollision(packet, fTimeElapsed);
 		break;
 	default:
 		break;
@@ -1265,4 +1296,30 @@ void GameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
 	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
 	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
 	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+}
+
+void GameScene::UpdatePlayerSliding(char* packet, float fTimeElapsed)
+{
+
+	SC_PACKET_PLAYER_ANI* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_ANI*>(packet);
+
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == playerInfo->id; });
+	if (obj != obList.end())
+	{
+		((CPlayer*)(*obj))->OnSliding();
+	}
+}
+void GameScene::UpdatePlayerCollision(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_PLAYER_ANI* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_ANI*>(packet);
+
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == playerInfo->id; });
+	if (obj != obList.end())
+	{
+		((CPlayer*)(*obj))->OnCollisionAni();
+	}
 }

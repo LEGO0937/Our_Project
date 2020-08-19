@@ -41,15 +41,16 @@ public:
 	void SetGameMode(const bool& mode) { m_bGameMode = mode; }
 	void SetPlayerName(const string& name) { m_sPlayerName = name; }
 	void SetNumPlayer(const int& num) { m_iNumPlayer = num; }
+
 	void SetPosition(const XMFLOAT3& position) { m_xmf3Position = position; }
 
 	void SetHwnd(const HWND& hwnd) { m_hWnd = hwnd; }
 
+	XMFLOAT3 GetPosition() { return m_xmf3Position; }
 	int GetRoomNum() { return m_iRoomNum; }
 	bool GetGameMode() { return m_bGameMode; }
 	string GetPlayerName() { return m_sPlayerName; }
 	int GetNumPlayer() { return m_iNumPlayer; }
-	XMFLOAT3 GetPosition() { return m_xmf3Position; }
 private:
 	CS_PACKET_READY* pReady = NULL; // 레디
 	CS_PACKET_UNREADY* pUnReady = NULL; // 레디 안함
@@ -59,6 +60,8 @@ private:
 	CS_PACKET_CHATTING* pText = NULL;
 	CS_PACKET_PLAYER_INFO* pInfo = NULL; // 플레이어 위치, 애니메이션
 	CS_PACKET_EVENT* pEvent = NULL;  // 아이템 
+	CS_PACKET_PLAYER_ANI* pAni = NULL; //슬라이딩 or 충돌 애니메이션용
+	CS_PACKET_GAME_MODE_INFO* pGameMode = NULL; //룸씬의 게임모드 상태
 
 	HWND m_hWnd{ NULL };
 	int m_iNumPlayer = 0;
@@ -89,7 +92,8 @@ public:
 	SOCKET getSock();
 	void Initialize();
 	void Release();
-	void ConnectToServer();
+	void LoadToServer(HWND hWnd);
+	void ConnectToServer(HWND hWnd);
 
 	//Network클래스도 씬에접근하기 위해서에 접근가능하게 하기위해 내부 포인터를 갖고있게 함.
 	void SetGameFrameworkPtr(HWND hWnd, shared_ptr<BaseScene> client);
@@ -100,20 +104,22 @@ public:
 	void SendPacket(DWORD dataBytes);
 
 public:
-
 	void SendReady(); // 룸씬에다
 	void SendNotReady(); // 룸씬에다
 	void SendReqStart(); // 룸씬(선택)
 	void SendReleaseKey(); // 그냥 혹시몰라서
 	void SendPlayerInfo(int checkPoints, DWORD keyState, XMFLOAT4X4 xmf4x4Parents); // 아이템 게임씬, 스피드 게임씬
 
+	void SendChangeGameMode();
+	void SendSliding();
+	void SendColision();
+
 	void SendNickName(char id, _TCHAR* name); // 닉네임 값(나중에 의논)
 	void SendChattingText(char id, const _TCHAR* text); // 채팅(졸작 끝나고 어떻게 좀)
-	void SendEvent(MessageStruct& msg); // 아이템 관리 패킷(아이템 게임 씬)
+	void SendEvent(MessageStruct msg); // 아이템 관리 패킷(아이템 게임 씬)
 
 public:
 	CS_PACKET_REQUEST_START* GetRS() { return pRequestStart; }
 	void SetNullRS() { pRequestStart = NULL; }
 
 };
-

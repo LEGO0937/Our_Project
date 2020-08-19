@@ -7,7 +7,7 @@ public:
 	SkinedShader();
 	virtual ~SkinedShader();
 	
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
 		
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);

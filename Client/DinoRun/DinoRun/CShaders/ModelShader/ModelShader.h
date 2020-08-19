@@ -108,11 +108,33 @@ public:
 	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition);
 };
 
+class MeteoriteSpotShader : public ModelShader
+{
+public:
+	MeteoriteSpotShader();
+	virtual ~MeteoriteSpotShader();
+
+	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
+	virtual void Update(float fTimeElapsed);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition);
+};
+
 class MoundShader : public ModelShader
 {
 public:
 	MoundShader();
 	virtual ~MoundShader();
+
+	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
+	virtual void Update(float fTimeElapsed);
+	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition);
+};
+
+class FogBoxShader : public ModelShader
+{
+public:
+	FogBoxShader();
+	virtual ~FogBoxShader();
 
 	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL);
 	virtual void Update(float fTimeElapsed);

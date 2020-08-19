@@ -11,26 +11,6 @@ SkinedShader::SkinedShader()
 SkinedShader::~SkinedShader()
 {
 }
-void SkinedShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
-{
-	MODEL_INFO* info = (MODEL_INFO*)pInformation;
-	if (!info->modelName)
-		return;
-	if (info->updatedContext)
-		m_pUpdatedContext = info->updatedContext;
-
-	instancingModelName = info->modelName;
-	instancingModelName.insert(instancingModelName.find("."), "_ins");  //인스턴싱 전용 모델파일을 불러온다
-
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, info->modelName, NULL);
-	m_ppObjects = pModel->m_pModelRootObject;
-	//m_ppSkinedObjects->AddRef();
-
-	if (info->dataFileName)
-		Load(pCreateManager, info->modelName, info->dataFileName);
-
-	CreateShaderVariables(pCreateManager);
-}
 void SkinedShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
 {
 	FILE *pInFile = NULL;
@@ -42,19 +22,15 @@ void SkinedShader::Load(CreateManager* pCreateManager, const char* filename, con
 	int nLength = 0;
 
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
-	const char* fileName = instancingModelName.c_str();
-
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, filename, NULL);
 		pSkinedObject = pModel->m_pModelRootObject;
 		pSkinedObject->AddRef();
 
-		if(m_pUpdatedContext)
-			pSkinedObject->SetUpdatedContext(m_pUpdatedContext);
 		pSkinedObject->m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 1, pModel);
 		pSkinedObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); //left_turn_start
-		pSkinedObject->m_pSkinnedAnimationController->SetTrackEnable(0, true);
+		pSkinedObject->m_pSkinnedAnimationController->SetTrackEnable(0, false);
 
 		nReads = (UINT)::fread(&(pSkinedObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
 		objectList.emplace_back(pSkinedObject);

@@ -381,7 +381,7 @@ void ParticleSystem::FindValue(char name)
 		m_fSize = (1.0f);
 		m_fParticleLife = 3.0f;
 		m_fVelocity = (85.0f);
-		m_fGravity = 4.0f;
+		m_fGravity = 250.0f;
 		m_uMaxSize = 120;
 		m_sTextureName = "Resources/Images/T_Itemboxeat.dds";
 	}
@@ -392,7 +392,7 @@ void ParticleSystem::FindValue(char name)
 		m_fSize = (1.0f);
 		m_fParticleLife = 3.0f;
 		m_fVelocity = (85.0f);
-		m_fGravity = 4.0f;
+		m_fGravity = 250.0f;
 		m_uMaxSize = 120;
 		m_sTextureName = "Resources/Images/T_Meateat_P.dds";
 	}
@@ -414,7 +414,7 @@ void ParticleSystem::FindValue(char name)
 		m_fSize = (10.0f);
 		m_fParticleLife = 7.0f;
 		m_fVelocity = (170.0f);
-		m_fGravity = 5.0f;
+		m_fGravity = 400.0f;
 		m_uMaxSize = 16;
 		m_sTextureName = "Resources/Images/T_Minimeteo.dds";
 	}

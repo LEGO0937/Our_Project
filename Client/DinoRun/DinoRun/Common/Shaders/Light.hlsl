@@ -5,7 +5,7 @@
 #define DIRECTIONAL_LIGHT 3
 #define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
-//#define FOG
+#define FOG
 //#define _WITH_REFLECT
 
 

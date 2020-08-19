@@ -71,6 +71,17 @@ public:
 	~ItemMeteorite();
 };
 
+class ItemMeteoriteSpot : public CGameObject
+{
+private:
+	float m_fLifeCount = 0;
+public:
+	virtual bool Update(float fTimeElapsed, CGameObject* target);
+
+	ItemMeteoriteSpot(int nMeshes = 1);
+	~ItemMeteoriteSpot();
+};
+
 class ItemMound : public CGameObject
 {
 private:
@@ -80,4 +91,15 @@ public:
 
 	ItemMound(int nMeshes = 1);
 	~ItemMound();
+};
+
+class ItemFogBox : public CGameObject
+{
+private:
+	float m_fLifeCount = 0;
+public:
+	virtual bool Update(float fTimeElapsed, CGameObject* target);
+
+	ItemFogBox(int nMeshes = 1);
+	~ItemFogBox();
 };

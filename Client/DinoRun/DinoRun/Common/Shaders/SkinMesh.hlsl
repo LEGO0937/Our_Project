@@ -49,6 +49,18 @@ float4 PSSkinnedAnimation(VS_SKINNED_OUTPUT input) : SV_TARGET
 	float3 normalW = normalize(input.normal);
 	float4 color = saturate(0.45*(baseAlbedo) + sLighting(input.positionW, normalW, shadowFactor)*0.6);
 	
+	float3 toEyeWorld = gvCameraPosition - input.positionW;
+	float distToEye = length(toEyeWorld);
+
+#ifdef FOG
+	if (gFogStart >= 5.0f)
+	{
+		float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
+		color = lerp(color, gFogColor, fogAmount);
+	}
+#endif
+	color.a = baseAlbedo.a;
+
 	return color;
 	
 	

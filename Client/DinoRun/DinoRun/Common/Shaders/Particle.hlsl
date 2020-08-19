@@ -48,7 +48,7 @@ void ParticleCS( uint3 id : SV_GroupID)
 	{
 		float3 force = normalize(flat) / length(curParticle.position);
 		curParticle.velocity = prevParticle.velocity - ((force * gElapsedTime) * 0.5);
-		curParticle.velocity.y -= gGravity;
+		curParticle.velocity.y -= gGravity * gElapsedTime;
 	}
 	else
 	{
@@ -126,7 +126,18 @@ void GSParticle(point VS_PARTICLE_OUTPUT input[1], inout TriangleStream<VS_PARTI
 float4 PSParticle(VS_PARTICLE_OUTPUT input) : SV_TARGET
 {
 	float3 normalW = normalize(input.normalW);
-	float4 color = gTexture.Sample(gsamAnisotropicWrap, input.TexC);
-	clip(color.a - 0.1);
+	float4 baseAlbedo = gTexture.Sample(gsamAnisotropicWrap, input.TexC);
+	float4 color = baseAlbedo;
+	clip(baseAlbedo.a - 0.1);
+
+	float3 toEyeWorld = gvCameraPosition - input.positionW;
+	float distToEye = length(toEyeWorld);
+
+#ifdef FOG
+	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
+	color = lerp(color, gFogColor, fogAmount);
+#endif
+	color.a = baseAlbedo.a;
+
 	return(color);
 }

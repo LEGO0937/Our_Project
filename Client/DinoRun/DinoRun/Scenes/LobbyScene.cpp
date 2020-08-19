@@ -209,6 +209,7 @@ void LobbyScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CreateShaderVariables(pCreateManager.get());
 
 	//랜더링 준비가 끝났으니 방목록과 유저목록을 달라는 send할 것.
+	// 이 주석자리에 유저 정보 DB에서 불러오기
 }
 
 void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -263,27 +264,25 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 						if (clickNum <= m_vRooms.size() - 1)
 						{
 							//*서버*
-							//방 클릭 시 해당 방의 번호를 서버에게 보냄 서버는 방에 여유인원이 있고, 대기중 상태라면
-							//들어오라는 신호를 보낸다.
-							//연결 성공 시 네트워크 클래스에 m_vRooms[clickNum].m_iRoomNumber를 받아서 
-							//접속할 방의 번호 저장할것.
-
-							
 							
 							if (!m_vRooms[clickNum].m_bIsGaming && m_vRooms[clickNum].m_iUserNumber < m_vRooms[clickNum].m_iMaxUserNumber)
-							{
+							{// 조건문 내의 내용 앞에서부터 게임중 or 대기중, 방안의 유저수, 최대 유저 고정
 								//순서
 							    //방번호를 갖고있는 패킷을 send
 							    //서버에서 패킷받고 여유자리있는지 확인하고 입장가능여부 send
 							    //recv로 들어오라는 신호를 받음 그 처리는 Process패킷함수에서
 								//호출하는 updateEntryRoom함수가 함.
 								//아래 세개 if들도 이와 같음.
-								//send를하는데 방번호만
-
+								//방번호만 send 방번호에 여유가 있는지 확인
+								//새로 패킷 하나 만들어서 조건문 걸어야겠네
+								//만약 조건 만족해서 들어갈 수 있으면 m_vRooms[clickNum].m_iUserNumber + 1시키기
+								//아래의 UpdateEntryRoom 함수 있으면 사용
+								//우선순위를 나중으로
+								//추후에 DB추가(아이디, 비번, 닉네임, 방번호, 레디 언레디)
 								m_iResultNum = m_vRooms[clickNum].m_iRoomNumber;
-								//이 시점에서 룸 데이터베이스 나정보가 들어가야함.
+								// 이 시점에서 룸 데이터베이스에 내 정보가 들가야한다
 								m_bMode = m_vRooms[clickNum].m_bMode;
-								sceneType = SceneType::Room_Scene;
+								sceneType = SceneType::Room_Scene;  //수정: 서버연동시 위에 두줄은 납두고 이부분만 주석처리하면 돼요
 							}
 						}
 					}
@@ -305,7 +304,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 						{
 							if (!m_vRooms[clickNum + 2].m_bIsGaming && m_vRooms[clickNum + 2].m_iUserNumber < m_vRooms[clickNum + 2].m_iMaxUserNumber)
 							{
-								m_iResultNum = m_vRooms[clickNum + 2].m_iRoomNumber;  //방번호
+								m_iResultNum = m_vRooms[clickNum + 2].m_iRoomNumber; //방번호
 								m_bMode = m_vRooms[clickNum + 2].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -318,6 +317,7 @@ void LobbyScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 							if (!m_vRooms[clickNum + 3].m_bIsGaming && m_vRooms[clickNum + 3].m_iUserNumber < m_vRooms[clickNum + 3].m_iMaxUserNumber)
 							{
 								m_iResultNum = m_vRooms[clickNum + 3].m_iRoomNumber;
+								//아이디 만 넣어 DB쪽 구현
 								m_bMode = m_vRooms[clickNum + 3].m_bMode;
 								sceneType = SceneType::Room_Scene;
 							}
@@ -423,9 +423,12 @@ void LobbyScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM 
 		break;
 	}
 }
+
+
 void LobbyScene::ProcessInput(HWND hwnd, float deltaTime)
 {
 }
+
 
 void LobbyScene::Render()
 {
@@ -438,7 +441,7 @@ void LobbyScene::Render()
 			shader->Render(m_pd3dCommandList, m_pCamera);
 	}
 	
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_FONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 
@@ -465,16 +468,16 @@ SceneType LobbyScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	}
 
 	//----------------- 매번 서버로부터 방들의 정보를 갱신 
-	//m_vRooms
-	//m_vUsers
-	//m_vRooms.clear();
-	//for (int i = 0; i < db_size(); ++i)
-	//{
-	//	m_vRooms.emplace_back(룸정보);
-	//}
-	//m_vUsers같은 경우에는 나 자신을 빼야해요. 나를 제외한 다른 유저들만 넣어주면 된다.
+	// m_vRooms -> 룸넘버
+	// m_vUsers -> 유저 넘버
+	/*m_vRooms.clear();
+	for (int i = 0; i < db.size(); ++i)
+	{
+		m_vRooms.emplace_back(룸정보);
+	}*/
+	// 유저 넘버도 똑같은 방식 단 m_vUsers같은 경우 나 자신 제외
+	// 이는 조건문 걸어서 이용하자!
 	
-
 	//m_iPageNum 
 	//m_vRooms.clear();
 	/*
@@ -632,22 +635,20 @@ void LobbyScene::UpdateAddRoom(char* packet, float fTimeElapsed)
 {
 	//하나의 방을 방목록에 추가하는 패킷
 	SC_PACKET_ROOM* roomInfo = reinterpret_cast<SC_PACKET_ROOM*>(packet);
-	m_vRooms.emplace_back(Room(roomInfo->m_iRoomNumber, roomInfo->m_iUserNumber, 
-		roomInfo->m_bIsGaming, roomInfo->m_bMode));
+//	m_vRooms.emplace_back(Room(roomInfo->m_iRoomNumber, roomInfo->m_iUserNumber, 
+//		roomInfo->m_bIsGaming, roomInfo->m_bMode));
 }
 void LobbyScene::UpdateRoomInfo(char* packet, float fTimeElapsed)
 {
-	//하나의 방을 대상으로하는 방 정보 최신화
+	
 	SC_PACKET_ROOM* roomInfo = reinterpret_cast<SC_PACKET_ROOM*>(packet);
+	m_vRooms.clear(); //룸 명단을 초기화
 
-	//방번호로 목록에서 방을 찾고, 게임방 상태, 모드,접속 유저수를 최신화한다.
-	auto room = find_if(m_vRooms.begin(), m_vRooms.end(), [&](const Room& a) {
-		return a.m_iRoomNumber == roomInfo->m_iRoomNumber; });
-	if (room != m_vRooms.end())
+	//이 부분에서 패킷에 벡터로 갖고있는 룸 명단을 복사해오는거에요.
+	//받아오면 이후에는 룸명단이 화면에 알아서 출력돼요
+	for (const RoomInfo& room : roomInfo->romms)
 	{
-		(*room).m_bIsGaming = roomInfo->m_bIsGaming;
-		(*room).m_bMode = roomInfo->m_bMode;
-		(*room).m_iUserNumber = roomInfo->m_iUserNumber;
+		m_vRooms.emplace_back(Room(room.m_iRoomNumber, room.m_iUserNumber, room.m_bIsGaming, room.m_bMode));
 	}
 }
 
@@ -658,8 +659,8 @@ void LobbyScene::UpdateLogOut(char* packet, float fTimeElapsed)
 void LobbyScene::UpdateEntryRoom(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_ROOM* roomInfo = reinterpret_cast<SC_PACKET_ROOM*>(packet);
-	m_iResultNum = roomInfo->m_iRoomNumber;
-	m_bMode = roomInfo->m_bMode;
+	//m_iResultNum = roomInfo->m_iRoomNumber;
+	//m_bMode = roomInfo->m_bMode;
 	sceneType = SceneType::Room_Scene;
 
 }

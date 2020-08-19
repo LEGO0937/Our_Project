@@ -3,6 +3,7 @@
 #include "../Common/FrameWork/CreateManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
 #include "../Common/FrameWork/SoundManager.h"
+#include "EventHandler/EventHandler.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -19,7 +20,7 @@ RoomScene::RoomScene() :BaseScene()
 }
 RoomScene::~RoomScene()
 {
-	SoundManager::GetInstance()->Stop("Start_BGM");
+
 }
 void RoomScene::ReleaseUploadBuffers()
 {
@@ -87,6 +88,9 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	button_info.f_uvY.emplace_back(0.0f);
 	button_info.positions.emplace_back(XMFLOAT3(0.55f, -0.57f, 0.0f));
 	button_info.f_uvY.emplace_back(0.0f);
+	//---------------------------스피드전 아이템전 선택 버튼
+	button_info.positions.emplace_back(XMFLOAT3(-0.5f, -0.8f, 0.0f));
+	button_info.f_uvY.emplace_back(0.75f);
 
 	button_info.maxUv = XMFLOAT2(0.5f, 0.25f);
 	button_info.minUv = XMFLOAT2(0.0f, 0.0f);
@@ -108,7 +112,10 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	CreateShaderVariables(pCreateManager.get());
 
 	//랜더링 준비가 끝났으니 유저 목록을 달라는 메시지 send
+	//닉네임, 버튼 상태, 클라아이디
+	//DB에 방번호 및 레디 or 낫레디 추가
 	//이때 send로 보내는 패킷에는 룸번호가 필요하니 networkmanager에 있는 GetRoomNum()을 활용하자
+	//바로 위에꺼는 혹시 모르니 보류 DB로 처리해보도록 하자!
 }
 
 void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -118,19 +125,19 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 	::SetCapture(hWnd);
 	::GetCursorPos(&m_ptOldCursorPos);
 	ScreenToClient(hWnd, &m_ptOldCursorPos);
-	point = ScreenToProj(m_nWndClientWidth, m_nWndClientHeight, m_ptOldCursorPos);
+	point = ScreenToProj(EventHandler::GetInstance()->m_nWndClientWidth, EventHandler::GetInstance()->m_nWndClientHeight, m_ptOldCursorPos);
 	switch (nMessageID)
 	{
 	case WM_LBUTTONDOWN:
 		SoundManager::GetInstance()->Play("Mouse_Down", 0.2f);
-		if (point.x > -0.15f && point.x < 0.15f && point.y > -0.92f && point.y < -0.68f) //로그인 버튼 충돌체크
+		if (point.x > -0.15f && point.x < 0.15f && point.y > -0.92f && point.y < -0.68f) //레디 버튼 충돌체크
 		{
 			if (instacingUiShaders[1]->getUvXs()[0] == 0.0f)
 			{
-				//취소-> 레디 상태로 버튼 전환하는 구간
+				//레디-> 취소 상태로 버튼 전환하는 구간
 				//수행 후 버튼은 레디상태가 됨
 #ifdef isConnectedToServer
-				NetWorkManager::GetInstance()->SendReady();
+				NetWorkManager::GetInstance()->SendNotReady();
 #endif
 				BUTTON_STATE_SHADER->getUvXs()[0] = 0.5f;
 				BUTTON_STATE_SHADER->getUvXs()[1] = 0.0f;
@@ -141,15 +148,28 @@ void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPar
 			else
 			{
 #ifdef isConnectedToServer
-				NetWorkManager::GetInstance()->SendNotReady();
+				NetWorkManager::GetInstance()->SendReady();
 #endif
-				//레디-> 취소 상태로 버튼 전환하는 구간
+				//취소-> 레디 상태로 버튼 전환하는 구간
 				BUTTON_STATE_SHADER->getUvXs()[0] = 0.0f;
 				BUTTON_STATE_SHADER->getUvXs()[1] = 0.5f;
 			}
 			//*서버*
 			//버튼이 클릭 되는 구간
 			//클릭하여 버튼상태 변화 시 클라에게 버튼의 현재상태 정보를 보냄
+		}
+		else if (point.x > -0.65f && point.x < -0.35f && point.y > -0.92f && point.y < -0.68f) //모드선택버튼 충돌체크
+		{
+			{
+				
+#ifdef isConnectedToServer
+				NetWorkManager::GetInstance()->SendChangeGameMode();
+				//모드 상태 바뀌었다는 패킷전송
+#else
+				m_bModeState = !m_bModeState;
+#endif
+
+			}
 		}
 		::ReleaseCapture();
 		break;
@@ -183,7 +203,12 @@ void RoomScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM w
 #ifdef isConnectedToServer
 			//서버에게 나간다는 메시지 send
 #else
+#ifdef noLobby
+			sceneType = SceneType::Start_Scene;
+#else
 			sceneType = SceneType::Lobby_Scene;
+#endif //noLobby
+
 #endif
 			break;
 		default:
@@ -221,7 +246,7 @@ void RoomScene::Render()
 	if (instacingUiShaders[1])
 		instacingUiShaders[1]->Render(m_pd3dCommandList, m_pCamera);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_FONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 
@@ -241,6 +266,7 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
 	if (sceneType != SceneType::Room_Scene)
 	{
+		SoundManager::GetInstance()->AllStop();
 		return sceneType;
 	}
 	//*서버*
@@ -258,11 +284,12 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 	//send때 자신의 방번호와 닉네임을 보내고 서버에서는 이 닉네임을 제외한 다른 유저들의 정보를
 	//넘긴다.
 
-	//m_vUsers.clear();
-	//for (int i = 0; i < db 데이터량; ++i)
-	//{
-	//	m_vUsers.emplace_back(User("닉네임", 버튼상태, id));
-	//}
+	// m_vUsers.clear();
+	/*for (int i = 0; i < db.데이터사이즈; ++i)
+	{
+		m_vUsers.emplace_back(User("닉네임", 버튼상태, id));
+	}*/
+	BUTTON_STATE_SHADER->getUvXs()[6] = 0.5f * m_bModeState;
 
 	for (int i = 0; i < m_vUsers.size(); ++i)
 	{
@@ -271,22 +298,24 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		if (i < m_vUsers.size())
 		{
 			gameTexts[i + 1].text = m_vUsers[i].m_sName;  //첫번째는 본인이름이 들어가니 두번째란부터 입력
-			BUTTON_STATE_SHADER->getUvXs()[i + 2] = 0.5 * m_vUsers[i].m_bButtonState;
+			BUTTON_STATE_SHADER->getUvXs()[i + 2] = 0.5f * (float)m_vUsers[i].m_bButtonState;
 		}
 		else
 		{
 			gameTexts[i + 1].text = "";
-			BUTTON_STATE_SHADER->getUvXs()[i + 2] = 0.5;
+			BUTTON_STATE_SHADER->getUvXs()[i + 2] = 0.5f;
 		}
 	}
 	for (CUiShader* shader : instacingUiShaders)
 		shader->Update(fTimeElapsed, NULL);
+	if (BUTTON_STATE_SHADER->getUvXs()[1] != 0.5f)
+		return SceneType::Room_Scene;
 
 	for (int i = 0; i < m_vUsers.size(); ++i)
 	{
 		//이 부분은 들어와있는 모든 유저가 레디상태인지 확인 한명이라도 취소상태이면 다음씬으로 안넘어감.
-		if (instacingUiShaders[1]->getUvXs()[i + 1] != 0.5f && m_vUsers[i].m_sName != "")
-			return SceneType::Room_Scene;
+		if (instacingUiShaders[1]->getUvXs()[i + 2] != 0.5f && m_vUsers[i].m_sName != "")
+			return SceneType::Room_Scene; 
 	}
 	//이 구간에 왔다는것은 접속한 유저들이 모두 레디상태라는 뜻.
 	//마지막으로 나를 제외한 유저가 한명이라도 있다면 두명 이상 레디상태이니 다음 게임씬으로 넘어간다.
@@ -296,16 +325,21 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 		return SceneType::Room_Scene;
 	
 	//문제 1. 현재는 싱글플레이니까 이렇게 처리하는데 멀티플레이시에는 어떻게 처리할건지?...
-	//제안 1. 클라가 버튼을 누르면 send를 하게되는데.. 이 신호를 서버가 받고 그 버튼상태를
-	//데이터베이스에 적용함. 이후 데이터베이스로부터 룸에있는 유저들이 모두 ready상태인지를 확인하고
-	//조건이 성립하면 다음씬으로 넘어가라는 패킷을 룸에 있는 모든 유저에게 보냄.
-	//
-
+	//제안 1. 클라가 버튼을 누르면 send를 하게되는데 이 신호를 서버가 받고
+	//그 버튼 상태를 DB에 적용함, 이후 DB로부터 룸에 있는 유저들이 모두 ready
+	//상태인지를 확인하고 조건이 성립하면 다음 씬으로 넘어가라는 패킷을 룸에 있는
+	//모든 유저에게 보냄
+#ifdef isConnectedToServer
+	NetWorkManager::GetInstance()->SendReqStart();
+#else
 	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
-	if (NetWorkManager::GetInstance()->GetGameMode())
+	
+	if (m_bModeState)
 		sceneType = SceneType::ItemGame_Scene;
 	else
 		sceneType = SceneType::Game_Scene;
+#endif
+	// 스피드전 or 아이템전 판단.
 
 	return SceneType::Room_Scene;
 }
@@ -340,7 +374,13 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
 	switch (packet[1])
 	{
-	case SC_READY_STATE:
+	case SC_ACCESS_COMPLETE:
+		UpdateAccessUser(packet, fTimeElapsed);
+		break;
+	case SC_ACCESS_PLAYER:
+		//SC_PACKET_ACCESS_PLAYER* pAP = reinterpret_cast<SC_PACKET_ACCESS_PLAYER*>(packet);
+		break;
+	/*case SC_READY_STATE:
 		UpdateReadyState(packet, fTimeElapsed);
 		break;
 	case SC_UNREADY_STATE:
@@ -351,9 +391,18 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 		break;
 	case SC_CLIENT_LOBBY_OUT:
 		UpdateDeleteUser(packet, fTimeElapsed);
-		break;
-	case 4: //게임을 실행하라는 신호
+		break;*/
+	case SC_PUT_PLAYER:   //모든 플레이어가 레디를 하였으니 게임모드로 넘어가라는 명령
 		UpdateNextScene(packet, fTimeElapsed);
+		break;
+	case SC_ROOM_INFO:
+		UpdateUserList(packet, fTimeElapsed);
+		break; // 플레이어 리스트 및 레디 상태
+	case SC_RESET_ROOM_INFO:
+		UpdateClearUserList(packet, fTimeElapsed);
+		break;
+	case SC_GAME_MODE_INFO:
+		UpdateModeState(packet, fTimeElapsed);
 		break;
 	}
 }
@@ -403,18 +452,59 @@ void RoomScene::UpdateDeleteUser(char* packet, float fTimeElapsed)
 		return a.m_id == playerInfo->id; }), m_vUsers.end());
 }
 
+void RoomScene::UpdateLogOut(char* packet, float fTimeElapsed)
+{
+#ifdef noLobby
+	sceneType = SceneType::Start_Scene;
+#else
+	sceneType = SceneType::Lobby_Scene;
+#endif
+}
+void RoomScene::UpdateUserList(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_USERS_INFO* usersInfo = reinterpret_cast<SC_PACKET_USERS_INFO*>(packet);
+	//m_vUsers.clear();
+	{
+		if (usersInfo->users.m_sName != "" && 
+			usersInfo->users.m_sName != NetWorkManager::GetInstance()->GetPlayerName())
+		{
+			m_vUsers.emplace_back(usersInfo->users.m_sName, usersInfo->users.m_bReadyState);
+		}
+	}
+	//for (const UserInfo& user : usersInfo->users)
+	//{
+	//	m_vUsers.emplace_back(User(user.m_sName,user.m_bReadyState));
+	//}
+}
 void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
 {
-	//패킷안에 초기위치(각 플레이어마다 다름) 
 	NetWorkManager::GetInstance()->SetNumPlayer(m_vUsers.size());  //게임을 할 유저 수(자신 제외) 공룡객체 만드는 수와 일치
+
+	SC_PACKET_PUT_PLAYER* playerInfo = reinterpret_cast<SC_PACKET_PUT_PLAYER*>(packet);
+	NetWorkManager::GetInstance()->SetPosition(playerInfo->xmf3PutPos);
+
 	if (NetWorkManager::GetInstance()->GetGameMode())
 		sceneType = SceneType::ItemGame_Scene;
 	else
 		sceneType = SceneType::Game_Scene;
 
-	//여기서 게임씬으로 넘어가게될텐데 서버는 이 신호를 보내면서 데이터베이스에 있는 유저들의 버튼상태를 
-	//취소로 바꿔놔야함. 왜냐하면 end씬에서 esc누르면 룸씬으로 바로 넘어가서 유저정보를 받게되는데
-	//저걸 안바꾸고 업데이트에서 유저정보를 받아오면 모두가 레디된 상태로 받아오게 되니까.
+}
 
-	//NetWorkManager::GetInstance()->SetPosition(packet->position);
+void RoomScene::UpdateAccessUser(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_ACCESS_COMPLETE* access = reinterpret_cast<SC_PACKET_ACCESS_COMPLETE*>(packet);
+	NetWorkManager::GetInstance()->SetMyID(access->myId);
+	NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
+
+}
+
+void RoomScene::UpdateClearUserList(char* packet, float fTimeElapsed)
+{
+	m_vUsers.clear();
+}
+
+void RoomScene::UpdateModeState(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_GAME_MODE_INFO* gameMode = reinterpret_cast<SC_PACKET_GAME_MODE_INFO*>(packet);
+	m_bModeState = gameMode->m_bGameMode;
 }

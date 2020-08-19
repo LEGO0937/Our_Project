@@ -338,8 +338,8 @@ void CreateManager::CreateSwapChain()
 		&dxgiSwapChainDesc, (IDXGISwapChain * *)m_pdxgiSwapChain.GetAddressOf());
 
 	m_pDrawManager->SetSwapChain(m_pdxgiSwapChain);
-
-	hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
+	
+	//hResult = m_pdxgiFactory->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER);
 	//스왑체인의 현재 후면버퍼 인덱스를 저장한다.
 	m_pDrawManager->SetSwapChainBufferIndex(m_pdxgiSwapChain->GetCurrentBackBufferIndex());
 }

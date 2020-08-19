@@ -39,6 +39,12 @@ constexpr int SC_UNREADY_STATE = 12; // 언레디
 constexpr int SC_GO_LOBBY = 13; // 로그인하고 로비 들감
 constexpr int SC_EVENT = 14; // 플레이어 아이템 관리
 constexpr int SC_COMPARE_TIME = 15; // 서버와 클라 시간 비교
+constexpr int SC_ROOM_INFO = 16;
+constexpr int SC_RESET_ROOM_INFO = 17;
+constexpr int SC_GAME_MODE_INFO = 18;
+
+constexpr int SC_SLIDING_ANI = 16; // 특정 플레이어 충돌 애니메이션 실행
+constexpr int SC_COLLISION_ANI = 17; // 특정 플레이어 미끄러짐 애니메이션 실행
 //----추가
 
 constexpr int CS_READY = 0; // 레디
@@ -49,6 +55,10 @@ constexpr int CS_NICKNAME_INFO = 4; // 닉넴 정보
 constexpr int CS_CHATTING = 5; // 채팅
 constexpr int CS_PLAYER_INFO = 6; // 플레이어 위치
 constexpr int CS_EVENT = 7; // 플레이어 아이템
+constexpr int CS_GAME_MODE_INFO = 8; //룸씬에서 방장이 게임모드를 바꿧다는 메시지
+
+constexpr int CS_SLIDING_ANI = 16; // 특정 플레이어 충돌 애니메이션 실행
+constexpr int CS_COLLISION_ANI = 17; // 특정 플레이어 미끄러짐 애니메이션 실행
 //----추가 
 
 //struct MessageStruct
@@ -326,16 +336,34 @@ struct SC_PACKET_GO_LOBBY
 
 //------룸 정보 업데이트에 대한 패킷
 
+struct RoomInfo
+{
+	char m_iRoomNumber;
+	char m_iUserNumber;
+	bool m_bIsGaming;
+	bool m_bMode;
+	//
+	RoomInfo(char roomNum, char userNum, bool isGameing, bool mode) :m_iRoomNumber(roomNum),
+		m_iUserNumber(userNum), m_bIsGaming(isGameing), m_bMode(mode)  //isGameing 0: 대기중, 1: 게임중
+	{}
+};
+
+struct UserInfo
+{
+	string m_sName;
+	bool m_bReadyState;
+	//
+	UserInfo(string name = "", bool readyState = 0) :m_sName(name),
+		m_bReadyState(readyState)
+	{}
+};
 
 struct CS_PACKET_ROOM
 {
 	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
 	char type;
 
-	char m_iRoomNumber;
-	char m_iUserNumber;
-	bool m_bIsGaming;
-	bool m_bMode;
+	vector<RoomInfo> romms;
 };
 
 struct SC_PACKET_ROOM
@@ -343,9 +371,56 @@ struct SC_PACKET_ROOM
 	char size;
 	char type;
 
-	char m_iRoomNumber;
-	char m_iUserNumber;
-	bool m_bIsGaming;
-	bool m_bMode;
+	vector<RoomInfo> romms;
 };
 
+
+struct CS_PACKET_PLAYER_ANI
+{
+	char size;  //미끄러짐 혹은 충돌 애니메이션을 실행시키기 위한 패킷이에요 
+	char type; // 타입에 따라서 충돌혹은 미끄러짐 애니메이션을 실행해요.
+	char id;
+};
+
+struct SC_PACKET_PLAYER_ANI
+{
+	char size;
+	char type;
+	char id;
+};
+
+struct CS_PACKET_USERS_INFO
+{
+	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
+	char type;
+
+	UserInfo users[MAX_USER];
+};
+
+struct SC_PACKET_USERS_INFO
+{
+	char size;
+	char type;
+
+	UserInfo users;
+};
+
+struct SC_PACKET_RESET_USERS_INFO
+{
+	char size;
+	char type;
+};
+
+struct SC_PACKET_GAME_MODE_INFO
+{
+	char size;
+	char type;
+	
+	bool m_bGameMode;
+};
+
+struct CS_PACKET_GAME_MODE_INFO
+{
+	char size;
+	char type;
+};

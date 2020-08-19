@@ -33,8 +33,21 @@ VS_TEXTED_INSTANCING_OUTPUT VSTextedInstancing(VS_TEXTED_INSTANCING_INPUT input,
 float4 PSTextedInstancing(VS_TEXTED_INSTANCING_OUTPUT input) : SV_TARGET
 {
 	float3 normalW = normalize(input.normalW);
-	float4 color = gTexture.Sample(gsamAnisotropicWrap, input.TexC);
-	clip(color.a - 0.1);
-	color = color * 0.5 + (Lighting(input.positionW, normalW)*0.5);
+	float4 baseAlbedo = gTexture.Sample(gsamAnisotropicWrap, input.TexC);
+	clip(baseAlbedo.a - 0.1);
+	float4 color = saturate(baseAlbedo * 0.5 + (Lighting(input.positionW, normalW)*0.5));
+
+	float3 toEyeWorld = gvCameraPosition - input.positionW;
+	float distToEye = length(toEyeWorld);
+
+#ifdef FOG
+	if (gFogStart >= 5.0f)
+	{
+		float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
+		color = lerp(color, gFogColor, fogAmount);
+	}
+#endif
+	color.a = baseAlbedo.a;
+
 	return(color);
 }

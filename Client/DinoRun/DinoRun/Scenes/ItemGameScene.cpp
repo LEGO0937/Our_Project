@@ -158,7 +158,7 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
 
 #ifdef isConnectedToServer
-	NetWorkManager::GetInstance()->ConnectToServer();
+	//NetWorkManager::GetInstance()->ConnectToServer();
 #endif
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 
@@ -270,13 +270,31 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
 
+	shader = new FogBoxShader;
+	model_info.modelName = "Resources/Models/M_Fog.bin";
+	model_info.dataFileName = NULL;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+
 	shader = new MoundShader;
 	model_info.modelName = "Resources/Models/M_RockRIP.bin";
 	model_info.dataFileName = NULL;
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 	shader->AddRef();
+
 	UpdatedShaders.emplace_back(shader);
+	shader = new MeteoriteSpotShader;
+	model_info.modelName = "Resources/Models/M_Shadow_Rip.bin";
+	model_info.dataFileName = NULL;
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+	shader->AddRef();
+	UpdatedShaders.emplace_back(shader);
+
+	
 
 	m_pCreateManager->RenderLoading();
 
@@ -335,6 +353,19 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Stone3.bin";
 	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	model_info.useBillBoard = false;
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Sub_Dino.bin";
+	model_info.dataFileName = "Resources/ObjectData/DinoData";
+	shader->BuildObjects(pCreateManager.get(), &model_info);
+	instancingModelShaders.emplace_back(shader);
+
+	shader = new TreeShader;
+	model_info.modelName = "Resources/Models/M_Sub_Dino2.bin";
+	model_info.dataFileName = "Resources/ObjectData/Dino2Data";
 	shader->BuildObjects(pCreateManager.get(), &model_info);
 	instancingModelShaders.emplace_back(shader);
 #endif
@@ -491,7 +522,16 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			//if (m_pPlayer)	m_pPlayer->KeyUpDown();
 			break;
 		case VK_ESCAPE:
-			::PostQuitMessage(0);
+#ifdef isConnectedToServer
+			//골인했다는 신호를 서버에게 send
+			//신호만 유저에게 보낸다
+#else
+			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
+			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
+
+			sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+#endif
 			break;
 		case VK_SHIFT:
 			if (m_pPlayer)
@@ -551,7 +591,18 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 				message.shaderName = _METEORITE_SHADER;
 				CGameObject* checkPoint = m_pCheckPointShader->getList()[checkCount];
 				XMFLOAT4X4 mat = checkPoint->m_xmf4x4World;
-				mat._42 += 500;
+				mat._42 += 500.0f;
+				message.departMat = mat;
+				message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+				EventHandler::GetInstance()->RegisterEvent(message);
+#else
+				NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+				//---
+				message.shaderName = _METEORITESPOT_SHADER;
+				mat = checkPoint->m_xmf4x4World;
+				mat._42 += 1.0f;
 				message.departMat = mat;
 				message.msgName = _ADD_OBJECT;
 #ifndef isConnectedToServer
@@ -564,6 +615,12 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			m_eCurrentItem = IconDefault;
 			instancingImageUiShaders[ITEM_UI]->getUvXs()[0] = 0.125f * m_eCurrentItem;
 			break;
+		case VK_F1:
+			SoundManager::GetInstance()->Play("MeatEat", 0.5f);
+			m_pPlayer->SetMaxVelocityXZ(50);
+			m_fBoostTimer = 10;
+			isBoost = true;
+			break;
 		case VK_F2:
 		case VK_F3:
 			if (m_pPlayer) m_pCamera = m_pPlayer->ChangeCamera((wParam - VK_F1 + 1),
@@ -572,8 +629,140 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 		case VK_F4:
 			message.shaderName = _METEORITE_SHADER;
 			XMFLOAT4X4 mat = m_pPlayer->m_xmf4x4World;
-			mat._42 += 500;
+			mat._42 += 500.0f;
 			message.departMat = mat;
+			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+			//---
+			message.shaderName = _METEORITESPOT_SHADER;
+			mat = m_pPlayer->m_xmf4x4World;
+			mat._42 += -6.0f;
+			message.departMat = mat;
+			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+			break;
+		case VK_F5:
+			XMFLOAT4X4 matrix1 = m_pPlayer->m_xmf4x4ToParent;
+			XMFLOAT3 pos1 = m_pPlayer->GetLook();
+			pos1 = Vector3::ScalarProduct(pos1, 40, false);
+
+			matrix1._41 -= pos1.x;
+			matrix1._43 -= pos1.z;
+			matrix1._42 = m_pTerrain->GetHeight(matrix1._41, 256 * TerrainScaleZ - matrix1._43) + 1.0f;
+			XMFLOAT3 up1 = m_pTerrain->GetNormal(matrix1._41, matrix1._43);
+
+
+			matrix1._21 = up1.x;
+			matrix1._22 = up1.y;
+			matrix1._23 = up1.z;
+			XMFLOAT3 look1 = Vector3::CrossProduct(m_pPlayer->GetRight(), up1, true);
+
+			matrix1._31 = look1.x;
+			matrix1._32 = look1.y;
+			matrix1._33 = look1.z;
+
+			//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
+			message.shaderName = _BANANA_SHADER;
+			message.departMat = matrix1;
+			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+			break;
+		case VK_F6:
+			XMFLOAT4X4 matrix2 = m_pPlayer->m_xmf4x4ToParent;
+			XMFLOAT3 pos2 = m_pPlayer->GetLook();
+			pos2 = Vector3::ScalarProduct(pos2, 40, false);
+
+			matrix2._41 -= pos2.x;
+			matrix2._43 -= pos2.z;
+			matrix2._42 = m_pTerrain->GetHeight(matrix2._41, 256 * TerrainScaleZ - matrix2._43) + 1.0f;
+			XMFLOAT3 up2 = m_pTerrain->GetNormal(matrix2._41, matrix2._43);
+
+
+			matrix2._21 = up2.x;
+			matrix2._22 = up2.y;
+			matrix2._23 = up2.z;
+			XMFLOAT3 look2 = Vector3::CrossProduct(m_pPlayer->GetRight(), up2, true);
+
+			matrix2._31 = look2.x;
+			matrix2._32 = look2.y;
+			matrix2._33 = look2.z;
+
+			//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
+			message.shaderName = _MUD_SHADER;
+			message.departMat = matrix2;
+			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+			break;
+		case VK_F7:
+			XMFLOAT4X4 matrix3 = m_pPlayer->m_xmf4x4ToParent;
+			XMFLOAT3 pos3 = m_pPlayer->GetLook();
+			pos3 = Vector3::ScalarProduct(pos3, 40, false);
+
+			matrix3._41 -= pos3.x;
+			matrix3._43 -= pos3.z;
+			matrix3._42 = m_pTerrain->GetHeight(matrix3._41, 256 * TerrainScaleZ - matrix3._43) + 1.0f;
+			XMFLOAT3 up3 = m_pTerrain->GetNormal(matrix3._41, matrix3._43);
+
+
+			matrix3._21 = up3.x;
+			matrix3._22 = up3.y;
+			matrix3._23 = up3.z;
+			XMFLOAT3 look3 = Vector3::CrossProduct(m_pPlayer->GetRight(), up3, true);
+
+			matrix3._31 = look3.x;
+			matrix3._32 = look3.y;
+			matrix3._33 = look3.z;
+
+			//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
+			message.shaderName = _STONE_SHADER;
+			message.departMat = matrix3;
+			message.msgName = _ADD_OBJECT;
+#ifndef isConnectedToServer
+			EventHandler::GetInstance()->RegisterEvent(message);
+#else
+			NetWorkManager::GetInstance()->SendEvent(message);
+#endif
+			break;
+
+		case VK_F8:
+			XMFLOAT4X4 matrix4 = m_pPlayer->m_xmf4x4ToParent;
+			XMFLOAT3 pos4 = m_pPlayer->GetLook();
+			pos4 = Vector3::ScalarProduct(pos4, 40, false);
+
+			matrix4._41 -= pos4.x;
+			matrix4._43 -= pos4.z;
+			matrix4._42 = m_pTerrain->GetHeight(matrix4._41, 256 * TerrainScaleZ - matrix4._43) + 1.0f;
+			XMFLOAT3 up4 = m_pTerrain->GetNormal(matrix4._41, matrix4._43);
+
+
+			matrix4._21 = up4.x;
+			matrix4._22 = up4.y;
+			matrix4._23 = up4.z;
+			XMFLOAT3 look4 = Vector3::CrossProduct(m_pPlayer->GetRight(), up4, true);
+
+			matrix4._31 = look4.x;
+			matrix4._32 = look4.y;
+			matrix4._33 = look4.z;
+
+			//이부분에도 바로 추가하지않고 신호를 보냄. 업데이트에서 신호를 받아서 추가하도록 한다.
+			message.shaderName = _FOGBOX_SHADER;
+			message.departMat = matrix4;
 			message.msgName = _ADD_OBJECT;
 #ifndef isConnectedToServer
 			EventHandler::GetInstance()->RegisterEvent(message);
@@ -653,7 +842,7 @@ void ItemGameScene::ProcessInput(HWND hwnd, float deltaTime)
 		m_pPlayer->m_fForce = 0;
 
 	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
-	((CPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, deltaTime, deltaTime, true);
+	//((CPlayer*)PLAYER_SHADER->getList()[0])->Move(dwDirection, deltaTime, deltaTime, true);
 	//플레이어를 실제로 이동하고 카메라를 갱신한다. 중력과 마찰력의 영향을 속도 벡터에 적용한다. 
 	//m_pPlayer->FixedUpdate(deltaTime);
 }
@@ -662,8 +851,14 @@ void ItemGameScene::Render()
 {
 	BaseScene::Render();
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_CUBE_MAP]);
-	if (m_pSkyBox) m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
+	if (m_pCamera->m_fFogStart < 5.0f)
+	{
+		m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_CUBE_MAP]);
+		if (m_pSkyBox)
+			m_pSkyBox->Render(m_pd3dCommandList, m_pCamera);
+	}
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_TERRAIN]);
+	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SKIN_MESH]);
 	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
@@ -684,9 +879,6 @@ void ItemGameScene::Render()
 		if (shader)
 			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
 	}
-
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_TERRAIN]);
-	if (m_pTerrain) m_pTerrain->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SKIN_MESH_INSTANCING]);
 	for (CSkinedObInstancingShader* shader : instancingAnimatedModelShaders)
@@ -713,24 +905,25 @@ void ItemGameScene::Render()
 #endif
 }
 
+
 void ItemGameScene::RenderShadow()
 {
 	BaseScene::RenderShadow();
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_SKIN_MESH]);
-	m_pPlayer->Render(m_pd3dCommandList, m_pShadowCamera);
+	m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_MODEL_INSTANCING]);
 	for (CObInstancingShader* shader : instancingModelShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 
 	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_SHADOW_BILLBOARD]);
 	for (CObInstancingShader* shader : instancingBillBoardShaders)
-		if (shader) shader->Render(m_pd3dCommandList, m_pShadowCamera);
+		if (shader) shader->Render(m_pd3dCommandList, m_pCamera);
 	for (CObInstancingShader* shader : instancingModelShaders)
 	{
 		if (shader)
-			shader->BillBoardRender(m_pd3dCommandList, m_pShadowCamera);
+			shader->BillBoardRender(m_pd3dCommandList, m_pCamera);
 	}
 }
 void ItemGameScene::RenderVelocity()
@@ -792,7 +985,7 @@ void ItemGameScene::RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<I
 	if (m_pCountDownShader)
 		m_pCountDownShader->Render(m_pd3dCommandList, m_pCamera);
 
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_PONT]);
+	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_FONT]);
 	if (fontShader)
 		fontShader->Render(m_pd3dCommandList, m_pCamera, gameTexts);
 
@@ -861,6 +1054,7 @@ void ItemGameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapse
 
 SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 {
+	m_pCamera->m_fFogStart = 0.0f;
 
 	if (sceneType != SceneType::ItemGame_Scene)
 	{
@@ -900,8 +1094,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		{
 #ifdef isConnectedToServer
 			//골인했다는 신호를 서버에게 send
-			//서버는 send를 받자마자 보낸 유저의 닉네임이 포함되어있는 패킷을 유저들에게 보냄. 보낸 자신도 포함.
-			//닉네임만있으면 시간은 클라가 알아서처리함.
+			//신호만 유저에게 보낸다
 #else
 			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
@@ -913,7 +1106,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		else
 		{
 			int rank = 1;
-			vector<CGameObject*> list = PLAYER_SHADER->getList();
+			 vector<CGameObject*> list = PLAYER_SHADER->getList();
 			//((CPlayer*)list[0])->SetCheckPoint(1);
 			//((CPlayer*)list[0])->SetName("player3");
 			//((CPlayer*)list[1])->SetCheckPoint(4);
@@ -1044,13 +1237,13 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 	}
 
 #ifdef isConnectedToServer
-	CS_PACKET_PLAYER_INFO playerInfo;
+	/*CS_PACKET_PLAYER_INFO playerInfo;
 	playerInfo.checkPoints = m_pPlayer->GetCheckPoint();
 	playerInfo.id = NetWorkManager::GetInstance()->GetMyID();
 	playerInfo.keyState = dwDirection;
 	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
 	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
-	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);
+	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);*/
 #endif
 	return ItemGame_Scene;
 }
@@ -1066,7 +1259,7 @@ void ItemGameScene::BuildLights()
 	m_pLights->m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
 	m_pLights->m_pLights[0].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.6f);
-	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	m_pLights->m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -0.7f, 0.0f);
 	
 	m_pLights->m_pLights[1].m_bEnable = 1;
 	m_pLights->m_pLights[1].m_nType = POINT_LIGHT;
@@ -1174,14 +1367,14 @@ void ItemGameScene:: ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager)
 void ItemGameScene::UpdateShadow()
 {
 	XMFLOAT3 centerPosition(m_pPlayer->GetPosition());  //지형의 한 가운데
-	float rad = 500;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
+	float rad = 600;   // 지형을 담는 구의 반지름(ex 지구의 반지름)
 
 	XMVECTOR lightDir = XMLoadFloat3(&m_pLights->m_pLights[0].m_xmf3Direction);
 	lightDir = XMVector3Normalize(lightDir);
 
-	XMVECTOR shadowCameraPosition = XMLoadFloat3(&centerPosition) - 2.0f*rad*lightDir;
+	XMVECTOR shadowCameraPosition = XMLoadFloat3(&centerPosition) - 1.0f*rad*lightDir;
 	XMVECTOR targetPosition = XMLoadFloat3(&centerPosition);
-	XMVECTOR shadowUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	XMVECTOR shadowUp = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
 
 	XMFLOAT3 xmf3CameraPosition;
 	XMFLOAT3 xmf3CameraTarget;
@@ -1321,6 +1514,7 @@ void ItemGameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
 	BaseScene::ReSize(pCreateManager);
 	ResetShadowBuffer(m_pCreateManager.get());
 	ReBuildSubCameras(pCreateManager);
+	motionBlurShader->OnResize(pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
 }
 
 void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
@@ -1339,14 +1533,17 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
 		break;
 	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치 만일 룸씬에서 받는거라면 이건 필요없게 됨.
-		UpdateInitInfo(packet, fTimeElapsed); //무시하셈.
+		UpdateInitInfo(packet, fTimeElapsed);
 
 		break;
 	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 이걸 받고나서 카운트다운 시작.
 		UpdateStartInfo(packet, fTimeElapsed);
 		break;
-	case 5: //누군가가(나 포함) 골인에 도착했다는 신호를 보낸경우
-		UpdateFinishInfo(packet, fTimeElapsed);
+	case SC_SLIDING_ANI:
+		UpdatePlayerSliding(packet, fTimeElapsed);
+		break;
+	case SC_COLLISION_ANI:
+		UpdatePlayerCollision(packet, fTimeElapsed);
 		break;
 	default:
 		break;
@@ -1407,6 +1604,31 @@ void ItemGameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
 	EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 	EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
 	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
-	//EventHandler::GetInstance()->m_sWinner = packet->승자이름;
+	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
 	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환
+}
+
+void ItemGameScene::UpdatePlayerSliding(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_PLAYER_ANI* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_ANI*>(packet);
+
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == playerInfo->id; });
+	if (obj != obList.end())
+	{
+		((CPlayer*)(*obj))->OnSliding();
+	}
+}
+void ItemGameScene::UpdatePlayerCollision(char* packet, float fTimeElapsed)
+{
+	SC_PACKET_PLAYER_ANI* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_ANI*>(packet);
+
+	vector<CGameObject*> obList = PLAYER_SHADER->getList();
+	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
+		return a->GetId() == playerInfo->id; });
+	if (obj != obList.end())
+	{
+		((CPlayer*)(*obj))->OnCollisionAni();
+	}
 }

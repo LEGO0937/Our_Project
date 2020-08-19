@@ -46,9 +46,15 @@ public:
 	void UpdateReadyState(char* packet, float fTimeElapsed);
 	void UpdateAddUser(char* packet, float fTimeElapsed);
 	void UpdateDeleteUser(char* packet, float fTimeElapsed);
+	void UpdateLogOut(char* packet, float fTimeElapsed);
 	void UpdateNextScene(char* packet, float fTimeElapsed);
+	void UpdateUserList(char* packet, float fTimeElapsed);
+	void UpdateAccessUser(char* packet, float fTimeElapsed);
+	void UpdateClearUserList(char* packet, float fTimeElapsed);
+	void UpdateModeState(char* packet, float fTimeElapsed);
 private:
 	vector<CUiShader*> instacingUiShaders;
 	bool isClickedButton = false;
+	bool m_bModeState = false;
 	vector<User> m_vUsers;
 };

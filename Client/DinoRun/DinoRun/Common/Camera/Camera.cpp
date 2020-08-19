@@ -18,6 +18,10 @@ CCamera::CCamera()
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_nMode = 0x00;
 	m_pPlayer = NULL;
+
+	m_xmf4FogColor = XMFLOAT4{ 0.82f, 0.82f, 0.82f, 1.0f };
+	m_fFogRange = 300.0f;
+	m_fFogStart = 0.0f;
 }
 
 CCamera::CCamera(CCamera *pCamera)
@@ -45,6 +49,10 @@ CCamera::CCamera(CCamera *pCamera)
 		m_fTimeLag = 0.0f;
 		m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 		m_nMode = 0x00;
+
+		m_xmf4FogColor = XMFLOAT4{ 0.82f, 0.82f, 0.82f, 1.0f };
+		m_fFogRange = 300.0f;
+		m_fFogStart = 0.0f;
 		m_pPlayer = NULL;
 	}
 }
@@ -168,9 +176,12 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 	XMStoreFloat4x4(&xmf4x4PrevView, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevView)));
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4PrevView, &xmf4x4PrevView, sizeof(XMFLOAT4X4));
 
-	
+
 	m_pcbMappedCamera->m_cameraPosition = GetPosition();
 
+	m_pcbMappedCamera->m_xmf4FogColor = m_xmf4FogColor;
+	m_pcbMappedCamera->m_fFogRange = m_fFogRange;
+	m_pcbMappedCamera->m_fFogStart = m_fFogStart;
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbGameObjectGpuVirtualAddress =
 		m_pd3dcbCamera->GetGPUVirtualAddress();
@@ -226,14 +237,14 @@ void CSpaceShipCamera::Rotate(float x, float y, float z)
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-		
+
 		m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
 		//플레이어의 위치를 중심으로 카메라의 위치 벡터(플레이어를 기준으로 한)를 회전한다. 
 		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
 		//회전시킨 카메라의 위치 벡터에 플레이어의 위치를 더하여 카메라의 위치 벡터를 구한다. 
 		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
 	}
-	
+
 	if (m_pPlayer && (y != 0.0f))
 	{
 		XMFLOAT3 xmf3Up = m_pPlayer->GetUp();
@@ -265,7 +276,7 @@ CFirstPersonCamera::CFirstPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 	m_nMode = FIRST_PERSON_CAMERA;
 	if (pCamera)
 	{
-		
+
 		if (pCamera->GetMode() == SPACESHIP_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -282,8 +293,8 @@ void CFirstPersonCamera::Rotate(float x, float y, float z)
 	if (x != 0.0f)
 	{
 		//카메라의 로컬 x-축을 기준으로 회전하는 행렬을 생성한다. 사람의 경우 고개를 끄떡이는 동작이다.
-		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), 
-		XMConvertToRadians(x));
+		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right),
+			XMConvertToRadians(x));
 		//카메라의 로컬 x-축, y-축, z-축을 회전 행렬을 사용하여 회전한다.
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 		m_xmf3Up = Vector3::TransformNormal(m_xmf3Up, xmmtxRotate);
@@ -326,7 +337,7 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 	m_nMode = THIRD_PERSON_CAMERA;
 	if (pCamera)
 	{
-		
+
 		if (pCamera->GetMode() == SPACESHIP_CAMERA)
 		{
 			m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -369,7 +380,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 
 		//--------------------------------
 		float c = 3.0f, k = 20.0f;
-		float cXZ = 1.0f, kXZ = 18.0f;
+		float cXZ = 1.0f, kXZ = 17.5f;
 		{
 			//k = 0.04  ,  c = 0.2
 			//f= - cv -k*x   -cv -kx아닌가?..
@@ -377,9 +388,9 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			//c^3 > 4mk -> overdamping
 			//c^2 = 4mk -> critical damping
 			//c^2 < 4mk ->under damping
-			
+
 			//x,y,z에 대한 변위 각자 따로 구할 것.
-			
+
 			//작업구간 현재 구현중
 			//xmf3Position-> 새로운 카메라 위치
 			XMFLOAT3 vel = m_pPlayer->GetVelocity();
@@ -390,7 +401,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 				m_xmf3Offset = XMFLOAT3(0.0f, 30.0f, -60.0f);
 
 			XMFLOAT4X4 viewM = Matrix4x4::LookAtLH(xmf3Position, m_pPlayer->GetPosition(), xmf3Up1);
-			
+
 			xmf3Right = XMFLOAT3(viewM._11, viewM._21, viewM._31);
 			xmf3Look = XMFLOAT3(viewM._13, viewM._23, viewM._33);
 			xmf3Up = XMFLOAT3(viewM._12, viewM._22, viewM._32);
@@ -430,7 +441,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			XMVECTOR xmvResultVec = XMVector3TransformCoord(XMLoadFloat4(&xmf4Position), XMLoadFloat4x4(&viewM));
 
 			XMVECTOR xmVResultVel = XMVector4Transform(XMLoadFloat4(&xmf4Velocity), XMLoadFloat4x4(&viewM));
-			
+
 			XMStoreFloat3(&xmf3ResultVec, xmvResultVec);
 			XMStoreFloat3(&xmf3ResultVel, xmVResultVel);
 
@@ -438,17 +449,17 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			float forceY = (-c * xmf3ResultVel.y) + (-k * xmf3ResultVec.y);
 			float forceZ = (-cXZ * xmf3ResultVel.z) + (-kXZ * xmf3ResultVec.z);
 
-			XMFLOAT4 xmf4Force = XMFLOAT4(forceX, forceY, forceZ,0);
+			XMFLOAT4 xmf4Force = XMFLOAT4(forceX, forceY, forceZ, 0);
 
 			//xmf4Force = Vector3::DivProduct
 			XMFLOAT3 accelerationForce;
 
-			XMStoreFloat3(&accelerationForce,XMVector4Transform(XMLoadFloat4(&xmf4Force), XMLoadFloat4x4(&inverseViewM)));
+			XMStoreFloat3(&accelerationForce, XMVector4Transform(XMLoadFloat4(&xmf4Force), XMLoadFloat4x4(&inverseViewM)));
 
 			m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, accelerationForce, fTimeElapsed);
 
 			m_xmf3Position = Vector3::Add(m_xmf3Position, m_xmf3Velocity, fTimeElapsed);
-			
+
 		}
 		//---------------------------------
 		/*
@@ -460,23 +471,23 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		p2 = xmf3Position;
 
 		p1 = Vector3::Normalize(p1);
-		p2 = Vector3::Normalize(p2); 
+		p2 = Vector3::Normalize(p2);
 		XMFLOAT3 crossProduct = Vector3::CrossProduct(p1, p2,false);
 		float angle = Vector3::DotProduct(p1, p2);
 		angle = (angle > 0.0f) ? XMConvertToDegrees(acosf(angle)) : 90.0f;
 		angle *= (crossProduct.y > 0.0f) ? 1.0f : -1.0f;
-	
+
 		if (isnan(angle))
 		{
 			angle = 0;
 		}
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&xmf3Up),
 			XMConvertToRadians(angle));
-		
+
 		//m_xmf3Position = Vector3::Subtract(m_xmf3Position, m_pPlayer->GetPosition());
-		//플레이어의 위치를 중심으로 카메라의 위치 벡터(플레이어를 기준으로 한)를 회전한다. 
+		//플레이어의 위치를 중심으로 카메라의 위치 벡터(플레이어를 기준으로 한)를 회전한다.
 		m_xmf3Position = Vector3::TransformCoord(m_xmf3Position, xmmtxRotate);
-		//회전시킨 카메라의 위치 벡터에 플레이어의 위치를 더하여 카메라의 위치 벡터를 구한다. 
+		//회전시킨 카메라의 위치 벡터에 플레이어의 위치를 더하여 카메라의 위치 벡터를 구한다.
 		m_xmf3Position = Vector3::Add(m_xmf3Position, m_pPlayer->GetPosition());
 	*/
 		SetLookAt(xmf3LookAt);

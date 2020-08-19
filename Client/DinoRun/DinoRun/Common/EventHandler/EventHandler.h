@@ -28,4 +28,6 @@ public:
 	int m_iMinute = 0;
 	float m_fSecond = 0.0f;
 
+	float m_nWndClientWidth{ FRAME_BUFFER_WIDTH };
+	float m_nWndClientHeight{ FRAME_BUFFER_HEIGHT };
 };

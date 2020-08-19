@@ -24,10 +24,15 @@ struct INSTANCEDSKINEDOBJECTINFO
 
 cbuffer cbCameraInfo : register(b0)
 {
-	matrix gmtxView : packoffset(c0);
-	matrix gmtxProjection : packoffset(c4);
-	matrix gmtxPrevView : packoffset(c8);
-	float3 gvCameraPosition : packoffset(c12);
+	matrix gmtxView;
+	matrix gmtxProjection;
+	matrix gmtxPrevView;
+	float3 gvCameraPosition;
+	float cameraPad1;
+
+	float4 gFogColor;
+	float gFogStart;
+	float gFogRange ;
 };
 
 cbuffer cbShadowInfo : register(b3)
@@ -255,7 +260,7 @@ struct VS_SKYBOX_OUTPUT
 
 float CalcShadowFactor(float4 shadowPosH)
 {
-	shadowPosH.xyz /= shadowPosH.w;
+	//shadowPosH.xyz /= shadowPosH.w;
 
 	float depth = shadowPosH.z;
 

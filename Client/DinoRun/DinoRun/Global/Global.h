@@ -28,8 +28,8 @@
 #define PSO_SHADOW_TERRAIN 15
 #define PSO_SHADOW_SKINED_INSTANCING 16
 
-//PSO pont
-#define PSO_PONT 17
+//PSO Font
+#define PSO_FONT 17
 
 //PSO use computeShader
 #define PSO_HORZ_BLUR 18
@@ -45,7 +45,7 @@
 #define PSO_VELOCITY_CUBEMAP 29
 
 //Max,Min Force amount
-#define MAX_FORCE 3200
+#define MAX_FORCE 4500
 #define MIDDLE_FORCE 1300
 #define MIN_FORCE 600
 #define MIN_VELOCITY 25.0f
@@ -62,7 +62,8 @@
 
 enum SceneType { Default_Scene = 0, Start_Scene, Lobby_Scene, Room_Scene, Game_Scene,ItemGame_Scene, End_Scene };
 enum ModelType { Default = 0, CheckPoint, Player, Fence, Item_Box, Item_Banana, 
-	Item_Meat, Item_Mud, Item_Stone, Item_Meteorite,Item_Mound};
+	Item_Meat, Item_Mud, Item_Stone, Item_Meteorite, Item_FogBox,Item_Mound, Item_MeteoriteSpot
+};
 enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 
 #define MAX_ROTATE_RADIAN 0.26   //¾à 15µµ
@@ -72,7 +73,7 @@ enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 
 
 #define isDebug
-
+#define noLobby
 //#define isConnectedToServer
 
 //shaderName
@@ -83,7 +84,10 @@ enum BodyType {BodyType_Dynamic = 0, BodyType_Kinematic, BodyType_Static};
 #define _MUD_SHADER 2
 #define _STONE_SHADER 3
 #define _METEORITE_SHADER 4
-#define _MOUND_SHADER 5
+#define _FOGBOX_SHADER 5
+#define _MOUND_SHADER 6
+#define _METEORITESPOT_SHADER 7
+
 
 #define _MODEL_SHADER 6
 #define _BILLBOARD_SHADER 7

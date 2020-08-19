@@ -62,3 +62,25 @@ void ItemMeteorite::OnUpdateCallback(float fTimeElapsed)
 		m_fLifeCount = -1;
 	}
 }
+
+
+//---------
+
+ItemMeteoriteSpot::ItemMeteoriteSpot(int nMeshes) :CGameObject(nMeshes)
+{
+	m_fMass = 0;
+	m_ModelType = ModelType::Item_MeteoriteSpot;
+	m_fLifeCount = 3.3f;
+}
+ItemMeteoriteSpot::~ItemMeteoriteSpot()
+{
+}
+
+bool ItemMeteoriteSpot::Update(float fTimeElapsed, CGameObject* target)
+{
+	m_fLifeCount -= fTimeElapsed;
+	m_fMass = 0;
+	if (m_fLifeCount < 0)
+		return true;
+	return false;
+}

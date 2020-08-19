@@ -516,8 +516,7 @@ void CGameObject::Animate(float fTimeElapsed)
 
 void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
-	if (m_pSkinnedAnimationController) 
-		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	if (m_pMesh)
 	{
@@ -631,17 +630,21 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCame
 
 	if (m_pMesh)
 	{
-		if (IsVisible(pCamera))
 		{
 			if (isSkined)
 				UpdateShaderVariable(pd3dCommandList);
 			else
 				UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-
 			if (m_nMaterials > 0)
 			{
 				for (int i = 0; i < m_nMaterials; i++)
 				{
+					if (m_ppMaterials[i])
+					{
+						if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+						m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+					}
+
 					m_pMesh->Render(pd3dCommandList, i);
 				}
 			}
@@ -655,29 +658,48 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCame
 void CGameObject::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera,
 	UINT nInstances)
 {
-	//인스턴싱용 랜더함수
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	OnPrepareRender();
 	if (m_pMesh)
 	{
 		if (isSkined)
-			pd3dCommandList->SetGraphicsRootShaderResourceView(3,
-				m_pd3dcbSkinedGameObjects->GetGPUVirtualAddress());
+		{
+			if (m_pcbMappedSkinedGameObjects)
+				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
+					m_pd3dcbSkinedGameObjects->GetGPUVirtualAddress());
+		}
 		else
-			pd3dCommandList->SetGraphicsRootShaderResourceView(3,
-				m_pd3dcbGameObjects->GetGPUVirtualAddress());
-
+		{
+			//여기서 if로 빌보드인지 확인해서 그릴것
+			if (m_pcbMappedGameObjects)
+				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
+					m_pd3dcbGameObjects->GetGPUVirtualAddress());
+			else if (m_pcbMappedBillBoardObjects)
+				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
+					m_pd3dcbBillBoardObjects->GetGPUVirtualAddress());
+		}
 		if (m_nMaterials > 0)
 		{
 			for (int i = 0; i < m_nMaterials; ++i)
 			{
+				if (m_ppMaterials[i])
+				{
+					if (m_ppMaterials[i]->m_pShader)
+					{
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					}
+
+					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+				}
+
 				m_pMesh->Render(pd3dCommandList, i, nInstances);
 			}
 		}
 	}
 	if (m_pSibling) m_pSibling->ShadowRender(pd3dCommandList, pCamera, nInstances);
 	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera, nInstances);
+
 
 }
 

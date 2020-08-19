@@ -23,7 +23,7 @@
     <ProjectGuid>{398CE88A-DC4E-4594-A006-463AC5C2A571}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DinoRun</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -247,6 +247,7 @@
     <ClCompile Include="CShaders\ModelShader\BananaShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\BlockShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\FenceShader.cpp" />
+    <ClCompile Include="CShaders\ModelShader\FogBoxShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\ItemShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\MeatShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\MeteoriteShader.cpp" />
@@ -284,6 +285,7 @@
     <ClCompile Include="Objects\CheckPointObject.cpp" />
     <ClCompile Include="Objects\FenceObject.cpp" />
     <ClCompile Include="Objects\ItemBanana.cpp" />
+    <ClCompile Include="Objects\ItemFogBox.cpp" />
     <ClCompile Include="Objects\ItemMeat.cpp" />
     <ClCompile Include="Objects\ItemMeteorite.cpp" />
     <ClCompile Include="Objects\ItemMound.cpp" />
@@ -324,16 +326,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Common\Shaders\DrawVelocityMap.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Effect</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0_level_9_3</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0_level_9_3</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="Common\Shaders\DrawVelocityMap2.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -348,16 +340,6 @@
     </FxCompile>
     <FxCompile Include="Common\Shaders\Light.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Common\Shaders\MotionBlur.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Effect</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0_level_9_3</ShaderModel>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0_level_9_3</ShaderModel>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="Common\Shaders\MotionBlur2.hlsl">

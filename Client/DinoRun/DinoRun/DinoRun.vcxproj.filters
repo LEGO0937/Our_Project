@@ -265,6 +265,9 @@
     <Filter Include="Scenes\BaseScene">
       <UniqueIdentifier>{bc465297-5264-4fa2-a967-cb8931c9cb54}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Objects\ItemObject\07FogBox">
+      <UniqueIdentifier>{6e87c402-8fbd-48a3-bfd1-fcc88ad0e490}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -665,6 +668,12 @@
     <ClCompile Include="CShaders\UiShader\CountDownShader.cpp">
       <Filter>CShaders\UiShader\10CountDown</Filter>
     </ClCompile>
+    <ClCompile Include="Objects\ItemFogBox.cpp">
+      <Filter>Objects\ItemObject\07FogBox</Filter>
+    </ClCompile>
+    <ClCompile Include="CShaders\ModelShader\FogBoxShader.cpp">
+      <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DinoRun.rc">
@@ -719,16 +728,10 @@
     <FxCompile Include="Common\Shaders\Particle.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Common\Shaders\MotionBlur.hlsl">
-      <Filter>Shaders\not complete</Filter>
-    </FxCompile>
     <FxCompile Include="Common\Shaders\MotionBlur2.hlsl">
       <Filter>Shaders\not complete</Filter>
     </FxCompile>
     <FxCompile Include="Common\Shaders\DrawVelocityMap2.hlsl">
-      <Filter>Shaders\not complete</Filter>
-    </FxCompile>
-    <FxCompile Include="Common\Shaders\DrawVelocityMap.hlsl">
       <Filter>Shaders\not complete</Filter>
     </FxCompile>
   </ItemGroup>

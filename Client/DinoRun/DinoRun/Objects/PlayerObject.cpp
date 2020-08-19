@@ -78,8 +78,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 #ifdef _WITH_LEFT_HAND_COORDINATES
 		if (dwDirection & DIR_FORWARD)
 		{
-			KeyDownUp(); 
-			if((dwDirection & DIR_RIGHT) || (dwDirection & DIR_LEFT))
+			KeyDownUp();
+			if ((dwDirection & DIR_RIGHT) || (dwDirection & DIR_LEFT))
 				m_fForce += fDistance * 0.5f;
 			else
 				m_fForce += fDistance;
@@ -154,7 +154,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 			if (isLeft)
 				KeyUpLeft();
 		}
-			
+
 		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
 #else
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
@@ -223,7 +223,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		if (m_pCamera)
 		{
-			
+
 			m_pCamera->Move(xmf3Shift);
 			//m_pCamera->RegenerateViewMatrix();
 		}
@@ -344,7 +344,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		UpdateDistance(fTimeElapsed, target);
 		m_fForce = 0;
 
-		
+
 	}
 	float fLength;
 	switch (target->GetModelType())   //충돌처리로 씬내에 무언가를 삭제 or 생성하려면 return true 할 것
@@ -378,7 +378,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 		return true;
 	case ModelType::Item_Meat:
-		m_fMaxVelocityXZ += 15;
+		m_fMaxVelocityXZ += 10;
 		if (m_fMaxVelocityXZ > MAX_VELOCITY)
 			m_fMaxVelocityXZ = MAX_VELOCITY;
 
@@ -418,7 +418,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #else
 		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
 #endif
-		break;		
+		break;
 	case ModelType::Item_Mud:
 		fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 		if (fLength > 4)  //속도 크기가 xz최대량을 넘으면 최대량으로 변하게 함. 속도벡터의 단위는 m/s
@@ -433,10 +433,14 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 			XMFLOAT3 dir = Vector3::Subtract(m_xmf3Position, target->GetPosition());
 			dir = Vector3::Normalize(dir);
 
-			SetVelocity(XMFLOAT3(20*dir.x, 17 , 20*dir.z));
+			SetVelocity(XMFLOAT3(20 * dir.x, 17, 20 * dir.z));
 
 			OnCollisionAni();
 		}
+		break;
+	case ModelType::Item_FogBox:
+		if (m_pCamera)
+			m_pCamera->m_fFogStart = 5.0f;
 		break;
 	default:
 		break;
@@ -551,17 +555,17 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	if (m_fWheelDegree != 0.0f && Vector3::Length(vel) > 0)   //바퀴에 조향각입력 & 시동걸린상태일때만 
 	{
 		float degree = m_fWheelDegree;  //현재 머리의 회전 각도
-		
+
 		//3.8f = 바이크의 전륜 후륜사이의 길이
 		//57.3f = 각도를 degree값으로 변환하기위해 사용됨
 		//--------------------연습중
 		float slipB = Vector3::DotProduct(m_xmf3Look, m_xmf3Velocity)
-			/(Vector3::Length(m_xmf3Look)*Vector3::Length(m_xmf3Velocity));  //이게 슬립각도의 코사인값임.
-			
+			/ (Vector3::Length(m_xmf3Look)*Vector3::Length(m_xmf3Velocity));  //이게 슬립각도의 코사인값임.
+
 		float result;
 
 		if (!isShift)
-			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree))*slipB*(8.0f/ Vector3::Length(vel))
+			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree))*slipB*(8.0f / Vector3::Length(vel))
 			/ 3.8f;
 		else
 			result = Vector3::Length(vel) * tanf(XMConvertToRadians(degree))*slipB
@@ -571,7 +575,7 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 
 		//w = Vector3::Length(m_xmf3Velocity) * cosf(XMConvertToRadians(slipB)) * tanf(XMConvertToRadians(degree)) / 3.8f;
 		Rotate(0, XMConvertToDegrees(result)*fTimeElapsed, 0.0f); //degree로 바꿔서 회전 시작 
-		
+
 	}
 	//else
 	//{
@@ -581,19 +585,24 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	float drag;
 	//float cDrag = 0.3f;
 	//위에는 횡력 처리 아래는 직진 힘.
-	if (isShift && m_fWheelDegree != 0)
+	if (isShift && m_fWheelDegree != 0 && Vector3::Length(m_xmf3Velocity) > MIN_VELOCITY + 10.0f)
 	{
-		drag = 0.5f* 1.0f* AIR * 3.8f;   //0.3f= 마찰계수 AIR = 공기저항 , 2.2f = 정면 면적
+		drag = 0.5f* 1.5f* AIR * 8.2f;   //0.3f= 마찰계수 AIR = 공기저항 , 8.2f = 정면 면적
+		//드리프트시에는 저항을 받는 면적이 정면이 아닌 옆면이이때문에 면적이 더 큼.
+	}
+	else if (isShift)
+	{
+		drag = 0.5f* 1.0f* AIR * 4.0f;   //0.3f= 마찰계수 AIR = 공기저항 , 4.0f = 정면 면적
 		//드리프트시에는 저항을 받는 면적이 정면이 아닌 옆면이이때문에 면적이 더 큼.
 	}
 	else
 	{
-		drag = 0.5f* 1.0f* AIR *2.2f;
+		drag = 0.5f* 1.0f* AIR *2.4f;
 	}
 	float rR = drag * 29.7f;   // -> C_Rr
-	
-	
-	
+
+
+
 
 	float W = m_fMass * 9.8f;
 	float L = 3.8f, c = 1.9f, b = 1.9f; //L은 전륜 후륜사이 거리. c = 중심에서 전륜까지 거리, b는 생략
@@ -636,15 +645,15 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	//===================
 	//측면힘
 
-	XMFLOAT3 forceF = Vector3::ScalarProduct(vel,sinf(XMConvertToRadians(m_fWheelDegree)),true);
-	forceF = Vector3::ScalarProduct(forceF,Wf,false);
-	
+	XMFLOAT3 forceF = Vector3::ScalarProduct(vel, sinf(XMConvertToRadians(m_fWheelDegree)), true);
+	forceF = Vector3::ScalarProduct(forceF, Wf, false);
+
 	forceF = Vector3::ScalarProduct(forceF, cos(XMConvertToRadians(m_fWheelDegree)), false);
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, forceF);
 
 	//=================
-	
-	
+
+
 	m_xmf3AcceleratingForce = Vector3::DivProduct(xmf3Ftraction, m_fMass, false); //힘에 질량을 나눠서 가속력을 구함
 	Move(Vector3::ScalarProduct(m_xmf3AcceleratingForce, fTimeElapsed, false), true); //가속력에 시간변화량을 곱하여 속력에 더함.
 
@@ -655,25 +664,25 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
 		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
 	}
-	
+
 	//XMVector3AngleBetweenVectors  벡터사이 각도 구하기
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, UNIT_PER_METER * fTimeElapsed, false); //10은 유닛당 10cm 이므로 10을 곱해야함
 	Move(xmf3Velocity, false); //속력만큼 벡터 이동
 
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
-//	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) 
-	//for (int i = 0; i < m_uNCamera; ++i)
-	//{
-	//	if (m_ppCamera[i])
-	//	{
-	//		if (i == 0)
-	//			m_ppCamera[i]->Update(m_xmf3Position, fTimeElapsed);
-	//		else
-	//			m_ppCamera[i]->Update(m_ppCamera[i - 1]->GetPosition(), fTimeElapsed);
-	//	}
-	//}
+	//	DWORD nCurrentCameraMode = m_pCamera->GetMode();
+		//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) 
+		//for (int i = 0; i < m_uNCamera; ++i)
+		//{
+		//	if (m_ppCamera[i])
+		//	{
+		//		if (i == 0)
+		//			m_ppCamera[i]->Update(m_xmf3Position, fTimeElapsed);
+		//		else
+		//			m_ppCamera[i]->Update(m_ppCamera[i - 1]->GetPosition(), fTimeElapsed);
+		//	}
+		//}
 	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	// 카메라 작업 이전: m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
@@ -791,9 +800,9 @@ void CFuncCallbackHandler::HandleCallback(void *pAnimationController, int nSet)
 
 CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName) : CPlayer()
 {
-	SetPosition(XMFLOAT3(800.0f, 76.0f, 1150.0f)); //(XMFLOAT3(700.0f, 76.0f, 1150.0f));//800,76,900
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+	SetPosition(XMFLOAT3(800.0f, 76.0f, 1150.0f)); //(XMFLOAT3(700.0f, 76.0f, 1150.0f));//800,76,900
 	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, sModelName.c_str(), NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject->GetChild(), true);
 	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 16, pAngrybotModel);
@@ -806,7 +815,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	m_pSkinnedAnimationController->m_CurrentTrack = IDLE;
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE, IDLE); //left_turn_start
 
-	
+
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE_LEFT_TURN, IDLE_LEFT_TURN);
 	m_pSkinnedAnimationController->SetCallbackFuncKeys(IDLE_LEFT_TURN, 1);
 	m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_TURN, 0, PLAYER_ANI_TIME_LENGTH, IDLE_LEFT_TURN, IDLE_LEFT_TURNING);
@@ -837,7 +846,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	m_pSkinnedAnimationController->SetCallbackFuncKeys(RUN_LEFT_RETURN, 1);
 	m_pSkinnedAnimationController->SetTrackAnimationSet(RUN_RIGHT_RETURN, RUN_RIGHT_RETURN);
 	m_pSkinnedAnimationController->SetCallbackFuncKeys(RUN_RIGHT_RETURN, 1);
-	
+
 	m_pSkinnedAnimationController->SetTrackEnable(IDLE, true);
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(SLIDING, SLIDING); //left_turn_start
@@ -849,7 +858,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager,DUST_PARTICLE, this, XMFLOAT3(0.0f, 0, 18));
+	m_pParticleSystem = new ParticleSystem(pCreateManager, DUST_PARTICLE, this, XMFLOAT3(0.0f, 0, 18));
 	//SetScale(XMFLOAT3(0.05f, 0.05f, 0.05f));
 
 }
@@ -890,9 +899,9 @@ CCamera *CDinoRunPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.0f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 1800.0f, ASPECT_RATIO, 60.0f);
-		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 1800.0f, EventHandler::GetInstance()->m_nWndClientWidth / EventHandler::GetInstance()->m_nWndClientHeight, 60.0f);
+		m_pCamera->SetViewport(0, 0, EventHandler::GetInstance()->m_nWndClientWidth, EventHandler::GetInstance()->m_nWndClientHeight, 0.0f, 1.0f);
+		m_pCamera->SetScissorRect(0, 0, EventHandler::GetInstance()->m_nWndClientWidth, EventHandler::GetInstance()->m_nWndClientHeight);
 		break;
 	case THIRD_PERSON_CAMERA:
 		SetFriction(150.0f);
@@ -904,9 +913,9 @@ CCamera *CDinoRunPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		m_pCamera->SetTimeLag(0.10f);
 		m_pCamera->SetOffset(XMFLOAT3(0.0f, 30.0f, -60.0f));
 		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
-		m_pCamera->GenerateProjectionMatrix(1.01f, 1800.0f, ASPECT_RATIO, 60.0f);
-		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+		m_pCamera->GenerateProjectionMatrix(1.01f, 1800.0f, EventHandler::GetInstance()->m_nWndClientWidth/EventHandler::GetInstance()->m_nWndClientHeight, 60.0f);
+		m_pCamera->SetViewport(0, 0, EventHandler::GetInstance()->m_nWndClientWidth, EventHandler::GetInstance()->m_nWndClientHeight, 0.0f, 1.0f);
+		m_pCamera->SetScissorRect(0, 0, EventHandler::GetInstance()->m_nWndClientWidth, EventHandler::GetInstance()->m_nWndClientHeight);
 		m_pCamera->SetLookAt(GetPosition());
 		m_pCamera->RegenerateViewMatrix();
 		break;

@@ -17,6 +17,11 @@ struct VS_CB_CAMERA_INFO
 	XMFLOAT4X4 m_xmf4x4Projection;
 	XMFLOAT4X4 m_xmf4x4PrevView;
 	XMFLOAT3 m_cameraPosition;
+	float cameraPad1;
+
+	XMFLOAT4 m_xmf4FogColor;
+	float m_fFogStart;
+	float m_fFogRange;
 };
 
 
@@ -71,6 +76,10 @@ public:
 	CCamera();
 	CCamera(CCamera *pCamera);
 	virtual ~CCamera();
+
+	XMFLOAT4 m_xmf4FogColor;
+	float m_fFogStart;
+	float m_fFogRange;
 
 	//카메라의 정보를 셰이더 프로그램에게 전달하기 위한 상수 버퍼를 생성하고 갱신한다. 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList
