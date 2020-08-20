@@ -6,7 +6,7 @@
 
 using namespace std;
 #define SERVER_IP "127.0.0.1"
-constexpr int MAX_USER = 6;
+constexpr int MAX_USER = 5;
 
 constexpr int MAX_ROUND_TIME = 0;
 constexpr int MAX_ITEM_NAME_LENGTH = 16;
@@ -343,7 +343,6 @@ struct CS_PACKET_REMOVE_PLAYER
 {
 	char size;
 	char type;
-	char id;
 };
 
 

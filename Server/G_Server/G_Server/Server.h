@@ -107,6 +107,24 @@ public:
 
 	}
 
+	void Init() {
+		in_use = false;
+		rank = 0;
+		//item = ITEM::EMPTY;
+		checkPoints = 0;
+		keyState = 0;
+		ZeroMemory(&xmf4x4Parents, sizeof(xmf4x4Parents));
+		ZeroMemory(&msg, sizeof(msg));
+		//ZeroMemory(nickname, sizeof(wchar_t) * 12);
+		ZeroMemory(&over_ex.messageBuffer, sizeof(over_ex.messageBuffer));
+		ZeroMemory(&packet_buffer, sizeof(packet_buffer));
+		ZeroMemory(&xmf3PutPos, sizeof(xmf3PutPos));
+		over_ex.dataBuffer.len = MAX_BUFFER;
+		over_ex.dataBuffer.buf = over_ex.messageBuffer;
+		over_ex.event_t = EV_RECV;
+		isReady = false;
+	}
+
 	/*
 	clients[client].isConnect = true;
 	clients[client].prev_size = 0;
@@ -176,7 +194,7 @@ public:
 	void SendReadyStatePacket(char toClient, char fromClient);
 	void SendUnReadyStatePacket(char toClient, char fromClient);
 	void SendRemovePlayer(char fromClient);
-	void SendQuitClient(char toClient, char fromClient);
+	//void SendQuitClient(char toClient, char fromClient);
 	void SendPlayerInfo(char toCliet, char fromClient);
 	void SendPlayerAni_Collision(char toCliet, char fromClient);
 	void SendPlayerAni_Sliding(char toCliet, char fromClient);

@@ -3,6 +3,7 @@
 
 using namespace std;
 
+bool isStarted = false;
 
 Server::Server()
 {
@@ -146,24 +147,7 @@ void Server::AcceptThreadFunc()
 			cout << "MAX USER overflow\n";
 			continue;
 		}
-		//cout << "여기22" << endl;
-		bool isStarted = false;
-		for (int i = 0; i < MAX_USER; ++i)
-		{
-			if (false == clients[i].in_use)
-				continue;
-			if (GS_INGAME == clients[i].gameState)
-			{
-				isStarted = true;
-				break;
-			}
-		}
-		if (true == isStarted)
-		{
-			cout << "Players aleady Start!\n";
-			continue;
-		}
-
+	
 
 		//-----------------------DB 처리부분-----------------------------
 		char  buf[255];
@@ -223,7 +207,6 @@ void Server::AcceptThreadFunc()
 		CreateIoCompletionPort(reinterpret_cast<HANDLE>(clientSocket), iocp, new_id, 0);
 
 		clients[new_id].in_use = true;
-		clients[new_id].gameState = GS_ID_INPUT;
 		SendAcessComplete(new_id);
 		SendGameMode(new_id);
 
@@ -509,13 +492,13 @@ void Server::ProcessPacket(char client, char* packet)
 
 			// 이 주석부분에 초기 위치 설정
 
-			for (int i = 0; i < MAX_USER; ++i)
+		/*	for (int i = 0; i < MAX_USER; ++i)
 			{
 				if (clients[i].in_use == true)
 				{
 					clients[i].gameState = GS_INGAME;
 				}
-			}
+			}*/
 
 
 			// 랜덤으로 결정된 시작위치인덱스에 해당하는 위치 적용
@@ -620,22 +603,28 @@ void Server::ProcessPacket(char client, char* packet)
 			{
 				clients[i].isInGameReady = false;
 				clients[i].isReady = false;
+				
 				SendInGameFinish(i, clients[client].game_id);
 				
 			}
-
 		}
+		isStarted = false;
 		break;
 	case CS_REMOVE_PLAYER:
-		clients[client].in_use = false;
-		SendRemovePlayer(client);
+		/*clients[client].in_use = false;
+		clients[client].isReady = false;
+		clients[client].game_id = ;*/
+		clients[client].Init();
+		/*SendRemovePlayer(client);
+		
 		for (int i = 0; i < MAX_USER; ++i)
 		{
-			if (clients[client].in_use == false)
+			if (clients[i].in_use == false)
 				continue;
 			SendResetRoomInfo(i);
 			SendRoomInfo(i);
-		}
+		}*/
+		ClientDisconnect(client);
 
 		break;
 	default:
@@ -903,15 +892,15 @@ void Server::SendEventPacket(char toClient, MessageStruct& msg)
 }
 
 
-void Server::SendQuitClient(char toClient, char fromClient)
-{
-	SC_PACKET_REMOVE_PLAYER packet;
-	packet.id = fromClient;
-	packet.size = sizeof(packet);
-	packet.type = SC_REMOVE_PLAYER;
-
-	SendFunc(toClient, &packet);
-}
+//void Server::SendQuitClient(char toClient, char fromClient)
+//{
+//	SC_PACKET_REMOVE_PLAYER packet;
+//	packet.id = fromClient;
+//	packet.size = sizeof(packet);
+//	packet.type = SC_REMOVE_PLAYER;
+//
+//	SendFunc(toClient, &packet);
+//}
 
 void Server::SendRemovePlayer(char fromClient)
 {
@@ -947,7 +936,8 @@ void Server::SendPutPlayer(char toClient)
 
 void Server::ClientDisconnect(char client)
 {
-	clients[client].in_use = false;
+	clients[client].in_use = false; 
+	SendRemovePlayer(client);
 	for (int i = 0; i < MAX_USER; ++i)
 	{
 		if (false == clients[i].in_use)
@@ -955,6 +945,8 @@ void Server::ClientDisconnect(char client)
 		if (i == client)
 			continue;
 		//SendQuitClient(i, client);
+		SendResetRoomInfo(i);
+		SendRoomInfo(i);
 	}
 	closesocket(clients[client].socket);
 	clientCnt_l.lock();
@@ -962,6 +954,30 @@ void Server::ClientDisconnect(char client)
 	printf("%d 클라이언트 접속 종료, 현재 클라이언트 수: %d\n", (int)client, clientCount);
 	clientCnt_l.unlock();
 }
+
+//void Server::ClientDisconnect(char client)
+//{
+//	clients[client].in_use = false;
+//	clients[client].isReady = false;
+//	SendRemovePlayer(client);
+//	for (int i = 0; i < MAX_USER; ++i)
+//	{
+//		if (false == clients[i].in_use)
+//			continue;
+//		if (i == client)
+//			continue;
+//		SendResetRoomInfo(i);
+//		SendRoomInfo(i);
+//	}
+//	closesocket(clients[client].socket);
+//	clientCnt_l.lock();
+//	--clientCount;
+//	printf("%d 클라이언트 접속 종료, 현재 클라이언트 수: %d\n", (int)client, clientCount);
+//	clientCnt_l.unlock();
+//}
+
+
+
 
 
 void Server::err_quit(const char* msg)
