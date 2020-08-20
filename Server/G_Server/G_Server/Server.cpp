@@ -328,7 +328,7 @@ void Server::WorkerThreadFunc()
 		if (EV_RECV == over_ex->event_t)
 		{
 			// RECV 처리
-			cout << "Packet from Client: " << (int)key << "\n";
+			// cout << "Packet from Client: " << (int)key << "\n";
 			// 패킷조립
 			// 남은 크기
 			int rest = io_byte;
@@ -487,8 +487,12 @@ void Server::ProcessPacket(char client, char* packet)
 		//clients[client].msg = p->msg;
 		for (int i = 0; i < MAX_USER; ++i)
 		{
-			if (true == clients[i].in_use)
+			if (false == clients[i].in_use)
+				continue;
+			else
+			{
 				SendEventPacket(i, p->msg);
+			}
 		}
 		break;
 	}
@@ -586,7 +590,7 @@ void Server::ProcessPacket(char client, char* packet)
 		break;
 	case CS_INGAME_READY:
 		isInGameReady = false;
-		clients[client].isReady = true;
+		clients[client].isInGameReady = true;
 
 		for (int i = 0; i < MAX_USER; ++i)
 		{
@@ -613,8 +617,26 @@ void Server::ProcessPacket(char client, char* packet)
 			if (clients[i].in_use == false)
 				continue;
 			else
-				SendInGameFinish(i, clients[client].id);
+			{
+				clients[i].isInGameReady = false;
+				clients[i].isReady = false;
+				SendInGameFinish(i, clients[client].game_id);
+				
+			}
+
 		}
+		break;
+	case CS_REMOVE_PLAYER:
+		clients[client].in_use = false;
+		SendRemovePlayer(client);
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (clients[client].in_use == false)
+				continue;
+			SendResetRoomInfo(i);
+			SendRoomInfo(i);
+		}
+
 		break;
 	default:
 		wcout << L"패킷 사이즈: " << (int)packet[0] << endl;
@@ -868,7 +890,7 @@ void Server::SendPlayerAni_Sliding(char toClient, char fromClient)
 
 
 // 플레이어 애니메이션 처리
-void Server::SendEventPacket(char toClient, const MessageStruct& msg)
+void Server::SendEventPacket(char toClient, MessageStruct& msg)
 {
 	SC_PACKET_EVENT packet;
 
@@ -881,7 +903,7 @@ void Server::SendEventPacket(char toClient, const MessageStruct& msg)
 }
 
 
-void Server::SendRemovePlayer(char toClient, char fromClient)
+void Server::SendQuitClient(char toClient, char fromClient)
 {
 	SC_PACKET_REMOVE_PLAYER packet;
 	packet.id = fromClient;
@@ -889,6 +911,16 @@ void Server::SendRemovePlayer(char toClient, char fromClient)
 	packet.type = SC_REMOVE_PLAYER;
 
 	SendFunc(toClient, &packet);
+}
+
+void Server::SendRemovePlayer(char fromClient)
+{
+	SC_PACKET_REMOVE_PLAYER packet;
+	packet.id = fromClient;
+	packet.size = sizeof(packet);
+	packet.type = SC_REMOVE_PLAYER;
+
+	SendFunc(fromClient, &packet);
 }
 
 void Server::SendPutPlayer(char toClient)
@@ -922,7 +954,7 @@ void Server::ClientDisconnect(char client)
 			continue;
 		if (i == client)
 			continue;
-		SendRemovePlayer(i, client);
+		//SendQuitClient(i, client);
 	}
 	closesocket(clients[client].socket);
 	clientCnt_l.lock();

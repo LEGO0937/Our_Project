@@ -326,6 +326,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 			EventHandler::GetInstance()->RegisterEvent(message);
 #else
 			NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+			NetWorkManager::GetInstance()->SendColision();
 #endif
 			OnCollisionAni();
 		}
@@ -417,6 +418,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
 		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendSliding();
 #endif
 		break;
 	case ModelType::Item_Mud:

@@ -360,6 +360,16 @@ void NetWorkManager::SendChattingText(char id, const _TCHAR* text)
 	SendPacket(pText->size);
 }
 
+void NetWorkManager::SendRemovePlayer(char id)
+{
+	pRemovePlayer = reinterpret_cast<CS_PACKET_REMOVE_PLAYER *> (send_buffer);
+	pRemovePlayer->size = sizeof(pRemovePlayer);
+	pRemovePlayer->type = CS_REMOVE_PLAYER;
+	pRemovePlayer->id = id;
+
+	SendPacket();
+}
+
 
 
 void NetWorkManager::SendNickName(char id, _TCHAR* name)
@@ -406,7 +416,7 @@ void NetWorkManager::SendEvent(MessageStruct msg)
 {
 	pEvent = reinterpret_cast<CS_PACKET_EVENT*>(send_buffer);
 	pEvent->msg = msg;
-	pEvent->size = sizeof(pEvent);
+	pEvent->size = sizeof(CS_PACKET_EVENT);
 	send_wsabuf.len = sizeof(pEvent);
 	pEvent->type = CS_EVENT;
 

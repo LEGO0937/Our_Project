@@ -63,6 +63,7 @@ constexpr int CS_SLIDING_ANI = 16; // 특정 플레이어 충돌 애니메이션 실행
 constexpr int CS_COLLISION_ANI = 17; // 특정 플레이어 미끄러짐 애니메이션 실행
 constexpr int CS_INGAME_READY = 18;
 constexpr int CS_INGAME_FINISH = 19;
+constexpr int CS_REMOVE_PLAYER = 20;
 									 
 									 //----추가 
 
@@ -299,9 +300,9 @@ struct SC_PACKET_CHATTING
 // 플레이어가 아이템 사용 시
 struct SC_PACKET_EVENT
 {
-	char id;
 	char size;
 	char type;
+	char id;
 
 	MessageStruct msg;
 };
@@ -322,6 +323,13 @@ struct SC_PACKET_REMOVE_PLAYER
 	char id;
 };
 
+
+struct CS_PACKET_REMOVE_PLAYER
+{
+	char size;
+	char type;
+	char id;
+};
 
 struct SC_PACKET_ROUND_END
 {

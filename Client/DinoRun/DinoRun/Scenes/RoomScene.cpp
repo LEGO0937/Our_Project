@@ -116,6 +116,9 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	//DB에 방번호 및 레디 or 낫레디 추가
 	//이때 send로 보내는 패킷에는 룸번호가 필요하니 networkmanager에 있는 GetRoomNum()을 활용하자
 	//바로 위에꺼는 혹시 모르니 보류 DB로 처리해보도록 하자!
+#ifdef isConnectedToServer
+	NetWorkManager::GetInstance()->SendNotReady();
+#endif
 }
 
 void RoomScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -202,6 +205,7 @@ void RoomScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM w
 		case VK_ESCAPE:
 #ifdef isConnectedToServer
 			//서버에게 나간다는 메시지 send
+			NetWorkManager::GetInstance()->SendRemovePlayer();
 #else
 #ifdef noLobby
 			sceneType = SceneType::Start_Scene;
@@ -403,6 +407,13 @@ void RoomScene::ProcessPacket(char* packet, float fTimeElapsed)
 		break;
 	case SC_GAME_MODE_INFO:
 		UpdateModeState(packet, fTimeElapsed);
+		break;
+	case SC_REMOVE_PLAYER:
+#ifdef noLobby
+		sceneType = SceneType::Start_Scene;
+#else
+		sceneType = SceneType::Lobby_Scene;
+#endif 
 		break;
 	}
 }

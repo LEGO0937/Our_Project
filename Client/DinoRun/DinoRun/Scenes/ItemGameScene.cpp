@@ -1544,9 +1544,9 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		//playerObject.cpp의 update에서 eventHandler::registEvent부분에서 메시지를 send할 것.
 		//모든 플레이어가 recv받으면 그때 registEvent가 호출되도록 해야함.
 		break;
-	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치 만일 룸씬에서 받는거라면 이건 필요없게 됨.
-		UpdateInitInfo(packet, fTimeElapsed);
-		break;
+	//case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치 만일 룸씬에서 받는거라면 이건 필요없게 됨.
+	//	UpdateInitInfo(packet, fTimeElapsed);
+	//	break;
 	case SC_INGAME_READY: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 
 		//이 패킷을 받으면 바로 게임 카운트다운 시작
 		UpdateStartInfo(packet, fTimeElapsed);

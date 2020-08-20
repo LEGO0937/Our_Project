@@ -65,6 +65,8 @@ private:
 
 	CS_PACKET_INGAME_READY_INFO* pInGameReady = NULL; //인게임씬의 리소스 준비 상태
 	CS_PACKET_INGAME_FINISH_INFO* pInGameFinish = NULL; //인게임씬 골인신호
+	CS_PACKET_REMOVE_PLAYER* pRemovePlayer = NULL;
+
 
 	HWND m_hWnd{ NULL };
 	int m_iNumPlayer = 0;
@@ -116,6 +118,8 @@ public:
 	void SendChangeGameMode();
 	void SendSliding();
 	void SendColision();
+
+	void SendRemovePlayer(char id);
 
 	void SendInGameReady();
 	void SendInGameFinish();

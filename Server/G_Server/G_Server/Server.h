@@ -175,12 +175,13 @@ public:
 	void SendGameMode(char toClient);
 	void SendReadyStatePacket(char toClient, char fromClient);
 	void SendUnReadyStatePacket(char toClient, char fromClient);
-	void SendRemovePlayer(char toClient, char fromClient);
+	void SendRemovePlayer(char fromClient);
+	void SendQuitClient(char toClient, char fromClient);
 	void SendPlayerInfo(char toCliet, char fromClient);
 	void SendPlayerAni_Collision(char toCliet, char fromClient);
 	void SendPlayerAni_Sliding(char toCliet, char fromClient);
 	void SendRoundEnd(char client);
-	void SendEventPacket(char toClient, const MessageStruct& msg); // 애니메이션 상태 패킷
+	void SendEventPacket(char toClient, MessageStruct& msg); // 애니메이션 상태 패킷
 	void SendRoundStart(char client);
 	void SendRoomInfo(char client);
 	void SendResetRoomInfo(char client);
