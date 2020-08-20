@@ -483,7 +483,7 @@ void RoomScene::UpdateNextScene(char* packet, float fTimeElapsed)
 	SC_PACKET_PUT_PLAYER* playerInfo = reinterpret_cast<SC_PACKET_PUT_PLAYER*>(packet);
 	NetWorkManager::GetInstance()->SetPosition(playerInfo->xmf3PutPos);
 
-	if (NetWorkManager::GetInstance()->GetGameMode())
+	if (m_bModeState)
 		sceneType = SceneType::ItemGame_Scene;
 	else
 		sceneType = SceneType::Game_Scene;

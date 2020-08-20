@@ -423,4 +423,6 @@ struct CS_PACKET_GAME_MODE_INFO
 {
 	char size;
 	char type;
+
+	
 };
