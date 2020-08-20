@@ -45,7 +45,9 @@ constexpr int SC_GAME_MODE_INFO = 18;
 
 constexpr int SC_SLIDING_ANI = 16; // 특정 플레이어 충돌 애니메이션 실행
 constexpr int SC_COLLISION_ANI = 17; // 특정 플레이어 미끄러짐 애니메이션 실행
-//----추가
+constexpr int SC_INGAME_READY = 18;
+constexpr int SC_INGAME_FINISH = 19;
+									 //----추가
 
 constexpr int CS_READY = 0; // 레디
 constexpr int CS_UNREADY = 1; // 언레디
@@ -59,7 +61,10 @@ constexpr int CS_GAME_MODE_INFO = 8; //룸씬에서 방장이 게임모드를 바꿧다는 메시�
 
 constexpr int CS_SLIDING_ANI = 16; // 특정 플레이어 충돌 애니메이션 실행
 constexpr int CS_COLLISION_ANI = 17; // 특정 플레이어 미끄러짐 애니메이션 실행
-//----추가 
+constexpr int CS_INGAME_READY = 18;
+constexpr int CS_INGAME_FINISH = 19;
+									 
+									 //----추가 
 
 //struct MessageStruct
 //{
@@ -423,6 +428,32 @@ struct CS_PACKET_GAME_MODE_INFO
 {
 	char size;
 	char type;
-
-	
 };
+
+
+struct SC_PACKET_INGAME_READY_INFO
+{
+	char size;
+	char type;
+};
+
+struct CS_PACKET_INGAME_READY_INFO
+{
+	char size;
+	char type;
+};
+
+
+struct SC_PACKET_INGAME_FINISH_INFO
+{
+	char size;
+	char type;
+	string name;
+};
+
+struct CS_PACKET_INGAME_FINISH_INFO
+{
+	char size;
+	char type;
+};
+

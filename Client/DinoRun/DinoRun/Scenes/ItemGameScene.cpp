@@ -470,7 +470,11 @@ void ItemGameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	SoundManager::GetInstance()->Play("InGame_BGM", 0.1f);
 	m_pCreateManager->RenderLoading();
 
+#ifdef isConnectedToServer
+	NetWorkManager::GetInstance()->SendInGameReady();
+#else
 	isAllConnected = true;
+#endif
 	//원래라면 이 구간에서 서버에게 빌드 끝 신호를 보내고 서버에서 모든 클라가 빌드종료시 allConnected의 값을
 	//true로 만들도록 하는 메시지를 보내줘야함.
 }
@@ -523,6 +527,7 @@ void ItemGameScene::OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPAR
 			break;
 		case VK_ESCAPE:
 #ifdef isConnectedToServer
+			NetWorkManager::GetInstance()->SendInGameFinish();
 			//골인했다는 신호를 서버에게 send
 			//신호만 유저에게 보낸다
 #else
@@ -1092,10 +1097,13 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 		//m_pPlayer->SetCheckPoint(CHECKPOINT_GOAL);
 		if (m_pPlayer->GetCheckPoint() == CHECKPOINT_GOAL)
 		{
+
 #ifdef isConnectedToServer
+			NetWorkManager::GetInstance()->SendInGameFinish();
 			//골인했다는 신호를 서버에게 send
 			//신호만 유저에게 보낸다
 #else
+			SoundManager::GetInstance()->AllStop();
 			EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 			EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
 			EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
@@ -1139,19 +1147,22 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 					gameTexts[idx++].text = m_sPlayerId;
 			}
 			m_pPlayer->SetRank(rank);
+#ifdef isConnectedToServer
 
+#else
 			if (((CPlayer*)list[0])->GetCheckPoint() == CHECKPOINT_GOAL)
 			{
-#ifdef isConnectedToServer
+
 				//골인했다는 신호를 서버에게 send
-#else
+
 				EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 				EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
 				EventHandler::GetInstance()->m_sWinner = ((CPlayer*)list[0])->GetName();
 
 				sceneType = End_Scene;
-#endif
+
 			}
+#endif
 		}
 
 		if (isBoost)
@@ -1244,6 +1255,7 @@ SceneType ItemGameScene::Update(CreateManager* pCreateManager, float fTimeElapse
 	playerInfo.playerNames = NetWorkManager::GetInstance()->GetPlayerName();
 	playerInfo.xmf4x4Parents = m_pPlayer->m_xmf4x4ToParent;
 	NetWorkManager::GetInstance()->SendPlayerInfoPacket(playerInfo);*/
+	NetWorkManager::GetInstance()->SendPlayerInfo(m_pPlayer->GetCheckPoint(), dwDirection, m_pPlayer->m_xmf4x4ToParent);
 #endif
 	return ItemGame_Scene;
 }
@@ -1534,10 +1546,13 @@ void ItemGameScene::ProcessPacket(char* packet, float fTimeElapsed)
 		break;
 	case 3: // 빌드종료후 서버에게 받을 플레이어의 초기 위치 만일 룸씬에서 받는거라면 이건 필요없게 됨.
 		UpdateInitInfo(packet, fTimeElapsed);
-
 		break;
-	case 4: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 이걸 받고나서 카운트다운 시작.
+	case SC_INGAME_READY: // 플레이어의 모든 연결이 끝났다고 서버로부터 받는 패킷처리 
+		//이 패킷을 받으면 바로 게임 카운트다운 시작
 		UpdateStartInfo(packet, fTimeElapsed);
+		break;
+	case SC_INGAME_FINISH:
+		UpdateFinishInfo(packet, fTimeElapsed);
 		break;
 	case SC_SLIDING_ANI:
 		UpdatePlayerSliding(packet, fTimeElapsed);
@@ -1558,26 +1573,45 @@ void ItemGameScene::UpdatePlayerInfo(char* packet, float fTimeElapsed)
 {
 	SC_PACKET_PLAYER_INFO* playerInfo = reinterpret_cast<SC_PACKET_PLAYER_INFO*>(packet);
 
-	if (playerInfo->id == NetWorkManager::GetInstance()->GetMyID())
+	if (NetWorkManager::GetInstance()->GetMyID() == playerInfo->id)
 		return;
+
 	vector<CGameObject*> obList = PLAYER_SHADER->getList();
 	auto obj = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
 		return a->GetId() == playerInfo->id; });
 	if (obj != obList.end())
 	{
 		(*obj)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents;
+		((CPlayer*)(*obj))->SetPosition(XMFLOAT3((*obj)->m_xmf4x4ToParent._41,
+			(*obj)->m_xmf4x4ToParent._42, (*obj)->m_xmf4x4ToParent._43));
+		((CPlayer*)(*obj))->SetRight(XMFLOAT3((*obj)->m_xmf4x4ToParent._11,
+			(*obj)->m_xmf4x4ToParent._12, (*obj)->m_xmf4x4ToParent._13));
+		((CPlayer*)(*obj))->SetUp(XMFLOAT3((*obj)->m_xmf4x4ToParent._21,
+			(*obj)->m_xmf4x4ToParent._22, (*obj)->m_xmf4x4ToParent._23));
+		((CPlayer*)(*obj))->SetLook(XMFLOAT3((*obj)->m_xmf4x4ToParent._31,
+			(*obj)->m_xmf4x4ToParent._32, (*obj)->m_xmf4x4ToParent._33));
+
 		((CPlayer*)(*obj))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);
 		((CPlayer*)(*obj))->SetCheckPoint(playerInfo->checkPoints);
 	}
 	else
 	{
 		auto findId = find_if(obList.begin(), obList.end(), [&](CGameObject* a) {
-			return a->GetId() == 0; });
+			return a->GetId() == -1; });
 		if (findId != obList.end())
 		{
 			(*findId)->SetId(playerInfo->id);
 			(*findId)->SetName(playerInfo->playerNames); // 없을경우 이름지정
 			(*findId)->m_xmf4x4ToParent = playerInfo->xmf4x4Parents; //변환행렬 처리
+			((CPlayer*)(*findId))->SetPosition(XMFLOAT3((*findId)->m_xmf4x4ToParent._41,
+				(*findId)->m_xmf4x4ToParent._42, (*findId)->m_xmf4x4ToParent._43));
+			((CPlayer*)(*findId))->SetRight(XMFLOAT3((*findId)->m_xmf4x4ToParent._11,
+				(*findId)->m_xmf4x4ToParent._12, (*findId)->m_xmf4x4ToParent._13));
+			((CPlayer*)(*findId))->SetUp(XMFLOAT3((*findId)->m_xmf4x4ToParent._21,
+				(*findId)->m_xmf4x4ToParent._22, (*findId)->m_xmf4x4ToParent._23));
+			((CPlayer*)(*findId))->SetLook(XMFLOAT3((*findId)->m_xmf4x4ToParent._31,
+				(*findId)->m_xmf4x4ToParent._32, (*findId)->m_xmf4x4ToParent._33));
+
 			((CPlayer*)(*findId))->Move(playerInfo->keyState, 20.0f, fTimeElapsed, true);  //애니메이션처리
 			((CPlayer*)(*findId))->SetCheckPoint(playerInfo->checkPoints);
 		}
@@ -1601,8 +1635,11 @@ void ItemGameScene::UpdateStartInfo(char* packet, float fTimeElapsed)
 }
 void ItemGameScene::UpdateFinishInfo(char* packet, float fTimeElapsed)
 {
+	SoundManager::GetInstance()->AllStop();
+	SC_PACKET_INGAME_FINISH_INFO* finishInfo = reinterpret_cast<SC_PACKET_INGAME_FINISH_INFO*>(packet);
 	EventHandler::GetInstance()->m_iMinute = ((TimeCountShader*)TIME_COUNT_SHADER)->GetMinute();
 	EventHandler::GetInstance()->m_fSecond = ((TimeCountShader*)TIME_COUNT_SHADER)->GetSecond();
+	EventHandler::GetInstance()->m_sWinner = finishInfo->name;
 	//패킷으로 골인한 플레이어 이름을 받아서 winner에 대입, string임!
 	//EventHandler::GetInstance()->m_sWinner = NetWorkManager::GetInstance()->GetPlayerName();
 	sceneType = End_Scene;  //멀티 플레이시 이 구간에서 서버로부터 골인한 플레이어를 확인후 씬 전환

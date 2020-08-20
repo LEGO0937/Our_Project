@@ -60,6 +60,7 @@ public:
 	// in_use가 true인걸 확인하고 send하려고 하는데 그 이전에 접속 종료해서 false가된다면?
 	// 그리고 send 전에 새 플레이어가 id를 재사용한다면? => 엉뚱한 곳에 send가 됨
 	// mutex access_lock;
+	bool isInGameReady = false; // 인게임에서 리소스 빌드가 완료됬는지 유무
 	bool in_use; // 연결됬냐 연결 안됬냐
 	OVER_EX over_ex;
 	SOCKET socket;
@@ -80,7 +81,7 @@ public:
 	GAME_STATE gameState; // 현재 이 클라의 접속 상태
 	DWORD keyState; // 이것도 애니메이션 부분
 	XMFLOAT3 xmf3PutPos = {}; // 초기위치 지정이라는데...
-
+	
 	
 	// 나중에 벡터로 바꾸든지 하자
 
@@ -137,7 +138,7 @@ private:
 	vector<thread> workerThreads;
 	int clientCount;
 	int readyCount;
-
+	bool game_mode = false; // default = false
 
 	
 
@@ -171,15 +172,21 @@ public:
 	void SendAccessPlayer(char toClient, char fromClient);
 	void SendPutPlayer(char toClient);
 	void SendGoLobby(char toClient);
+	void SendGameMode(char toClient);
 	void SendReadyStatePacket(char toClient, char fromClient);
 	void SendUnReadyStatePacket(char toClient, char fromClient);
 	void SendRemovePlayer(char toClient, char fromClient);
-	void SendPlayerInfo(char toClietn, char fromClient);
+	void SendPlayerInfo(char toCliet, char fromClient);
+	void SendPlayerAni_Collision(char toCliet, char fromClient);
+	void SendPlayerAni_Sliding(char toCliet, char fromClient);
 	void SendRoundEnd(char client);
 	void SendEventPacket(char toClient, const MessageStruct& msg); // 애니메이션 상태 패킷
 	void SendRoundStart(char client);
 	void SendRoomInfo(char client);
 	void SendResetRoomInfo(char client);
+
+	void SendInGameReady(char client);
+	void SendInGameFinish(char client, string name);
 public:
 	void SetClient_Initialize(char client);
 public:

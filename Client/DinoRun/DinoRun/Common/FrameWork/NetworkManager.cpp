@@ -282,12 +282,13 @@ void NetWorkManager::SendPacket()
 void NetWorkManager::SendPlayerInfo(int checkPoints, DWORD keyState, XMFLOAT4X4 xmf4x4Parents)
 {
 	pInfo = reinterpret_cast<CS_PACKET_PLAYER_INFO*>(send_buffer);
-	pInfo->size = sizeof(pInfo);
+	pInfo->size = sizeof(CS_PACKET_PLAYER_INFO);
 	send_wsabuf.len = sizeof(pInfo);
 	pInfo->type = CS_PLAYER_INFO;
 	pInfo->checkPoints = checkPoints;
 	pInfo->keyState = keyState;
 	pInfo->xmf4x4Parents = xmf4x4Parents;
+
 
 
 	SendPacket(pInfo->size);
@@ -461,7 +462,24 @@ void NetWorkManager::SendSliding()
 
 	SendPacket();
 }
+void NetWorkManager::SendInGameReady()
+{
+	pInGameReady = reinterpret_cast<CS_PACKET_INGAME_READY_INFO*>(send_buffer);
+	pInGameReady->size = sizeof(pInGameReady);
+	send_wsabuf.len = sizeof(pInGameReady);
+	pInGameReady->type = CS_INGAME_READY;
 
+	SendPacket();
+}
+void NetWorkManager::SendInGameFinish()
+{
+	pInGameFinish = reinterpret_cast<CS_PACKET_INGAME_FINISH_INFO*>(send_buffer);
+	pInGameFinish->size = sizeof(pInGameFinish);
+	send_wsabuf.len = sizeof(pInGameFinish);
+	pInGameFinish->type = CS_INGAME_FINISH;
+
+	SendPacket();
+}
 void NetWorkManager::SendChangeGameMode()
 {
 	pGameMode = reinterpret_cast<CS_PACKET_GAME_MODE_INFO*>(send_buffer);

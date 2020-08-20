@@ -213,7 +213,8 @@ protected:
 	bool							isKinematic = false; //충돌 체크시 물리효과를 적용할 것인가 y or n 
 	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n false이면 update,render X
 
-	int								m_iSerealNum = 0;
+	//int								m_iSerealNum = 0;
+	int								m_iSerealNum = -1;
 	string							m_sObjectName = "None";
 
 	ModelType						m_ModelType = ModelType::Default;   //Layer와 유사

@@ -225,6 +225,7 @@ void Server::AcceptThreadFunc()
 		clients[new_id].in_use = true;
 		clients[new_id].gameState = GS_ID_INPUT;
 		SendAcessComplete(new_id);
+		SendGameMode(new_id);
 
 		printf("%d 클라이언트 접속 완료\n", new_id);
 		// 기존 유저들에게 이후 접속한 유저들 출력
@@ -327,7 +328,7 @@ void Server::WorkerThreadFunc()
 		if (EV_RECV == over_ex->event_t)
 		{
 			// RECV 처리
-			wcout << "Packet from Client: " << (int)key << "\n";
+			cout << "Packet from Client: " << (int)key << "\n";
 			// 패킷조립
 			// 남은 크기
 			int rest = io_byte;
@@ -398,7 +399,7 @@ void Server::ProcessPacket(char client, char* packet)
 	// packet[0] packet[1] 
 
 	DWORD tmpDir;
-
+	bool isInGameReady = false;
 	switch (packet[1]) // 0번째는 패킷 사이즈 1번쨰는 패킷 타입
 	{
 	case CS_PLAYER_INFO: // 플레이어 전체적인 위치 담당
@@ -409,7 +410,7 @@ void Server::ProcessPacket(char client, char* packet)
 		clients[client].checkPoints = p->checkPoints;
 		clients[client].xmf4x4Parents = p->xmf4x4Parents;
 		clients[client].keyState = p->keyState;
-		clients[client].id = p->playerNames;
+		//clients[client].id = p->playerNames;
 
 		for (int i = 0; i < MAX_USER; ++i)
 		{
@@ -550,6 +551,71 @@ void Server::ProcessPacket(char client, char* packet)
 		}
 		break;
 	}
+	case CS_GAME_MODE_INFO:
+	{
+		game_mode = !game_mode;
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (clients[i].in_use == false)
+				continue;
+			else
+				SendGameMode(i);
+				//continue;
+		}
+		break;
+	}
+	case CS_SLIDING_ANI:
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (clients[i].in_use == false)
+				continue;
+			else
+				SendPlayerAni_Sliding(i, client);
+			//continue;
+		}
+		break;
+	case CS_COLLISION_ANI:
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (clients[i].in_use == false)
+				continue;
+			else
+				SendPlayerAni_Collision(i, client);
+			//continue;
+		}
+		break;
+	case CS_INGAME_READY:
+		isInGameReady = false;
+		clients[client].isReady = true;
+
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (clients[i].in_use == false)
+				continue;
+			else
+				if (!clients[i].isInGameReady)
+				{
+					isInGameReady = true;
+					break;
+				}
+			//continue;
+		}
+		if (isInGameReady)
+			break;
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			SendInGameReady(i);
+		}
+		break;
+	case CS_INGAME_FINISH:
+		for (int i = 0; i < MAX_USER; ++i)
+		{
+			if (clients[i].in_use == false)
+				continue;
+			else
+				SendInGameFinish(i, clients[client].id);
+		}
+		break;
 	default:
 		wcout << L"패킷 사이즈: " << (int)packet[0] << endl;
 		wcout << L"패킷 타입 : " << (int)packet[1] << endl;
@@ -718,7 +784,35 @@ void Server::SendUnReadyStatePacket(char toClient, char fromClient)
 	SendFunc(toClient, &packet);
 }
 
+void Server::SendGameMode(char toClient)
+{
+	SC_PACKET_GAME_MODE_INFO packet;
 
+	packet.size = sizeof(packet);
+	packet.type = SC_GAME_MODE_INFO;
+	packet.m_bGameMode = game_mode;
+
+
+	SendFunc(toClient, &packet);
+}
+
+
+void Server::SendInGameReady(char client)
+{
+	SC_PACKET_INGAME_READY_INFO packet;
+
+	packet.size = sizeof(packet);
+	packet.type = SC_INGAME_READY;
+	SendFunc(client, &packet);
+}
+void Server::SendInGameFinish(char client, string name)
+{
+	SC_PACKET_INGAME_FINISH_INFO packet;
+	packet.size = sizeof(packet);
+	packet.type = SC_INGAME_FINISH;
+	packet.name = name;
+	SendFunc(client, &packet);
+}
 void Server::SendPlayerInfo(char toClient, char fromClient)
 {
 	SC_PACKET_PLAYER_INFO packet;
@@ -728,7 +822,7 @@ void Server::SendPlayerInfo(char toClient, char fromClient)
 	packet.xmf4x4Parents = clients[fromClient].xmf4x4Parents;
 	packet.checkPoints = clients[fromClient].checkPoints;
 	packet.keyState = clients[fromClient].keyState;
-	packet.playerNames = clients[fromClient].id;
+	packet.playerNames = clients[fromClient].game_id;
 
 	/*char size;
 	char type;
@@ -740,6 +834,23 @@ void Server::SendPlayerInfo(char toClient, char fromClient)
 	SendFunc(toClient, &packet);
 }
 
+//플레이어 특수 애니메이션용 -> 미끄러짐 충돌애니메이션
+void Server::SendPlayerAni_Collision(char toClient, char fromClient)
+{
+	SC_PACKET_PLAYER_ANI packet;
+	packet.id = fromClient;
+	packet.size = sizeof(packet);
+	packet.type = SC_COLLISION_ANI;
+	SendFunc(toClient, &packet);
+}
+void Server::SendPlayerAni_Sliding(char toClient, char fromClient)
+{
+	SC_PACKET_PLAYER_ANI packet;
+	packet.id = fromClient;
+	packet.size = sizeof(packet);
+	packet.type = SC_SLIDING_ANI;
+	SendFunc(toClient, &packet);
+}
 
 // 플레이어 인포로 사용...? 
 //void Server::SendPutPlayer(char toClient, char fromClient)

@@ -63,6 +63,9 @@ private:
 	CS_PACKET_PLAYER_ANI* pAni = NULL; //슬라이딩 or 충돌 애니메이션용
 	CS_PACKET_GAME_MODE_INFO* pGameMode = NULL; //룸씬의 게임모드 상태
 
+	CS_PACKET_INGAME_READY_INFO* pInGameReady = NULL; //인게임씬의 리소스 준비 상태
+	CS_PACKET_INGAME_FINISH_INFO* pInGameFinish = NULL; //인게임씬 골인신호
+
 	HWND m_hWnd{ NULL };
 	int m_iNumPlayer = 0;
 private:
@@ -113,6 +116,9 @@ public:
 	void SendChangeGameMode();
 	void SendSliding();
 	void SendColision();
+
+	void SendInGameReady();
+	void SendInGameFinish();
 
 	void SendNickName(char id, _TCHAR* name); // 닉네임 값(나중에 의논)
 	void SendChattingText(char id, const _TCHAR* text); // 채팅(졸작 끝나고 어떻게 좀)

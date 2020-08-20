@@ -5,11 +5,8 @@
 #include <vector>
 
 using namespace std;
-
-//#define SERVER_IP "172.30.1.1"
-//#define SERVER_IP "192.168.200.130"
 #define SERVER_IP "127.0.0.1"
-constexpr int MAX_USER = 5;
+constexpr int MAX_USER = 6;
 
 constexpr int MAX_ROUND_TIME = 0;
 constexpr int MAX_ITEM_NAME_LENGTH = 16;
@@ -25,6 +22,23 @@ enum ITEM { MUD, ROCK, BANANA, EMPTY };
 
 enum PLAYER_NUM { P1, P2, P3, P4, P5, P6 };						// 몇번 플레이어 인지 
 enum STATE_TYPE { Init, Run, Over };
+
+struct MessageStruct
+{
+	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
+	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
+	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
+	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
+
+	MessageStruct() {}
+	MessageStruct(const MessageStruct& msg)
+	{
+		msgName = msg.msgName;
+		shaderName = msg.shaderName;
+		departMat = msg.departMat;
+		objectSerialNum = msg.objectSerialNum;
+	}
+};
 
 constexpr int SC_ACCESS_COMPLETE = 0; // 연결 됬다
 constexpr int SC_PUT_PLAYER = 1; // 플레이어를 놓는다
@@ -44,6 +58,13 @@ constexpr int SC_EVENT = 14; // 플레이어 아이템 관리
 constexpr int SC_COMPARE_TIME = 15; // 서버와 클라 시간 비교
 constexpr int SC_ROOM_INFO = 16;
 constexpr int SC_RESET_ROOM_INFO = 17;
+constexpr int SC_GAME_MODE_INFO = 18;
+
+constexpr int SC_SLIDING_ANI = 16; // 특정 플레이어 충돌 애니메이션 실행
+constexpr int SC_COLLISION_ANI = 17; // 특정 플레이어 미끄러짐 애니메이션 실행
+constexpr int SC_INGAME_READY = 18;
+constexpr int SC_INGAME_FINISH = 19;
+//----추가
 
 constexpr int CS_READY = 0; // 레디
 constexpr int CS_UNREADY = 1; // 언레디
@@ -53,38 +74,35 @@ constexpr int CS_NICKNAME_INFO = 4; // 닉넴 정보
 constexpr int CS_CHATTING = 5; // 채팅
 constexpr int CS_PLAYER_INFO = 6; // 플레이어 위치
 constexpr int CS_EVENT = 7; // 플레이어 아이템
+constexpr int CS_GAME_MODE_INFO = 8; //룸씬에서 방장이 게임모드를 바꿧다는 메시지
 
+constexpr int CS_SLIDING_ANI = 16; // 특정 플레이어 충돌 애니메이션 실행
+constexpr int CS_COLLISION_ANI = 17; // 특정 플레이어 미끄러짐 애니메이션 실행
+constexpr int CS_INGAME_READY = 18;
+constexpr int CS_INGAME_FINISH = 19;
+ //----추가 
 
-
-struct MessageStruct
-{
-	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
-	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
-	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
-	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
-
-	MessageStruct() {}
-	MessageStruct(const MessageStruct& msg)
-	{
-		msgName = msg.msgName;
-		shaderName = msg.shaderName;
-		departMat = msg.departMat;
-		objectSerialNum = msg.objectSerialNum;
-	}
-};
-
-struct UserInfo
-{
-	string m_sName;
-	bool m_bReadyState;
-	//
-	UserInfo(string name = "", bool readyState = 0) :m_sName(name),
-		m_bReadyState(readyState)
-	{}
-};
-
+//struct MessageStruct
+//{
+//	char msgName;				//명령어: 오브젝트삭제, 생성 or파티클 추가 or 비활성화
+//	char shaderName;             //담당 쉐이더를 나타내는 상수데이터 global.h에 값 정리돼있음.
+//	int objectSerialNum = 0;     //오브젝트의 이름이라고 보면 됨
+//	XMFLOAT4X4 departMat;         //오브젝트에 적용할 행렬 
+//
+//	MessageStruct() {}
+//	MessageStruct(const MessageStruct& msg)
+//	{
+//		msgName = msg.msgName;
+//		shaderName = msg.shaderName;
+//		departMat = msg.departMat;
+//		objectSerialNum = msg.objectSerialNum;
+//	}
+//};
 
 //[클라->서버]
+
+
+
 
 
 //////////////////////////////////////////////////////
@@ -122,14 +140,6 @@ struct CS_PACKET_REQUEST_START
 	char type;
 };
 
-struct CS_PACKET_ANIMATION
-{
-	char size;
-	char type;
-	char animation;			//애니메이션 정보를 클라에서 받아오는 패킷
-	char padding;			//4바이트 정렬을 위한 
-	//float animationTime;	//현재 애니메이션 시간
-};
 
 struct CS_PACKET_RELEASE_KEY
 {
@@ -163,11 +173,6 @@ struct CS_PACKET_CHATTING
 //	unsigned short objId;		//object개수는 66536을 넘지 않기 때문에 unsigned short로 변경
 //};
 
-struct CS_PACKET_NOT_COLLISION
-{
-	char size;
-	char type;
-};
 
 
 // 아이템 사용
@@ -194,12 +199,7 @@ struct SC_PACKET_PUT_PLAYER
 	char size;
 	char type;
 	XMFLOAT3 xmf3PutPos;
-	/*
-	char roomNo;
-	bool isReady; 
-	*/
 };
-
 
 
 struct SC_PACKET_ACCESS_COMPLETE
@@ -355,29 +355,67 @@ struct SC_PACKET_GO_LOBBY
 };
 
 
-struct SC_PACKET_COLLIDED
+//------룸 정보 업데이트에 대한 패킷
+
+struct RoomInfo
+{
+	char m_iRoomNumber;
+	char m_iUserNumber;
+	bool m_bIsGaming;
+	bool m_bMode;
+	//
+	RoomInfo(char roomNum, char userNum, bool isGameing, bool mode) :m_iRoomNumber(roomNum),
+		m_iUserNumber(userNum), m_bIsGaming(isGameing), m_bMode(mode)  //isGameing 0: 대기중, 1: 게임중
+	{}
+};
+
+struct UserInfo
+{
+	string m_sName;
+	bool m_bReadyState;
+	//
+	UserInfo(string name = "", bool readyState = 0) :m_sName(name),
+		m_bReadyState(readyState)
+	{}
+};
+
+struct CS_PACKET_ROOM
+{
+	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
+	char type;
+
+	vector<RoomInfo> romms;
+};
+
+struct SC_PACKET_ROOM
+{
+	char size;
+	char type;
+
+	vector<RoomInfo> romms;
+};
+
+
+struct CS_PACKET_PLAYER_ANI
+{
+	char size;  //미끄러짐 혹은 충돌 애니메이션을 실행시키기 위한 패킷이에요 
+	char type; // 타입에 따라서 충돌혹은 미끄러짐 애니메이션을 실행해요.
+	char id;
+};
+
+struct SC_PACKET_PLAYER_ANI
 {
 	char size;
 	char type;
 	char id;
 };
-
-
-struct SC_PACKET_NOT_COLLIDED
-{
-	char size;
-	char type;
-	char id;
-};
-
-
 
 struct CS_PACKET_USERS_INFO
 {
 	char size;  //클라에서 굳이 보낼필요가 있는지 모르겠어서, 일단 만들어 놓았어요.
 	char type;
 
-	UserInfo users[MAX_USER];
+	//UserInfo users[MAX_USER];
 };
 
 struct SC_PACKET_USERS_INFO
@@ -388,7 +426,47 @@ struct SC_PACKET_USERS_INFO
 	UserInfo users;
 };
 
-struct SC_PACKET_RESET_USERS_INFO //룸정보 유저리스트 리셋하라는 명령
+struct SC_PACKET_RESET_USERS_INFO
+{
+	char size;
+	char type;
+};
+
+struct SC_PACKET_GAME_MODE_INFO
+{
+	char size;
+	char type;
+
+	bool m_bGameMode;
+};
+
+struct CS_PACKET_GAME_MODE_INFO
+{
+	char size;
+	char type;
+};
+
+
+struct SC_PACKET_INGAME_READY_INFO
+{
+	char size;
+	char type;
+};
+
+struct CS_PACKET_INGAME_READY_INFO
+{
+	char size;
+	char type;
+};
+
+struct SC_PACKET_INGAME_FINISH_INFO
+{
+	char size;
+	char type;
+	string name;
+};
+
+struct CS_PACKET_INGAME_FINISH_INFO
 {
 	char size;
 	char type;
