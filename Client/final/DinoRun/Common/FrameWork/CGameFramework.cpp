@@ -1,14 +1,25 @@
 #include "../stdafx.h"
 #include "CGameFramework.h"
 #include "TerrainObject.h"
+
+#include "GameManager.h"
+#include "SoundManager.h"
+#include "NetworkManager.h"
+
 #include "EventHandler/EventHandler.h"
+
+#include "../Scenes/GameScene.h"
+#include "../Scenes/ItemGameScene.h"
+#include "../Scenes/StartScene.h"
+#include "../Scenes/LoadingScene.h"
+#include "../Scenes/RoomScene.h"
+#include "../Scenes/EndScene.h"
 ID3D12PipelineState** CGameFramework::m_ppd3dPipelineStates = NULL;
 
 CGameFramework::CGameFramework()
 {
 	EventHandler::GetInstance()->Update();
 	SoundManager::GetInstance()->Initialize();
-	//NetWorkManager::GetInstance()->Initialize();
 }
 
 CGameFramework::~CGameFramework()
@@ -17,6 +28,7 @@ CGameFramework::~CGameFramework()
 	NetWorkManager::GetInstance()->Release();
 	NetWorkManager::GetInstance()->destroy();
 	SoundManager::GetInstance()->destroy();
+	GameManager::GetInstance()->destroy();
 }
 
 bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
@@ -25,12 +37,9 @@ bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
 #ifdef isConnectedToServer
 	NetWorkManager::GetInstance()->SetHwnd(hWnd);
 #endif
-	m_pCreateManager = shared_ptr<CreateManager>(new CreateManager);
+	GameManager::GetInstance()->Initialize(hInstance, hWnd);
 
-	m_pCreateManager->Initialize(hInstance, hWnd);
-	m_pDrawManager = m_pCreateManager->GetDrawMgr();
-
-	::gnCbvSrvDescriptorIncrementSize = m_pCreateManager->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+	::gnCbvSrvDescriptorIncrementSize = GameManager::GetInstance()->GetDevice()->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
 	m_pCamera = new CMinimapCamera;
 	m_pCamera->SetPosition(XMFLOAT3(0, 300, 0));
@@ -40,7 +49,7 @@ bool CGameFramework::Initialize(HINSTANCE hInstance, HWND hWnd)
 	m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
 	m_pCamera->GenerateViewMatrix(XMFLOAT3(0, 0, 0), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
-	m_pCamera->CreateShaderVariables(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetCommandList().Get());
+	m_pCamera->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 	
 	
 	return(true);
@@ -69,7 +78,6 @@ void CGameFramework::Release()
 		m_pCamera->ReleaseShaderVariables();
 		delete m_pCamera;
 	}
-	m_pCreateManager->Release();
 }
 
 void LoadingFrameAdvance()
@@ -83,18 +91,19 @@ void CGameFramework::FrameAdvance()
 
 	m_pScene->ProcessInput(m_hWnd, fTimeElapsed);
 	// processinput과 플레이어 animate의 순서를 뒤바꾸면 플레이어가 움직일 시 흔들림 발생.
-	m_pScene->FixedUpdate(m_pCreateManager.get(), fTimeElapsed);
+	m_pScene->FixedUpdate(fTimeElapsed);
 	m_pScene->AnimateObjects(fTimeElapsed); //바뀐 행렬값으로 애니메이션 수행
 	
-	m_pCreateManager->GetDrawMgr()->WaitForGpuComplete();
-	m_pCreateManager->GetDrawMgr()->ResetCommandAllocator();
-	m_pCreateManager->ResetCommandList();
-	m_pCreateManager->SetComputeRootSignature();
+	GameManager::GetInstance()->WaitForGpuComplete();
+	GameManager::GetInstance()->ResetCommandAllocator();
+	GameManager::GetInstance()->ResetCommandList();
+	GameManager::GetInstance()->SetComputeRootSignature();
 	
-	m_CurState = m_pScene->Update(m_pCreateManager.get(),fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
-	m_pCreateManager->ExecuteCommandList();
-	if(m_pScene)
-		m_pDrawManager->Render(m_pScene, fTimeElapsed);
+	m_CurState = m_pScene->Update(fTimeElapsed);  //ProcessInput과 Update를 통해 물리처리
+	GameManager::GetInstance()->ExecuteCommandList();
+
+	if (m_pScene)
+		GameManager::GetInstance()->Render(m_pScene, fTimeElapsed);
 
 	if (m_CurState != m_PrevState)
 	{
@@ -114,57 +123,32 @@ void CGameFramework::BuildObjects()
 #endif
 
 	BuildPipelineState();
-	m_pCreateManager->ResetCommandList();
+	GameManager::GetInstance()->ResetCommandList();
 
 	m_pFontManager = shared_ptr<FontManager>(new FontManager);
-	m_pFontManager->Initialize(m_pCreateManager.get());
-	//-----------
-	/* 게임씬 바로 입장용 코드 
-	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
-	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
-	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
-	m_pLoadingScene->BuildObjects(m_pCreateManager);
-	m_pLoadingScene->SetFontShader(m_pFontManager->getFontShader());
-	m_pLoadingScene->setCamera(m_pCamera);
-	m_pCreateManager->ExecuteCommandList();
-	m_pCreateManager->ResetCommandList();
-
-	m_pCreateManager->SetLoadingScene(m_pLoadingScene);
-
-	m_pScene = shared_ptr<ItemGameScene>(new ItemGameScene());
-	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
-	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateManager);
-	m_pScene->SetId(m_sPlayerID);
-	CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
-	pPlayer->SetMaxForce(MAX_FORCE);
-	m_pPlayer = pPlayer;
-
-	m_pScene->setPlayer(m_pPlayer);
-	m_pScene->setCamera(m_pPlayer->GetCamera());
-	*/
-	//--------
+	m_pFontManager->Initialize();
 	
 	m_pLoadingScene = shared_ptr<LoadingScene>(new LoadingScene());
-	m_pLoadingScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
+	m_pLoadingScene->SetGraphicsRootSignature(GameManager::GetInstance()->GetGraphicsRootSignature().Get());
 	m_pLoadingScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
-	m_pLoadingScene->BuildObjects(m_pCreateManager);
+	m_pLoadingScene->BuildObjects();
 	m_pLoadingScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pLoadingScene->setCamera(m_pCamera);
-	m_pCreateManager->ExecuteCommandList();
-	m_pCreateManager->ResetCommandList();
 
-	m_pCreateManager->SetLoadingScene(m_pLoadingScene);
+	GameManager::GetInstance()->ExecuteCommandList();
+	GameManager::GetInstance()->ResetCommandList();
+
+	GameManager::GetInstance()->SetLoadingScene(m_pLoadingScene);
 	m_pScene = shared_ptr<StartScene>(new StartScene());
-	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
+	m_pScene->SetGraphicsRootSignature(GameManager::GetInstance()->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates,m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateManager);
+	m_pScene->BuildObjects();
 	m_pScene->SetFontShader(m_pFontManager->getFontShader());
 	m_pScene->setCamera(m_pCamera);
 	
 	//-----------------------
 	
-	m_pCreateManager->ExecuteCommandList();
+	GameManager::GetInstance()->ExecuteCommandList();
 
 	if (m_pScene)
 		m_pScene->ReleaseUploadBuffers();
@@ -197,7 +181,7 @@ void CGameFramework::CalculateFrameStats()
 		::GetCursorPos(&m_ptOldCursorPos);
 
 		ScreenToClient(m_hWnd, &m_ptOldCursorPos);
-		Point2D p = ScreenToProj(m_pCreateManager->GetWindowWidth(), m_pCreateManager->GetWindowHeight(), m_ptOldCursorPos);
+		Point2D p = ScreenToProj(GameManager::GetInstance()->GetWindowWidth(), GameManager::GetInstance()->GetWindowHeight(), m_ptOldCursorPos);
 		wstring windowText;
 	
 		windowText = L"DinoRun   fps: " + fpsStr;
@@ -226,13 +210,10 @@ LRESULT CALLBACK CGameFramework::OnProcessingPacket(HWND hWnd, UINT nMessageID,
 		{
 		case FD_READ:
 			NetWorkManager::GetInstance()->ReadPacket(m_GameTimer.DeltaTime());
-			//NetWorkManager::GetInstance()->ReadPacket(0);
 			break;
 		case FD_CLOSE:
 			closesocket((SOCKET)wParam);
 			NetWorkManager::GetInstance()->Initialize();
-			//Network::GetInstance()->DeleteInstance();
-			//PostQuitMessage(0);
 			break;
 		}
 		break;
@@ -247,7 +228,8 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	{
 		if (LOWORD(lParam) == 0 || HIWORD(lParam) == 0)
 			break;
-		m_pCreateManager->Resize(LOWORD(lParam), HIWORD(lParam));
+		GameManager::GetInstance()->ResetSize(LOWORD(lParam), HIWORD(lParam));
+
 		EventHandler::GetInstance()->m_nWndClientWidth = LOWORD(lParam);
 		EventHandler::GetInstance()->m_nWndClientHeight = HIWORD(lParam);
 
@@ -257,7 +239,7 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 
 		if (m_pScene)
 		{
-			m_pScene->ReSize(m_pCreateManager);
+			m_pScene->ReSize();
 			
 		}
 		if (m_pPlayer)
@@ -313,8 +295,7 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ChangeSceneByType(SceneType type)
 {
-	m_pCreateManager->ResetCommandList();
-	
+	GameManager::GetInstance()->ResetCommandList();
 	
 	if (m_PrevState == Start_Scene)
 	{
@@ -374,15 +355,15 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		break;
 	}
 
-	m_pScene->SetGraphicsRootSignature(m_pCreateManager->GetGraphicsRootSignature().Get());
+	m_pScene->SetGraphicsRootSignature(GameManager::GetInstance()->GetGraphicsRootSignature().Get());
 	m_pScene->SetPipelineStates(m_nPipelineStates, m_ppd3dPipelineStates);
-	m_pScene->BuildObjects(m_pCreateManager);
+	m_pScene->BuildObjects();
 
 	if (type == SceneType::Game_Scene || type == SceneType::ItemGame_Scene)
 	{
 		m_pScene->SetId(m_sPlayerID);
 		m_pScene->SetFontShader(m_pFontManager->getFontShader());
-		CDinoRunPlayer *pPlayer = new CDinoRunPlayer(m_pCreateManager.get(), "Resources/Models/M_DinoTest.bin");
+		CDinoRunPlayer *pPlayer = new CDinoRunPlayer("Resources/Models/M_DinoTest.bin");
 		pPlayer->SetMaxForce(MAX_FORCE);
 		m_pPlayer = pPlayer;
 		//게임씬으로 바뀌면서 자신의 위치정보를 서버로부터 받아서 설정한다.
@@ -396,7 +377,7 @@ void CGameFramework::ChangeSceneByType(SceneType type)
 		m_pScene->setCamera(m_pPlayer->GetCamera());
 	}
 
-	m_pCreateManager->ExecuteCommandList();
+	GameManager::GetInstance()->ExecuteCommandList();
 
 	if (m_pScene)
 		m_pScene->ReleaseUploadBuffers();
@@ -422,40 +403,40 @@ void CGameFramework::BuildPipelineState()
 void CGameFramework::CreatePSOs()
 {
 	//Base Pipelines
-	CreatePsoCube(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_CUBE_MAP);
-	CreatePsoSkinMesh(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH);
-	CreatePsoTextedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MODEL_INSTANCING);
-	CreatePsoBillBoardInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_BILLBOARD);
-	CreatePsoTerrain(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_TERRAIN);
-	CreatePsoSkinedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH_INSTANCING);
-	CreatePsoUi(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI);
-	CreatePsoUiGuage(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_GAUGE);
-	CreatePsoUiNumber(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_NUMBER);
-	CreatePsoParticle(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE);
-	CreatePsoMinimap(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MINIMAP);
-	CreatePsoPostEffect(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_EFFECT);
+	CreatePsoCube(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_CUBE_MAP);
+	CreatePsoSkinMesh(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH);
+	CreatePsoTextedInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MODEL_INSTANCING);
+	CreatePsoBillBoardInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_BILLBOARD);
+	CreatePsoTerrain(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_TERRAIN);
+	CreatePsoSkinedInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SKIN_MESH_INSTANCING);
+	CreatePsoUi(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI);
+	CreatePsoUiGuage(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_GAUGE);
+	CreatePsoUiNumber(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_UI_NUMBER);
+	CreatePsoParticle(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE);
+	CreatePsoMinimap(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_MINIMAP);
+	CreatePsoPostEffect(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_EFFECT);
 	//Shadow Pipelines
 
-	CreatePsoShadowSkinMesh(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKIN_MESH);//수정
-	CreatePsoShadowTextedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_MODEL_INSTANCING);
-	CreatePsoShadowBillBoardInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_BILLBOARD);
-	CreatePsoShadowTerrain(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_TERRAIN);
-	CreatePsoShadowSkinedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKINED_INSTANCING);
+	CreatePsoShadowSkinMesh(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKIN_MESH);//수정
+	CreatePsoShadowTextedInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_MODEL_INSTANCING);
+	CreatePsoShadowBillBoardInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_BILLBOARD);
+	CreatePsoShadowTerrain(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_TERRAIN);
+	CreatePsoShadowSkinedInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_SHADOW_SKINED_INSTANCING);
 	
 	//Velocity Pipelines
-	CreatePsoVelocitySkinMesh(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_SKIN_MESH);//수정
-	CreatePsoVelocityTextedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_MODEL_INSTANCING);
-	CreatePsoVelocityBillBoardInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_BILLBOARD);
-	CreatePsoVelocityTerrain(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_TERRAIN);
-	CreatePsoVelocitySkinedInstancing(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_SKINED_INSTANCING);
-	CreatePsoVelocityCubeMap(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_CUBEMAP);
+	CreatePsoVelocitySkinMesh(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_SKIN_MESH);//수정
+	CreatePsoVelocityTextedInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_MODEL_INSTANCING);
+	CreatePsoVelocityBillBoardInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_BILLBOARD);
+	CreatePsoVelocityTerrain(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_TERRAIN);
+	CreatePsoVelocitySkinedInstancing(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_SKINED_INSTANCING);
+	CreatePsoVelocityCubeMap(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_VELOCITY_CUBEMAP);
 	//Wire Pipelines
-	CreatePsoWire(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE);
-	CreatePsoWireInstance(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE_INSTANCING);
+	CreatePsoWire(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE);
+	CreatePsoWireInstance(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_WIRE_INSTANCING);
 	//Font
-	CreatePsoFont(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_FONT);
+	CreatePsoFont(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetGraphicsRootSignature().Get(), m_ppd3dPipelineStates, PSO_FONT);
 	//Blur
-	CreatePsoMotionBlur(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_MOTION_BLUR);
+	CreatePsoMotionBlur(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_MOTION_BLUR);
 
-	CreatePsoParticleCs(m_pCreateManager->GetDevice().Get(), m_pCreateManager->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE_CALC);
+	CreatePsoParticleCs(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetComputeRootSignature().Get(), m_ppd3dPipelineStates, PSO_PARTICLE_CALC);
 }

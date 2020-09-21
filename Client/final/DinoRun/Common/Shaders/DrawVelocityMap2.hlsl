@@ -1,6 +1,6 @@
 #include "Shaders.hlsl"
 
-
+//카메라 모션블러 방식 사용(카메라의 시점을 기준으로 속도벡터 계산.)
 
 CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedAnimation(VS_SKINNED_INPUT input)
 {

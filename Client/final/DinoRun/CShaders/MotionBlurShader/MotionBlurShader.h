@@ -1,6 +1,5 @@
 #pragma once
 #include "../../Common/stdafx.h"
-#include "../../Common/FrameWork/CreateManager.h"
 
 class MotionBlurShader
 {
@@ -12,7 +11,7 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 public:
-	MotionBlurShader(CreateManager* pCreateManager);
+	MotionBlurShader();
 
 	MotionBlurShader(const MotionBlurShader& rhs) = delete;
 	MotionBlurShader& operator=(const MotionBlurShader& rhs) = delete;

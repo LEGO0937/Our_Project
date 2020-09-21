@@ -1,7 +1,6 @@
 #pragma once
 #include "../../CShaders/Shader.h"
 #include "BillBoardMesh.h"
-#include "../../Common/FrameWork/CreateManager.h"
 
 #include "../stdafx.h"
 #define LOOP 0
@@ -81,7 +80,7 @@ private:
 	CB_Particle *particleCb;
 	
 public:
-	ParticleSystem(CreateManager* pCreateManager, char name, CGameObject* pTarget,
+	ParticleSystem(char name, CGameObject* pTarget,
 		const XMFLOAT3& xmf3Position);
 	~ParticleSystem();
 	list<Particle> GetParticles() { return m_vParticles; }
@@ -89,7 +88,7 @@ public:
 	void Update(float fTimeElapsed);
 	void FixedUpdate(float fTimeElapsed);
 
-	void BuildResource(CreateManager* pCreateManager);
+	void BuildResource();
 	void ReleaseUploadBuffers();
 	void ChangeResourceState(ID3D12GraphicsCommandList* pCommandList, ID3D12Resource* pResource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter);
 	void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);

@@ -88,12 +88,6 @@
     <Filter Include="CShaders\ModelShader">
       <UniqueIdentifier>{84ee182e-3d38-4609-b75e-94669d09cb5c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Framework\DrawManager">
-      <UniqueIdentifier>{9c4c0e31-3d8c-435b-9cc8-c0be06488409}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Common\Framework\CreateManager">
-      <UniqueIdentifier>{b1911e3e-a96a-4512-9cbd-9db54a5766f4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common\Global">
       <UniqueIdentifier>{00108b15-7089-4251-b299-205024b72fdc}</UniqueIdentifier>
     </Filter>
@@ -259,6 +253,9 @@
     <Filter Include="Objects\ItemObject\07FogBox">
       <UniqueIdentifier>{6e87c402-8fbd-48a3-bfd1-fcc88ad0e490}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common\Framework\GameManager">
+      <UniqueIdentifier>{7b230077-6071-486d-95ff-309860fff365}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common\stdafx.h">
@@ -332,12 +329,6 @@
     </ClInclude>
     <ClInclude Include="Objects\BillBoardObject.h">
       <Filter>Objects\BillBoardObject</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\FrameWork\CreateManager.h">
-      <Filter>Common\Framework\CreateManager</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\FrameWork\DrawManager.h">
-      <Filter>Common\Framework\DrawManager</Filter>
     </ClInclude>
     <ClInclude Include="DinoRun.h">
       <Filter>DinoRun</Filter>
@@ -417,6 +408,9 @@
     <ClInclude Include="protocol.h">
       <Filter>Common\Framework\NetworkManager</Filter>
     </ClInclude>
+    <ClInclude Include="Common\FrameWork\GameManager.h">
+      <Filter>Common\Framework\GameManager</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Common\stdafx.cpp">
@@ -475,12 +469,6 @@
     </ClCompile>
     <ClCompile Include="Objects\BillBoardObject.cpp">
       <Filter>Objects\BillBoardObject</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\FrameWork\CreateManager.cpp">
-      <Filter>Common\Framework\CreateManager</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\FrameWork\DrawManager.cpp">
-      <Filter>Common\Framework\DrawManager</Filter>
     </ClCompile>
     <ClCompile Include="DinoRun.cpp">
       <Filter>DinoRun</Filter>
@@ -646,6 +634,9 @@
     </ClCompile>
     <ClCompile Include="CShaders\ModelShader\FogBoxShader.cpp">
       <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\FrameWork\GameManager.cpp">
+      <Filter>Common\Framework\GameManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

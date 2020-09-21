@@ -105,7 +105,7 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager);
+	virtual void CreateShaderVariables();
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 
@@ -150,7 +150,7 @@ protected:
 class CDinoRunPlayer : public CPlayer
 {
 public:
-	CDinoRunPlayer(CreateManager* pCreateManager,string sModelName);
+	CDinoRunPlayer(string sModelName);
 	virtual ~CDinoRunPlayer();
 	
 public:

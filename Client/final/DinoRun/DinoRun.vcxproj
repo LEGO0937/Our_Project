@@ -173,9 +173,8 @@
     <ClInclude Include="Common\EventHandler\EventHandler.h" />
     <ClInclude Include="Common\Font\Font.h" />
     <ClInclude Include="Common\FrameWork\CGameFramework.h" />
-    <ClInclude Include="Common\FrameWork\CreateManager.h" />
-    <ClInclude Include="Common\FrameWork\DrawManager.h" />
     <ClInclude Include="Common\FrameWork\FontManager.h" />
+    <ClInclude Include="Common\FrameWork\GameManager.h" />
     <ClInclude Include="Common\FrameWork\NetworkManager.h" />
     <ClInclude Include="Common\FrameWork\SoundManager.h" />
     <ClInclude Include="Common\ParticleSystem\ParticleSystem.h" />
@@ -226,9 +225,8 @@
     <ClCompile Include="Common\EventHandler\EventHandler.cpp" />
     <ClCompile Include="Common\Font\Font.cpp" />
     <ClCompile Include="Common\FrameWork\CGameFramework.cpp" />
-    <ClCompile Include="Common\FrameWork\CreateManager.cpp" />
-    <ClCompile Include="Common\FrameWork\DrawManager.cpp" />
     <ClCompile Include="Common\FrameWork\FontManager.cpp" />
+    <ClCompile Include="Common\FrameWork\GameManager.cpp" />
     <ClCompile Include="Common\FrameWork\NetworkManager.cpp" />
     <ClCompile Include="Common\FrameWork\SoundManager.cpp" />
     <ClCompile Include="Common\ParticleSystem\ParticleSystem.cpp" />

@@ -6,7 +6,6 @@
 
 class CPlayer;
 class CCamera;
-class CreateManager;
 class NetWorkManager;
 class SoundManager;
 
@@ -65,18 +64,18 @@ public:
 
 	virtual void SetViewportsAndScissorRects();
 
-	virtual void BuildObjects(shared_ptr<CreateManager> pCreateManager) = 0;
+	virtual void BuildObjects() = 0;
 	virtual void BuildLights() {};
 
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager) {}
+	virtual void CreateShaderVariables() {}
 	virtual void UpdateShaderVariables() {}
 	virtual void ReleaseShaderVariables() {}
 
-	virtual SceneType Update(CreateManager* pCreateManager, float fTimeElapsed) = 0;
-	virtual void FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed) {};
+	virtual SceneType Update(float fTimeElapsed) = 0;
+	virtual void FixedUpdate(float fTimeElapsed) {};
 	virtual void AnimateObjects(float fTimeElapsed) {}
 
 	virtual void Render();
@@ -88,7 +87,7 @@ public:
 	void SetPipelineStates(int nPipelineStates, ID3D12PipelineState** ppd3dPipelineStates);
 	void SetFontShader(FontShader* shader) { fontShader = shader; }
 
-	virtual void ResetShadowBuffer(CreateManager* pCreateManager) {};
+	virtual void ResetShadowBuffer() {};
 
 	CPlayer* m_pPlayer = NULL;
 	CCamera* m_pCamera = NULL;
@@ -97,7 +96,7 @@ public:
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);
 
-	virtual void ReSize(shared_ptr<CreateManager> pCreateManager);
+	virtual void ReSize();
 
 	virtual string GetId() { return m_sPlayerId; }
 	virtual void SetId(const string& str) { m_sPlayerId = str; }
@@ -108,8 +107,6 @@ public:
 	virtual void ProcessPacket(char* packet,float fTimeElapsed) {}
 protected:
 	string m_sPlayerId;
-	shared_ptr<CreateManager> m_pCreateManager = NULL;
-	shared_ptr<SoundManager> m_pSoundManager = NULL;
 	SceneType sceneType;
 
 	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;

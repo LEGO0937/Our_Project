@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "FenceObject.h"
 FenceShader::FenceShader()
 {
@@ -10,7 +10,7 @@ FenceShader::~FenceShader()
 
 }
 
-void FenceShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void FenceShader::Load(const char* filename, const char* Loadname)
 {
 	isEnable = false;
 
@@ -27,7 +27,7 @@ void FenceShader::Load(CreateManager* pCreateManager, const char* filename, cons
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pFenceObject = new FenceObject;
 		pFenceObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pFenceObject->AddRef();

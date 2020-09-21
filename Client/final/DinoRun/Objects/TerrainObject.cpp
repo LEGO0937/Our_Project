@@ -1,20 +1,19 @@
 #include "TerrainObject.h"
 #include "../CShaders/TerrainShader/TerrainShader.h"
-#include "../Common/FrameWork/CreateManager.h"
-
-CHeightMapTerrain::CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFileName, int
+#include "../Common/FrameWork/GameManager.h"
+CHeightMapTerrain::CHeightMapTerrain( LPCTSTR pFileName, int
 	nWidth, int nLength, int nBlockWidth, int nBlockLength, XMFLOAT3 xmf3Scale) : CGameObject(1)
 {
 
 	CTexture *pTerrainBaseTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTerrainBaseTexture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), L"Resources/Images/First_Map_Texture.dds", 0);
+	pTerrainBaseTexture->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), L"Resources/Images/First_Map_Texture.dds", 0);
 
 	CTexture *pTerrainDetailTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTerrainDetailTexture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), L"Resources/Images/Detail_Texture.dds", 0);
+	pTerrainDetailTexture->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), L"Resources/Images/Detail_Texture.dds", 0);
 
 	CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(),0);
-	pCreateManager->GetShadowBuffer()->AddRef();
+	pShadowTexture->SetTexture(GameManager::GetInstance()->GetShadowBuffer(),0);
+	GameManager::GetInstance()->GetShadowBuffer()->AddRef();
 	//----------------------
 	//지형에 사용할 높이 맵의 가로, 세로의 크기이다. 
 	m_nWidth = nWidth;
@@ -36,10 +35,10 @@ CHeightMapTerrain::CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFil
 	CGameObject* Object = NULL;
 	CMaterial *material = NULL;
 	TerrainShader *pShader = new TerrainShader();
-	pShader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 3);
-	pShader->CreateShaderResourceViews(pCreateManager, pTerrainBaseTexture, 8, true);
-	pShader->CreateShaderResourceViews(pCreateManager, pTerrainDetailTexture, 9, true);
-	pShader->CreateShadowResourceViews(pCreateManager, pShadowTexture, 10, true);
+	pShader->CreateCbvSrvDescriptorHeaps(0, 3);
+	pShader->CreateShaderResourceViews(pTerrainBaseTexture, 8, true);
+	pShader->CreateShaderResourceViews(pTerrainDetailTexture, 9, true);
+	pShader->CreateShadowResourceViews(pShadowTexture, 10, true);
 
 	material = new CMaterial(3);
 	material->m_xmf4AmbientColor = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
@@ -51,7 +50,7 @@ CHeightMapTerrain::CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFil
 	material->SetTexture(pShadowTexture, 2);
 
 	
-	material->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	material->CreateShaderVariable(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 	SetMaterial(0, material);
 
@@ -64,10 +63,10 @@ CHeightMapTerrain::CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFil
 			xStart = x * (nBlockWidth - 1);
 			zStart = z * (nBlockLength - 1);
 			//지형의 일부분을 나타내는 격자 메쉬를 생성하여 지형 메쉬에 저장한다.
-			CHeightMapGridMesh *pMeshInfo = new CHeightMapGridMesh(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), xStart,
+			CHeightMapGridMesh *pMeshInfo = new CHeightMapGridMesh(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), xStart,
 				zStart, nBlockWidth, nBlockLength, xmf3Scale, m_pHeightMapImage);
 
-			pMeshInfo->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+			pMeshInfo->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 			Object = new CGameObject(1);
 
@@ -76,7 +75,7 @@ CHeightMapTerrain::CHeightMapTerrain(CreateManager* pCreateManager, LPCTSTR pFil
 
 		}
 	}
-	CreateBuffer(pCreateManager);
+	CreateBuffer();
 }
 CHeightMapTerrain::~CHeightMapTerrain(void)
 {

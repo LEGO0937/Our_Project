@@ -3,8 +3,8 @@
 #include "../Timer/Timer.h"
 #include "../Camera/Camera.h"
 #include "../../Scenes/BaseScene.h"
-#include "CreateManager.h"
-#include "DrawManager.h"
+#include "FontManager.h"
+
 class CGameFramework
 {
 
@@ -39,8 +39,6 @@ private: // 내부 함수
 
 private: // 변수
 	HWND m_hWnd{ NULL };
-	shared_ptr<CreateManager> m_pCreateManager;
-	shared_ptr<DrawManager> m_pDrawManager;
 	shared_ptr<FontManager> m_pFontManager;
 
 	shared_ptr<BaseScene> m_pScene;

@@ -1,7 +1,5 @@
 #include "FontShader.h"
-
-#include "../../Common/FrameWork/CreateManager.h"
-
+#include "../Common/FrameWork/GameManager.h"
 FontShader::FontShader()
 {
 	m_nReferences = 1;
@@ -11,24 +9,24 @@ FontShader::~FontShader()
 
 }
 
-void FontShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void FontShader::BuildObjects(void* pInformation)
 {
 	
 	arialFont = LoadFont(L"Resources/Fonts/Arial.fnt", FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
 	pFontTex = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pFontTex->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), arialFont.fontImage.c_str(), 0);
+	pFontTex->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), arialFont.fontImage.c_str(), 0);
 
-	CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
+	CreateCbvSrvDescriptorHeaps(0, 1);
 
-	CreateShaderResourceViews(pCreateManager, pFontTex, 8, true);
+	CreateShaderResourceViews(pFontTex, 8, true);
 
 	HRESULT hResult;
 	//18개의 텍스트 출력을 위한 정점 버퍼 생성.
 	//한 프레임에 출력 가능 텍스트는 18개가 최대
 	for (int i = 0; i < 18; ++i)
 	{
-		pCreateManager->GetDevice().Get()->CreateCommittedResource(
+		GameManager::GetInstance()->GetDevice().Get()->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(maxNumTextCharacters * sizeof(TextVertex)),

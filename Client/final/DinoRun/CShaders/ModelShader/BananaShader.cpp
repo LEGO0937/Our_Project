@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "ItemObject.h"
 
 BananaShader::BananaShader()
@@ -11,7 +11,7 @@ BananaShader::~BananaShader()
 
 }
 
-void BananaShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void BananaShader::Load(const char* filename, const char* Loadname)
 {
 	isEnable = true;
 
@@ -28,7 +28,7 @@ void BananaShader::Load(CreateManager* pCreateManager, const char* filename, con
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pItemObject = new ItemBanana;
 		pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pItemObject->AddRef();
@@ -72,10 +72,10 @@ void BananaShader::Update(float fTimeElapsed)
 	}
 }
 
-void BananaShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
+void BananaShader::addObject(const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemBanana* pItemObject = NULL;
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
+	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(instancingModelName.c_str(), NULL);
 	
 	pItemObject = new ItemBanana;
 	pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
@@ -93,5 +93,5 @@ void BananaShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xm
 		pModel = NULL;
 	}
 	ReleaseShaderVariables();
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }

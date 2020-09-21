@@ -5,7 +5,7 @@
 #include "../Common/stdafx.h"
 #include "Shader.h"
 
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 
 CShader::CShader()
 {
@@ -31,14 +31,14 @@ void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 	OnPrepareRender(pd3dCommandList);
 }
 
-void CShader::CreateCbvSrvDescriptorHeaps(CreateManager* pCreateManager, int nConstantBufferViews, int nShaderResourceViews)
+void CShader::CreateCbvSrvDescriptorHeaps(int nConstantBufferViews, int nShaderResourceViews)
 {
 	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
 	d3dDescriptorHeapDesc.NumDescriptors = nConstantBufferViews + nShaderResourceViews; //CBVs + SRVs 
 	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 	d3dDescriptorHeapDesc.NodeMask = 0;
-	pCreateManager->GetDevice().Get()->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void **)&m_pd3dCbvSrvDescriptorHeap);
+	GameManager::GetInstance()->GetDevice().Get()->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void **)&m_pd3dCbvSrvDescriptorHeap);
 
 	m_d3dCbvCPUDescriptorNextHandle = m_d3dCbvCPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 	m_d3dCbvGPUDescriptorNextHandle = m_d3dCbvGPUDescriptorStartHandle = m_pd3dCbvSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
@@ -51,7 +51,7 @@ void CShader::BackDescriptorHeapCount()
 	m_d3dSrvCPUDescriptorNextHandle.ptr -= ::gnCbvSrvDescriptorIncrementSize;
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateConstantBufferViews(CreateManager* pCreateManager, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride)
+D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateConstantBufferViews(int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dCbvGPUDescriptorHandle = m_d3dCbvGPUDescriptorNextHandle;
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = pd3dConstantBuffers->GetGPUVirtualAddress();
@@ -61,7 +61,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateConstantBufferViews(CreateManager* pC
 	{
 		d3dCBVDesc.BufferLocation = d3dGpuVirtualAddress + (nStride * j);
 		m_d3dCbvCPUDescriptorNextHandle.ptr = m_d3dCbvCPUDescriptorNextHandle.ptr + ::gnCbvSrvDescriptorIncrementSize;
-		pCreateManager->GetDevice().Get()->CreateConstantBufferView(&d3dCBVDesc, m_d3dCbvCPUDescriptorNextHandle);
+		GameManager::GetInstance()->GetDevice().Get()->CreateConstantBufferView(&d3dCBVDesc, m_d3dCbvCPUDescriptorNextHandle);
 		m_d3dCbvGPUDescriptorNextHandle.ptr = m_d3dCbvGPUDescriptorNextHandle.ptr + ::gnCbvSrvDescriptorIncrementSize;
 	}
 	return(d3dCbvGPUDescriptorHandle);
@@ -109,7 +109,7 @@ D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3
 	return(d3dShaderResourceViewDesc);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShaderResourceViews(CreateManager* pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
+D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShaderResourceViews(CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle = m_d3dSrvGPUDescriptorNextHandle;
 	if (pTexture)
@@ -121,7 +121,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShaderResourceViews(CreateManager* pC
 			ID3D12Resource *pShaderResource = pTexture->GetTexture(i);
 			D3D12_RESOURCE_DESC d3dResourceDesc = pShaderResource->GetDesc();
 			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = GetShaderResourceViewDesc(d3dResourceDesc, nTextureType);
-			pCreateManager->GetDevice().Get()->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
+			GameManager::GetInstance()->GetDevice().Get()->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
 			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 
 			pTexture->SetRootArgument(i, (bAutoIncrement) ? (nRootParameter + i) : nRootParameter, m_d3dSrvGPUDescriptorNextHandle);
@@ -131,7 +131,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShaderResourceViews(CreateManager* pC
 	return(d3dSrvGPUDescriptorHandle);
 }
 
-D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShadowResourceViews(CreateManager* pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
+D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShadowResourceViews(CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement)
 {
 	D3D12_GPU_DESCRIPTOR_HANDLE d3dSrvGPUDescriptorHandle = m_d3dSrvGPUDescriptorNextHandle;
 	if (pTexture)
@@ -145,7 +145,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CShader::CreateShadowResourceViews(CreateManager* pC
 			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = GetShaderResourceViewDesc(d3dResourceDesc, nTextureType);
 			d3dShaderResourceViewDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
 			d3dShaderResourceViewDesc.Texture2D.MipLevels = 1;
-			pCreateManager->GetDevice().Get()->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
+			GameManager::GetInstance()->GetDevice().Get()->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
 			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 
 			pTexture->SetRootArgument(i, (bAutoIncrement) ? (nRootParameter + i) : nRootParameter, m_d3dSrvGPUDescriptorNextHandle);
@@ -247,12 +247,12 @@ CObInstancingShader::~CObInstancingShader()
 {
 }
 
-void CObInstancingShader::CreateShaderVariables(CreateManager* pCreateManager)
+void CObInstancingShader::CreateShaderVariables()
 {
-	m_ppObjects->CreateInstanceBuffer(pCreateManager, objectList.size(), instancedObjectInfo);
+	m_ppObjects->CreateInstanceBuffer(objectList.size(), instancedObjectInfo);
 	if (m_pBillBoardObject)
 	{
-		m_pBillBoardObject->CreateBillBoardInstanceBuffer(pCreateManager, objectList.size());
+		m_pBillBoardObject->CreateBillBoardInstanceBuffer(objectList.size());
 	}
 }
 void CObInstancingShader::ReleaseShaderVariables()
@@ -411,9 +411,9 @@ CSkinedObInstancingShader::~CSkinedObInstancingShader()
 {
 }
 
-void CSkinedObInstancingShader::CreateShaderVariables(CreateManager* pCreateManager)
+void CSkinedObInstancingShader::CreateShaderVariables()
 {
-	m_ppObjects->CreateSkinedInstanceBuffer(pCreateManager, objectList.size(), instancedObjectInfo);
+	m_ppObjects->CreateSkinedInstanceBuffer(objectList.size(), instancedObjectInfo);
 }
 void CSkinedObInstancingShader::ReleaseShaderVariables()
 {
@@ -529,7 +529,7 @@ CUiShader::~CUiShader()
 }
 
 
-void CUiShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void CUiShader::BuildObjects(void* pInformation)
 {
 }
 
@@ -547,11 +547,11 @@ void CUiShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCam
 	}
 }
 
-void CUiShader::CreateShaderVariables(CreateManager* pCreateManager)
+void CUiShader::CreateShaderVariables()
 {
 	if (objectList.size() > 0)
 	{
-		m_pd3dcbUis = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+		m_pd3dcbUis = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 			sizeof(CB_UI_INFO) * objectList.size(), D3D12_HEAP_TYPE_UPLOAD,
 			D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 		//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 

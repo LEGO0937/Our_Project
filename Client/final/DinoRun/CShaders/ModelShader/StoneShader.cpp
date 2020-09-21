@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "ItemObject.h"
 
 StoneShader::StoneShader()
@@ -11,7 +11,7 @@ StoneShader::~StoneShader()
 
 }
 
-void StoneShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void StoneShader::Load(const char* filename, const char* Loadname)
 {
 	billBoardCb->fSize = 50;
 	isEnable = true;
@@ -29,7 +29,7 @@ void StoneShader::Load(CreateManager* pCreateManager, const char* filename, cons
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pItemObject = new ItemStone;
 		pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pItemObject->AddRef();
@@ -69,10 +69,10 @@ void StoneShader::Update(float fTimeElapsed)
 	}
 }
 
-void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
+void StoneShader::addObject(const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemStone* pItemObject = NULL;
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
+	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(instancingModelName.c_str(), NULL);
 
 	pItemObject = new ItemStone;
 	pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
@@ -90,5 +90,5 @@ void StoneShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf
 		pModel = NULL;
 	}
 	ReleaseShaderVariables();
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }

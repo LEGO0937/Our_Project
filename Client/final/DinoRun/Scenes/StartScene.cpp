@@ -1,5 +1,5 @@
 #include "StartScene.h"
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
 #include "../Common/FrameWork/SoundManager.h"
 #include "EventHandler/EventHandler.h"
@@ -47,11 +47,9 @@ void StartScene::ReleaseObjects()
 	instacingBillBoardShaders.clear();
 
 }
-void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void StartScene::BuildObjects()
 {
-	m_pCreateManager = pCreateManager;
-
-	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+	m_pd3dCommandList = GameManager::GetInstance()->GetCommandList().Get();
 
 	SoundManager::GetInstance()->Play("Start_BGM", 0.2f);
 
@@ -59,7 +57,7 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/T_LoginBackGround.dds";
-	uiShader->BuildObjects(pCreateManager.get(), &name);
+	uiShader->BuildObjects(&name);
 	instacingUiShaders.emplace_back(uiShader);
 
 	UI_INFO button_info;
@@ -71,22 +69,22 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	button_info.minUv = XMFLOAT2(0.0f, 0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager.get(), &button_info);
+	uiShader->BuildObjects(&button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 	
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.27f, 0.60f)));// ID구간
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.27f, 0.75f)));// PassWord구간
 
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	CreateShaderVariables(pCreateManager.get());
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	CreateShaderVariables();
 }
 
 void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -258,7 +256,7 @@ void StartScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-SceneType StartScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
+SceneType StartScene::Update(float fTimeElapsed)
 {
 	//물리 및 충돌을 위한 update
 	if (sceneType != SceneType::Start_Scene)
@@ -273,7 +271,7 @@ SceneType StartScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 }
 
 
-void StartScene::CreateShaderVariables(CreateManager* pCreateManager)
+void StartScene::CreateShaderVariables()
 {
 
 }

@@ -1,34 +1,35 @@
 #include "ParticleSystem.h"
+#include "FrameWork/GameManager.h"
 #include <time.h>
 
 
-ParticleSystem::ParticleSystem(CreateManager* pCreateManager, char name, CGameObject* pTarget,
+ParticleSystem::ParticleSystem(char name, CGameObject* pTarget,
 	const XMFLOAT3& xmf3Position)
 {
 	FindValue(name);
-	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+	m_pd3dCommandList = GameManager::GetInstance()->GetCommandList().Get();
 
 	CTexture * texture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	texture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(m_sTextureName.c_str()), 0);
+	texture->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), ConvertCHARtoWCHAR(m_sTextureName.c_str()), 0);
 
 	CShader* pShader = new CShader();
-	pShader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
-	pShader->CreateShaderResourceViews(pCreateManager, texture, 8, true);
+	pShader->CreateCbvSrvDescriptorHeaps(0, 1);
+	pShader->CreateShaderResourceViews(texture, 8, true);
 	
 	m_pMaterial = new CMaterial(1);
 	m_pMaterial->SetShader(pShader);
 	m_pMaterial->SetTexture(texture, 0);
 
-	m_pMaterial->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	m_pMaterial->CreateShaderVariable(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 	m_pMesh = new BillBoardMesh();
-	m_pMesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	m_pMesh->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 	
 	m_pTarget = pTarget;
 
 	m_xmf3Position = xmf3Position;
 
-	BuildResource(pCreateManager);
+	BuildResource();
 }
 ParticleSystem::~ParticleSystem()
 {
@@ -273,10 +274,10 @@ void ParticleSystem::Update(float fTimeElapsed)
 }
 void ParticleSystem::FixedUpdate(float fTimeElapsed) {}
 
-void ParticleSystem::BuildResource(CreateManager* pCreateManager)
+void ParticleSystem::BuildResource()
 {
 
-	m_pd3dUbParticles = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+	m_pd3dUbParticles = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 		sizeof(Particle) * m_uMaxSize, D3D12_HEAP_TYPE_DEFAULT,
 		D3D12_RESOURCE_STATE_COPY_DEST, NULL, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 	//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
@@ -286,19 +287,19 @@ void ParticleSystem::BuildResource(CreateManager* pCreateManager)
 	//버퍼는 세개 만든다 하나는 uav , upload, readback
 	//업데이트 전에 업로드힙에서 오브젝트 정보를 업데이트하고 uav로 복사, 업데이트 실행후 uav의 내용을 readBack으로
 	//복사, -> readback에서 map함수호출로 최종값 불러옴.
-	m_pd3dSrbParticles = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+	m_pd3dSrbParticles = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 		sizeof(Particle) * m_uMaxSize, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 	m_pd3dSrbParticles->Map(0, NULL, (void **)&m_pSrbMappedParticles);
 	copy(m_vParticles.begin(), m_vParticles.end(), m_pSrbMappedParticles);
-	m_pd3dReadBackParticles = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+	m_pd3dReadBackParticles = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 		sizeof(Particle) * m_uMaxSize, D3D12_HEAP_TYPE_READBACK,
 		D3D12_RESOURCE_STATE_COPY_DEST, NULL);
 	//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
 	m_pd3dCommandList->CopyResource(m_pd3dReadBackParticles, m_pd3dSrbParticles);
 
 	UINT ncbElementBytes = ((sizeof(CB_Particle) + 255) & ~255); //256의 배수
-	m_pd3dcbStruct = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList, NULL,
+	m_pd3dcbStruct = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), m_pd3dCommandList, NULL,
 		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbStruct->Map(0, NULL, (void **)&particleCb);

@@ -7,7 +7,7 @@ private:
 public:
 	FontManager(){}
 	~FontManager() { Release(); }
-	void Initialize(CreateManager* createMgr);
+	void Initialize();
 	void Release();
 
 	FontShader* getFontShader() { return m_pFontShader; }

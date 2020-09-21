@@ -1,5 +1,6 @@
 #include "UiShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
+#include "../Common/FrameWork/NetworkManager.h"
 #include "../../Meshes/PlaneMesh.h"
 
 RankCountShader::RankCountShader()
@@ -10,15 +11,15 @@ RankCountShader::~RankCountShader()
 }
 
 
-void RankCountShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void RankCountShader::BuildObjects(void* pInformation)
 {
 
 	CTexture * Count = new CTexture(1, RESOURCE_TEXTURE2D_ARRAY, 0);
-	Count->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), L"Resources/Images/Time_Number.dds", 0);
+	Count->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), L"Resources/Images/Time_Number.dds", 0);
 
-	CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
+	CreateCbvSrvDescriptorHeaps(0, 1);
 
-	CreateShaderResourceViews(pCreateManager, Count, 8, true);
+	CreateShaderResourceViews(Count, 8, true);
 
 	m_ppObjects = new CGameObject(1);
 	m_ppObjects->AddRef();
@@ -27,12 +28,12 @@ void RankCountShader::BuildObjects(CreateManager* pCreateManager, void* pInforma
 	CMaterial *material = new CMaterial(1);
 
 	material->SetTexture(Count);
-	material->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	material->CreateShaderVariable(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 	m_ppObjects->SetMaterial(0, material);
 
 	PlaneMesh *mesh = NULL;
 	mesh = new PlaneMesh(0.05f, 0.065f, 0.1f, 0.0f, 0.1f, 0.0f, 0.5f);
-	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	mesh->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 	m_ppObjects->SetMesh(mesh);
 
@@ -76,7 +77,7 @@ void RankCountShader::BuildObjects(CreateManager* pCreateManager, void* pInforma
 	//uvX.emplace_back(8);
 	//uvY.emplace_back(0);
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }
 
 void RankCountShader::Update(float fTimeElapsed, void* pInformation)

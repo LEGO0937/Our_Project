@@ -1,5 +1,4 @@
 #include "Font.h"
-#include "../../Common/FrameWork/CreateManager.h"
 
 Font LoadFont(LPCWSTR filename, int windowWidth, int windowHeight)
 {

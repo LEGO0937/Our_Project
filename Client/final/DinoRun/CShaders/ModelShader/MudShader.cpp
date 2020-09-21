@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "ItemObject.h"
 
 MudShader::MudShader()
@@ -11,7 +11,7 @@ MudShader::~MudShader()
 
 }
 
-void MudShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void MudShader::Load(const char* filename, const char* Loadname)
 {
 	isEnable = true;
 
@@ -28,7 +28,7 @@ void MudShader::Load(CreateManager* pCreateManager, const char* filename, const 
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pItemObject = new ItemMud;
 		pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pItemObject->AddRef();
@@ -69,10 +69,10 @@ void MudShader::Update(float fTimeElapsed)
 	}
 }
 
-void MudShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
+void MudShader::addObject(const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemMud* pItemObject = NULL;
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
+	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(instancingModelName.c_str(), NULL);
 
 	pItemObject = new ItemMud;
 	pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
@@ -90,5 +90,5 @@ void MudShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3D
 		pModel = NULL;
 	}
 	ReleaseShaderVariables();
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }

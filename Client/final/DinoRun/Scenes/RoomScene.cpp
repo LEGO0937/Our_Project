@@ -1,6 +1,6 @@
 #include "RoomScene.h"
 
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
 #include "../Common/FrameWork/SoundManager.h"
 #include "EventHandler/EventHandler.h"
@@ -39,11 +39,9 @@ void RoomScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 }
-void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void RoomScene::BuildObjects()
 {
-	m_pCreateManager = pCreateManager;
-
-	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+	m_pd3dCommandList = GameManager::GetInstance()->GetCommandList().Get();
 
 
 	SoundManager::GetInstance()->Play("Start_BGM", 0.2f);
@@ -53,7 +51,7 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/T_Room.dds";
-	uiShader->BuildObjects(pCreateManager.get(), &name);
+	uiShader->BuildObjects(&name);
 	instacingUiShaders.emplace_back(uiShader);
 
 #ifdef isConnectedToServer
@@ -86,7 +84,7 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	button_info.minUv = XMFLOAT2(0.0f, 0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager.get(), &button_info);
+	uiShader->BuildObjects(&button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 
@@ -99,7 +97,7 @@ void RoomScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 
 	BUTTON_STATE_SHADER->getUvXs()[0] = 0.5f;
-	CreateShaderVariables(pCreateManager.get());
+	CreateShaderVariables();
 
 #ifdef isConnectedToServer
 	NetWorkManager::GetInstance()->SendNotReady();
@@ -240,7 +238,7 @@ void RoomScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
+SceneType RoomScene::Update(float fTimeElapsed)
 {
 	if (sceneType != SceneType::Room_Scene)
 	{
@@ -298,7 +296,7 @@ SceneType RoomScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 }
 
 
-void RoomScene::CreateShaderVariables(CreateManager* pCreateManager)
+void RoomScene::CreateShaderVariables()
 {
 }
 

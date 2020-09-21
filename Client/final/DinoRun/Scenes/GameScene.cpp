@@ -1,5 +1,5 @@
 #include "GameScene.h"
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
 #include "../Common/FrameWork/SoundManager.h"
 
@@ -147,27 +147,26 @@ void GameScene::ReleaseObjects()
 	instancingModelShaders.clear();
 	instancingAnimatedModelShaders.clear();
 }
-void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void GameScene::BuildObjects()
 {
-	m_pCreateManager = pCreateManager;
 	m_fCountDownTime = 4.0f;
 
-	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+	m_pd3dCommandList = GameManager::GetInstance()->GetCommandList().Get();
 
 #ifdef isConnectedToServer
 //	NetWorkManager::GetInstance()->ConnectToServer();
 #endif
 
-	m_pCreateManager->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
 	XMFLOAT3 xmf3Scale(TerrainScaleX, TerrainScaleY, TerrainScaleZ);
 	
-	m_pSkyBox = new SkyBoxObject(pCreateManager.get());
+	m_pSkyBox = new SkyBoxObject();
 
-	m_pTerrain = new CHeightMapTerrain(pCreateManager.get(), _T("Resources\\Images\\First_Map.raw"), 257, 257, 7,
+	m_pTerrain = new CHeightMapTerrain(_T("Resources\\Images\\First_Map.raw"), 257, 257, 7,
 		7, xmf3Scale);
-	m_pCreateManager->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
 
-	m_pCreateManager->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
 	CObInstancingShader* shader;
 	CUiShader* uiShader;
 	CSkinedObInstancingShader* animatedShader;
@@ -183,7 +182,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
 	view_info.f_uvY.emplace_back(0.0f);
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager.get(), &view_info);
+	uiShader->BuildObjects(&view_info);
 	instancingImageUiShaders.emplace_back(uiShader);
 	view_info.positions.clear();
 	view_info.f_uvY.clear();
@@ -196,7 +195,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
 	view_info.f_uvY.emplace_back(0);
 	m_pEffectShader = new ImageShader;
-	m_pEffectShader->BuildObjects(pCreateManager.get(), &view_info);
+	m_pEffectShader->BuildObjects(&view_info);
 	view_info.positions.clear();
 	view_info.f_uvY.clear();
 
@@ -207,16 +206,16 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.minUv = XMFLOAT2(0.0f, 0.0f);
 	view_info.f_uvY.emplace_back(0.0f);
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager.get(), &view_info);
+	uiShader->BuildObjects(&view_info);
 	instancingImageUiShaders.emplace_back(uiShader);
 	view_info.positions.clear();
 	view_info.f_uvY.clear();
 
 
 	m_pCountDownShader = new CountDownShader;
-	m_pCountDownShader->BuildObjects(pCreateManager.get(), NULL);
+	m_pCountDownShader->BuildObjects(NULL);
 
-	m_pCreateManager->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
 
 	model_info.useBillBoard = true;
 
@@ -225,31 +224,31 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.modelName = "Resources/Images/B_Tree.dds";
 	model_info.dataFileName = "Resources/ObjectData/BillBoardData";
 	model_info.size = 50;
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingBillBoardShaders.emplace_back(shader);
 
 	shader = new BillBoardShader;
 	model_info.modelName = "Resources/Images/B_Stone.dds";
 	model_info.dataFileName = "Resources/ObjectData/BillBoardStoneData";
 	model_info.size = 50;
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingBillBoardShaders.emplace_back(shader);
 
 	shader = new BillBoardShader;
 	model_info.modelName = "Resources/Images/B_Bush.dds";
 	model_info.dataFileName = "Resources/ObjectData/BillBoardBushData";
 	model_info.size = 50;
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingBillBoardShaders.emplace_back(shader);
 #endif
-	m_pCreateManager->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
 
 
 	shader = new MeatShader;
 	model_info.modelName = "Resources/Models/M_Meat.bin";
 	model_info.dataFileName = "Resources/ObjectData/MeatData";
 	model_info.useBillBoard = false;
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
@@ -259,69 +258,69 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.modelName = "Resources/Models/M_Tree.bin";
 	model_info.dataFileName = "Resources/ObjectData/TreeData";
 	model_info.useBillBoard = true;
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Stone.bin";
 	model_info.dataFileName = "Resources/ObjectData/StoneData";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Bush.bin";
 	model_info.dataFileName = "Resources/ObjectData/WeedData";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Tree2.bin";
 	model_info.dataFileName = "Resources/ObjectData/Tree2Data";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Tree3.bin";
 	model_info.dataFileName = "Resources/ObjectData/Tree3Data";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Tree4.bin";
 	model_info.dataFileName = "Resources/ObjectData/Tree4Data";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 
 	//--
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Stone1.bin";
 	model_info.dataFileName = "Resources/ObjectData/Stone1Data";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 	//
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Grass.bin";
 	model_info.dataFileName = "Resources/ObjectData/Grass1Data";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 	//
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Stone3.bin";
 	model_info.dataFileName = "Resources/ObjectData/Stone3Data";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects( &model_info);
 	instancingModelShaders.emplace_back(shader);
 
 	model_info.useBillBoard = false;
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Sub_Dino.bin";
 	model_info.dataFileName = "Resources/ObjectData/DinoData";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 
 	shader = new TreeShader;
 	model_info.modelName = "Resources/Models/M_Sub_Dino2.bin";
 	model_info.dataFileName = "Resources/ObjectData/Dino2Data";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 #endif
 
@@ -329,7 +328,7 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	model_info.modelName = "Resources/Models/M_Block.bin";
 	model_info.dataFileName = "Resources/ObjectData/RectData(Fence)";
 	model_info.useBillBoard = false;
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 	shader->AddRef();
 	UpdatedShaders.emplace_back(shader);
@@ -337,63 +336,63 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	m_pCheckPointShader = new BlockShader;
 	model_info.modelName = "Resources/Models/M_Block.bin";
 	model_info.dataFileName = "Resources/ObjectData/RectData(LineBox)";
-	m_pCheckPointShader->BuildObjects(pCreateManager.get(), &model_info);
+	m_pCheckPointShader->BuildObjects(&model_info);
 
 	shader = new ModelShader;
 	model_info.modelName = "Resources/Models/M_Cavern.bin";
 	model_info.dataFileName = "Resources/ObjectData/CaveData";
-	shader->BuildObjects(pCreateManager.get(), &model_info);
+	shader->BuildObjects(&model_info);
 	instancingModelShaders.emplace_back(shader);
 
 
 
-	m_pCreateManager->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
 	m_pGuageShader = new GaugeShader;
-	m_pGuageShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	m_pGuageShader->BuildObjects(m_pTerrain);
 
 
 	uiShader = new TimeCountShader;
-	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	uiShader->BuildObjects(m_pTerrain);
 	instancingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new TrackCountShader;
-	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	uiShader->BuildObjects(m_pTerrain);
 	instancingNumberUiShaders.emplace_back(uiShader);
 
 	uiShader = new RankCountShader;
-	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	uiShader->BuildObjects(m_pTerrain);
 	instancingNumberUiShaders.emplace_back(uiShader);
 	
 	uiShader = new VelocityCountShader;
-	uiShader->BuildObjects(pCreateManager.get(), m_pTerrain);
+	uiShader->BuildObjects(m_pTerrain);
 	instancingNumberUiShaders.emplace_back(uiShader);
 	
 
 	animatedShader = new PlayerShader;
 	model_info.modelName = "Resources/Models/M_DinoTest.bin";
 	model_info.dataFileName = NULL;
-	animatedShader->BuildObjects(pCreateManager.get(), &model_info);
+	animatedShader->BuildObjects(&model_info);
 	instancingAnimatedModelShaders.emplace_back(animatedShader);
 	animatedShader->AddRef();
 	UpdatedShaders.emplace_back(animatedShader);
 	
 	m_pMinimapShader = new MinimapShader();
-	m_pMinimapShader->BuildObjects(pCreateManager.get(), "Resources/Images/MiniMap.dds",NULL);
+	m_pMinimapShader->BuildObjects("Resources/Images/MiniMap.dds",NULL);
 
 	string name = "Resources/Images/T_Faceicon.dds";
 	m_pIconShader = new IconShader();
-	m_pIconShader->BuildObjects(pCreateManager.get(), &name);
+	m_pIconShader->BuildObjects(&name);
 
-	motionBlurShader = new MotionBlurShader(pCreateManager.get());
+	motionBlurShader = new MotionBlurShader();
 
 
 	XMFLOAT3 startPosition = m_pCheckPointShader->getList()[0]->GetPosition();
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
-	particleSystems.emplace_back(new ParticleSystem(pCreateManager.get(), SPAWN, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(SPAWN, NULL, XMFLOAT3(startPosition.x, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(SPAWN, NULL, XMFLOAT3(startPosition.x - 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
+	particleSystems.emplace_back(new ParticleSystem(SPAWN, NULL, XMFLOAT3(startPosition.x + 50, m_pTerrain->GetHeight(startPosition.x, startPosition.z), startPosition.z)));
 	BuildLights();
-	m_pCreateManager->RenderLoading();
-	BuildSubCameras(pCreateManager);
+	GameManager::GetInstance()->RenderLoading();
+	BuildSubCameras();
 	
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.19f))); //플레이어 명단
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.25f)));
@@ -401,10 +400,10 @@ void GameScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.37f)));
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.05f, 0.43f)));
 
-	CreateShaderVariables(pCreateManager.get());
+	CreateShaderVariables();
 	SoundManager::GetInstance()->Play("InGame_BGM", 0.1f);
 
-	m_pCreateManager->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
 
 #ifdef isConnectedToServer
 	NetWorkManager::GetInstance()->SendInGameReady();
@@ -718,7 +717,7 @@ void GameScene::AnimateObjects(float fTimeElapsed)
 }
 
 
-void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
+void GameScene::FixedUpdate(float fTimeElapsed)
 {
 	//물리
 	{
@@ -748,7 +747,7 @@ void GameScene::FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed)
 }
 
 
-SceneType GameScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
+SceneType GameScene::Update(float fTimeElapsed)
 {
 	if (sceneType != SceneType::Game_Scene)
 	{
@@ -1001,36 +1000,36 @@ void GameScene::BuildLights()
 	m_pLights->fogrange = 30;
 
 }
-void GameScene::BuildSubCameras(shared_ptr<CreateManager> pCreateManager)
+void GameScene::BuildSubCameras()
 {
 	m_pMinimapCamera = new CMinimapCamera;
 	m_pMinimapCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pMinimapCamera->SetLookAt(XMFLOAT3(0, 0, 0));
 	m_pMinimapCamera->GenerateOrthoProjectionMatrix(1000, 1000, 10, 300.0f);
-	float minimapWidth = pCreateManager->GetWindowWidth() / 5;
-	float minimapHeight = pCreateManager->GetWindowHeight() / 4;
-	m_pMinimapCamera->SetViewport(pCreateManager->GetWindowWidth() - minimapWidth, pCreateManager->GetWindowHeight()/2 - (minimapHeight/2), minimapWidth, minimapHeight, 0.0f, 1.0f);
-	m_pMinimapCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
+	float minimapWidth = GameManager::GetInstance()->GetWindowWidth() / 5;
+	float minimapHeight = GameManager::GetInstance()->GetWindowHeight() / 4;
+	m_pMinimapCamera->SetViewport(GameManager::GetInstance()->GetWindowWidth() - minimapWidth, GameManager::GetInstance()->GetWindowHeight()/2 - (minimapHeight/2), minimapWidth, minimapHeight, 0.0f, 1.0f);
+	m_pMinimapCamera->SetScissorRect(0, 0, GameManager::GetInstance()->GetWindowWidth(), GameManager::GetInstance()->GetWindowHeight());
 
 	m_pMinimapCamera->GenerateViewMatrix(m_pMinimapCamera->GetPosition(), XMFLOAT3(128 * TerrainScaleX, 0, 128 * TerrainScaleZ), XMFLOAT3(0, 0, 1));
-	m_pMinimapCamera->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	m_pMinimapCamera->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 	m_pShadowCamera = new CMinimapCamera;
 	m_pShadowCamera->SetPosition(XMFLOAT3(0, 300, 0));
 	m_pShadowCamera->SetLookAt(XMFLOAT3(0, 0, 0));
-	m_pShadowCamera->SetViewport(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight(), 0.0f, 1.0f);
-	m_pShadowCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
+	m_pShadowCamera->SetViewport(0, 0, GameManager::GetInstance()->GetWindowWidth(), GameManager::GetInstance()->GetWindowHeight(), 0.0f, 1.0f);
+	m_pShadowCamera->SetScissorRect(0, 0, GameManager::GetInstance()->GetWindowWidth(), GameManager::GetInstance()->GetWindowHeight());
 }
 
-void GameScene::ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager)
+void GameScene::ReBuildSubCameras()
 {
-	float minimapWidth = pCreateManager->GetWindowWidth() / 5;
-	float minimapHeight = pCreateManager->GetWindowHeight() / 4;
-	m_pMinimapCamera->SetViewport(pCreateManager->GetWindowWidth() - minimapWidth, pCreateManager->GetWindowHeight() / 2 - (minimapHeight / 2), minimapWidth, minimapHeight, 0.0f, 1.0f);
-	m_pMinimapCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
+	float minimapWidth = GameManager::GetInstance()->GetWindowWidth() / 5;
+	float minimapHeight = GameManager::GetInstance()->GetWindowHeight() / 4;
+	m_pMinimapCamera->SetViewport(GameManager::GetInstance()->GetWindowWidth() - minimapWidth, GameManager::GetInstance()->GetWindowHeight() / 2 - (minimapHeight / 2), minimapWidth, minimapHeight, 0.0f, 1.0f);
+	m_pMinimapCamera->SetScissorRect(0, 0, GameManager::GetInstance()->GetWindowWidth(), GameManager::GetInstance()->GetWindowHeight());
 
-	m_pShadowCamera->SetViewport(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight(), 0.0f, 1.0f);
-	m_pShadowCamera->SetScissorRect(0, 0, pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
+	m_pShadowCamera->SetViewport(0, 0, GameManager::GetInstance()->GetWindowWidth(), GameManager::GetInstance()->GetWindowHeight(), 0.0f, 1.0f);
+	m_pShadowCamera->SetScissorRect(0, 0, GameManager::GetInstance()->GetWindowWidth(), GameManager::GetInstance()->GetWindowHeight());
 }
 
 void GameScene::UpdateShadow()
@@ -1091,16 +1090,16 @@ void GameScene::UpdateShadow()
 	XMStoreFloat4x4(&martrix, ShadowProj);
 	m_pShadowCamera->SetProjectionMatrix(martrix);
 }
-void GameScene::CreateShaderVariables(CreateManager* pCreateManager)
+void GameScene::CreateShaderVariables()
 {
 	UINT ncbElementBytes = ((sizeof(LIGHTS) + 255) & ~255); //256의 배수
-	m_pd3dcbLights = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList, NULL,
+	m_pd3dcbLights = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), m_pd3dCommandList, NULL,
 		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbLights->Map(0, NULL, (void **)&m_pcbMappedLights);
 
 	ncbElementBytes = ((sizeof(CB_GAME_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbShadow = ::CreateBufferResource(pCreateManager->GetDevice().Get(), m_pd3dCommandList, NULL,
+	m_pd3dcbShadow = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), m_pd3dCommandList, NULL,
 		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbShadow->Map(0, NULL, (void **)&m_pcbMappedShadow);
@@ -1147,9 +1146,9 @@ void GameScene::setCamera(CCamera* camera)
 	m_pPlayer->SetCameraUpdatedContext((CHeightMapTerrain*)m_pTerrain);
 }
 
-void GameScene::ResetShadowBuffer(CreateManager* pCreateManager)
+void GameScene::ResetShadowBuffer()
 {
-	m_pTerrain->resetShadowTexture(pCreateManager);
+	m_pTerrain->resetShadowTexture();
 }
 
 void GameScene::ProcessEvent(const MessageStruct& msg)
@@ -1158,7 +1157,7 @@ void GameScene::ProcessEvent(const MessageStruct& msg)
 	if (msg.msgName == _ADD_PARTICLE)
 	{
 		XMFLOAT3 pos = XMFLOAT3(msg.departMat._41, msg.departMat._42, msg.departMat._43);
-		particleSystems.emplace_back(new ParticleSystem(m_pCreateManager.get(), msg.shaderName, NULL, pos));
+		particleSystems.emplace_back(new ParticleSystem(msg.shaderName, NULL, pos));
 	}
 	else if (msg.msgName == _DISENABLE_OBJECT)
 	{
@@ -1166,12 +1165,12 @@ void GameScene::ProcessEvent(const MessageStruct& msg)
 			instancingModelShaders[msg.shaderName]->DisEnableObject(msg.objectSerialNum);
 	}
 }
-void GameScene::ReSize(shared_ptr<CreateManager> pCreateManager)
+void GameScene::ReSize()
 {
-	BaseScene::ReSize(pCreateManager);
-	ResetShadowBuffer(m_pCreateManager.get());
-	ReBuildSubCameras(pCreateManager);
-	motionBlurShader->OnResize(pCreateManager->GetWindowWidth(), pCreateManager->GetWindowHeight());
+	BaseScene::ReSize();
+	ResetShadowBuffer();
+	ReBuildSubCameras();
+	motionBlurShader->OnResize(GameManager::GetInstance()->GetWindowWidth(), GameManager::GetInstance()->GetWindowHeight());
 }
 void GameScene::ProcessPacket(char* packet, float fTimeElapsed)
 {

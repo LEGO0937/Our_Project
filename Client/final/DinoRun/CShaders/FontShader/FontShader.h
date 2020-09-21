@@ -36,7 +36,7 @@ public:
 	FontShader();
 	virtual ~FontShader();
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 

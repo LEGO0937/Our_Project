@@ -1,6 +1,7 @@
 #include "PlayerObject.h"
 #include "TerrainObject.h"
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
+#include "../Common/FrameWork/SoundManager.h"
 #include "../CShaders/Shader.h"
 #include "../Common/Camera/Camera.h"
 
@@ -42,9 +43,9 @@ CPlayer::~CPlayer()
 	if (m_pCamera) delete m_pCamera;
 }
 
-void CPlayer::CreateShaderVariables(CreateManager* pCreateManager)
+void CPlayer::CreateShaderVariables()
 {
-	if (m_pCamera) m_pCamera->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	if (m_pCamera) m_pCamera->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 }
 
 void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -673,14 +674,14 @@ void CFuncCallbackHandler::HandleCallback(void *pAnimationController, int nSet)
 	controller->SetTrackEnable(nSet, true);
 }
 
-CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName) : CPlayer()
+CDinoRunPlayer::CDinoRunPlayer(string sModelName) : CPlayer()
 {
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	SetPosition(XMFLOAT3(800.0f, 76.0f, 1150.0f)); //(XMFLOAT3(700.0f, 76.0f, 1150.0f));
-	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, sModelName.c_str(), NULL);
+	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(sModelName.c_str(), NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject->GetChild(), true);
-	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 16, pAngrybotModel);
+	m_pSkinnedAnimationController = new CAnimationController(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), 16, pAngrybotModel);
 	m_fMass = 100.0f; 
 
 	m_fMaxForce = 2000.0f;
@@ -728,11 +729,11 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	if (pAngrybotModel) delete pAngrybotModel;
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager, DUST_PARTICLE, this, XMFLOAT3(0.0f, 0, 18));
+	m_pParticleSystem = new ParticleSystem(DUST_PARTICLE, this, XMFLOAT3(0.0f, 0, 18));
 	//SetScale(XMFLOAT3(0.05f, 0.05f, 0.05f));
 
 }

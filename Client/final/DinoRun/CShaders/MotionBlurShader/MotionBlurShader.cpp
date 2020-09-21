@@ -1,12 +1,12 @@
 #include "MotionBlurShader.h"
+#include "../Common/FrameWork/GameManager.h"
 
-
-MotionBlurShader::MotionBlurShader(CreateManager* pCreateManager)
+MotionBlurShader::MotionBlurShader()
 {
-	m_pd3dDevice = pCreateManager->GetDevice();
+	m_pd3dDevice = GameManager::GetInstance()->GetDevice();
 
-	mWidth = pCreateManager->GetWindowWidth();
-	mHeight = pCreateManager->GetWindowHeight();
+	mWidth = GameManager::GetInstance()->GetWindowWidth();
+	mHeight = GameManager::GetInstance()->GetWindowHeight();
 	mFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
 	D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
@@ -19,7 +19,7 @@ MotionBlurShader::MotionBlurShader(CreateManager* pCreateManager)
 	BuildDescriptors(
 		m_pCbvSrvUavDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		m_pCbvSrvUavDescriptorHeap->GetGPUDescriptorHandleForHeapStart(),
-		pCreateManager->GetCbvSrvDescriptorIncrementSize());
+		GameManager::GetInstance()->GetCbvSrvDescriptorIncrementSize());
 }
 
 ID3D12Resource* MotionBlurShader::Output()

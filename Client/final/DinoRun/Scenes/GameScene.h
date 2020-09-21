@@ -24,7 +24,7 @@ public:
 	GameScene();
 	~GameScene();
 
-	virtual void ReSize(shared_ptr<CreateManager> pCreateManager);
+	virtual void ReSize();
 
 	void ProcessInput(HWND hWnd, float deltaTime);
 	void OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -33,29 +33,29 @@ public:
 		lParam, float deltaTime);
 
 	virtual void BuildLights();
-	void BuildSubCameras(shared_ptr<CreateManager> pCreateManager);
-	void ReBuildSubCameras(shared_ptr<CreateManager> pCreateManager);
+	void BuildSubCameras();
+	void ReBuildSubCameras();
 
-	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
+	void BuildObjects();
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager);
+	virtual void CreateShaderVariables();
 	virtual void UpdateShaderVariables();
 	virtual void ReleaseShaderVariables();
 
 	void UpdateShadow();
 	
 	virtual void AnimateObjects(float fTimeElapsed);  //局聪皋捞记 诀单捞飘
-	virtual SceneType Update(CreateManager* pCreateManager, float fTimeElapsed);  // 面倒贸府 棺 拱府
-	virtual void FixedUpdate(CreateManager* pCreateManager, float fTimeElapsed);
+	virtual SceneType Update(float fTimeElapsed);  // 面倒贸府 棺 拱府
+	virtual void FixedUpdate(float fTimeElapsed);
 
 	void Render();
 	void RenderShadow();
 	void RenderVelocity();
 	virtual void RenderPostProcess(ComPtr<ID3D12Resource> curBuffer, ComPtr<ID3D12Resource> velocityMap);
 
-	virtual void ResetShadowBuffer(CreateManager* pCreateManager);
+	virtual void ResetShadowBuffer();
 
 	virtual void setPlayer(CPlayer* player);
 	virtual void setCamera(CCamera* camera);

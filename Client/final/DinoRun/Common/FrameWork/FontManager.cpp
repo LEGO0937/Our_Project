@@ -1,10 +1,10 @@
 #include "FontManager.h"
 
 
-void FontManager::Initialize(CreateManager* createMgr)
+void FontManager::Initialize()
 {
 	m_pFontShader = new FontShader;
-	m_pFontShader->BuildObjects(createMgr, NULL);
+	m_pFontShader->BuildObjects(NULL);
 }
 void FontManager::Release()
 {

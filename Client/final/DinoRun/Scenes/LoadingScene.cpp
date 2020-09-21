@@ -1,6 +1,6 @@
 #include "LoadingScene.h"
 
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -32,10 +32,9 @@ void LoadingScene::ReleaseObjects()
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 
 }
-void LoadingScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void LoadingScene::BuildObjects()
 {
-	m_pCreateManager = pCreateManager;
-	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+	m_pd3dCommandList = GameManager::GetInstance()->GetCommandList().Get();
 
 	CUiShader* uiShader;
 
@@ -50,10 +49,10 @@ void LoadingScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	Ui_info.f_uvY.emplace_back(0);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager.get(), &Ui_info);
+	uiShader->BuildObjects(&Ui_info);
 	instacingUiShaders.emplace_back(uiShader);
 
-	CreateShaderVariables(pCreateManager.get());
+	CreateShaderVariables();
 }
 
 void LoadingScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -123,7 +122,7 @@ void LoadingScene::AnimateObjects(float fTimeElapsed)
 	
 }
 
-SceneType LoadingScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
+SceneType LoadingScene::Update(float fTimeElapsed)
 {
 	//물리 및 충돌을 위한 update
 	if (sceneType != SceneType::End_Scene)
@@ -137,7 +136,7 @@ SceneType LoadingScene::Update(CreateManager* pCreateManager, float fTimeElapsed
 }
 
 
-void LoadingScene::CreateShaderVariables(CreateManager* pCreateManager)
+void LoadingScene::CreateShaderVariables()
 {
 }
 

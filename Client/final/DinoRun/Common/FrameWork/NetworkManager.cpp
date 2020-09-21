@@ -24,7 +24,6 @@ NetWorkManager::NetWorkManager()
 
 NetWorkManager::~NetWorkManager()
 {
-	//m_pGameClient = nullptr;
 	m_pCurScene = nullptr;
 }
 
@@ -82,7 +81,6 @@ void NetWorkManager::LoadToServer(HWND hWnd)
 
 	case NetWorkManager::CONNECT_STATE::OK:
 	{
-		//g_State = GAMESTATE::LOGIN;
 		break;
 	}
 
