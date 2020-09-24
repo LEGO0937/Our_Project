@@ -37,7 +37,7 @@ void PlayerShader::Load(const char* filename, const char* Loadname)
 
 	//서버로부터 nLenght에 플레이어 수를 받음.
 	
-	nLength = 3;
+	//nLength = 3;
 	for (int i = 0; i < nLength; ++i)
 	{
 		pPlayerObject = new CDinoRunPlayer(instancingModelName);
