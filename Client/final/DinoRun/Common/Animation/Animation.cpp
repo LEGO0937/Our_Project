@@ -177,7 +177,7 @@ void CAnimationSet::Animate(float fTrackPosition, float fTrackWeight)
 	{
 		for (int j = 0; j < m_pAnimationLayers[i].m_nAnimatedBoneFrames; j++)
 		{
-			//모션블러 연습중
+			
 			m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4PrevWorld = m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4World;
 			
 			m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();

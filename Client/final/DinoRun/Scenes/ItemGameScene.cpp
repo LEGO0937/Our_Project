@@ -878,14 +878,7 @@ void ItemGameScene::Render()
 	{
 		system->Render(m_pd3dCommandList, m_pCamera);
 	}
-#ifdef _WITH_BOUND_BOX
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_WIRE]);
-	m_pPlayer->BbxRender(m_pd3dCommandList, m_pCamera);
-	m_pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[PSO_WIRE_INSTANCING]);
-	for (CObInstancingShader* shader : instancingModelShaders)
-		if (shader) shader->BbxRender(m_pd3dCommandList, m_pCamera);
 
-#endif
 }
 
 

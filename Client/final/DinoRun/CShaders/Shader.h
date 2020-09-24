@@ -110,9 +110,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {};
-#ifdef _WITH_BOUND_BOX
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {};
-#endif
+
 	vector<CGameObject*>& getList()
 	{
 		return objectList;
@@ -150,9 +148,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void BillBoardRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-#ifdef _WITH_BOUND_BOX
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-#endif
+
 	virtual void Load(const char* filename = NULL) {}
 	virtual void Load(const char* filename = NULL, const char* Loadname = NULL) {}
 protected:
@@ -185,9 +181,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-#ifdef _WITH_BOUND_BOX
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-#endif
+
 	virtual void Load(const char* filename = NULL) {}
 	virtual void Load(const char* filename = NULL, const char* Loadname = NULL) {}
 

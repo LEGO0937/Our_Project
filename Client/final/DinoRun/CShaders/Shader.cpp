@@ -362,21 +362,7 @@ void CObInstancingShader::BillBoardRender(ID3D12GraphicsCommandList *pd3dCommand
 	}
 }
 
-#ifdef _WITH_BOUND_BOX
-void CObInstancingShader::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
-	*pCamera)
-{
-	UpdateShaderVariables(pd3dCommandList, pCamera);  //그림자 적용시 여기에선 더이상 사용안함
-	if (objectList.size() > 0 && isEnable)
-	{
-		CShader::Render(pd3dCommandList, pCamera);
-		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
 
-		m_ppObjects->BbxRender(pd3dCommandList, pCamera, drawingCount);
-		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
-	}
-}
-#endif
 void CObInstancingShader::ReleaseObjects()
 {
 
@@ -479,19 +465,7 @@ void CSkinedObInstancingShader::ShadowRender(ID3D12GraphicsCommandList *pd3dComm
 	}
 }
 
-#ifdef _WITH_BOUND_BOX
-void CSkinedObInstancingShader::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera
-	*pCamera)
-{
-	if (objectList.size() > 0)
-	{
-		//모든 게임 객체의 인스턴싱 데이터를 버퍼에 저장한다. 
-		UpdateShaderVariables(pd3dCommandList, pCamera);
-		//하나의 정점 데이터를 사용하여 모든 게임 객체(인스턴스)들을 렌더링한다. 
-		m_ppObjects->BbxRender(pd3dCommandList, pCamera, drawingCount);
-	}
-}
-#endif
+
 void CSkinedObInstancingShader::ReleaseObjects()
 {
 	if (objectList.size())

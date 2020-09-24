@@ -296,10 +296,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
-#ifdef _WITH_BOUND_BOX
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
-#endif
+
 
 	virtual void CreateShaderVariables() {}
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) {}

@@ -547,6 +547,7 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 		m_pPlayer->m_fForce = 0;
 
 	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
+	((CDinoRunPlayer*)PLAYER_SHADER->getList()[2])->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
 }
 
 void GameScene::Render()

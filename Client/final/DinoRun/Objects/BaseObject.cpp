@@ -589,34 +589,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, nInstances);
 
 }
-//-------
-#ifdef _WITH_BOUND_BOX
-void CGameObject::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
-{
-	if (m_pMesh)
-	{
-		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-		
-		m_pMesh->BbxRender(pd3dCommandList);
-	}
-
-	if (m_pSibling) m_pSibling->BbxRender(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->BbxRender(pd3dCommandList, pCamera);
-}
-
-void CGameObject::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera,
-	UINT nInstances)
-{
-
-	pd3dCommandList->SetGraphicsRootShaderResourceView(3,
-		m_pd3dcbGameObjects->GetGPUVirtualAddress());
-
-	if (m_pMesh) m_pMesh->BbxRender(pd3dCommandList, nInstances);
-	
-	if (m_pSibling) m_pSibling->BbxRender(pd3dCommandList, pCamera, nInstances);
-	if (m_pChild) m_pChild->BbxRender(pd3dCommandList, pCamera, nInstances);
-}
-#endif
+//------
 
 
 //----
