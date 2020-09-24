@@ -1,5 +1,5 @@
 #define MAX_VERTEX_INFLUENCES			4
-#define SKINNED_ANIMATION_BONES			16
+#define SKINNED_ANIMATION_BONES			27
 
 struct INSTANCEDGAMEOBJECTINFO
 {
@@ -17,7 +17,7 @@ struct INSTANCEDGAMEUIINFO
 struct INSTANCEDSKINEDOBJECTINFO
 {
 	float4x4 gpmtxInstancedBoneTransforms[SKINNED_ANIMATION_BONES];
-	float4x4 gpmtxInstancedPrevBoneTransforms[SKINNED_ANIMATION_BONES];
+	//float4x4 gpmtxInstancedPrevBoneTransforms[SKINNED_ANIMATION_BONES];
 	//이전 월드행렬을 저장하기 위해 하나 더 갖게 하고 싶지만 사이즈 초과
 };
 

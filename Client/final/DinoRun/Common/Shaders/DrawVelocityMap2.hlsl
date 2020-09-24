@@ -60,7 +60,7 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedInstancingAnimation(VS_SKINNED_INPUT inpu
 	for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
 	{
 		mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gSkinedGameObjectInfos[nInstanceID].gpmtxInstancedBoneTransforms[input.indices[i]]);
-		mtxPrevVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gSkinedGameObjectInfos[nInstanceID].gpmtxInstancedPrevBoneTransforms[input.indices[i]]);
+		mtxPrevVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gPrevSkinedGameObjectInfos[nInstanceID].gpmtxInstancedBoneTransforms[input.indices[i]]);
 		positionW += (input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld)).xyz;
 		prevPositionW += (input.weights[i] * mul(float4(input.position, 1.0f), mtxPrevVertexToBoneWorld)).xyz;
 		normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;

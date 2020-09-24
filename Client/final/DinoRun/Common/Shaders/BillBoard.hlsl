@@ -54,12 +54,12 @@ float4 PSTextedInstancing(VS_TEXTED_INSTANCING_OUTPUT input) : SV_TARGET
 	float4 color = saturate(baseAlbedo * 0.5 + (Lighting(input.positionW, normalW)*0.5));
 
 	float3 toEyeWorld = gvCameraPosition - input.positionW;
-	float distToEye = length(toEyeWorld);
+	float distance = length(toEyeWorld);
 
 	if (fFogStart >= 5.0f)
 	{
-		float fogRate = saturate((distToEye - fFogStart) / fFogRange);
-		color = lerp(color, f4FogColor, fogRate);
+		float fogFactor = saturate((distance - fFogStart) / fFogRange);
+		color = lerp(color, f4FogColor, fogFactor);
 	}
 	color.a = baseAlbedo.a;
 

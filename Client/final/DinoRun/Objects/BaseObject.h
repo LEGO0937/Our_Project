@@ -14,7 +14,7 @@
 #define RESOURCE_TEXTURE2DARRAY		0x03
 #define RESOURCE_TEXTURE_CUBE		0x04
 #define RESOURCE_BUFFER				0x05
-#define MAX_BONE_NUM 16
+#define MAX_BONE_NUM 27
 
 class CShader;
 class CCamera;
@@ -32,7 +32,7 @@ struct CB_OBJECT_INFO
 struct CB_SKINEOBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4Worlds[MAX_BONE_NUM];
-	XMFLOAT4X4 m_xmf4x4PrevWorlds[MAX_BONE_NUM];
+	//XMFLOAT4X4 m_xmf4x4PrevWorlds[MAX_BONE_NUM];
 };
 
 struct CB_UI_INFO
@@ -197,6 +197,9 @@ protected:
 
 	CB_SKINEOBJECT_INFO *m_pcbMappedSkinedGameObjects = NULL; // Skined Object's instancing buffer
 	ID3D12Resource *m_pd3dcbSkinedGameObjects = NULL;
+
+	CB_SKINEOBJECT_INFO* m_pcbMappedPrevSkinedGameObjects = NULL; // Prev Skined Object's instancing buffer
+	ID3D12Resource* m_pd3dcbPrevSkinedGameObjects = NULL;
 public:
 	void AddRef();
 	void Release();
@@ -309,7 +312,7 @@ public:
 	void CreateBuffer();
 	void CreateInstanceBuffer(UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& uMap);
 	void CreateBillBoardInstanceBuffer(UINT nInstances);
-	void CreateSkinedInstanceBuffer(UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& uMap);
+	void CreateSkinedInstanceBuffer(UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapCur, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapPrev);
 
 	virtual void ReleaseUploadBuffers();
 
@@ -337,7 +340,7 @@ public:
 	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent = NULL);
 	void UpdateTransform_Instancing(unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer, const int& idx, XMFLOAT4X4 *pxmf4x4Parent);
 	void UpdateTransform_BillBoardInstancing(CB_OBJECT_INFO* buffer, const int& idx, XMFLOAT4X4 *pxmf4x4Parent);
-	void UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer, const int& idx);
+	void UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& mapCur, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapPrev, const int& idx);
 
 	CGameObject *FindFrame(char *pstrFrameName);
 

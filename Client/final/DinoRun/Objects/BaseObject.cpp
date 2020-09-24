@@ -266,11 +266,23 @@ CGameObject::~CGameObject()
 		m_pd3dcbGameObjects->Release();
 		m_pd3dcbGameObjects = NULL;
 	}
+	if (m_pd3dcbBillBoardObjects)
+	{
+		m_pd3dcbBillBoardObjects->Unmap(0, NULL);
+		m_pd3dcbBillBoardObjects->Release();
+		m_pd3dcbBillBoardObjects = NULL;
+	}
 	if (m_pd3dcbSkinedGameObjects)
 	{
 		m_pd3dcbSkinedGameObjects->Unmap(0, NULL);
 		m_pd3dcbSkinedGameObjects->Release();
 		m_pd3dcbSkinedGameObjects = NULL;
+	}
+	if (m_pd3dcbPrevSkinedGameObjects)
+	{
+		m_pd3dcbPrevSkinedGameObjects->Unmap(0, NULL);
+		m_pd3dcbPrevSkinedGameObjects->Release();
+		m_pd3dcbPrevSkinedGameObjects = NULL;
 	}
 	if (m_pSkinnedAnimationController)
 	{
@@ -415,22 +427,22 @@ void CGameObject::UpdateTransform_BillBoardInstancing(CB_OBJECT_INFO* buffer,con
 	XMStoreFloat4x4(&(buffer[idx].m_xmf4x4PrevWorld),
 		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevWorld)));
 }
-void CGameObject::UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer, const int& idx)
+void CGameObject::UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& mapCur, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapPrev, const int& idx)
 {
 	if (m_pMesh)
 	{
 		CSkinnedMesh* mesh = (CSkinnedMesh*)m_pMesh;
 		for (int j = 0; j < mesh->m_nSkinningBones; j++)
 		{
-			XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4Worlds[j]),
+			XMStoreFloat4x4(&(mapCur[m_pstrFrameName][idx].m_xmf4x4Worlds[j]),
 				XMMatrixTranspose(XMLoadFloat4x4(&mesh->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
 
-			XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4PrevWorlds[j]),
+			XMStoreFloat4x4(&(mapPrev[m_pstrFrameName][idx].m_xmf4x4Worlds[j]),
 				XMMatrixTranspose(XMLoadFloat4x4(&mesh->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4PrevWorld)));
 		}
 	}
-	if (m_pSibling) m_pSibling->UpdateTransform_SkinedInstancing(instancedTransformBuffer, idx);
-	if (m_pChild) m_pChild->UpdateTransform_SkinedInstancing(instancedTransformBuffer, idx);
+	if (m_pSibling) m_pSibling->UpdateTransform_SkinedInstancing(mapCur,mapPrev, idx);
+	if (m_pChild) m_pChild->UpdateTransform_SkinedInstancing(mapCur, mapPrev, idx);
 }
 
 void CGameObject::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
@@ -554,8 +566,13 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 		if (isSkined)
 		{
 			if (m_pcbMappedSkinedGameObjects)
+			{
 				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
 					m_pd3dcbSkinedGameObjects->GetGPUVirtualAddress());
+				pd3dCommandList->SetGraphicsRootShaderResourceView(12,
+					m_pd3dcbPrevSkinedGameObjects->GetGPUVirtualAddress());
+			}
+
 		}
 		else
 		{
@@ -635,8 +652,13 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCame
 		if (isSkined)
 		{
 			if (m_pcbMappedSkinedGameObjects)
+			{
 				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
 					m_pd3dcbSkinedGameObjects->GetGPUVirtualAddress());
+				pd3dCommandList->SetGraphicsRootShaderResourceView(12,
+					m_pd3dcbPrevSkinedGameObjects->GetGPUVirtualAddress());
+			}
+
 		}
 		else
 		{
@@ -718,6 +740,12 @@ void CGameObject::ReleaseShaderVariables()
 		m_pd3dcbSkinedGameObjects->Unmap(0, NULL);
 		m_pd3dcbSkinedGameObjects->Release();
 		m_pd3dcbSkinedGameObjects = NULL;
+	}
+	if (m_pd3dcbPrevSkinedGameObjects)
+	{
+		m_pd3dcbPrevSkinedGameObjects->Unmap(0, NULL);
+		m_pd3dcbPrevSkinedGameObjects->Release();
+		m_pd3dcbPrevSkinedGameObjects = NULL;
 	}
 	if (m_pSibling) m_pSibling->ReleaseShaderVariables();
 	if (m_pChild) m_pChild->ReleaseShaderVariables();
@@ -1185,7 +1213,7 @@ void CGameObject::CreateBillBoardInstanceBuffer(UINT nInstances)
 		m_pd3dcbBillBoardObjects->Map(0, NULL, (void **)&m_pcbMappedBillBoardObjects);
 	}
 }
-void CGameObject::CreateSkinedInstanceBuffer(UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer)
+void CGameObject::CreateSkinedInstanceBuffer(UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapCur, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapPrev)
 {
 	if (nInstances > 0)
 	{
@@ -1194,10 +1222,18 @@ void CGameObject::CreateSkinedInstanceBuffer(UINT nInstances, unordered_map<stri
 			D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 		//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
 		m_pd3dcbSkinedGameObjects->Map(0, NULL, (void **)&m_pcbMappedSkinedGameObjects);
-		instancedTransformBuffer[m_pstrFrameName] = m_pcbMappedSkinedGameObjects;
+		mapCur[m_pstrFrameName] = m_pcbMappedSkinedGameObjects;
 
-		if (m_pSibling) m_pSibling->CreateSkinedInstanceBuffer(nInstances, instancedTransformBuffer);
-		if (m_pChild) m_pChild->CreateSkinedInstanceBuffer(nInstances, instancedTransformBuffer);
+		m_pd3dcbPrevSkinedGameObjects = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
+			sizeof(CB_SKINEOBJECT_INFO) * nInstances, D3D12_HEAP_TYPE_UPLOAD,
+			D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+		//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
+		m_pd3dcbPrevSkinedGameObjects->Map(0, NULL, (void**)&m_pcbMappedPrevSkinedGameObjects);
+		mapPrev[m_pstrFrameName] = m_pcbMappedPrevSkinedGameObjects;
+
+
+		if (m_pSibling) m_pSibling->CreateSkinedInstanceBuffer(nInstances, mapCur, mapPrev);
+		if (m_pChild) m_pChild->CreateSkinedInstanceBuffer(nInstances, mapCur, mapPrev);
 	}
 }
 

@@ -157,13 +157,13 @@ float4 PSTer(VS_TEXT_OUTPUT input) : SV_TARGET
 	float4 color = saturate(0.4*(detailedAlbedo + baseAlbedo) + sLighting(input.positionW, normalW, shadowFactor)*0.6);
 
 	float3 toEyeWorld = gvCameraPosition - input.positionW;
-	float distToEye = length(toEyeWorld);
+	float distance = length(toEyeWorld);
 
 
 	if (fFogStart >= 5.0f)
 	{
-		float fogRate = saturate((distToEye - fFogStart) / fFogRange);
-		color = lerp(color, f4FogColor, fogRate);
+		float fogFactor = saturate((distance - fFogStart) / fFogRange);
+		color = lerp(color, f4FogColor, fogFactor);
 	}
 
 	color.a = baseAlbedo.a;

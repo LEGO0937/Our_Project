@@ -1,6 +1,7 @@
 #include "PlayerObject.h"
 #include "TerrainObject.h"
 #include "../Common/FrameWork/GameManager.h"
+#include "../Common/FrameWork/NetworkManager.h"
 #include "../Common/FrameWork/SoundManager.h"
 #include "../CShaders/Shader.h"
 #include "../Common/Camera/Camera.h"
@@ -54,6 +55,7 @@ void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 
 void CPlayer::ReleaseShaderVariables()
 {
+	//CGameObject::ReleaseShaderVariables();
 	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
 }
 

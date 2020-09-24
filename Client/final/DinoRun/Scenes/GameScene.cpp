@@ -545,8 +545,11 @@ void GameScene::ProcessInput(HWND hwnd, float deltaTime)
 
 	if(dwDirection == 0)
 		m_pPlayer->m_fForce = 0;
-	//else
-	//	((CDinoRunPlayer*)PLAYER_SHADER->getList()[1])->Move(XMFLOAT3(0, 0, 50 * deltaTime), false);
+	else
+	{
+		//((CDinoRunPlayer*)PLAYER_SHADER->getList()[1])->Move(XMFLOAT3(0, 0, 50 * deltaTime), false);
+		//((CDinoRunPlayer*)PLAYER_SHADER->getList()[2])->Move(XMFLOAT3(10* deltaTime, 0, 50 * deltaTime), false);
+	}
 	m_pPlayer->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
 	//((CDinoRunPlayer*)PLAYER_SHADER->getList()[1])->Move(dwDirection, 800.0f*deltaTime, deltaTime, true);
 	

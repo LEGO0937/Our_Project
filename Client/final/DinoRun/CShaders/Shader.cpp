@@ -257,9 +257,6 @@ void CObInstancingShader::CreateShaderVariables()
 }
 void CObInstancingShader::ReleaseShaderVariables()
 {
-	m_ppObjects->ReleaseShaderVariables();
-	if (m_pBillBoardObject)
-		m_pBillBoardObject->ReleaseShaderVariables();
 }
 //인스턴싱 정보(객체의 월드 변환 행렬과 색상)를 정점 버퍼에 복사한다.
 void CObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
@@ -399,11 +396,10 @@ CSkinedObInstancingShader::~CSkinedObInstancingShader()
 
 void CSkinedObInstancingShader::CreateShaderVariables()
 {
-	m_ppObjects->CreateSkinedInstanceBuffer(objectList.size(), instancedObjectInfo);
+	m_ppObjects->CreateSkinedInstanceBuffer(objectList.size(), instancedObjectInfo, instancedPrevObjectInfo);
 }
 void CSkinedObInstancingShader::ReleaseShaderVariables()
 {
-	m_ppObjects->ReleaseShaderVariables();
 }
 //인스턴싱 정보(객체의 월드 변환 행렬과 색상)를 정점 버퍼에 복사한다.
 void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
@@ -418,7 +414,7 @@ void CSkinedObInstancingShader::UpdateShaderVariables(ID3D12GraphicsCommandList
 			ob->UpdateTransform(NULL);
 			if (ob->GetEnableState() && ob->IsVisible_Ins(pCamera))
 			{
-				ob->UpdateTransform_SkinedInstancing(instancedObjectInfo, drawingCount);
+				ob->UpdateTransform_SkinedInstancing(instancedObjectInfo, instancedPrevObjectInfo, drawingCount);
 				drawingCount++;
 			}
 		}
