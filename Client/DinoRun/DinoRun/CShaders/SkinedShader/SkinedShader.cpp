@@ -1,5 +1,5 @@
 #include "SkinedShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "../../Objects/TerrainObject.h"
 
 #include "../../Common/Animation/Animation.h"
@@ -11,7 +11,7 @@ SkinedShader::SkinedShader()
 SkinedShader::~SkinedShader()
 {
 }
-void SkinedShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void SkinedShader::Load(const char* filename, const char* Loadname)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, Loadname, "rb");
@@ -24,11 +24,11 @@ void SkinedShader::Load(CreateManager* pCreateManager, const char* filename, con
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, filename, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(filename, NULL);
 		pSkinedObject = pModel->m_pModelRootObject;
 		pSkinedObject->AddRef();
 
-		pSkinedObject->m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 1, pModel);
+		pSkinedObject->m_pSkinnedAnimationController = new CAnimationController(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), 1, pModel);
 		pSkinedObject->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0); //left_turn_start
 		pSkinedObject->m_pSkinnedAnimationController->SetTrackEnable(0, false);
 

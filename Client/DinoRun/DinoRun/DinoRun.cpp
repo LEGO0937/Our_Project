@@ -1,6 +1,7 @@
 ﻿// DinoRun.cpp : 애플리케이션에 대한 진입점을 정의합니다.
 //
 #include "DinoRun.h"
+#include "FrameWork/NetworkManager.h"
 #define MAX_LOADSTRING 100
 
 HINSTANCE hInst;                                // 현재 인스턴스입니다.
@@ -40,7 +41,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 
 	frameWork.BuildObjects();
-
 	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE))

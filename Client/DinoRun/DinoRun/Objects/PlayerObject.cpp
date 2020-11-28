@@ -1,10 +1,8 @@
-//-----------------------------------------------------------------------------
-// File: CPlayer.cpp
-//-----------------------------------------------------------------------------
-
 #include "PlayerObject.h"
 #include "TerrainObject.h"
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
+#include "../Common/FrameWork/NetworkManager.h"
+#include "../Common/FrameWork/SoundManager.h"
 #include "../CShaders/Shader.h"
 #include "../Common/Camera/Camera.h"
 
@@ -13,9 +11,7 @@
 
 #include "EventHandler/EventHandler.h"
 
-#define PLAYER_ANI_TIME_LENGTH 0.49f
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// CPlayer
+#define PLAYER_ANI_TIME_LENGTH 0.49f //플레이어의 애니메이션 길이
 
 
 CPlayer::CPlayer() : CGameObject()
@@ -48,9 +44,9 @@ CPlayer::~CPlayer()
 	if (m_pCamera) delete m_pCamera;
 }
 
-void CPlayer::CreateShaderVariables(CreateManager* pCreateManager)
+void CPlayer::CreateShaderVariables()
 {
-	if (m_pCamera) m_pCamera->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	if (m_pCamera) m_pCamera->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 }
 
 void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
@@ -59,6 +55,7 @@ void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 
 void CPlayer::ReleaseShaderVariables()
 {
+	//CGameObject::ReleaseShaderVariables();
 	if (m_pCamera) m_pCamera->ReleaseShaderVariables();
 }
 
@@ -116,38 +113,17 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 		if (dwDirection & DIR_RIGHT)
 		{
 			KeyDownRight();
-			/*
-			if (!isShift)
-			{
-				if (length < 30)
-					m_fWheelDegree += 15 * fDeltaTime;
-				else
-					m_fWheelDegree += 10 * fDeltaTime;
-			}
-			else
-				m_fWheelDegree += 30 * fDeltaTime;
-				*/
 		}
 		else
 		{
 			if (isRight)
 				KeyUpRight();
 		}
-		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, +fDistance);
+		
 		if (dwDirection & DIR_LEFT)
 		{
 			KeyDownLeft();
-			/*
-			if (!isShift)
-			{
-				if (length < 30)
-					m_fWheelDegree -= 15 * fDeltaTime;
-				else
-					m_fWheelDegree -= 10 * fDeltaTime;
-			}
-			else
-				m_fWheelDegree -= 30 * fDeltaTime;
-				*/
+			
 		}
 		else
 		{
@@ -155,41 +131,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, float fDeltaTime, bool bU
 				KeyUpLeft();
 		}
 
-		//	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
+		
 #else
 		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
 		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, +fDistance);
 #endif
-		//if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, +fDistance);
-		//if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
-
-		//Move(xmf3Shift, bUpdateVelocity);
-		/*
-		if (!isShift)
-		{
-			if (length > 30)
-			{
-				if (m_fWheelDegree > 10)
-					m_fWheelDegree = 10;
-				else if (m_fWheelDegree < -10)
-					m_fWheelDegree = -10;
-			}
-			else
-			{
-				if (m_fWheelDegree > 10)
-					m_fWheelDegree = 10;
-				else if (m_fWheelDegree < -10)
-					m_fWheelDegree = -10;
-			}
-		}
-		else
-		{
-			if (m_fWheelDegree > 20)
-				m_fWheelDegree = 20;
-			else if (m_fWheelDegree < -20)
-				m_fWheelDegree = -20;
-		}
-		*/
 	}
 	else
 	{
@@ -225,7 +171,6 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		{
 
 			m_pCamera->Move(xmf3Shift);
-			//m_pCamera->RegenerateViewMatrix();
 		}
 	}
 }
@@ -256,7 +201,7 @@ void CPlayer::Rotate(float x, float y, float z)
 			if (m_fRoll > +20.0f) { z -= (m_fRoll - 20.0f); m_fRoll = +20.0f; }
 			if (m_fRoll < -20.0f) { z -= (m_fRoll + 20.0f); m_fRoll = -20.0f; }
 		}
-		//m_pCamera->Rotate(x, y, z);
+
 		if (y != 0.0f)
 		{
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
@@ -265,7 +210,6 @@ void CPlayer::Rotate(float x, float y, float z)
 
 			if (!isShift)
 			{
-				//if (Vector3::Length(m_xmf3Velocity) < 35)
 				m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
 			}
 			else
@@ -276,7 +220,6 @@ void CPlayer::Rotate(float x, float y, float z)
 						SoundManager::GetInstance()->Stop("Running");
 					SoundManager::GetInstance()->Play("Curve");
 				}
-				//m_xmf3Velocity = Vector3::TransformCoord(m_xmf3Velocity, xmmtxRotate);
 			}
 		}
 	}
@@ -325,7 +268,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 			EventHandler::GetInstance()->RegisterEvent(message);
 #else
-			NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+			NetWorkManager::GetInstance()->SendEvent(message);  
 			NetWorkManager::GetInstance()->SendColision();
 #endif
 			OnCollisionAni();
@@ -348,7 +291,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 
 	}
 	float fLength;
-	switch (target->GetModelType())   //충돌처리로 씬내에 무언가를 삭제 or 생성하려면 return true 할 것
+	switch (target->GetModelType())  
 	{
 	case ModelType::CheckPoint:
 		++m_uCheckpointCount;
@@ -366,7 +309,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  
 #endif
 		message.shaderName = BOX_PARTICLE;
 		message.departMat = target->m_xmf4x4World;
@@ -374,7 +317,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  
 #endif
 		SoundManager::GetInstance()->Play("ItemBox", 0.2f);
 		return true;
@@ -389,7 +332,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  
 #endif
 
 		message.shaderName = MEAT_PARTICLE;
@@ -398,16 +341,11 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  
 #endif
 		SoundManager::GetInstance()->Play("MeatEat", 0.5f);
-		//target->SetEnableState(false);  //서버 비활성화 신호 서버에 보내주고 쉐이더에서 처리할 것.
 		return true;
 	case ModelType::Item_Banana:
-		//if (m_fWheelDegree > 0)
-		//	m_fWheelDegree = 30;
-		//else if (m_fWheelDegree < 0)
-		//	m_fWheelDegree = -30;
 		SoundManager::GetInstance()->Play("Sliding", 0.5f);
 
 		OnSliding();
@@ -417,7 +355,7 @@ bool CPlayer::Update(float fTimeElapsed, CGameObject* target)
 #ifndef isConnectedToServer
 		EventHandler::GetInstance()->RegisterEvent(message);
 #else
-		NetWorkManager::GetInstance()->SendEvent(message);  //서버연동 중일땐 register대신 이게 들어가면 됨.
+		NetWorkManager::GetInstance()->SendEvent(message);  
 		NetWorkManager::GetInstance()->SendSliding();
 #endif
 		break;
@@ -492,24 +430,6 @@ void CPlayer::ProcessRotate(float fTimeElapsed)
 			break;
 		}
 
-		//if (!isShift)
-		{
-			//if (length > 20)
-			//{
-			//	if (m_fWheelDegree > 8)
-			//		m_fWheelDegree = 8;
-			//	else if (m_fWheelDegree < -8)
-			//		m_fWheelDegree = -8;
-			//}
-			//else
-			//{
-			//	if (m_fWheelDegree > 15)
-			//		m_fWheelDegree = 15;
-			//	else if (m_fWheelDegree < -15)
-			//		m_fWheelDegree = -15;
-			//}
-		}
-		//else
 		{
 			if (m_fWheelDegree > 20)
 				m_fWheelDegree = 20;
@@ -526,43 +446,20 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		m_pCamera->RegenerateViewMatrix();
 		return;
 	}
-	/*
-	if (!isLeft && !isRight)
-	{
-		if (m_fWheelDegree > 0)
-		{
-			if (!isShift)
-				m_fWheelDegree -= 30 * fTimeElapsed;
-			else
-				m_fWheelDegree -= 30 * fTimeElapsed;
-			if (m_fWheelDegree < 0.0f)
-				m_fWheelDegree = 0.0f;
-		}
-		else if (m_fWheelDegree < 0)
-		{
-			if (!isShift)
-				m_fWheelDegree += 30 * fTimeElapsed;
-			else
-				m_fWheelDegree += 30 * fTimeElapsed;
-
-			if (m_fWheelDegree > 0.0f)
-				m_fWheelDegree = 0.0f;
-		}
-	}
-	*/
+	
 	ProcessRotate(fTimeElapsed);
 
 	XMFLOAT3 vel = m_xmf3Velocity;
 	vel.y = 0;
-	if (m_fWheelDegree != 0.0f && Vector3::Length(vel) > 0)   //바퀴에 조향각입력 & 시동걸린상태일때만 
+	if (m_fWheelDegree != 0.0f && Vector3::Length(vel) > 0)   //머리의 조향각입력 & 시동걸린상태일때만 
 	{
 		float degree = m_fWheelDegree;  //현재 머리의 회전 각도
 
-		//3.8f = 바이크의 전륜 후륜사이의 길이
+		//3.8f = 공룡의 머리 꼬리사이의 길이
 		//57.3f = 각도를 degree값으로 변환하기위해 사용됨
-		//--------------------연습중
+		//--------------------
 		float slipB = Vector3::DotProduct(m_xmf3Look, m_xmf3Velocity)
-			/ (Vector3::Length(m_xmf3Look)*Vector3::Length(m_xmf3Velocity));  //이게 슬립각도의 코사인값임.
+			/ (Vector3::Length(m_xmf3Look)*Vector3::Length(m_xmf3Velocity));  //슬립각도의 코사인값임.
 
 		float result;
 
@@ -574,28 +471,20 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 			/ 3.8f*1.3f;
 
 		//--------------------------
-
-		//w = Vector3::Length(m_xmf3Velocity) * cosf(XMConvertToRadians(slipB)) * tanf(XMConvertToRadians(degree)) / 3.8f;
 		Rotate(0, XMConvertToDegrees(result)*fTimeElapsed, 0.0f); //degree로 바꿔서 회전 시작 
 
 	}
-	//else
-	//{
-	//	//if (SoundManager::GetInstance()->Playing("Curve"))
-	//	//	SoundManager::GetInstance()->Stop("Curve");
-	//}
+
 	float drag;
-	//float cDrag = 0.3f;
-	//위에는 횡력 처리 아래는 직진 힘.
+	//직진 힘.
 	if (isShift && m_fWheelDegree != 0 && Vector3::Length(m_xmf3Velocity) > MIN_VELOCITY + 10.0f)
 	{
-		drag = 0.5f* 1.5f* AIR * 8.2f;   //0.3f= 마찰계수 AIR = 공기저항 , 8.2f = 정면 면적
+		drag = 0.5f* 1.5f* AIR * 8.2f;   //1.5f= 마찰계수 AIR = 공기저항 , 8.2f = 정면 면적
 		//드리프트시에는 저항을 받는 면적이 정면이 아닌 옆면이이때문에 면적이 더 큼.
 	}
 	else if (isShift)
 	{
-		drag = 0.5f* 1.0f* AIR * 4.0f;   //0.3f= 마찰계수 AIR = 공기저항 , 4.0f = 정면 면적
-		//드리프트시에는 저항을 받는 면적이 정면이 아닌 옆면이이때문에 면적이 더 큼.
+		drag = 0.5f* 1.0f* AIR * 4.0f;   //1.0f= 마찰계수 AIR = 공기저항 , 4.0f = 정면 면적
 	}
 	else
 	{
@@ -604,14 +493,12 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	float rR = drag * 29.7f;   // -> C_Rr
 
 
-
-
 	float W = m_fMass * 9.8f;
-	float L = 3.8f, c = 1.9f, b = 1.9f; //L은 전륜 후륜사이 거리. c = 중심에서 전륜까지 거리, b는 생략
+	float L = 3.8f, c = 1.9f, b = 1.9f; //L은 머리 꼬리사이 거리. c = 중심에서 머리까지 거리, b는 중심~꼬리 거리
 	float h = 1.4f; //cg의 높이
 	float Wf;  //Wf전방 차축 무게, Wr= 후방 차축 무게
 	float scaleVel = Vector3::Length(vel);
-	//코너링 강성 67830 or 67.8  or 678
+
 	XMFLOAT3 acc = m_xmf3AcceleratingForce;
 	acc.y = 0.0f;
 
@@ -632,15 +519,13 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 	XMFLOAT3 xmf3Frr = Vector3::ScalarProduct(m_xmf3Velocity, -rR, false); //회전 저항
 	XMFLOAT3 xmf3Ftraction;
 
-	xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); //앞키로 얻은 힘을 통한 진행 힘 구하는 식
+	xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, m_fForce, false); 
 	if (isShift && !m_fWheelDegree)
 		xmf3Ftraction = Vector3::Add(xmf3Ftraction, Vector3::ScalarProduct(Vector3::Normalize(m_xmf3Velocity), -1000.0f, false));
-	//	xmf3Ftraction = Vector3::ScalarProduct(m_xmf3Look, -400.0f, false); //브레이크 시
 
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Frr);
 	xmf3Ftraction = Vector3::Add(xmf3Ftraction, xmf3Fdrag);  //총합
-	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);//힘의 최종합을 구함 > 이부분이 수정되어야 함.
-	//현재 앞으로 갔다가 뒤로가면 이힘이 계속해서 적용되어 방향이 바로 안바뀜
+	xmf3Ftraction = Vector3::Add(xmf3Ftraction, m_xmf3Forces);
 	xmf3Ftraction.y -= 9.8f * m_fMass * 4;
 
 
@@ -667,35 +552,17 @@ void CPlayer::FixedUpdate(float fTimeElapsed)
 		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
 	}
 
-	//XMVector3AngleBetweenVectors  벡터사이 각도 구하기
 	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, UNIT_PER_METER * fTimeElapsed, false); //10은 유닛당 10cm 이므로 10을 곱해야함
 	Move(xmf3Velocity, false); //속력만큼 벡터 이동
 
 	if (m_pUpdatedContext) OnUpdateCallback(fTimeElapsed);
 
-	//	DWORD nCurrentCameraMode = m_pCamera->GetMode();
-		//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) 
-		//for (int i = 0; i < m_uNCamera; ++i)
-		//{
-		//	if (m_ppCamera[i])
-		//	{
-		//		if (i == 0)
-		//			m_ppCamera[i]->Update(m_xmf3Position, fTimeElapsed);
-		//		else
-		//			m_ppCamera[i]->Update(m_ppCamera[i - 1]->GetPosition(), fTimeElapsed);
-		//	}
-		//}
 	m_pCamera->Update(m_xmf3Position, fTimeElapsed);
-	// 카메라 작업 이전: m_pCamera->Update(m_xmf3Position, fTimeElapsed);
+
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
-	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
-	//((CThirdPersonCamera*)m_pCamera)->SetLookAt(m_xmf3Position);
+	
 	m_pCamera->RegenerateViewMatrix();
 
-	//fLength = Vector3::Length(m_xmf3Velocity);
-	//float fDeceleration = (m_fFriction * fTimeElapsed);
-	//if (fDeceleration > fLength) fDeceleration = fLength;
-	//m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 	m_xmf3Forces = XMFLOAT3(0, 0, 0);
 
 	if (isWalking)
@@ -800,16 +667,15 @@ void CFuncCallbackHandler::HandleCallback(void *pAnimationController, int nSet)
 	controller->SetTrackEnable(nSet, true);
 }
 
-CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName) : CPlayer()
+CDinoRunPlayer::CDinoRunPlayer(string sModelName) : CPlayer()
 {
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-	SetPosition(XMFLOAT3(800.0f, 76.0f, 1150.0f)); //(XMFLOAT3(700.0f, 76.0f, 1150.0f));//800,76,900
-	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, sModelName.c_str(), NULL);
+	SetPosition(XMFLOAT3(800.0f, 76.0f, 1150.0f)); 
+	CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(sModelName.c_str(), NULL);
 	SetChild(pAngrybotModel->m_pModelRootObject->GetChild(), true);
-	m_pSkinnedAnimationController = new CAnimationController(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 16, pAngrybotModel);
-	//위의 매개변수들 중 1은 애니메이션 트랙의 갯수 현재는 idle 뿐이니 1임 늘어날 수록 숫자 높일것.
-	m_fMass = 100.0f;   //이전 몸무게 130
+	m_pSkinnedAnimationController = new CAnimationController(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), 16, pAngrybotModel);
+	m_fMass = 100.0f; 
 
 	m_fMaxForce = 2000.0f;
 
@@ -823,7 +689,7 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 	m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_TURN, 0, PLAYER_ANI_TIME_LENGTH, IDLE_LEFT_TURN, IDLE_LEFT_TURNING);
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE_RIGHT_TURN, IDLE_RIGHT_TURN);
-	m_pSkinnedAnimationController->SetCallbackFuncKeys(IDLE_RIGHT_TURN, 1); //라이트 턴에대한 예약애니메이션의 갯수는 1
+	m_pSkinnedAnimationController->SetCallbackFuncKeys(IDLE_RIGHT_TURN, 1);
 	m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_RIGHT_TURN, 0, PLAYER_ANI_TIME_LENGTH, IDLE_RIGHT_TURN, IDLE_RIGHT_TURNING);
 
 	m_pSkinnedAnimationController->SetTrackAnimationSet(IDLE_LEFT_TURNING, IDLE_LEFT_TURNING);
@@ -856,12 +722,11 @@ CDinoRunPlayer::CDinoRunPlayer(CreateManager* pCreateManager, string sModelName)
 
 	if (pAngrybotModel) delete pAngrybotModel;
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 
 	UpdateTransform(NULL);
 
-	m_pParticleSystem = new ParticleSystem(pCreateManager, DUST_PARTICLE, this, XMFLOAT3(0.0f, 0, 18));
-	//SetScale(XMFLOAT3(0.05f, 0.05f, 0.05f));
+	m_pParticleSystem = new ParticleSystem(DUST_PARTICLE, this, XMFLOAT3(0.0f, 0, 18));
 
 }
 
@@ -1315,7 +1180,6 @@ void CDinoRunPlayer::KeyUpLeft()
 	isLeft = false;
 	int prevCurrent = m_pSkinnedAnimationController->m_CurrentTrack;
 	float positionTime = m_pSkinnedAnimationController->m_pAnimationSets->m_ppAnimationSets[m_pSkinnedAnimationController->m_CurrentTrack]->m_fPosition;
-	//ㄴ> 트랙으로 주는게 잘못됐음. set의 포지션타임이 필요
 	float length = 0.0f;
 
 	if (isWalking)
@@ -1601,7 +1465,6 @@ void CDinoRunPlayer::returnIdle()
 	{
 	case IDLE_LEFT_TURN:
 	case IDLE_RIGHT_TURN:  //+2
-		//m_pSkinnedAnimationController->SetCallbackFuncKey(nextTrack, 0, 0.5f, nextTrack, nextTrack+2);
 		break;
 	case IDLE_LEFT_RETURN:
 		m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, PLAYER_ANI_TIME_LENGTH, IDLE_LEFT_RETURN, IDLE);
@@ -1615,7 +1478,6 @@ void CDinoRunPlayer::returnIdle()
 	{
 		SoundManager::GetInstance()->Stop("Running");
 	}
-	//m_pSkinnedAnimationController->SetCallbackFuncKey(IDLE_LEFT_RETURN, 0, 0.5f, IDLE_LEFT_RETURN, IDLE);
 	m_xmf3Velocity = XMFLOAT3(0, 0, 0);
 }
 

@@ -8,6 +8,7 @@ VS_FONT_OUTPUT VSFont(VS_FONT_INPUT input, uint vertexID : SV_VertexID)
 	// id 1 = 0001, uv = (1, 0)
 	// id 2 = 0010, uv = (0, 1)
 	// id 3 = 0011, uv = (1, 1)
+	// 버택스Id의 비트연산으로 uv를 찾아냄
 	float2 uv = float2(vertexID & 1, (vertexID >> 1) & 1);
 
 	output.pos = float4(input.pos.x + (input.pos.z * uv.x), input.pos.y - (input.pos.w * uv.y), 0, 1);

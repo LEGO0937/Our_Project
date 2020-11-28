@@ -1,7 +1,7 @@
 #include "SkinedShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "../../Common/Animation/Animation.h"
-
+#include "../Common/FrameWork/NetworkManager.h"
 PlayerShader::PlayerShader()
 {
 	shaderName = _PLAYER_SHADER;
@@ -9,7 +9,7 @@ PlayerShader::PlayerShader()
 PlayerShader::~PlayerShader()
 {
 }
-void PlayerShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void PlayerShader::BuildObjects(void* pInformation)
 {
 	MODEL_INFO* info = (MODEL_INFO*)pInformation;
 	if (!info->modelName)
@@ -20,26 +20,27 @@ void PlayerShader::BuildObjects(CreateManager* pCreateManager, void* pInformatio
 	instancingModelName = info->modelName;
 	instancingModelName.insert(instancingModelName.find("."), "_ins");  //인스턴싱 전용 모델파일을 불러온다
 
-	CDinoRunPlayer *pModel = new CDinoRunPlayer(pCreateManager, info->modelName);
+	CDinoRunPlayer *pModel = new CDinoRunPlayer(info->modelName);
 	m_ppObjects = pModel;
 	//m_ppSkinedObjects->AddRef();
 
 	if (info->modelName)
-		Load(pCreateManager, info->modelName, info->dataFileName);
+		Load(info->modelName, info->dataFileName);
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }
 
-void PlayerShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void PlayerShader::Load(const char* filename, const char* Loadname)
 {
 	CDinoRunPlayer *pPlayerObject = NULL;
 	int nLength = NetWorkManager::GetInstance()->GetNumPlayer();
 
 	//서버로부터 nLenght에 플레이어 수를 받음.
 	
+	//nLength = 3;
 	for (int i = 0; i < nLength; ++i)
 	{
-		pPlayerObject = new CDinoRunPlayer(pCreateManager, instancingModelName);
+		pPlayerObject = new CDinoRunPlayer(instancingModelName);
 		//동시에 아이디를 받아서 멤버에 셋팅.
 		//pPlayerObject->AddRef();
 		//pPlayerObject->SetPosition(XMFLOAT3(800.0f, 73.6, 920));

@@ -31,7 +31,7 @@ public:
 	void AddRef() { m_nReferences++; }
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager) {};
+	virtual void CreateShaderVariables() {};
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {};
 	virtual void ReleaseShaderVariables() {};
 
@@ -41,16 +41,16 @@ public:
 
 	virtual void ReleaseUploadBuffers() { }
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void *pInformation = NULL) { }
+	virtual void BuildObjects(void *pInformation = NULL) { }
 	virtual void AnimateObjects(float fTimeElapsed) { }
 	virtual void ReleaseObjects() { }
 
-	void CreateCbvSrvDescriptorHeaps(CreateManager* pCreateManager, int nConstantBufferViews, int nShaderResourceViews);
+	void CreateCbvSrvDescriptorHeaps(int nConstantBufferViews, int nShaderResourceViews);
 	void BackDescriptorHeapCount();
 
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(CreateManager* pCreateManager, int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride);
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceViews(CreateManager* pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement);
-	D3D12_GPU_DESCRIPTOR_HANDLE CreateShadowResourceViews(CreateManager* pCreateManager, CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement);
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateConstantBufferViews(int nConstantBufferViews, ID3D12Resource *pd3dConstantBuffers, UINT nStride);
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateShaderResourceViews(CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement);
+	D3D12_GPU_DESCRIPTOR_HANDLE CreateShadowResourceViews(CTexture *pTexture, UINT nRootParameter, bool bAutoIncrement);
 	
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCPUCbvDescriptorStartHandle() { return(m_d3dCbvCPUDescriptorStartHandle); }
 	D3D12_GPU_DESCRIPTOR_HANDLE GetGPUCbvDescriptorStartHandle() { return(m_d3dCbvGPUDescriptorStartHandle); }
@@ -95,14 +95,14 @@ public:
 
 	char GetName() { return shaderName; }
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) = 0;
+	virtual void BuildObjects(void* pInformation) = 0;
 	virtual void ReleaseObjects() = 0;
 	virtual void ReleaseUploadBuffers();
 
 	virtual void AnimateObjects(float fTimeElapsed);
 	virtual void Update(float fTimeElapsed) {}
 	virtual void FixedUpdate(float fTimeElapsed);
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT3& xmf3Position) {}
+	virtual void addObject(const XMFLOAT3& xmf3Position) {}
 	virtual void DeleteObject(const int& iSerealNum) {}
 	virtual void DisEnableObject(const int& iSerealNum) {}
 
@@ -110,9 +110,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {};
-#ifdef _WITH_BOUND_BOX
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera) {};
-#endif
+
 	vector<CGameObject*>& getList()
 	{
 		return objectList;
@@ -133,28 +131,26 @@ public:
 	CObInstancingShader();
 	virtual ~CObInstancingShader();
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager);
+	virtual void CreateShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ReleaseShaderVariables();
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
+	virtual void BuildObjects(void* pInformation) {}
 
 	virtual void ReleaseObjects();
 	
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
-	virtual void addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition) {}
+	virtual void addObject(const XMFLOAT4X4& xmf3DepartPosition) {}
 	virtual void DeleteObject(const int& iSerealNum);
 	virtual void DisEnableObject(const int& iSerealNum);
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void BillBoardRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-#ifdef _WITH_BOUND_BOX
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-#endif
-	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL) {}
-	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL) {}
+
+	virtual void Load(const char* filename = NULL) {}
+	virtual void Load(const char* filename = NULL, const char* Loadname = NULL) {}
 protected:
 	unordered_map<string, CB_OBJECT_INFO*> instancedObjectInfo;
 	unordered_map<string, CB_OBJECT_INFO*> instancedBillBoardObjectInfo;
@@ -171,11 +167,11 @@ public:
 	virtual ~CSkinedObInstancingShader();
 
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager);
+	virtual void CreateShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ReleaseShaderVariables();
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
+	virtual void BuildObjects( void* pInformation) {}
 
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
@@ -185,11 +181,9 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-#ifdef _WITH_BOUND_BOX
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
-#endif
-	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL) {}
-	virtual void Load(CreateManager* pCreateManager, const char* filename = NULL, const char* Loadname = NULL) {}
+
+	virtual void Load(const char* filename = NULL) {}
+	virtual void Load(const char* filename = NULL, const char* Loadname = NULL) {}
 
 	vector<CGameObject*>& getSkiendList()
 	{
@@ -210,13 +204,13 @@ public:
 	CUiShader();
 	virtual ~CUiShader();
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 	virtual void ReleaseObjects();
 
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation) {}
-	virtual void CreateShaderVariables(CreateManager* pCreateManager);
+	virtual void CreateShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera);
 	virtual void ReleaseShaderVariables();
 

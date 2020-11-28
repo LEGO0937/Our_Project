@@ -11,9 +11,8 @@ void EventHandler::Update()
 {
 	
 	/*
-	먼저 send로 쌓여있는 메시지 받아오기
-	recv로 받아와서 message Queue에 추가
-	그후 메시지 수만큼 업데이트
+	register로 큐에 쌓인 명령들을 일괄처리하는 부분.
+	주로 오브젝트의 활성화여부, 삭제, 추가등을 관리한다. 
 	*/
 	while (messageQueue.size())
 	{

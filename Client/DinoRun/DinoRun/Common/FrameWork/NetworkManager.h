@@ -81,8 +81,15 @@ public:
 	void err_display(const char* msg);
 	int GetMyID() { return myId; }
 	void SetMyID(int id) { myId = id; }
-	void SetServerIP(const char* ip) { m_ServerIP = ip; }
-	const char* GetServerIP() { return m_ServerIP; }
+	void SetServerIP(const char* ip) 
+	{ 
+		m_ServerIP = ip; 
+		return;
+	}
+	const char* GetServerIP() 
+	{ 
+		return m_ServerIP; 
+	}
 
 	enum CONNECT_STATE { NONE, TRY, FAIL, OK };
 	CONNECT_STATE GetConnectState()	const { return m_ConnectState; }

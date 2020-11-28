@@ -60,7 +60,7 @@
 //CheckPoint max  ,   2 track
 #define CHECKPOINT_GOAL 363
 
-enum SceneType { Default_Scene = 0, Start_Scene, Lobby_Scene, Room_Scene, Game_Scene,ItemGame_Scene, End_Scene };
+enum SceneType { Default_Scene = 0, Start_Scene, Room_Scene, Game_Scene,ItemGame_Scene, End_Scene };
 enum ModelType { Default = 0, CheckPoint, Player, Fence, Item_Box, Item_Banana, 
 	Item_Meat, Item_Mud, Item_Stone, Item_Meteorite, Item_FogBox,Item_Mound, Item_MeteoriteSpot
 };

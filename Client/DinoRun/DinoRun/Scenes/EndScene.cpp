@@ -1,6 +1,8 @@
 #include "EndScene.h"
 
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
+#include "../Common/FrameWork/SoundManager.h"
+#include "../Common/FrameWork/NetworkManager.h"
 
 #include "../Objects/PlayerObject.h"
 
@@ -37,12 +39,11 @@ void EndScene::ReleaseObjects()
 	for(CUiShader* shader : instancingNumberUiShaders)
 		if (shader) { shader->ReleaseShaderVariables(); shader->ReleaseObjects();  shader->Release(); }
 }
-void EndScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void EndScene::BuildObjects()
 {
 	SoundManager::GetInstance()->AllStop();
 
-	m_pCreateManager = pCreateManager;
-	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+	m_pd3dCommandList = GameManager::GetInstance()->GetCommandList().Get();
 
 	CUiShader* uiShader;
 
@@ -53,7 +54,7 @@ void EndScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	else
 		name = "Resources/Images/T_Lose.dds";
 	
-	uiShader->BuildObjects(pCreateManager.get(), &name);
+	uiShader->BuildObjects(&name);
 	instacingUiShaders.emplace_back(uiShader);
 
 	UI_INFO view_info;
@@ -66,7 +67,7 @@ void EndScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.positions.emplace_back(XMFLOAT3(-0.43f, -0.1f, 0.0f));
 	view_info.f_uvY.emplace_back(0.5f);
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager.get(), &view_info);
+	uiShader->BuildObjects(&view_info);
 	instacingUiShaders.emplace_back(uiShader);
 	view_info.f_uvY.clear();
 	view_info.positions.clear();
@@ -94,7 +95,7 @@ void EndScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	view_info.f_uvY.emplace_back(0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager.get(), &view_info);
+	uiShader->BuildObjects(&view_info);
 	uiShader->getUvXs()[2] = 10.0f;
 	uiShader->getUvXs()[5] = 10.0f;
 
@@ -112,7 +113,7 @@ void EndScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.4f, 0.4f), XMFLOAT2(1.05f, 1.05f))); //winner name font
 	gameTexts[0].text = EventHandler::GetInstance()->m_sWinner;
-	CreateShaderVariables(pCreateManager.get());
+	CreateShaderVariables();
 
 	SoundManager::GetInstance()->Play("End_BGM", 0.2f);
 }
@@ -190,7 +191,7 @@ void EndScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-SceneType EndScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
+SceneType EndScene::Update(float fTimeElapsed)
 {
 	//물리 및 충돌을 위한 update
 	if (sceneType != SceneType::End_Scene)
@@ -205,7 +206,7 @@ SceneType EndScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 }
 
 
-void EndScene::CreateShaderVariables(CreateManager* pCreateManager)
+void EndScene::CreateShaderVariables()
 {
 }
 

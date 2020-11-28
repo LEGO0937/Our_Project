@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "ItemObject.h"
 
 MeteoriteShader::MeteoriteShader()
@@ -12,7 +12,7 @@ MeteoriteShader::~MeteoriteShader()
 
 }
 
-void MeteoriteShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void MeteoriteShader::Load(const char* filename, const char* Loadname)
 {
 	billBoardCb->fSize = 50;
 	isEnable = true;
@@ -30,7 +30,7 @@ void MeteoriteShader::Load(CreateManager* pCreateManager, const char* filename, 
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pItemObject = new ItemMeteorite;
 		pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pItemObject->AddRef();
@@ -70,10 +70,10 @@ void MeteoriteShader::Update(float fTimeElapsed)
 	}
 }
 
-void MeteoriteShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
+void MeteoriteShader::addObject(const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemMeteorite* pItemObject = NULL;
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
+	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(instancingModelName.c_str(), NULL);
 
 	pItemObject = new ItemMeteorite;
 	pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
@@ -92,7 +92,7 @@ void MeteoriteShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4&
 		pModel = NULL;
 	}
 	ReleaseShaderVariables();
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }
 
 
@@ -107,7 +107,7 @@ MeteoriteSpotShader::~MeteoriteSpotShader()
 
 }
 
-void MeteoriteSpotShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void MeteoriteSpotShader::Load(const char* filename, const char* Loadname)
 {
 	billBoardCb->fSize = 50;
 	isEnable = true;
@@ -125,7 +125,7 @@ void MeteoriteSpotShader::Load(CreateManager* pCreateManager, const char* filena
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pItemObject = new ItemMeteoriteSpot;
 		pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pItemObject->AddRef();
@@ -165,10 +165,10 @@ void MeteoriteSpotShader::Update(float fTimeElapsed)
 	}
 }
 
-void MeteoriteSpotShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
+void MeteoriteSpotShader::addObject(const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemMeteoriteSpot* pItemObject = NULL;
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
+	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(instancingModelName.c_str(), NULL);
 
 	pItemObject = new ItemMeteoriteSpot;
 	pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
@@ -187,5 +187,5 @@ void MeteoriteSpotShader::addObject(CreateManager* pCreateManager, const XMFLOAT
 		pModel = NULL;
 	}
 	ReleaseShaderVariables();
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }

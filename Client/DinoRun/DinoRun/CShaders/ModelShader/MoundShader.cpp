@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "ItemObject.h"
 
 MoundShader::MoundShader()
@@ -11,7 +11,7 @@ MoundShader::~MoundShader()
 
 }
 
-void MoundShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void MoundShader::Load(const char* filename, const char* Loadname)
 {
 	billBoardCb->fSize = 50;
 	isEnable = true;
@@ -29,7 +29,7 @@ void MoundShader::Load(CreateManager* pCreateManager, const char* filename, cons
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pItemObject = new ItemMound;
 		pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pItemObject->AddRef();
@@ -69,10 +69,10 @@ void MoundShader::Update(float fTimeElapsed)
 	}
 }
 
-void MoundShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf3DepartPosition)
+void MoundShader::addObject(const XMFLOAT4X4& xmf3DepartPosition)
 {
 	ItemMound* pItemObject = NULL;
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, instancingModelName.c_str(), NULL);
+	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(instancingModelName.c_str(), NULL);
 
 	pItemObject = new ItemMound;
 	pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
@@ -90,5 +90,5 @@ void MoundShader::addObject(CreateManager* pCreateManager, const XMFLOAT4X4& xmf
 		pModel = NULL;
 	}
 	ReleaseShaderVariables();
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }

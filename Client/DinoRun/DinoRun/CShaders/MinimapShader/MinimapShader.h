@@ -6,6 +6,6 @@ public:
 	MinimapShader();
 	virtual ~MinimapShader();
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation) {}
-	virtual void BuildObjects(CreateManager* pCreateManager, const char *pszFileName, const char* filename = NULL);
+	virtual void BuildObjects(void* pInformation) {}
+	virtual void BuildObjects(const char *pszFileName, const char* filename = NULL);
 };

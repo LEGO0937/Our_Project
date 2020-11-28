@@ -31,12 +31,12 @@ private:
 	UINT8* textVBGPUAddress[18];
 
 	int maxNumTextCharacters = 1024;
-	CTexture * fontTex;
+	CTexture * pFontTex;
 public:
 	FontShader();
 	virtual ~FontShader();
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
@@ -44,7 +44,7 @@ public:
 	virtual void ReleaseShaderVariables();
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, vector<GameText>& vec);
-	void RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx, Font font, string text, XMFLOAT2 pos, XMFLOAT2 scale = XMFLOAT2(1.0f, 1.0f), XMFLOAT2 padding = XMFLOAT2(0.5f, 0.0f), XMFLOAT4 color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
+	void RenderText(ID3D12GraphicsCommandList *pd3dCommandList, const int& idx, Font& font, const string& text, const XMFLOAT2& pos, const XMFLOAT2& scale = XMFLOAT2(1.0f, 1.0f), const XMFLOAT2& padding = XMFLOAT2(0.5f, 0.0f), const XMFLOAT4& color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f));
 
 };
 

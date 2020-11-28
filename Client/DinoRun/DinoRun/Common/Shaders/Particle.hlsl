@@ -133,10 +133,10 @@ float4 PSParticle(VS_PARTICLE_OUTPUT input) : SV_TARGET
 	float3 toEyeWorld = gvCameraPosition - input.positionW;
 	float distToEye = length(toEyeWorld);
 
-#ifdef FOG
-	float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
-	color = lerp(color, gFogColor, fogAmount);
-#endif
+
+	float fogRate = saturate((distToEye - fFogStart) / fFogRange);
+	color = lerp(color, f4FogColor, fogRate);
+
 	color.a = baseAlbedo.a;
 
 	return(color);

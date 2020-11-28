@@ -19,17 +19,17 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
 		lParam, float deltaTime);
 
-	void BuildObjects(shared_ptr<CreateManager> pCreateManager);
+	void BuildObjects();
 
 	virtual void ReleaseObjects();
 	virtual void ReleaseUploadBuffers();
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager);
+	virtual void CreateShaderVariables();
 	virtual void UpdateShaderVariables();
 	virtual void ReleaseShaderVariables();
 
 	virtual void AnimateObjects(float fTimeElapsed);  //局聪皋捞记 诀单捞飘
-	virtual SceneType Update(CreateManager* pCreateManager, float fTimeElapsed);  // 面倒贸府 棺 拱府
+	virtual SceneType Update(float fTimeElapsed);  // 面倒贸府 棺 拱府
 
 	void Render();
 

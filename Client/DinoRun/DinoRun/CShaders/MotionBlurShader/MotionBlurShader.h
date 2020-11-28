@@ -1,6 +1,5 @@
 #pragma once
 #include "../../Common/stdafx.h"
-#include "../../Common/FrameWork/CreateManager.h"
 
 class MotionBlurShader
 {
@@ -12,10 +11,10 @@ public:
 	void Release() { if (--m_nReferences <= 0) delete this; }
 
 public:
-	MotionBlurShader(CreateManager* pCreateManager);
+	MotionBlurShader();
 
-	MotionBlurShader(const BlurShader& rhs) = delete;
-	MotionBlurShader& operator=(const BlurShader& rhs) = delete;
+	MotionBlurShader(const MotionBlurShader& rhs) = delete;
+	MotionBlurShader& operator=(const MotionBlurShader& rhs) = delete;
 	~MotionBlurShader() = default;
 
 	ID3D12Resource* Output();
@@ -34,8 +33,6 @@ public:
 
 	void ChangeResourceState(ID3D12GraphicsCommandList* pCommandList, ComPtr<ID3D12Resource> pResource, D3D12_RESOURCE_STATES stateBefore, D3D12_RESOURCE_STATES stateAfter);
 private:
-	std::vector<float> CalcGaussWeights(float sigma);
-
 	void BuildDescriptors();
 	void BuildResources();
 
@@ -50,28 +47,24 @@ private:
 
 	ComPtr<ID3D12DescriptorHeap> m_pCbvSrvUavDescriptorHeap = nullptr;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hFirstBlurCpuSrv;
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hFirstBlurCpuUav;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hBlurCpuSrv;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hBlurCpuUav;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hSecondBlurCpuSrv;
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hSecondBlurCpuUav;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hRenderTargetCpuSrv;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hRenderTargetCpuUav;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hThirdBlurCpuSrv;
-	D3D12_CPU_DESCRIPTOR_HANDLE m_hThirdBlurCpuUav;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hVelocityCpuSrv;
+	D3D12_CPU_DESCRIPTOR_HANDLE m_hVelocityCpuUav;
 
-	//D3D12_GPU_DESCRIPTOR_HANDLE m_hFirstBlurGpuSrv;
-	D3D12_GPU_DESCRIPTOR_HANDLE m_hFirstBlurGpuUav;
 
-	D3D12_GPU_DESCRIPTOR_HANDLE m_hSecondBlurGpuSrv;
-	//D3D12_GPU_DESCRIPTOR_HANDLE m_hSecondBlurGpuUav;
-
-	D3D12_GPU_DESCRIPTOR_HANDLE m_hThirdBlurGpuSrv;
-	//D3D12_GPU_DESCRIPTOR_HANDLE m_hThirdBlurGpuUav;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_hBlurGpuUav;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_hRenderTargetGpuSrv;
+	D3D12_GPU_DESCRIPTOR_HANDLE m_hVelocityGpuSrv;
 
 	// Two for ping-ponging the textures.
-	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurMap0 = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurMap1 = nullptr;
-	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurMap2 = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> mBlurMap = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> mRenderTargetMap = nullptr;
+	Microsoft::WRL::ComPtr<ID3D12Resource> mVelocityMap = nullptr;
 
 };
 

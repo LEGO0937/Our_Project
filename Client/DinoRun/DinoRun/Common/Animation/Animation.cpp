@@ -177,7 +177,7 @@ void CAnimationSet::Animate(float fTrackPosition, float fTrackWeight)
 	{
 		for (int j = 0; j < m_pAnimationLayers[i].m_nAnimatedBoneFrames; j++)
 		{
-			//모션블러 연습중
+			
 			m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4PrevWorld = m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4World;
 			
 			m_pAnimationLayers[i].m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4ToParent = Matrix4x4::Zero();
@@ -396,8 +396,6 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject *pRootGam
 	m_fTime += fTimeElapsed;
 	if (m_pAnimationTracks)
 	{
-		//for (int i = 0; i < m_nAnimationTracks; i++) 
-
 		for (int k = 0; k < m_nAnimationTracks; k++)
 		{
 
@@ -408,7 +406,5 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject *pRootGam
 				pAnimationSet->Animate(m_pAnimationTracks[k].m_fPosition, m_pAnimationTracks[k].m_fWeight);
 			}
 		}
-
-		//pRootGameObject->UpdateTransform(NULL);
 	}
 }

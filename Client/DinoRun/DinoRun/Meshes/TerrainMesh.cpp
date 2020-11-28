@@ -8,12 +8,6 @@ CHeightMapImage::CHeightMapImage(LPCTSTR pFileName, int nWidth, int nLength, XMF
 	m_xmf3Scale = xmf3Scale;
 
 	BYTE *pHeightMapPixels = new BYTE[m_nWidth * m_nLength];
-	////파일을 열고 읽는다. 높이 맵 이미지는 파일 헤더가 없는 RAW 이미지이다. 
-	//HANDLE hFile = ::CreateFile(pFileName, GENERIC_READ, 0, NULL, OPEN_EXISTING,
-	//	FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_READONLY, NULL);
-	//DWORD dwBytesRead;
-	//::ReadFile(hFile, pHeightMapPixels, (m_nWidth * m_nLength), &dwBytesRead, NULL);
-	//::CloseHandle(hFile);
 	ifstream in(pFileName, ios::binary);
 	in.seekg(0, std::ios::end);
 	int n2 = in.tellg();
@@ -165,8 +159,6 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice,
 #endif
 			m_pxmf2DetailedUvs[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x*0.5f), float(z) / 
 				float(m_xmf3Scale.z*0.5f));
-			//m_pxmf2Uv1[i] = XMFLOAT2(float(x) / float(m_xmf3Scale.x*0.5f), float(z) / float(m_xmf3Scale.z*0.5f));
-			//XMFLOAT4 xmf3Color = Vector4::Add(OnGetColor(x, z, pContext), xmf4Color);
 			m_pxmf3Normals[i] = pHeightMapImage->GetHeightMapNormal(x, z);
 
 			if (fHeight < fMinHeight) fMinHeight = fHeight;
@@ -177,9 +169,7 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice,
 	m_xmf3AABBExtents = XMFLOAT3(m_xmf3Scale.x*nWidth / 2, maxHeight*m_xmf3Scale.y, m_xmf3Scale.z*nLength / 2);
 
 	m_xmBoundingBox = BoundingOrientedBox(m_xmf3AABBCenter,m_xmf3AABBExtents, XMFLOAT4(0, 0, 0, 1));
-	//vertices.assign(&pVertices[0], &pVertices[m_nVertices]);
 	////다음 그림은 격자의 교점(정점)을 나열하는 순서를 보여준다.
-	//delete[] pVertices;
 
 	m_pnSubSetIndices = new int[m_nSubMeshes];
 	m_ppnSubSetIndices = new UINT*[m_nSubMeshes];
@@ -190,7 +180,6 @@ CHeightMapGridMesh::CHeightMapGridMesh(ID3D12Device *pd3dDevice,
 	m_ppd3dSubSetIndexUploadBuffers = new ID3D12Resource*[m_nSubMeshes];
 	m_pd3dSubSetIndexBufferViews = new D3D12_INDEX_BUFFER_VIEW[m_nSubMeshes];
 
-	//UINT *pnIndices = new UINT[m_nIndices];
 	int k = 0;
 	for (int i = 0; i < nLength - 1; ++i)
 	{

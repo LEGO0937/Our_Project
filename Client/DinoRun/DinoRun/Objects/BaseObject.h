@@ -14,7 +14,7 @@
 #define RESOURCE_TEXTURE2DARRAY		0x03
 #define RESOURCE_TEXTURE_CUBE		0x04
 #define RESOURCE_BUFFER				0x05
-#define MAX_BONE_NUM 16
+#define MAX_BONE_NUM 27
 
 class CShader;
 class CCamera;
@@ -32,7 +32,7 @@ struct CB_OBJECT_INFO
 struct CB_SKINEOBJECT_INFO
 {
 	XMFLOAT4X4 m_xmf4x4Worlds[MAX_BONE_NUM];
-	XMFLOAT4X4 m_xmf4x4PrevWorlds[MAX_BONE_NUM];
+	//XMFLOAT4X4 m_xmf4x4PrevWorlds[MAX_BONE_NUM];
 };
 
 struct CB_UI_INFO
@@ -197,6 +197,9 @@ protected:
 
 	CB_SKINEOBJECT_INFO *m_pcbMappedSkinedGameObjects = NULL; // Skined Object's instancing buffer
 	ID3D12Resource *m_pd3dcbSkinedGameObjects = NULL;
+
+	CB_SKINEOBJECT_INFO* m_pcbMappedPrevSkinedGameObjects = NULL; // Prev Skined Object's instancing buffer
+	ID3D12Resource* m_pd3dcbPrevSkinedGameObjects = NULL;
 public:
 	void AddRef();
 	void Release();
@@ -213,7 +216,6 @@ protected:
 	bool							isKinematic = false; //충돌 체크시 물리효과를 적용할 것인가 y or n 
 	bool							isEnable = true;  //게임 상에 존재하게 할 것인지 y or n false이면 update,render X
 
-	//int								m_iSerealNum = 0;
 	int								m_iSerealNum = -1;
 	string							m_sObjectName = "None";
 
@@ -250,7 +252,6 @@ public:
 	char							m_pstrFrameName[64] = "RootNode";
 
 	   //충돌체크시 사용될 오브젝트의 유형(player, wall 등등)
-	//-----------------------rigidBody----------------------
 	float							m_fMass = 0;   //kg 단위
 	
 	XMFLOAT3 m_xmf3Angle;
@@ -282,7 +283,7 @@ public:
 	void SetShader(int nMaterial, CShader *pShader);
 	void SetMaterial(int nMaterial, CMaterial *pMaterial);
 
-	virtual void resetShadowTexture(CreateManager* pCreateManager);
+	virtual void resetShadowTexture();
 
 	void SetChild(CGameObject *pChild, bool bReferenceUpdate = false);
 	void SetMatrix(const XMFLOAT4X4& xmf4x4Matrix) { m_xmf4x4ToParent = xmf4x4Matrix; }
@@ -298,12 +299,9 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 	virtual void ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
-#ifdef _WITH_BOUND_BOX
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
-	virtual void BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, UINT nInstances);
-#endif
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager) {}
+
+	virtual void CreateShaderVariables() {}
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList) {}
 	virtual void ReleaseShaderVariables();
 
@@ -311,13 +309,10 @@ public:
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList);
 
 
-	void CreateBuffer(CreateManager* pCreateManager);
-	void CreateInstanceBuffer(CreateManager* pCreateManager,
-		UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& uMap);
-	void CreateBillBoardInstanceBuffer(CreateManager* pCreateManager,
-		UINT nInstances);
-	void CreateSkinedInstanceBuffer(CreateManager* pCreateManager,
-		UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& uMap);
+	void CreateBuffer();
+	void CreateInstanceBuffer(UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& uMap);
+	void CreateBillBoardInstanceBuffer(UINT nInstances);
+	void CreateSkinedInstanceBuffer(UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapCur, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapPrev);
 
 	virtual void ReleaseUploadBuffers();
 
@@ -345,7 +340,7 @@ public:
 	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent = NULL);
 	void UpdateTransform_Instancing(unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer, const int& idx, XMFLOAT4X4 *pxmf4x4Parent);
 	void UpdateTransform_BillBoardInstancing(CB_OBJECT_INFO* buffer, const int& idx, XMFLOAT4X4 *pxmf4x4Parent);
-	void UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer, const int& idx);
+	void UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& mapCur, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapPrev, const int& idx);
 
 	CGameObject *FindFrame(char *pstrFrameName);
 
@@ -372,12 +367,12 @@ public:
 	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
 	void SetTrackAnimationPosition(int nAnimationTrack, float fPosition);
 
-	void LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader);
+	void LoadMaterialsFromFile(CGameObject *pParent, FILE *pInFile, CShader *pShader);
 
 	static void LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoadedModel);
-	static CGameObject *LoadFrameHierarchyFromFile(CreateManager* pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
+	static CGameObject *LoadFrameHierarchyFromFile(CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes);
 
-	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(CreateManager* pCreateManager, const char *pstrFileName, CShader *pShader);
+	static CLoadedModelInfo *LoadGeometryAndAnimationFromFile(const char *pstrFileName, CShader *pShader);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 };

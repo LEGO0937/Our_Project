@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "ItemObject.h"
 
 ItemShader::ItemShader()
@@ -11,7 +11,7 @@ ItemShader::~ItemShader()
 
 }
 
-void ItemShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void ItemShader::Load(const char* filename, const char* Loadname)
 {
 	isEnable = true;
 
@@ -28,7 +28,7 @@ void ItemShader::Load(CreateManager* pCreateManager, const char* filename, const
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pItemObject = new ItemObject;
 		pItemObject->SetChild(pModel->m_pModelRootObject->GetChild());
 		pItemObject->AddRef();

@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "TerrainObject.h"
 #include "BillBoardMesh.h"
 
@@ -11,7 +11,7 @@ ModelShader::~ModelShader()
 {
 }
 
-void ModelShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void ModelShader::Load(const char* filename, const char* Loadname)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, Loadname, "rb");
@@ -24,7 +24,7 @@ void ModelShader::Load(CreateManager* pCreateManager, const char* filename, cons
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, filename, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(filename, NULL);
 		pModelObject = pModel->m_pModelRootObject;
 		pModelObject->AddRef();
 		nReads = (UINT)::fread(&(pModelObject->m_xmf4x4ToParent), sizeof(XMFLOAT4X4), 1, pInFile);
@@ -41,7 +41,7 @@ void ModelShader::Load(CreateManager* pCreateManager, const char* filename, cons
 	::fclose(pInFile);
 }
 
-void ModelShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void ModelShader::BuildObjects( void* pInformation)
 {
 	MODEL_INFO* info = (MODEL_INFO*)pInformation;
 	if (!info->modelName)
@@ -49,7 +49,7 @@ void ModelShader::BuildObjects(CreateManager* pCreateManager, void* pInformation
 	if (info->updatedContext)
 		m_pUpdatedContext = info->updatedContext;
 
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, info->modelName, NULL);
+	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(info->modelName, NULL);
 	m_ppObjects = pModel->m_pModelRootObject;
 
 	m_ppObjects->AddRef();
@@ -82,26 +82,26 @@ void ModelShader::BuildObjects(CreateManager* pCreateManager, void* pInformation
 		CMaterial* pMaterial = new CMaterial(1);
 
 		CShader* pShader = new CShader();
-		pShader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
+		pShader->CreateCbvSrvDescriptorHeaps(0, 1);
 		CTexture *pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 		//string name = pszFileName.c_str();
-		pTexture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(sBillBoardName.c_str()), 0);
-		pShader->CreateShaderResourceViews(pCreateManager, pTexture, 8, true);
+		pTexture->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), ConvertCHARtoWCHAR(sBillBoardName.c_str()), 0);
+		pShader->CreateShaderResourceViews(pTexture, 8, true);
 		pMaterial->SetTexture(pTexture);
 		pMaterial->SetShader(pShader);
-		pMaterial->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+		pMaterial->CreateShaderVariable(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 		m_pBillBoardObject->SetMaterial(0, pMaterial);
 
 		BillBoardMesh *mesh = NULL;
 		mesh = new BillBoardMesh();
-		mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+		mesh->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 		m_pBillBoardObject->SetMesh(mesh);
 
 		//billBoardCB
 		UINT ncbElementBytes = ((sizeof(CB_BillBoard) + 255) & ~255); //256의 배수
-		m_pd3dcbStruct = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+		m_pd3dcbStruct = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 			ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 			D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 		m_pd3dcbStruct->Map(0, NULL, (void **)&billBoardCb);
@@ -111,7 +111,7 @@ void ModelShader::BuildObjects(CreateManager* pCreateManager, void* pInformation
 	//각 셰이더의 로드 함수에서 직접 빌보드 크기 정할 것.
 
 	if (info->dataFileName)
-		Load(pCreateManager, info->modelName, info->dataFileName);
+		Load(info->modelName, info->dataFileName);
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 }

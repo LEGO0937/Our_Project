@@ -1,6 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
-
+#include "../Common/FrameWork/GameManager.h"
 TreeShader::TreeShader()
 {
 	shaderName = _TREE_SHADER;
@@ -10,7 +9,7 @@ TreeShader::~TreeShader()
 
 }
 
-void TreeShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void TreeShader::Load(const char* filename, const char* Loadname)
 {
 	if (m_pd3dcbStruct)
 		billBoardCb->fSize = 50;
@@ -28,7 +27,7 @@ void TreeShader::Load(CreateManager* pCreateManager, const char* filename, const
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		pTreeObject = pModel->m_pModelRootObject;
 		pTreeObject->AddRef();
 		

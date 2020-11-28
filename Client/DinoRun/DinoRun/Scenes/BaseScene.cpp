@@ -1,6 +1,6 @@
 #include "../Common/stdafx.h"
 #include "BaseScene.h"
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 
 #include "../Objects/PlayerObject.h"
 #include "../Objects/SkyBoxObject.h"
@@ -14,10 +14,10 @@ void BaseScene::ReleaseObjects()
 {
 	if (m_pLights) delete m_pLights;
 }
-void BaseScene::ReSize(shared_ptr<CreateManager> pCreateManager)
+void BaseScene::ReSize()
 {
-	m_nWndClientWidth = pCreateManager->GetWindowWidth();
-	m_nWndClientHeight = pCreateManager->GetWindowHeight();
+	m_nWndClientWidth = GameManager::GetInstance()->GetWindowWidth();
+	m_nWndClientHeight = GameManager::GetInstance()->GetWindowHeight();
 
 }
 void BaseScene::SetViewportsAndScissorRects()

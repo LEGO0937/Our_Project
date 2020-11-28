@@ -1373,10 +1373,7 @@ void CreatePsoVelocityTerrain(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_p
 		&pd3dVertexShaderBlob);
 	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "PSVelocityMap", "ps_5_1",
 		&pd3dPixelShaderBlob);
-	//d3dPipelineStateDesc.HS = CompileShaderFromFile(L"Common/Shaders/Terrain.hlsl", "HS", "hs_5_1",
-	//	&pd3dHullShaderBlob);
-	//d3dPipelineStateDesc.DS = CompileShaderFromFile(L"Common/Shaders/Shadows.hlsl", "DSShadow", "ds_5_1",
-	//	&pd3dDomainShaderBlob);
+
 	d3dPipelineStateDesc.RasterizerState = CreateRasterizerState();
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
@@ -1405,10 +1402,7 @@ void CreatePsoVelocityCubeMap(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_p
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC d3dPipelineStateDesc;
 	::ZeroMemory(&d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	d3dPipelineStateDesc.pRootSignature = m_pd3dGraphicsRootSignature;
-	//d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/Shaders.hlsl", "VSCube", "vs_5_1",
-	//	&pd3dVertexShaderBlob);
-	//d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/Shaders.hlsl", "PSCube", "ps_5_1",
-	//	&pd3dPixelShaderBlob);
+
 	d3dPipelineStateDesc.VS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "VSVelocitySkyBox", "vs_5_1",
 		&pd3dVertexShaderBlob);
 	d3dPipelineStateDesc.PS = CompileShaderFromFile(L"Common/Shaders/DrawVelocityMap2.hlsl", "PSVelocityMap", "ps_5_1",
@@ -1418,7 +1412,6 @@ void CreatePsoVelocityCubeMap(ID3D12Device *pd3dDevice, ID3D12RootSignature* m_p
 	d3dPipelineStateDesc.BlendState = CreateBlendState();
 	d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState();
 	d3dPipelineStateDesc.DepthStencilState.DepthEnable = FALSE;
-	//d3dPipelineStateDesc.InputLayout = CreateTextureInputLayout();
 	d3dPipelineStateDesc.InputLayout = CreateCubeInputLayout();
 	d3dPipelineStateDesc.SampleMask = UINT_MAX;
 	d3dPipelineStateDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;

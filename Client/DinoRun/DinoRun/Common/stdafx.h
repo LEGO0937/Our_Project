@@ -73,8 +73,8 @@ using namespace std;
 #define DIRECTIONAL_LIGHT 3
 
 #define SKINNED_ANIMATION_BONES		23
-const UINT N_SWAPCHAINBUFFERS = 2; //스왑 체인의 후면 버퍼의 개수
-const UINT N_RENDERTARGETBUFFERS = 1; //스왑 체인의 후면 버퍼의 개수
+const UINT nSwapchainBuffers = 2; //스왑 체인의 후면 버퍼의 개수
+const UINT nRendertargetBuffers = 1; //스왑 체인의 후면 버퍼의 개수
 
 typedef struct Point2D 
 {

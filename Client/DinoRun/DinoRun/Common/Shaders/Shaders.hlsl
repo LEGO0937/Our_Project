@@ -1,5 +1,5 @@
 #define MAX_VERTEX_INFLUENCES			4
-#define SKINNED_ANIMATION_BONES			16
+#define SKINNED_ANIMATION_BONES			27
 
 struct INSTANCEDGAMEOBJECTINFO
 {
@@ -17,7 +17,7 @@ struct INSTANCEDGAMEUIINFO
 struct INSTANCEDSKINEDOBJECTINFO
 {
 	float4x4 gpmtxInstancedBoneTransforms[SKINNED_ANIMATION_BONES];
-	float4x4 gpmtxInstancedPrevBoneTransforms[SKINNED_ANIMATION_BONES];
+	//float4x4 gpmtxInstancedPrevBoneTransforms[SKINNED_ANIMATION_BONES];
 	//이전 월드행렬을 저장하기 위해 하나 더 갖게 하고 싶지만 사이즈 초과
 };
 
@@ -30,9 +30,9 @@ cbuffer cbCameraInfo : register(b0)
 	float3 gvCameraPosition;
 	float cameraPad1;
 
-	float4 gFogColor;
-	float gFogStart;
-	float gFogRange ;
+	float4 f4FogColor;
+	float fFogStart;
+	float fFogRange ;
 };
 
 cbuffer cbShadowInfo : register(b3)
@@ -71,13 +71,11 @@ Texture2D gTexture : register(t2);
 Texture2D gDetailedTexture : register(t3);
 Texture2D gShadowMap : register(t4);
 
-SamplerState gsamPointWrap  : register(s0);
-SamplerState gsamPointClamp  : register(s1);
-SamplerState gsamLinearWrap  : register(s2);
-SamplerState gsamLinearClamp  : register(s3);
-SamplerState gsamAnisotropicWrap  : register(s4);
-SamplerState gsamAnisotropicClamp  : register(s5);
-SamplerComparisonState gsamShadow : register(s6);
+SamplerState gsamLinearWrap  : register(s0);
+SamplerState gsamLinearClamp  : register(s1);
+SamplerState gsamAnisotropicWrap  : register(s2);
+SamplerState gsamAnisotropicClamp  : register(s3);
+SamplerComparisonState gsamShadow : register(s4);
 
 #include "Light.hlsl"
 

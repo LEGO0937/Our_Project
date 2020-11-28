@@ -1,7 +1,5 @@
 #include "FontShader.h"
-
-#include "../../Common/FrameWork/CreateManager.h"
-
+#include "../Common/FrameWork/GameManager.h"
 FontShader::FontShader()
 {
 	m_nReferences = 1;
@@ -11,32 +9,32 @@ FontShader::~FontShader()
 
 }
 
-void FontShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void FontShader::BuildObjects(void* pInformation)
 {
 	
 	arialFont = LoadFont(L"Resources/Fonts/Arial.fnt", FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
 
-	fontTex = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	fontTex->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), arialFont.fontImage.c_str(), 0);
+	pFontTex = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	pFontTex->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), arialFont.fontImage.c_str(), 0);
 
-	CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
+	CreateCbvSrvDescriptorHeaps(0, 1);
 
-	CreateShaderResourceViews(pCreateManager, fontTex, 8, true);
+	CreateShaderResourceViews(pFontTex, 8, true);
 
-	HRESULT hr;
+	HRESULT hResult;
 	//18개의 텍스트 출력을 위한 정점 버퍼 생성.
+	//한 프레임에 출력 가능 텍스트는 18개가 최대
 	for (int i = 0; i < 18; ++i)
 	{
-		pCreateManager->GetDevice().Get()->CreateCommittedResource(
+		GameManager::GetInstance()->GetDevice().Get()->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(maxNumTextCharacters * sizeof(TextVertex)),
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
 			IID_PPV_ARGS(&textVertexBuffer[i]));
-		textVertexBuffer[i]->SetName(L"Text Vertex Buffer Upload Resource Heap");
 
-		hr = textVertexBuffer[i]->Map(0, NULL, reinterpret_cast<void**>(&textVBGPUAddress[i]));
+		hResult = textVertexBuffer[i]->Map(0, NULL, (void**)(&textVBGPUAddress[i]));
 
 		textVertexBufferView[i].BufferLocation = textVertexBuffer[i]->GetGPUVirtualAddress();
 		textVertexBufferView[i].StrideInBytes = sizeof(TextVertex);
@@ -63,17 +61,17 @@ void FontShader::ReleaseShaderVariables()
 			}
 		}
 	}
-	if (fontTex)
+	if (pFontTex)
 	{
-		fontTex->ReleaseShaderVariables();
-		fontTex->Release();
+		pFontTex->ReleaseShaderVariables();
+		pFontTex->Release();
 	}
 }
 void FontShader::ReleaseUploadBuffers()
 {
-	if (fontTex)
+	if (pFontTex)
 	{
-		fontTex->ReleaseUploadBuffers();
+		pFontTex->ReleaseUploadBuffers();
 	}
 }
 
@@ -82,7 +80,7 @@ void FontShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCa
 {
 	CShader::Render(pd3dCommandList, pCamera);
 	pd3dCommandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	fontTex->UpdateShaderVariable(pd3dCommandList, 0);
+	pFontTex->UpdateShaderVariable(pd3dCommandList, 0);
 	
 	int i = 0;
 	for (const GameText& text : vec)
@@ -92,7 +90,7 @@ void FontShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCa
 	}
 }
 
-void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx, Font font, string text, XMFLOAT2 pos, XMFLOAT2 scale, XMFLOAT2 padding, XMFLOAT4 color)
+void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, const int& idx, Font& font, const string& text, const XMFLOAT2& pos, const XMFLOAT2& scale, const XMFLOAT2& padding, const XMFLOAT4& color)
 {
 	int numCharacters = 0;
 
@@ -111,7 +109,7 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx,
 	{
 		wchar_t c = text[i];
 
-		FontChar* fc = font.GetChar(c);
+		FontChar* fc = font.GetChar(c);   //해당 문자 정보 불러오기
 
 		if (fc == nullptr)
 			continue;
@@ -122,7 +120,7 @@ void FontShader::RenderText(ID3D12GraphicsCommandList *pd3dCommandList, int idx,
 		if (c == L'\n')
 		{
 			x = topLeftScreenX;
-			y -= (font.lineHeight + upDownPadding) * scale.y;
+			y -= (font.lineHeight + upDownPadding) * scale.y;   //스크린 좌표계 기준으로 계산해야함.
 			continue;
 		}
 

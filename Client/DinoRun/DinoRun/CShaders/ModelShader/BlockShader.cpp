@@ -1,5 +1,5 @@
 #include "ModelShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "CheckPointObject.h"
 
 BlockShader::BlockShader()
@@ -11,7 +11,7 @@ BlockShader::~BlockShader()
 
 }
 
-void BlockShader::Load(CreateManager* pCreateManager, const char* filename, const char* Loadname)
+void BlockShader::Load(const char* filename, const char* Loadname)
 {
 	isEnable = false;
 	FILE *pInFile = NULL;
@@ -28,7 +28,7 @@ void BlockShader::Load(CreateManager* pCreateManager, const char* filename, cons
 	nReads = (UINT)::fread(&nLength, sizeof(int), 1, pInFile);
 	for (int i = 0; i < nLength; ++i)
 	{
-		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pCreateManager, fileName, NULL);
+		CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(fileName, NULL);
 		
 		pBlockObject = new CheckPointObject;
 		pBlockObject->SetChild(pModel->m_pModelRootObject->GetChild());

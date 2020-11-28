@@ -53,7 +53,6 @@ protected:
 
 	CCamera						*m_pCamera = NULL;
 
-	//«“ ∞Õ¿”.
 	UINT						m_uCheckpointCount = 0;
 	UINT						m_uRank = 1;
 public:
@@ -105,7 +104,7 @@ public:
 	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
-	virtual void CreateShaderVariables(CreateManager* pCreateManager);
+	virtual void CreateShaderVariables();
 	virtual void ReleaseShaderVariables();
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);
 
@@ -150,7 +149,7 @@ protected:
 class CDinoRunPlayer : public CPlayer
 {
 public:
-	CDinoRunPlayer(CreateManager* pCreateManager,string sModelName);
+	CDinoRunPlayer(string sModelName);
 	virtual ~CDinoRunPlayer();
 	
 public:

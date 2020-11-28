@@ -1,20 +1,21 @@
 #include "SkyBoxObject.h"
 #include "../Common/Camera/Camera.h"
-#include "../Common/FrameWork/CreateManager.h"
-SkyBoxObject::SkyBoxObject(CreateManager* pCreateManager) : CGameObject(1)
+
+#include "../Common/FrameWork/GameManager.h"
+SkyBoxObject::SkyBoxObject() : CGameObject(1)
 {
 
-	SkyBoxMesh *pSkyBoxMesh = new SkyBoxMesh(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), 2500.0f, 2500.0f, 2500.0f);
+	SkyBoxMesh *pSkyBoxMesh = new SkyBoxMesh(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), 2500.0f, 2500.0f, 2500.0f);
 	SetMesh(pSkyBoxMesh);
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 
 	CTexture *pSkyBoxTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0);
-	pSkyBoxTexture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), L"Resources/Images/grasscube1024.dds", 0);
+	pSkyBoxTexture->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), L"Resources/Images/grasscube1024.dds", 0);
 
 	SkyBoxShader *pSkyBoxShader = new SkyBoxShader();
-	pSkyBoxShader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
-	pSkyBoxShader->CreateShaderResourceViews(pCreateManager, pSkyBoxTexture, 8, true);
+	pSkyBoxShader->CreateCbvSrvDescriptorHeaps(0, 1);
+	pSkyBoxShader->CreateShaderResourceViews(pSkyBoxTexture, 8, true);
 
 	
 	CMaterial *pSkyBoxMaterial = new CMaterial(1);
@@ -24,10 +25,10 @@ SkyBoxObject::SkyBoxObject(CreateManager* pCreateManager) : CGameObject(1)
 	pSkyBoxMaterial->SetTexture(pSkyBoxTexture,0);
 	pSkyBoxMaterial->SetShader(pSkyBoxShader);
 
-	pSkyBoxMaterial->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	pSkyBoxMaterial->CreateShaderVariable(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 	SetMaterial(0, pSkyBoxMaterial);
 
-	CreateBuffer(pCreateManager);
+	CreateBuffer();
 }
 
 SkyBoxObject::~SkyBoxObject()

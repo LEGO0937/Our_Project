@@ -24,18 +24,6 @@ VS_SKINNED_OUTPUT VSSkinnedAnimation(VS_SKINNED_INPUT input)
 
 float4 PSSkinnedAnimation(VS_SKINNED_OUTPUT input) : SV_TARGET
 {
-	/*
-	float4 ShadowPosH = mul(float4(input.positionW, 1.0f), invViewProj);
-	float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-	shadowFactor[0] = CalcShadowFactor(ShadowPosH);
-
-	float4 diffuseAlbedo = gTexture.Sample(gsamAnisotropicWrap,input.TexC);
-	float3 normalW = normalize(input.normal);
-
-	diffuseAlbedo = diffuseAlbedo * 0.5 + (Lighting(input.positionW, normalW)*0.5);
-
-	return(diffuseAlbedo);
-	*/
 	
 	
 	float4 ShadowPosH = mul(float4(input.positionW, 1.0f), invViewProj);
@@ -50,15 +38,15 @@ float4 PSSkinnedAnimation(VS_SKINNED_OUTPUT input) : SV_TARGET
 	float4 color = saturate(0.45*(baseAlbedo) + sLighting(input.positionW, normalW, shadowFactor)*0.6);
 	
 	float3 toEyeWorld = gvCameraPosition - input.positionW;
-	float distToEye = length(toEyeWorld);
+	float distance = length(toEyeWorld);
 
-#ifdef FOG
-	if (gFogStart >= 5.0f)
+
+	if (fFogStart >= 5.0f)
 	{
-		float fogAmount = saturate((distToEye - gFogStart) / gFogRange);
-		color = lerp(color, gFogColor, fogAmount);
+		float fogFactor = saturate((distance - fFogStart) / fFogRange);
+		color = lerp(color, f4FogColor, fogFactor);
 	}
-#endif
+
 	color.a = baseAlbedo.a;
 
 	return color;

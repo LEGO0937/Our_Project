@@ -1,6 +1,6 @@
 #include "Shaders.hlsl"
 
-
+//카메라 모션블러 방식 사용(카메라의 시점을 기준으로 속도벡터 계산.)
 
 CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedAnimation(VS_SKINNED_INPUT input)
 {
@@ -25,27 +25,17 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedAnimation(VS_SKINNED_INPUT input)
 		normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 	}
 
-	//curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
-	//prevPos = mul(mul(float4(prevPositionW, 1.0f), gmtxView), gmtxProjection);
 	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
 	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 	
 	float3 dir = (curPos.xyz) - (prevPos.xyz);
-	/*
-	float a = dot(normalize(dir), normalize(normalW));
-	
-	if (a < 0.0f)
-		output.position = prevPos;
-	else
-		output.position = curPos;
-		*/
+
 	output.position = curPos;
 	output.direction.xy = dir.xy * 0.5f;
 
-	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	// 좌표계의 y방향은 다르기때문에 반대로 지정
 	output.direction.y *= -1.0f;
 
-	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;
 	output.direction.w = output.position.w;
 
@@ -70,7 +60,7 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedInstancingAnimation(VS_SKINNED_INPUT inpu
 	for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
 	{
 		mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gSkinedGameObjectInfos[nInstanceID].gpmtxInstancedBoneTransforms[input.indices[i]]);
-		mtxPrevVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gSkinedGameObjectInfos[nInstanceID].gpmtxInstancedPrevBoneTransforms[input.indices[i]]);
+		mtxPrevVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gPrevSkinedGameObjectInfos[nInstanceID].gpmtxInstancedBoneTransforms[input.indices[i]]);
 		positionW += (input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld)).xyz;
 		prevPositionW += (input.weights[i] * mul(float4(input.position, 1.0f), mtxPrevVertexToBoneWorld)).xyz;
 		normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
@@ -80,21 +70,13 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkinnedInstancingAnimation(VS_SKINNED_INPUT inpu
 	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
 	float3 dir = (curPos.xyz) - (prevPos.xyz);
-	/*
-	float a = dot(normalize(dir), normalize(normalW));
-
-	if (a < 0.0f)
-		output.position = prevPos;
-	else
-		output.position = curPos;
-		*/
+	
 	output.position = curPos;
 	output.direction.xy = dir.xy * 0.5f;
 
-	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	// 좌표계의 y방향은 다르기때문에 반대로 지정
 	output.direction.y *= -1.0f;
 
-	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;
 	output.direction.w = output.position.w;
 
@@ -111,10 +93,10 @@ float4 PSVelocityMap(CREATE_VEL_MAP_OUTPUT input) : SV_TARGET
 
 	output.xy = input.direction.xy;
 
-	// 미사용
+	// 사용안함
 	output.z = 0.0f;
 
-	// Z 값을 계산
+	// Z 값 구하기
 	output.w = input.direction.z / input.direction.w;
 
 	return output;
@@ -148,21 +130,13 @@ CREATE_VEL_MAP_OUTPUT VSVelocityTextedInstancing(VS_TEXTED_INSTANCING_INPUT inpu
 	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
 	float3 dir = (curPos.xyz ) - (prevPos.xyz);
-	/*
-	float a = dot(normalize(dir), normalize(normalW));
 
-	if (a < 0.0f)
-		output.position = prevPos;
-	else
-		output.position = curPos;
-		*/
 	output.position = curPos;
 	output.direction.xy = dir.xy;
 
-	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	// 좌표계의 y방향은 다르기때문에 반대로 지정
 	output.direction.y *= -1.0f;
 
-	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;
 	output.direction.w = output.position.w;
 
@@ -218,18 +192,11 @@ void VelocityGS(point VS_TEXTED_INSTANCING_OUTPUT input[1], inout TriangleStream
 
 		normalW = vLook;
 		dir = (curPos.xyz) - (prevPos.xyz);
-		/*
-		float a = dot(normalize(dir), normalize(normalW));
 
-		if (a < 0.0f)
-			output.position = prevPos;
-		else
-			output.position = curPos;
-			*/
 		output.position = curPos;
 		output.direction.xy = dir.xy * 0.5f;
 
-		// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+		// 좌표계의 y방향은 다르기때문에 반대로 지정
 		output.direction.y *= -1.0f;
 
 		output.direction.z = output.position.z;
@@ -267,21 +234,13 @@ CREATE_VEL_MAP_OUTPUT VSVelocityTer(VS_TEXT_INPUT input)
 	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
 	float3 dir = (curPos.xyz) - (prevPos.xyz);
-	/*
-	float a = dot(normalize(dir), normalize(normalW));
 
-	if (a < 0.0f)
-		output.position = prevPos;
-	else
-		output.position = curPos;
-		*/
 	output.position = curPos;
 	output.direction.xy = dir.xy * 0.5f;
 
-	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	// 좌표계의 y방향은 다르기때문에 반대로 지정
 	output.direction.y *= -1.0f;
 
-	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;
 	output.direction.w = output.position.w;
 
@@ -311,28 +270,19 @@ CREATE_VEL_MAP_OUTPUT VSVelocitySkyBox(VS_SKYBOX_INPUT input)
 	mtxPrevWorld = gmtxPrevWorld;
 	positionW = mul(float4(input.position, 1.0f), mtxWorld).xyz;
 	prevPositionW = mul(float4(input.position, 1.0f), mtxPrevWorld).xyz;
-	//normalW = mul(input.normal, (float3x3)mtxWorld).xyz;
 
 
 	curPos = mul(mul(float4(positionW, 1.0f), gmtxView), gmtxProjection);
 	prevPos = mul(mul(float4(positionW, 1.0f), gmtxPrevView), gmtxProjection);
 
 	float3 dir = (curPos.xyz) - (prevPos.xyz);
-	/*
-	float a = dot(normalize(dir), normalize(normalW));
 
-	if (a < 0.0f)
-		output.position = prevPos;
-	else
-		output.position = curPos;
-		*/
 	output.position = curPos;
 	output.direction.xy = dir.xy * 0.5f;
 
-	// 마지막으로 텍셀의 오프셋 값이되기 때문에 Y 방향을 반대 방향으로하는
+	// 좌표계의 y방향은 다르기때문에 반대로 지정
 	output.direction.y *= -1.0f;
 
-	// 장면의 Z 값을 계산하기위한 매개 변수
 	output.direction.z = output.position.z;
 	output.direction.w = output.position.w;
 

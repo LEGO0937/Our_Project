@@ -1,5 +1,5 @@
 #include "StartScene.h"
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "../Common/FrameWork/NetWorkManager.h"
 #include "../Common/FrameWork/SoundManager.h"
 #include "EventHandler/EventHandler.h"
@@ -22,7 +22,6 @@ StartScene::StartScene():BaseScene()
 }
 StartScene::~StartScene()
 {
-	//SoundManager::GetInstance()->AllStop();
 }
 void StartScene::ReleaseUploadBuffers()
 {
@@ -48,11 +47,9 @@ void StartScene::ReleaseObjects()
 	instacingBillBoardShaders.clear();
 
 }
-void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
+void StartScene::BuildObjects()
 {
-	m_pCreateManager = pCreateManager;
-
-	m_pd3dCommandList = pCreateManager->GetCommandList().Get();
+	m_pd3dCommandList = GameManager::GetInstance()->GetCommandList().Get();
 
 	SoundManager::GetInstance()->Play("Start_BGM", 0.2f);
 
@@ -60,7 +57,7 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 
 	uiShader = new BackGroundShader;
 	string name = "Resources/Images/T_LoginBackGround.dds";
-	uiShader->BuildObjects(pCreateManager.get(), &name);
+	uiShader->BuildObjects(&name);
 	instacingUiShaders.emplace_back(uiShader);
 
 	UI_INFO button_info;
@@ -72,22 +69,22 @@ void StartScene::BuildObjects(shared_ptr<CreateManager> pCreateManager)
 	button_info.minUv = XMFLOAT2(0.0f, 0.0f);
 
 	uiShader = new ImageShader;
-	uiShader->BuildObjects(pCreateManager.get(), &button_info);
+	uiShader->BuildObjects(&button_info);
 	instacingUiShaders.emplace_back(uiShader);
 
 	
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.27f, 0.60f)));// ID구간
 	gameTexts.emplace_back(GameText(XMFLOAT2(0.27f, 0.75f)));// PassWord구간
 
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	m_pCreateManager->RenderLoading();
-	CreateShaderVariables(pCreateManager.get());
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	GameManager::GetInstance()->RenderLoading();
+	CreateShaderVariables();
 }
 
 void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM
@@ -136,30 +133,16 @@ void StartScene::OnProcessingMouseMessage(HWND hWnd, UINT nMessageID, WPARAM wPa
 		{
 			if (isClickedLogin)
 			{
-				//*서버*
 				BUTTON_SHADER->getUvXs()[0] = 0.0f;
 				isClickedLogin = false;
 
 				gameTexts[PASSWORD].text; //패스워드  
 				gameTexts[ID].text;  //아이디  둘 다 영문   string자료형임.
-				//순서
-				//아이디와 비밀번호가 있는 패킷을 send
-				//recv로 로그인 성공인지 실패인지 확인.
-				//로그인 성공시에는 아래 세줄 수행 후 로비씬으로 넘어감.
-				//패킷 구현 후에는 아래 세줄이 프로세스 처리 함수중 로그인 성공함수에 들어갈 예정->UpdateLogin()
-				//NetWorkManager::GetInstance()->SetServerIP("127.0.0.1"); // IP를 통한 연결 필요, 나중에 다른 컴에 접속을 요구할거면 ipconfig로 ip주소 따서 진행
+				
 				m_sPlayerId = gameTexts[ID].text;
 				NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId);
 #ifndef isConnectedToServer
-#ifdef noLobby
 				sceneType = Room_Scene;
-#else
-				sceneType = Lobby_Scene;
-#endif
-				// 바로 위의 코드는 나중에 프로세스 패킷에서 처리하는 함수로 만들어졌다
-				// 추후에 삭제\
-
-
 #else
 				NetWorkManager::GetInstance()->SetConnectState(NetWorkManager::CONNECT_STATE::TRY); // 연결상태를 TRY로 하여 NetWorkManager::GetInstance()->ConnecttoServer호출
 				NetWorkManager::GetInstance()->LoadToServer(hWnd);
@@ -273,7 +256,7 @@ void StartScene::AnimateObjects(float fTimeElapsed)
 
 }
 
-SceneType StartScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
+SceneType StartScene::Update(float fTimeElapsed)
 {
 	//물리 및 충돌을 위한 update
 	if (sceneType != SceneType::Start_Scene)
@@ -288,7 +271,7 @@ SceneType StartScene::Update(CreateManager* pCreateManager, float fTimeElapsed)
 }
 
 
-void StartScene::CreateShaderVariables(CreateManager* pCreateManager)
+void StartScene::CreateShaderVariables()
 {
 
 }
@@ -319,7 +302,7 @@ void StartScene::ProcessPacket(char* packet, float fTimeElapsed)
 {
 	switch (packet[1])
 	{
-	case SC_ACCESS_COMPLETE:   //케이스는 로그인용으로 따로 만들어줄 것.
+	case SC_ACCESS_COMPLETE: 
 		UpdateLogin(packet, fTimeElapsed);  //이 함수가 호출 되면 다음 프레임에 로비씬으로 넘어가게 됨.
 		break;
 	default: // 로그인 실패같은 경우에는 무시함.
@@ -333,26 +316,9 @@ void StartScene::UpdateLogin(char* packet, float fTimeElapsed)
 
 	m_sPlayerId = gameTexts[ID].text;
 	NetWorkManager::GetInstance()->SetMyID(accessInfo->myId);
-	//NetWorkManager::GetInstance()->SetPlayerName(m_sPlayerId); // 플레이어 아이디 설정
-#ifdef noLobby
+
 	sceneType = Room_Scene;
 	NetWorkManager::GetInstance()->SetRoomNum(0);
 	NetWorkManager::GetInstance()->SetGameMode(0);
-	// DB에서아이디 -> 닉네임
-	// 클라이언트 아이디 
-#else
-	sceneType = Lobby_Scene;
-#endif
-
-	//그리고 여기서 클라이언트 넘버를 받는게 맞다면
-	//NetWorkManager::GetInstance()->SetMyID()로 아이디 적용할것.
 }
-
-
-
-//NetWorkManager::GetInstance()->SetServerIP("127.0.0.1"); // IP를 통한 연결 필요, 나중에 다른 컴에 접속을 요구할거면 ipconfig로 ip주소 따서 진행
-//NetWorkManager::GetInstance()->SetConnectState(NetWorkManager::CONNECT_STATE::TRY); // 연결상태를 TRY로 하여 NetWorkManager::GetInstance()->ConnecttoServer호출
-// 바로 위 함수는 CG프레임워크에 ConnectingServer호출에 필요한 놈
-// 과연 어떤 자리에 초기 위치를 설정해야될까 ㅇㅁㅇ?
-
 

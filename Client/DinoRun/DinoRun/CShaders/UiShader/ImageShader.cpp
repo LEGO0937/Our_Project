@@ -1,5 +1,5 @@
 #include "UiShader.h"
-#include "../../Common//FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "../../Meshes/PlaneMesh.h"
 
 ImageShader::ImageShader()
@@ -10,17 +10,17 @@ ImageShader::~ImageShader()
 }
 
 
-void ImageShader::BuildObjects(CreateManager* pCreateManager, void* pInformation)
+void ImageShader::BuildObjects(void* pInformation)
 {	
 	UI_INFO* ui_Infomation = (UI_INFO*)pInformation;
 	if (ui_Infomation->positions.size() <= 0)
 		return;
 	CTexture * texture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	texture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(ui_Infomation->textureName.c_str()), 0);
+	texture->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), ConvertCHARtoWCHAR(ui_Infomation->textureName.c_str()), 0);
 
-	CreateCbvSrvDescriptorHeaps(pCreateManager, 0, 1);
+	CreateCbvSrvDescriptorHeaps(0, 1);
 
-	CreateShaderResourceViews(pCreateManager, texture, 8, true);
+	CreateShaderResourceViews(texture, 8, true);
 
 	m_ppObjects = new CGameObject(1);
 	m_ppObjects->AddRef();
@@ -29,13 +29,13 @@ void ImageShader::BuildObjects(CreateManager* pCreateManager, void* pInformation
 	CMaterial *material = new CMaterial(1);
 
 	material->SetTexture(texture);
-	material->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	material->CreateShaderVariable(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 	m_ppObjects->SetMaterial(0, material);
 
 	PlaneMesh *mesh = NULL;
 	mesh = new PlaneMesh(ui_Infomation->meshSize.x, ui_Infomation->meshSize.y, 0.1f, ui_Infomation->minUv.x, 
 		ui_Infomation->maxUv.x, ui_Infomation->minUv.y, ui_Infomation->maxUv.y);
-	mesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+	mesh->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 	m_ppObjects->SetMesh(mesh);
 
@@ -54,7 +54,7 @@ void ImageShader::BuildObjects(CreateManager* pCreateManager, void* pInformation
 		objectList.emplace_back(pObject);
 	}
 
-	CreateShaderVariables(pCreateManager);
+	CreateShaderVariables();
 
 }
 

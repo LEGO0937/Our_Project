@@ -28,7 +28,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 
 	float GetSecond() { return m_fSecond; }
 	int GetMinute() { return m_iMinute; }
@@ -40,7 +40,7 @@ public:
 	GaugeShader();
 	virtual ~GaugeShader();
 
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 	virtual void Update(float fTimeElapsed){}
 	virtual void Update(float fTimeElapsed, void* pInformation);
 };
@@ -57,7 +57,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };
 
 class RankCountShader : public CUiShader
@@ -71,7 +71,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };
 
 class VelocityCountShader : public CUiShader
@@ -85,7 +85,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };
 
 class CountDownShader : public CUiShader
@@ -100,7 +100,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };
 
 
@@ -115,7 +115,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };
 
 
@@ -130,7 +130,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };
 
 class ImageShader : public CUiShader
@@ -144,7 +144,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };
 
 class SelectImageShader : public CUiShader
@@ -158,7 +158,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };
 
 class IconShader : public CUiShader
@@ -172,5 +172,5 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed) {}
 	virtual void Update(float fTimeElapsed, void* pInformation);
-	virtual void BuildObjects(CreateManager* pCreateManager, void* pInformation);
+	virtual void BuildObjects(void* pInformation);
 };

@@ -1,8 +1,5 @@
-//-----------------------------------------------------------------------------
-// File: CGameObject.cpp
-//-----------------------------------------------------------------------------
 #include "BaseObject.h"
-#include "../Common/FrameWork/CreateManager.h"
+#include "../Common/FrameWork/GameManager.h"
 #include "../Common/Camera/Camera.h"
 #include "../CShaders/Shader.h"
 #include "../Scenes/BaseScene.h"
@@ -269,11 +266,23 @@ CGameObject::~CGameObject()
 		m_pd3dcbGameObjects->Release();
 		m_pd3dcbGameObjects = NULL;
 	}
+	if (m_pd3dcbBillBoardObjects)
+	{
+		m_pd3dcbBillBoardObjects->Unmap(0, NULL);
+		m_pd3dcbBillBoardObjects->Release();
+		m_pd3dcbBillBoardObjects = NULL;
+	}
 	if (m_pd3dcbSkinedGameObjects)
 	{
 		m_pd3dcbSkinedGameObjects->Unmap(0, NULL);
 		m_pd3dcbSkinedGameObjects->Release();
 		m_pd3dcbSkinedGameObjects = NULL;
+	}
+	if (m_pd3dcbPrevSkinedGameObjects)
+	{
+		m_pd3dcbPrevSkinedGameObjects->Unmap(0, NULL);
+		m_pd3dcbPrevSkinedGameObjects->Release();
+		m_pd3dcbPrevSkinedGameObjects = NULL;
 	}
 	if (m_pSkinnedAnimationController)
 	{
@@ -348,14 +357,14 @@ void CGameObject::SetMaterial(int nMaterial, CMaterial *pMaterial)
 	if (m_ppMaterials[nMaterial]) m_ppMaterials[nMaterial]->AddRef();
 }
 
-void CGameObject::resetShadowTexture(CreateManager* pCreateManager)
+void CGameObject::resetShadowTexture()
 {
 	if (m_ppMaterials[0])
 	{
 		CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-		pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(), 0);
+		pShadowTexture->SetTexture(GameManager::GetInstance()->GetShadowBuffer(), 0);
 		m_ppMaterials[0]->m_pShader->BackDescriptorHeapCount();
-		m_ppMaterials[0]->m_pShader->CreateShadowResourceViews(pCreateManager, pShadowTexture, 10, true);
+		m_ppMaterials[0]->m_pShader->CreateShadowResourceViews(pShadowTexture, 10, true);
 	}
 }
 CSkinnedMesh *CGameObject::FindSkinnedMesh(char *pstrSkinnedMeshName)
@@ -402,7 +411,6 @@ void CGameObject::UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent)
 }
 void CGameObject::UpdateTransform_Instancing(unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer, const int& idx, XMFLOAT4X4 *pxmf4x4Parent)
 {
-	//m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : m_xmf4x4ToParent;
 
 	XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4World),
 		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4World)));
@@ -419,22 +427,22 @@ void CGameObject::UpdateTransform_BillBoardInstancing(CB_OBJECT_INFO* buffer,con
 	XMStoreFloat4x4(&(buffer[idx].m_xmf4x4PrevWorld),
 		XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevWorld)));
 }
-void CGameObject::UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer, const int& idx)
+void CGameObject::UpdateTransform_SkinedInstancing(unordered_map<string, CB_SKINEOBJECT_INFO*>& mapCur, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapPrev, const int& idx)
 {
 	if (m_pMesh)
 	{
 		CSkinnedMesh* mesh = (CSkinnedMesh*)m_pMesh;
 		for (int j = 0; j < mesh->m_nSkinningBones; j++)
 		{
-			XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4Worlds[j]),
+			XMStoreFloat4x4(&(mapCur[m_pstrFrameName][idx].m_xmf4x4Worlds[j]),
 				XMMatrixTranspose(XMLoadFloat4x4(&mesh->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4World)));
 
-			XMStoreFloat4x4(&(instancedTransformBuffer[m_pstrFrameName][idx].m_xmf4x4PrevWorlds[j]),
+			XMStoreFloat4x4(&(mapPrev[m_pstrFrameName][idx].m_xmf4x4Worlds[j]),
 				XMMatrixTranspose(XMLoadFloat4x4(&mesh->m_ppSkinningBoneFrameCaches[j]->m_xmf4x4PrevWorld)));
 		}
 	}
-	if (m_pSibling) m_pSibling->UpdateTransform_SkinedInstancing(instancedTransformBuffer, idx);
-	if (m_pChild) m_pChild->UpdateTransform_SkinedInstancing(instancedTransformBuffer, idx);
+	if (m_pSibling) m_pSibling->UpdateTransform_SkinedInstancing(mapCur,mapPrev, idx);
+	if (m_pChild) m_pChild->UpdateTransform_SkinedInstancing(mapCur, mapPrev, idx);
 }
 
 void CGameObject::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
@@ -558,8 +566,13 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 		if (isSkined)
 		{
 			if (m_pcbMappedSkinedGameObjects)
+			{
 				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
 					m_pd3dcbSkinedGameObjects->GetGPUVirtualAddress());
+				pd3dCommandList->SetGraphicsRootShaderResourceView(12,
+					m_pd3dcbPrevSkinedGameObjects->GetGPUVirtualAddress());
+			}
+
 		}
 		else
 		{
@@ -593,34 +606,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, nInstances);
 
 }
-//-------
-#ifdef _WITH_BOUND_BOX
-void CGameObject::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
-{
-	if (m_pMesh)
-	{
-		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
-		
-		m_pMesh->BbxRender(pd3dCommandList);
-	}
-
-	if (m_pSibling) m_pSibling->BbxRender(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->BbxRender(pd3dCommandList, pCamera);
-}
-
-void CGameObject::BbxRender(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera,
-	UINT nInstances)
-{
-
-	pd3dCommandList->SetGraphicsRootShaderResourceView(3,
-		m_pd3dcbGameObjects->GetGPUVirtualAddress());
-
-	if (m_pMesh) m_pMesh->BbxRender(pd3dCommandList, nInstances);
-	
-	if (m_pSibling) m_pSibling->BbxRender(pd3dCommandList, pCamera, nInstances);
-	if (m_pChild) m_pChild->BbxRender(pd3dCommandList, pCamera, nInstances);
-}
-#endif
+//------
 
 
 //----
@@ -666,8 +652,13 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList *pd3dCommandList, CCame
 		if (isSkined)
 		{
 			if (m_pcbMappedSkinedGameObjects)
+			{
 				pd3dCommandList->SetGraphicsRootShaderResourceView(3,
 					m_pd3dcbSkinedGameObjects->GetGPUVirtualAddress());
+				pd3dCommandList->SetGraphicsRootShaderResourceView(12,
+					m_pd3dcbPrevSkinedGameObjects->GetGPUVirtualAddress());
+			}
+
 		}
 		else
 		{
@@ -710,9 +701,8 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandLis
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	XMStoreFloat4x4(&m_pcbMappedGameObject->m_xmf4x4PrevWorld, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4PrevWorld)));
-	//m_pd3dcbGameObject
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, m_pd3dcbGameObject->GetGPUVirtualAddress());
-	//pd3dCommandList->SetGraphicsRoot32BitConstants(2, 16, &xmf4x4World, 0);
+
 }
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList)
 {
@@ -750,6 +740,12 @@ void CGameObject::ReleaseShaderVariables()
 		m_pd3dcbSkinedGameObjects->Unmap(0, NULL);
 		m_pd3dcbSkinedGameObjects->Release();
 		m_pd3dcbSkinedGameObjects = NULL;
+	}
+	if (m_pd3dcbPrevSkinedGameObjects)
+	{
+		m_pd3dcbPrevSkinedGameObjects->Unmap(0, NULL);
+		m_pd3dcbPrevSkinedGameObjects->Release();
+		m_pd3dcbPrevSkinedGameObjects = NULL;
 	}
 	if (m_pSibling) m_pSibling->ReleaseShaderVariables();
 	if (m_pChild) m_pChild->ReleaseShaderVariables();
@@ -836,7 +832,6 @@ void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
 	UpdateTransform(NULL);
 }
 
-//#define _WITH_DEBUG_FRAME_HIERARCHY
 
 int ReadIntegerFromFile(FILE *pInFile)
 {
@@ -863,7 +858,7 @@ int ReadStringFromFile(FILE *pInFile, char *pstrToken)
 	return(nStrLength);
 }
 
-void CGameObject::LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader)
+void CGameObject::LoadMaterialsFromFile(CGameObject *pParent, FILE *pInFile, CShader *pShader)
 {
 	char pstrToken[64] = { '\0' };
 
@@ -891,20 +886,20 @@ void CGameObject::LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObje
 			if (nTexture > 0)
 			{
 				CShader* shader = new CShader();
-				shader->CreateCbvSrvDescriptorHeaps(pCreateManager, 0, nTexture+1);
-				//ReadStringFromFile(pInFile, pstrToken);
+				shader->CreateCbvSrvDescriptorHeaps(0, nTexture+1);
+
 				for (int j = 0; j < nTexture; ++j)
 				{
 					ReadStringFromFile(pInFile, pstrToken);
 					CTexture *pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-					pTexture->LoadTextureFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), ConvertCHARtoWCHAR(pstrToken), 0);
-					shader->CreateShaderResourceViews(pCreateManager, pTexture, 8 + j, true);
+					pTexture->LoadTextureFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), ConvertCHARtoWCHAR(pstrToken), 0);
+					shader->CreateShaderResourceViews(pTexture, 8 + j, true);
 					pMaterial->SetTexture(pTexture, j);
 				}
 				CTexture *pShadowTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-				pShadowTexture->SetTexture(pCreateManager->GetShadowBuffer(), 0);
-				pCreateManager->GetShadowBuffer()->AddRef();
-				shader->CreateShadowResourceViews(pCreateManager, pShadowTexture, 10, true);
+				pShadowTexture->SetTexture(GameManager::GetInstance()->GetShadowBuffer(), 0);
+				GameManager::GetInstance()->GetShadowBuffer()->AddRef();
+				shader->CreateShadowResourceViews(pShadowTexture, 10, true);
 				pMaterial->SetTexture(pShadowTexture, 1);
 
 				pMaterial->SetShader(shader);
@@ -918,21 +913,20 @@ void CGameObject::LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObje
 			{
 				(UINT)::fread(&pMaterial->m_xmf4AmbientColor, sizeof(float), 3, pInFile);
 				(UINT)::fread(&pMaterial->m_xmf4DiffuseColor, sizeof(float), 3, pInFile);
-				//pMaterial->m_xmf4DiffuseColor.z = 0.2f;
+		
 				(UINT)::fread(&pMaterial->m_xmf4SpecularColor, sizeof(float), 3, pInFile);
-				//pMaterial->m_xmf4SpecularColor.z = 0.1f;
+		
 				(UINT)::fread(&pMaterial->m_xmf4EmissiveColor, sizeof(float), 3, pInFile);
 			}
 			else if (!strcmp(pstrToken, "<Lambert>:"))
 			{
 				(UINT)::fread(&pMaterial->m_xmf4AmbientColor, sizeof(float), 3, pInFile);
 				(UINT)::fread(&pMaterial->m_xmf4DiffuseColor, sizeof(float), 3, pInFile);
-				//(UINT)::fread(&pMaterial->m_xmf4SpecularColor, sizeof(float), 3, pInFile);
 				(UINT)::fread(&pMaterial->m_xmf4EmissiveColor, sizeof(float), 3, pInFile);
 			}
 			else if (!strcmp(pstrToken, "<Unknown>"))
 				continue;
-			pMaterial->CreateShaderVariable(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+			pMaterial->CreateShaderVariable(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 			SetMaterial(nMaterial, pMaterial);
 
 		}
@@ -943,7 +937,7 @@ void CGameObject::LoadMaterialsFromFile(CreateManager* pCreateManager, CGameObje
 	}
 }
 
-CGameObject *CGameObject::LoadFrameHierarchyFromFile(CreateManager* pCreateManager, CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes)
+CGameObject *CGameObject::LoadFrameHierarchyFromFile(CGameObject *pParent, FILE *pInFile, CShader *pShader, int *pnSkinnedMeshes)
 {
 	char pstrToken[64] = { '\0' };
 	UINT nReads = 0;
@@ -964,8 +958,8 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(CreateManager* pCreateManag
 		}
 		else if (!strcmp(pstrToken, "<Mesh>:"))
 		{
-			CMesh *pMesh = new CMesh(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
-			pMesh->LoadMeshFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), pInFile);
+			CMesh *pMesh = new CMesh(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
+			pMesh->LoadMeshFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), pInFile);
 			pGameObject->SetMesh(pMesh);
 
 		}
@@ -974,18 +968,18 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(CreateManager* pCreateManag
 			pGameObject->SetSkinedState(true);
 			if (pnSkinnedMeshes) (*pnSkinnedMeshes)++;
 
-			CSkinnedMesh *pSkinnedMesh = new CSkinnedMesh(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
-			pSkinnedMesh->LoadSkinDeformationsFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), pInFile);
-			pSkinnedMesh->CreateShaderVariables(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get());
+			CSkinnedMesh *pSkinnedMesh = new CSkinnedMesh(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
+			pSkinnedMesh->LoadSkinDeformationsFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), pInFile);
+			pSkinnedMesh->CreateShaderVariables(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get());
 
 			::ReadStringFromFile(pInFile, pstrToken); //<Mesh>:
-			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), pInFile);
+			if (!strcmp(pstrToken, "<Mesh>:")) pSkinnedMesh->LoadMeshFromFile(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), pInFile);
 
 			pGameObject->SetMesh(pSkinnedMesh);
 		}
 		else if (!strcmp(pstrToken, "<Materials>:"))
 		{
-			pGameObject->LoadMaterialsFromFile(pCreateManager, pParent, pInFile, pShader);
+			pGameObject->LoadMaterialsFromFile(pParent, pInFile, pShader);
 		}
 		else if (!strcmp(pstrToken, "<Children>:"))
 		{
@@ -997,7 +991,7 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(CreateManager* pCreateManag
 					::ReadStringFromFile(pInFile, pstrToken);
 					if (!strcmp(pstrToken, "<Frame>:"))
 					{
-						CGameObject *pChild = CGameObject::LoadFrameHierarchyFromFile(pCreateManager,  pGameObject, pInFile, pShader, pnSkinnedMeshes);
+						CGameObject *pChild = CGameObject::LoadFrameHierarchyFromFile( pGameObject, pInFile, pShader, pnSkinnedMeshes);
 						if (pChild) pGameObject->SetChild(pChild);
 #ifdef _WITH_DEBUG_FRAME_HIERARCHY
 						TCHAR pstrDebug[256] = { 0 };
@@ -1120,7 +1114,7 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 	}
 }
 
-CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(CreateManager* pCreateManager,  const char *pstrFileName, CShader *pShader)
+CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(const char *pstrFileName, CShader *pShader)
 {
 	FILE *pInFile = NULL;
 	::fopen_s(&pInFile, pstrFileName, "rb");
@@ -1143,7 +1137,7 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(CreateManager* p
 					::ReadStringFromFile(pInFile, pstrToken);
 					if (!strcmp(pstrToken, "<Frame>:"))
 					{
-						CGameObject *pChild = CGameObject::LoadFrameHierarchyFromFile(pCreateManager,  NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes);
+						CGameObject *pChild = CGameObject::LoadFrameHierarchyFromFile(NULL, pInFile, pShader, &pLoadedModel->m_nSkinnedMeshes);
 						if (pChild) pLoadedModel->m_pModelRootObject->SetChild(pChild);
 					}
 					else if (!strcmp(pstrToken, "</Hierarchy>"))
@@ -1181,60 +1175,65 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(CreateManager* p
 	return(pLoadedModel);
 }
 
-void CGameObject::CreateBuffer(CreateManager* pCreateManager)
+void CGameObject::CreateBuffer()
 {
 	UINT ncbElementBytes = ((sizeof(CB_OBJECT_INFO) + 255) & ~255); //256의 배수
-	m_pd3dcbGameObject = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+	m_pd3dcbGameObject = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 		ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD,
 		D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dcbGameObject->Map(0, NULL, (void **)&m_pcbMappedGameObject);
 
-	if (m_pSibling) m_pSibling->CreateBuffer(pCreateManager);
-	if (m_pChild) m_pChild->CreateBuffer(pCreateManager);
+	if (m_pSibling) m_pSibling->CreateBuffer();
+	if (m_pChild) m_pChild->CreateBuffer();
 }
 
-void CGameObject::CreateInstanceBuffer(CreateManager* pCreateManager,
-	UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer)
+void CGameObject::CreateInstanceBuffer(UINT nInstances, unordered_map<string, CB_OBJECT_INFO*>& instancedTransformBuffer)
 {
 	if (nInstances > 0)
 	{
-		m_pd3dcbGameObjects = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+		m_pd3dcbGameObjects = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 			sizeof(CB_OBJECT_INFO) * nInstances, D3D12_HEAP_TYPE_UPLOAD,
 			D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 		//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
 		m_pd3dcbGameObjects->Map(0, NULL, (void **)&m_pcbMappedGameObjects);
 		instancedTransformBuffer[m_pstrFrameName] = m_pcbMappedGameObjects;
 
-		if (m_pSibling) m_pSibling->CreateInstanceBuffer(pCreateManager, nInstances, instancedTransformBuffer);
-		if (m_pChild) m_pChild->CreateInstanceBuffer(pCreateManager, nInstances, instancedTransformBuffer);
+		if (m_pSibling) m_pSibling->CreateInstanceBuffer(nInstances, instancedTransformBuffer);
+		if (m_pChild) m_pChild->CreateInstanceBuffer(nInstances, instancedTransformBuffer);
 	}
 }
-void CGameObject::CreateBillBoardInstanceBuffer(CreateManager* pCreateManager,
-	UINT nInstances)
+void CGameObject::CreateBillBoardInstanceBuffer(UINT nInstances)
 {
 	if (nInstances > 0)
 	{
-		m_pd3dcbBillBoardObjects = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+		m_pd3dcbBillBoardObjects = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 			sizeof(CB_OBJECT_INFO) * nInstances, D3D12_HEAP_TYPE_UPLOAD,
 			D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 		//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
 		m_pd3dcbBillBoardObjects->Map(0, NULL, (void **)&m_pcbMappedBillBoardObjects);
 	}
 }
-void CGameObject::CreateSkinedInstanceBuffer(CreateManager* pCreateManager,
-	UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& instancedTransformBuffer)
+void CGameObject::CreateSkinedInstanceBuffer(UINT nInstances, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapCur, unordered_map<string, CB_SKINEOBJECT_INFO*>& mapPrev)
 {
 	if (nInstances > 0)
 	{
-		m_pd3dcbSkinedGameObjects = ::CreateBufferResource(pCreateManager->GetDevice().Get(), pCreateManager->GetCommandList().Get(), NULL,
+		m_pd3dcbSkinedGameObjects = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
 			sizeof(CB_SKINEOBJECT_INFO) * nInstances, D3D12_HEAP_TYPE_UPLOAD,
 			D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
 		//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
 		m_pd3dcbSkinedGameObjects->Map(0, NULL, (void **)&m_pcbMappedSkinedGameObjects);
-		instancedTransformBuffer[m_pstrFrameName] = m_pcbMappedSkinedGameObjects;
+		mapCur[m_pstrFrameName] = m_pcbMappedSkinedGameObjects;
 
-		if (m_pSibling) m_pSibling->CreateSkinedInstanceBuffer(pCreateManager, nInstances, instancedTransformBuffer);
-		if (m_pChild) m_pChild->CreateSkinedInstanceBuffer(pCreateManager, nInstances, instancedTransformBuffer);
+		m_pd3dcbPrevSkinedGameObjects = ::CreateBufferResource(GameManager::GetInstance()->GetDevice().Get(), GameManager::GetInstance()->GetCommandList().Get(), NULL,
+			sizeof(CB_SKINEOBJECT_INFO) * nInstances, D3D12_HEAP_TYPE_UPLOAD,
+			D3D12_RESOURCE_STATE_GENERIC_READ, NULL);
+		//정점 버퍼(업로드 힙)에 대한 포인터를 저장한다. 
+		m_pd3dcbPrevSkinedGameObjects->Map(0, NULL, (void**)&m_pcbMappedPrevSkinedGameObjects);
+		mapPrev[m_pstrFrameName] = m_pcbMappedPrevSkinedGameObjects;
+
+
+		if (m_pSibling) m_pSibling->CreateSkinedInstanceBuffer(nInstances, mapCur, mapPrev);
+		if (m_pChild) m_pChild->CreateSkinedInstanceBuffer(nInstances, mapCur, mapPrev);
 	}
 }
 

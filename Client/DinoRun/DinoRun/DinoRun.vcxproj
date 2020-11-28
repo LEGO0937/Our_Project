@@ -23,32 +23,32 @@
     <ProjectGuid>{398CE88A-DC4E-4594-A006-463AC5C2A571}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>DinoRun</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -173,21 +173,18 @@
     <ClInclude Include="Common\EventHandler\EventHandler.h" />
     <ClInclude Include="Common\Font\Font.h" />
     <ClInclude Include="Common\FrameWork\CGameFramework.h" />
-    <ClInclude Include="Common\FrameWork\CreateManager.h" />
-    <ClInclude Include="Common\FrameWork\DrawManager.h" />
     <ClInclude Include="Common\FrameWork\FontManager.h" />
+    <ClInclude Include="Common\FrameWork\GameManager.h" />
     <ClInclude Include="Common\FrameWork\NetworkManager.h" />
     <ClInclude Include="Common\FrameWork\SoundManager.h" />
     <ClInclude Include="Common\ParticleSystem\ParticleSystem.h" />
     <ClInclude Include="Common\Resource.h" />
-    <ClInclude Include="Common\RigidBody\RigidBody.h" />
     <ClInclude Include="Common\SingleTon\Singleton.h" />
     <ClInclude Include="Common\stdafx.h" />
     <ClInclude Include="Common\targetver.h" />
     <ClInclude Include="Common\TextureLoad\DDSTextureLoader12.h" />
     <ClInclude Include="Common\Timer\Timer.h" />
     <ClInclude Include="CShaders\BillBoardShader\BillBoardShader.h" />
-    <ClInclude Include="CShaders\BlurShader\BlurShader.h" />
     <ClInclude Include="CShaders\FontShader\FontShader.h" />
     <ClInclude Include="CShaders\MinimapShader\MinimapShader.h" />
     <ClInclude Include="CShaders\ModelShader\ModelShader.h" />
@@ -219,7 +216,6 @@
     <ClInclude Include="Scenes\GameScene.h" />
     <ClInclude Include="Scenes\ItemGameScene.h" />
     <ClInclude Include="Scenes\LoadingScene.h" />
-    <ClInclude Include="Scenes\LobbyScene.h" />
     <ClInclude Include="Scenes\RoomScene.h" />
     <ClInclude Include="Scenes\StartScene.h" />
   </ItemGroup>
@@ -229,19 +225,16 @@
     <ClCompile Include="Common\EventHandler\EventHandler.cpp" />
     <ClCompile Include="Common\Font\Font.cpp" />
     <ClCompile Include="Common\FrameWork\CGameFramework.cpp" />
-    <ClCompile Include="Common\FrameWork\CreateManager.cpp" />
-    <ClCompile Include="Common\FrameWork\DrawManager.cpp" />
     <ClCompile Include="Common\FrameWork\FontManager.cpp" />
+    <ClCompile Include="Common\FrameWork\GameManager.cpp" />
     <ClCompile Include="Common\FrameWork\NetworkManager.cpp" />
     <ClCompile Include="Common\FrameWork\SoundManager.cpp" />
     <ClCompile Include="Common\ParticleSystem\ParticleSystem.cpp" />
-    <ClCompile Include="Common\RigidBody\RigidBody.cpp" />
     <ClCompile Include="Common\SingleTon\Singleton.cpp" />
     <ClCompile Include="Common\stdafx.cpp" />
     <ClCompile Include="Common\TextureLoad\DDSTextureLoader12.cpp" />
     <ClCompile Include="Common\Timer\Timer.cpp" />
     <ClCompile Include="CShaders\BillBoardShader\BillBoardShader.cpp" />
-    <ClCompile Include="CShaders\BlurShader\BlurShader.cpp" />
     <ClCompile Include="CShaders\FontShader\FontShader.cpp" />
     <ClCompile Include="CShaders\MinimapShader\MinimapShader.cpp" />
     <ClCompile Include="CShaders\ModelShader\BananaShader.cpp" />
@@ -300,7 +293,6 @@
     <ClCompile Include="Scenes\GameScene.cpp" />
     <ClCompile Include="Scenes\ItemGameScene.cpp" />
     <ClCompile Include="Scenes\LoadingScene.cpp" />
-    <ClCompile Include="Scenes\LobbyScene.cpp" />
     <ClCompile Include="Scenes\RoomScene.cpp" />
     <ClCompile Include="Scenes\StartScene.cpp" />
   </ItemGroup>
@@ -313,12 +305,6 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Common\Shaders\BillBoard.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Common\Shaders\Blur.hlsl">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

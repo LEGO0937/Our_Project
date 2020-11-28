@@ -88,12 +88,6 @@
     <Filter Include="CShaders\ModelShader">
       <UniqueIdentifier>{84ee182e-3d38-4609-b75e-94669d09cb5c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\Framework\DrawManager">
-      <UniqueIdentifier>{9c4c0e31-3d8c-435b-9cc8-c0be06488409}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Common\Framework\CreateManager">
-      <UniqueIdentifier>{b1911e3e-a96a-4512-9cbd-9db54a5766f4}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Common\Global">
       <UniqueIdentifier>{00108b15-7089-4251-b299-205024b72fdc}</UniqueIdentifier>
     </Filter>
@@ -105,9 +99,6 @@
     </Filter>
     <Filter Include="Scenes\StartScene">
       <UniqueIdentifier>{c6abcaba-78d7-4fd5-9199-b84d02e3091e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scenes\LobbyScene">
-      <UniqueIdentifier>{5b607246-47bd-46e2-b95f-73ab3978741a}</UniqueIdentifier>
     </Filter>
     <Filter Include="CShaders\SkinedShader">
       <UniqueIdentifier>{98d6b664-2c66-41b4-b087-4a36610fd21b}</UniqueIdentifier>
@@ -175,9 +166,6 @@
     <Filter Include="Common\Framework\SoundManager">
       <UniqueIdentifier>{80054a99-b8a3-4446-96d6-ea12ba77ed06}</UniqueIdentifier>
     </Filter>
-    <Filter Include="CShaders\BlurShader">
-      <UniqueIdentifier>{65c525b6-9193-4dd9-a792-46330ab517cf}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Scenes\RoomScene">
       <UniqueIdentifier>{4b91accd-062c-4756-9514-155142872f60}</UniqueIdentifier>
     </Filter>
@@ -232,9 +220,6 @@
     <Filter Include="Common\Framework\NetworkManager">
       <UniqueIdentifier>{de07a1f1-7761-41ff-b9ac-02c16f1d58f1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Common\RigidBody">
-      <UniqueIdentifier>{8696683e-7500-4000-80db-c8c474215de6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CShaders\MotionBlurShader">
       <UniqueIdentifier>{b2719671-4b0e-448b-9c48-0f0e4b2ced61}</UniqueIdentifier>
     </Filter>
@@ -267,6 +252,9 @@
     </Filter>
     <Filter Include="Objects\ItemObject\07FogBox">
       <UniqueIdentifier>{6e87c402-8fbd-48a3-bfd1-fcc88ad0e490}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common\Framework\GameManager">
+      <UniqueIdentifier>{7b230077-6071-486d-95ff-309860fff365}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -342,12 +330,6 @@
     <ClInclude Include="Objects\BillBoardObject.h">
       <Filter>Objects\BillBoardObject</Filter>
     </ClInclude>
-    <ClInclude Include="Common\FrameWork\CreateManager.h">
-      <Filter>Common\Framework\CreateManager</Filter>
-    </ClInclude>
-    <ClInclude Include="Common\FrameWork\DrawManager.h">
-      <Filter>Common\Framework\DrawManager</Filter>
-    </ClInclude>
     <ClInclude Include="DinoRun.h">
       <Filter>DinoRun</Filter>
     </ClInclude>
@@ -366,9 +348,6 @@
     <ClInclude Include="Common\ParticleSystem\ParticleSystem.h">
       <Filter>Common\ParticleSystem</Filter>
     </ClInclude>
-    <ClInclude Include="Scenes\LobbyScene.h">
-      <Filter>Scenes\LobbyScene</Filter>
-    </ClInclude>
     <ClInclude Include="Scenes\StartScene.h">
       <Filter>Scenes\StartScene</Filter>
     </ClInclude>
@@ -383,9 +362,6 @@
     </ClInclude>
     <ClInclude Include="Common\FrameWork\SoundManager.h">
       <Filter>Common\Framework\SoundManager</Filter>
-    </ClInclude>
-    <ClInclude Include="CShaders\BlurShader\BlurShader.h">
-      <Filter>CShaders\BlurShader</Filter>
     </ClInclude>
     <ClInclude Include="Scenes\EndScene.h">
       <Filter>Scenes\EndScene</Filter>
@@ -417,9 +393,6 @@
     <ClInclude Include="Common\FrameWork\NetworkManager.h">
       <Filter>Common\Framework\NetworkManager</Filter>
     </ClInclude>
-    <ClInclude Include="Common\RigidBody\RigidBody.h">
-      <Filter>Common\RigidBody</Filter>
-    </ClInclude>
     <ClInclude Include="CShaders\MotionBlurShader\MotionBlurShader.h">
       <Filter>CShaders\MotionBlurShader</Filter>
     </ClInclude>
@@ -434,6 +407,9 @@
     </ClInclude>
     <ClInclude Include="protocol.h">
       <Filter>Common\Framework\NetworkManager</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\FrameWork\GameManager.h">
+      <Filter>Common\Framework\GameManager</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -494,12 +470,6 @@
     <ClCompile Include="Objects\BillBoardObject.cpp">
       <Filter>Objects\BillBoardObject</Filter>
     </ClCompile>
-    <ClCompile Include="Common\FrameWork\CreateManager.cpp">
-      <Filter>Common\Framework\CreateManager</Filter>
-    </ClCompile>
-    <ClCompile Include="Common\FrameWork\DrawManager.cpp">
-      <Filter>Common\Framework\DrawManager</Filter>
-    </ClCompile>
     <ClCompile Include="DinoRun.cpp">
       <Filter>DinoRun</Filter>
     </ClCompile>
@@ -529,9 +499,6 @@
     </ClCompile>
     <ClCompile Include="Common\ParticleSystem\ParticleSystem.cpp">
       <Filter>Common\ParticleSystem</Filter>
-    </ClCompile>
-    <ClCompile Include="Scenes\LobbyScene.cpp">
-      <Filter>Scenes\LobbyScene</Filter>
     </ClCompile>
     <ClCompile Include="Scenes\StartScene.cpp">
       <Filter>Scenes\StartScene</Filter>
@@ -565,9 +532,6 @@
     </ClCompile>
     <ClCompile Include="Common\FrameWork\SoundManager.cpp">
       <Filter>Common\Framework\SoundManager</Filter>
-    </ClCompile>
-    <ClCompile Include="CShaders\BlurShader\BlurShader.cpp">
-      <Filter>CShaders\BlurShader</Filter>
     </ClCompile>
     <ClCompile Include="Scenes\EndScene.cpp">
       <Filter>Scenes\EndScene</Filter>
@@ -632,9 +596,6 @@
     <ClCompile Include="Common\FrameWork\NetworkManager.cpp">
       <Filter>Common\Framework\NetworkManager</Filter>
     </ClCompile>
-    <ClCompile Include="Common\RigidBody\RigidBody.cpp">
-      <Filter>Common\RigidBody</Filter>
-    </ClCompile>
     <ClCompile Include="CShaders\MotionBlurShader\MotionBlurShader.cpp">
       <Filter>CShaders\MotionBlurShader</Filter>
     </ClCompile>
@@ -673,6 +634,9 @@
     </ClCompile>
     <ClCompile Include="CShaders\ModelShader\FogBoxShader.cpp">
       <Filter>CShaders\ModelShader\04Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\FrameWork\GameManager.cpp">
+      <Filter>Common\Framework\GameManager</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -722,17 +686,14 @@
     <FxCompile Include="Common\Shaders\Font.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Common\Shaders\Blur.hlsl">
-      <Filter>Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="Common\Shaders\Particle.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Common\Shaders\MotionBlur2.hlsl">
-      <Filter>Shaders\not complete</Filter>
-    </FxCompile>
     <FxCompile Include="Common\Shaders\DrawVelocityMap2.hlsl">
-      <Filter>Shaders\not complete</Filter>
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Common\Shaders\MotionBlur2.hlsl">
+      <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>
